@@ -18,12 +18,6 @@
                             <router-link :to="{ name: 'Home' }" class="nav-link text-dark">Home</router-link>
                            
                         </li>
-                        <li class="nav-item">
-                            <router-link :to="{ name: 'Counter' }" class="nav-link text-dark">Counter</router-link>
-                        </li>
-                        <li class="nav-item">
-                            <router-link :to="{ name: 'FetchData' }" class="nav-link text-dark">Fetch Data</router-link>
-                        </li>
                     </ul>
                 </div>
             </div>
