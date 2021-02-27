@@ -33,8 +33,10 @@
 
   <ItemGroup>
     <Folder Include="Controllers\" />
-    <Folder Include="Models\" />
     <Folder Include="Middlewares\" />
+    <Folder Include="Models\Base\" />
+    <Folder Include="Models\Input\" />
+    <Folder Include="Models\Output\" />
     <Folder Include="Services\" />
     <Folder Include="Extensions\" />
   </ItemGroup>
