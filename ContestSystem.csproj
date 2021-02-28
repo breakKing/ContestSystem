@@ -11,6 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.3">
       <PrivateAssets>all</PrivateAssets>
@@ -34,7 +35,6 @@
   <ItemGroup>
     <Folder Include="Controllers\" />
     <Folder Include="Middlewares\" />
-    <Folder Include="Models\Base\" />
     <Folder Include="Models\Input\" />
     <Folder Include="Models\Output\" />
   </ItemGroup>
