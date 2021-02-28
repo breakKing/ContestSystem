@@ -20,7 +20,18 @@ namespace ContestSystem.Models.Base
 
 
         [NotMapped]
-        public override ProblemBaseModel Problem => Solution.Problem;
+        public override ProblemBaseModel Problem
+        {
+            get
+            {
+                return Solution.Problem;
+            }
+            set
+            {
+
+            }
+        }
+
         [NotMapped]
         public override VerdictModel Result { get; set; }
         public VerdictType Verdict
