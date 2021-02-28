@@ -1,3 +1,4 @@
+using ContestSystem.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -30,6 +31,7 @@ namespace ContestSystem
             {
                 configuration.RootPath = "ClientApp";
             });
+            services.AddCheckerSystemConnector();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
