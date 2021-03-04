@@ -6,10 +6,7 @@ using System.Threading.Tasks;
 
 namespace ContestSystem.Models.Base
 {
-    public class ParticipantBaseModel
+    public class UserBaseModel: IdentityUser
     {
-        public long Id { get; set; }
-        public UserBaseModel User { get; set; }
-        public List<SolutionBaseModel> Solutions { get; set; }
     }
 }

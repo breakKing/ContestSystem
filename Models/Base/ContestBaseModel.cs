@@ -12,9 +12,9 @@ namespace ContestSystem.Models.Base
         public string Name { get; set; }
         public string Description { get; set; }
         public bool IsPublic { get; set; }
+        public bool IsForever { get; set; }
         public DateTime StartDateTime { get; set; }
         public int DurationInMinutes { get; set; }
-        public List<ProblemBaseModel> Problems { get; set; } = new List<ProblemBaseModel>();
         public List<ParticipantBaseModel> Participants { get; set; } = new List<ParticipantBaseModel>();
 
         [NotMapped]

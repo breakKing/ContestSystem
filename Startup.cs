@@ -1,5 +1,6 @@
 using ContestSystem.Extensions;
 using ContestSystem.Models;
+using ContestSystem.Models.Base;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -32,7 +33,7 @@ namespace ContestSystem
             services.AddDbContext<ContestSystemDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddIdentity<IdentityUser, IdentityRole>()
+            services.AddIdentity<UserBaseModel, IdentityRole>()
                 .AddEntityFrameworkStores<ContestSystemDbContext>();
 
             services.AddControllers();
@@ -41,6 +42,8 @@ namespace ContestSystem
             {
                 configuration.RootPath = "ClientApp";
             });
+
+            services.AddFilesStorage();
 
             services.AddCheckerSystemConnector();
         }

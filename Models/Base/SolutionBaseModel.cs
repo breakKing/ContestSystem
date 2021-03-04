@@ -11,7 +11,7 @@ namespace ContestSystem.Models.Base
     {
         public long Id { get; set; }
         public ProblemBaseModel Problem { get; set; }
-        public IdentityUser User { get; set; }
+        public UserBaseModel User { get; set; }
         public string Code { get; set; }
         public string Compiler { get; set; }
         public DateTime SubmitTime { get; set; }

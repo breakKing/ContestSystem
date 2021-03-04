@@ -14,6 +14,8 @@ namespace ContestSystem.Models.Base
         public override ProblemType Type { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
+        public string InputBlock { get; set; }
+        public string OutputBlock { get; set; }
         public bool IsPublic { get; set; }
         public List<ExampleBaseModel> Examples { get; set; } = new List<ExampleBaseModel>();
     }
