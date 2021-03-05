@@ -76,6 +76,7 @@
                 <th>Номер</th>
                 <th>Ввод</th>
                 <th>Вывод</th>
+                <th>ID задачи</th>
             </tr>
         </thead>
         <tbody>
@@ -84,6 +85,7 @@
                 <td>{{ example.number }}</td>
                 <td>{{ example.inputText }}</td>
                 <td>{{ example.outputText }}</td>
+                <td>{{ example.problem.id }}</td>
             </tr>
         </tbody>
     </table>

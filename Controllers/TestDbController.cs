@@ -2,6 +2,7 @@
 using ContestSystem.Models.Base;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,14 +39,14 @@ namespace ContestSystem.Controllers
         [Route("examples")]
         public ActionResult<IEnumerable<ExampleBaseModel>> GetExamples()
         {
-            return _dbContext.Examples.ToList();
+            return _dbContext.Examples.Include(ex => ex.Problem).ToList();
         }
 
         [HttpGet]
         [Route("aliases")]
         public ActionResult<IEnumerable<ProblemAliasBaseModel>> GetAliases()
         {
-            return _dbContext.ProblemAliases.ToList();
+            return _dbContext.ProblemAliases.Include(pa => pa.Contest).Include(pa => pa.Problem).ToList();
         }
     }
 }

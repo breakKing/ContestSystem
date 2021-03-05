@@ -17,6 +17,5 @@ namespace ContestSystem.Models.Base
         public string InputBlock { get; set; }
         public string OutputBlock { get; set; }
         public bool IsPublic { get; set; }
-        public List<ExampleBaseModel> Examples { get; set; } = new List<ExampleBaseModel>();
     }
 }
