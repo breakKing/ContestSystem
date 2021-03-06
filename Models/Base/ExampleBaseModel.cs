@@ -7,8 +7,8 @@ namespace ContestSystem.Models.Base
 {
     public class ExampleBaseModel
     {
-        public ulong Id { get; set; }
-        public uint Number { get; set; }
+        public long Id { get; set; }
+        public short Number { get; set; }
         public string InputText { get; set; }
         public string OutputText { get; set; }
         public ProblemBaseModel Problem { get; set; }

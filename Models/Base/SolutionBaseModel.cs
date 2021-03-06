@@ -9,7 +9,7 @@ namespace ContestSystem.Models.Base
 {
     public class SolutionBaseModel
     {
-        public ulong Id { get; set; }
+        public long Id { get; set; }
         public ProblemBaseModel Problem { get; set; }
         public UserBaseModel Participant { get; set; }
         public ContestBaseModel Contest { get; set; }

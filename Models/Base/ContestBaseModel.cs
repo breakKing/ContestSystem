@@ -8,12 +8,12 @@ namespace ContestSystem.Models.Base
 {
     public class ContestBaseModel
     {
-        public ulong Id { get; set; }
+        public long Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public bool IsPublic { get; set; }
         public bool IsForever { get; set; }
         public DateTime StartDateTime { get; set; }
-        public uint DurationInMinutes { get; set; }
+        public short DurationInMinutes { get; set; }
     }
 }

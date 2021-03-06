@@ -8,9 +8,9 @@ namespace ContestSystem.Models.Base
 {
     public class ProblemBaseModel : BaseProblem
     {
-        public override ulong Id { get; set; }
-        public override uint MemoryLimit { get; set; }
-        public override uint TimeLimit { get; set; }
+        public override long Id { get; set; }
+        public override int MemoryLimit { get; set; }
+        public override int TimeLimit { get; set; }
         public override ProblemType Type { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
