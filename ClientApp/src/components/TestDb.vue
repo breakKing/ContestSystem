@@ -120,8 +120,8 @@
             }
         },
         methods: {
-            getContests() {
-                axios.get('/api/TestDb/contests')
+            async getContests() {
+                await axios.get('/api/TestDb/contests')
                     .then((response) => {
                         this.contests = response.data;
                     })
@@ -129,8 +129,8 @@
                         alert(error);
                     });
             },
-            getProblems() {
-                axios.get('/api/TestDb/problems')
+            async getProblems() {
+                await axios.get('/api/TestDb/problems')
                     .then((response) => {
                         this.problems = response.data;
                     })
@@ -138,8 +138,8 @@
                         alert(error);
                     });
             },
-            getExamples() {
-                axios.get('/api/TestDb/examples')
+            async getExamples() {
+                await axios.get('/api/TestDb/examples')
                     .then((response) => {
                         this.examples = response.data;
                     })
@@ -147,8 +147,8 @@
                         alert(error);
                     });
             },
-            getAliases() {
-                axios.get('/api/TestDb/aliases')
+            async getAliases() {
+                await axios.get('/api/TestDb/aliases')
                     .then((response) => {
                         this.aliases = response.data;
                     })
@@ -157,11 +157,11 @@
                     });
             }
         },
-        mounted() {
-            this.getContests();
-            this.getProblems();
-            this.getExamples();
-            this.getAliases();
+        async mounted() {
+            await this.getContests();
+            await this.getProblems();
+            await this.getExamples();
+            await this.getAliases();
         }
     }
 </script>
