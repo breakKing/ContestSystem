@@ -1,17 +1,29 @@
 ﻿<!DOCTYPE html>
 <html lang="ru">
-  <head>
+<head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+    <link rel="icon" href="<%= BASE_URL %>favicon.ico" />
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/bootstrap.css" />
+    <script src="js/jquery-3.2.1.slim.min.js"></script>
+    <script src="js/popper.min.js"></script>
+    <script async src="js/bootstrap.min.js"></script>
     <title><%= htmlWebpackPlugin.options.title %></title>
-  </head>
-  <body>
+</head>
+<body>
     <noscript>
-      <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+        <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
     </noscript>
-    <div id="app"></div>
-    <!-- built files will be auto injected -->
-  </body>
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-1 col-md-2"></div>
+            <div id="app" class="col-10 col-md-8">
+                <!-- built files will be auto injected -->
+            </div>
+            <div class="col-1 col-md-2"></div>
+        </div>
+    </div>
+</body>
 </html>

@@ -10,7 +10,6 @@
                 <th>Открытый</th>
                 <th>Постоянный</th>
                 <th>Начало</th>
-                <th>Конец</th>
             </tr>
         </thead>
         <tbody>
@@ -23,7 +22,6 @@
                 <td v-if="contest.isForever">Да</td>
                 <td v-else>Нет</td>
                 <td>{{ contest.startDateTime }}</td>
-                <td>{{ contest.endDateTime }}</td>
             </tr>
         </tbody>
     </table>
@@ -96,7 +94,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr v-for="cp of contests_problems" v-bind:key="alias">
+            <tr v-for="cp of contests_problems" v-bind:key="cp">
                 <td>{{ cp.id }}</td>
                 <td>{{ cp.problemId }}</td>
                 <td>{{ cp.contestId }}</td>
