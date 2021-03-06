@@ -8,13 +8,13 @@ namespace ContestSystem.Models.Base
     public class PostBaseModel
     {
         public long Id { get; set; }
-        public long AuthorId { get; set; }
+        public string AuthorId { get; set; }
         public UserBaseModel Author { get; set; }
         public string Name { get; set; }
         public string HtmlText { get; set; }
         public DateTime PromotedDateTime { get; set; }
         public bool Approved { get; set; }
-        public long ApprovingModeratorId { get; set; }
+        public string ApprovingModeratorId { get; set; }
         public UserBaseModel ApprovingModerator { get; set; }
         public DateTime PublicationDateTime { get; set; }
     }

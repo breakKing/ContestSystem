@@ -16,7 +16,7 @@ namespace ContestSystem.Models.Base
         public bool IsMonitorPublic { get; set; }
         public DateTime StartDateTime { get; set; }
         public short DurationInMinutes { get; set; }
-        public long CreatorId { get; set; }
+        public string CreatorId { get; set; }
         public UserBaseModel Creator { get; set; }
     }
 }

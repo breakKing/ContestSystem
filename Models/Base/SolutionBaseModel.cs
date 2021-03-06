@@ -12,7 +12,7 @@ namespace ContestSystem.Models.Base
         public long Id { get; set; }
         public long ProblemId { get; set; }
         public ProblemBaseModel Problem { get; set; }
-        public long ParticipantId { get; set; }
+        public string ParticipantId { get; set; }
         public UserBaseModel Participant { get; set; }
         public long ContestId { get; set; }
         public ContestBaseModel Contest { get; set; }

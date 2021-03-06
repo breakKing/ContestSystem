@@ -10,7 +10,7 @@ namespace ContestSystem.Models.Base
         public long Id { get; set; }
         public long ContestId { get; set; }
         public ContestBaseModel Contest { get; set; }
-        public long ModeratorId { get; set; }
+        public string ModeratorId { get; set; }
         public UserBaseModel Moderator { get; set; }
     }
 }
