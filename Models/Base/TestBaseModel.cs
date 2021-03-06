@@ -12,6 +12,7 @@ namespace ContestSystem.Models.Base
     {
         public long Id { get; set; }
         public override short Number { get; set; }
+        public long SolutionId { get; set; }
         public SolutionBaseModel Solution { get; set; }
         public override long UsedMemory { get; set; }
         public override int UsedTime { get; set; }

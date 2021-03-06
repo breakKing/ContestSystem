@@ -84,7 +84,7 @@
         </tbody>
     </table>
 
-    <h1 id="tableLabel">Aliases</h1>
+    <h1 id="tableLabel">ContestsProblems</h1>
 
     <table class='table table-striped' aria-labelledby="tableLabel">
         <thead>
@@ -96,11 +96,11 @@
             </tr>
         </thead>
         <tbody>
-            <tr v-for="alias of aliases" v-bind:key="alias">
-                <td>{{ alias.id }}</td>
-                <td>{{ alias.problem.id }}</td>
-                <td>{{ alias.contest.id }}</td>
-                <td>{{ alias.alias }}</td>
+            <tr v-for="cp of contests_problems" v-bind:key="alias">
+                <td>{{ cp.id }}</td>
+                <td>{{ cp.problemId }}</td>
+                <td>{{ cp.contestId }}</td>
+                <td>{{ cp.alias }}</td>
             </tr>
         </tbody>
     </table>
@@ -116,7 +116,7 @@
                 contests: [],
                 examples: [],
                 problems: [],
-                aliases: []
+                contests_problems: []
             }
         },
         methods: {
@@ -147,10 +147,10 @@
                         alert(error);
                     });
             },
-            async getAliases() {
-                await axios.get('/api/TestDb/aliases')
+            async getContestsProblems() {
+                await axios.get('/api/TestDb/contests_problems')
                     .then((response) => {
-                        this.aliases = response.data;
+                        this.contests_problems = response.data;
                     })
                     .catch(function (error) {
                         alert(error);
@@ -161,7 +161,7 @@
             await this.getContests();
             await this.getProblems();
             await this.getExamples();
-            await this.getAliases();
+            await this.getContestsProblems();
         }
     }
 </script>

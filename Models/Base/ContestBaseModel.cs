@@ -13,7 +13,10 @@ namespace ContestSystem.Models.Base
         public string Description { get; set; }
         public bool IsPublic { get; set; }
         public bool IsForever { get; set; }
+        public bool IsMonitorPublic { get; set; }
         public DateTime StartDateTime { get; set; }
         public short DurationInMinutes { get; set; }
+        public long CreatorId { get; set; }
+        public UserBaseModel Creator { get; set; }
     }
 }

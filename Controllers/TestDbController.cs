@@ -43,10 +43,10 @@ namespace ContestSystem.Controllers
         }
 
         [HttpGet]
-        [Route("aliases")]
-        public ActionResult<IEnumerable<ProblemAliasBaseModel>> GetAliases()
+        [Route("contests_problems")]
+        public ActionResult<IEnumerable<ContestsProblemsBaseModel>> GetAliases()
         {
-            return _dbContext.ProblemAliases.Include(pa => pa.Contest).Include(pa => pa.Problem).ToList();
+            return _dbContext.ContestsProblems.Include(pa => pa.Contest).Include(pa => pa.Problem).ToList();
         }
     }
 }
