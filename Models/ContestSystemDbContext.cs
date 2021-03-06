@@ -14,12 +14,12 @@ namespace ContestSystem.Models
     {
         public DbSet<ContestBaseModel> Contests { get; set; }
         public DbSet<ExampleBaseModel> Examples { get; set; }
-        public DbSet<ParticipantBaseModel> Participants { get; set; }
         public DbSet<ProblemAliasBaseModel> ProblemAliases { get; set; }
         public DbSet<ProblemBaseModel> Problems { get; set; }
         public DbSet<SolutionBaseModel> Solutions { get; set; }
         public DbSet<TestBaseModel> Tests { get; set; }
         public DbSet<ContestsProblemsBaseModel> ContestsProblems { get; set; }
+        public DbSet<ContestsParticipantsBaseModel> ContestsParticipants { get; set; }
 
         public ContestSystemDbContext(DbContextOptions<ContestSystemDbContext> options): base(options)
         {

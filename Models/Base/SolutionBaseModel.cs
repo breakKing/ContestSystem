@@ -9,13 +9,13 @@ namespace ContestSystem.Models.Base
 {
     public class SolutionBaseModel
     {
-        public long Id { get; set; }
+        public ulong Id { get; set; }
         public ProblemBaseModel Problem { get; set; }
-        public UserBaseModel User { get; set; }
+        public UserBaseModel Participant { get; set; }
+        public ContestBaseModel Contest { get; set; }
         public string Code { get; set; }
         public string Compiler { get; set; }
         public DateTime SubmitTime { get; set; }
-        public List<TestBaseModel> Tests { get; set; } = new List<TestBaseModel>();
         public string ErrorsMessage { get; set; }
     }
 }

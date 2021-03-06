@@ -10,13 +10,13 @@ namespace ContestSystem.Models.Base
 {
     public class TestBaseModel : BaseTest<ProblemBaseModel, VerdictModel>
     {
-        public long Id { get; set; }
-        public override int Number { get; set; }
+        public ulong Id { get; set; }
+        public override ushort Number { get; set; }
         public SolutionBaseModel Solution { get; set; }
-        public override long UsedMemory { get; set; }
-        public override long UsedTime { get; set; }
-        public override int GotPoints { get; set; }
-        public override int AvailablePoints { get; set; }
+        public override ulong UsedMemory { get; set; }
+        public override ulong UsedTime { get; set; }
+        public override ushort GotPoints { get; set; }
+        public override ushort AvailablePoints { get; set; }
 
 
         [NotMapped]
