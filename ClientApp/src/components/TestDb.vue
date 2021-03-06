@@ -1,18 +1,16 @@
-<template lang="ru">
+п»ї<template lang="ru">
     <h1 id="tableLabel">Contests</h1>
 
-    <p v-if="!contests"><em>Loading...</em></p>
-
-    <table class='table table-striped' aria-labelledby="tableLabel" v-if="contests">
+    <table class='table table-striped' aria-labelledby="tableLabel">
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Название</th>
-                <th>Описание</th>
-                <th>Открытый</th>
-                <th>Постоянный</th>
-                <th>Начало</th>
-                <th>Конец</th>
+                <th>РќР°Р·РІР°РЅРёРµ</th>
+                <th>РћРїРёСЃР°РЅРёРµ</th>
+                <th>РћС‚РєСЂС‹С‚С‹Р№</th>
+                <th>РџРѕСЃС‚РѕСЏРЅРЅС‹Р№</th>
+                <th>РќР°С‡Р°Р»Рѕ</th>
+                <th>РљРѕРЅРµС†</th>
             </tr>
         </thead>
         <tbody>
@@ -20,10 +18,10 @@
                 <td>{{ contest.id }}</td>
                 <td>{{ contest.name }}</td>
                 <td>{{ contest.description }}</td>
-                <td v-if="contest.isPublic">Да</td>
-                <td v-else>Нет</td>
-                <td v-if="contest.isForever">Да</td>
-                <td v-else>Нет</td>
+                <td v-if="contest.isPublic">Р”Р°</td>
+                <td v-else>РќРµС‚</td>
+                <td v-if="contest.isForever">Р”Р°</td>
+                <td v-else>РќРµС‚</td>
                 <td>{{ contest.startDateTime }}</td>
                 <td>{{ contest.endDateTime }}</td>
             </tr>
@@ -32,20 +30,18 @@
 
     <h1 id="tableLabel">Problems</h1>
 
-    <p v-if="!problems"><em>Loading...</em></p>
-
-    <table class='table table-striped' aria-labelledby="tableLabel" v-if="problems">
+    <table class='table table-striped' aria-labelledby="tableLabel">
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Название</th>
-                <th>Описание</th>
-                <th>Входные данные</th>
-                <th>Выходные данные</th>
-                <th>Ограничения по времени</th>
-                <th>Ограничения по памяти</th>
-                <th>Тип</th>
-                <th>Общедоступная</th>
+                <th>РќР°Р·РІР°РЅРёРµ</th>
+                <th>РћРїРёСЃР°РЅРёРµ</th>
+                <th>Р’С…РѕРґРЅС‹Рµ РґР°РЅРЅС‹Рµ</th>
+                <th>Р’С‹С…РѕРґРЅС‹Рµ РґР°РЅРЅС‹Рµ</th>
+                <th>РћРіСЂР°РЅРёС‡РµРЅРёСЏ РїРѕ РІСЂРµРјРµРЅРё</th>
+                <th>РћРіСЂР°РЅРёС‡РµРЅРёСЏ РїРѕ РїР°РјСЏС‚Рё</th>
+                <th>РўРёРї</th>
+                <th>РћР±С‰РµРґРѕСЃС‚СѓРїРЅР°СЏ</th>
             </tr>
         </thead>
         <tbody>
@@ -57,26 +53,24 @@
                 <td>{{ problem.outputBlock }}</td>
                 <td>{{ problem.timeLimit }}</td>
                 <td>{{ problem.memoryLimit }}</td>
-                <td v-if="problem.type === 0">Полное решение</td>
-                <td v-else>Частичное решение</td>
-                <td v-if="problem.isPublic">Да</td>
-                <td v-else>Нет</td>
+                <td v-if="problem.type === 0">РџРѕР»РЅРѕРµ СЂРµС€РµРЅРёРµ</td>
+                <td v-else>Р§Р°СЃС‚РёС‡РЅРѕРµ СЂРµС€РµРЅРёРµ</td>
+                <td v-if="problem.isPublic">Р”Р°</td>
+                <td v-else>РќРµС‚</td>
             </tr>
         </tbody>
     </table>
 
     <h1 id="tableLabel">Examples</h1>
 
-    <p v-if="!examples"><em>Loading...</em></p>
-
-    <table class='table table-striped' aria-labelledby="tableLabel" v-if="examples">
+    <table class='table table-striped' aria-labelledby="tableLabel">
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Номер</th>
-                <th>Ввод</th>
-                <th>Вывод</th>
-                <th>ID задачи</th>
+                <th>РќРѕРјРµСЂ</th>
+                <th>Р’РІРѕРґ</th>
+                <th>Р’С‹РІРѕРґ</th>
+                <th>ID Р·Р°РґР°С‡Рё</th>
             </tr>
         </thead>
         <tbody>
@@ -92,15 +86,13 @@
 
     <h1 id="tableLabel">Aliases</h1>
 
-    <p v-if="!aliases"><em>Loading...</em></p>
-
-    <table class='table table-striped' aria-labelledby="tableLabel" v-if="aliases">
+    <table class='table table-striped' aria-labelledby="tableLabel">
         <thead>
             <tr>
                 <th>ID</th>
-                <th>ID задачи</th>
-                <th>ID соревнования</th>
-                <th>Буква задачи</th>
+                <th>ID Р·Р°РґР°С‡Рё</th>
+                <th>ID СЃРѕСЂРµРІРЅРѕРІР°РЅРёСЏ</th>
+                <th>Р‘СѓРєРІР° Р·Р°РґР°С‡Рё</th>
             </tr>
         </thead>
         <tbody>
