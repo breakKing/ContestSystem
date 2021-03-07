@@ -1,8 +1,7 @@
-﻿using ContestSystem.Models.Base;
-using ContestSystem.Models.Interfaces;
+﻿using ContestSystem.Models.Interfaces;
+using ContestSystemDbStructure;
+using ContestSystemDbStructure.BaseModels;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace ContestSystem.Models.Output

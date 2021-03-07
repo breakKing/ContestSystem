@@ -38,7 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Libs\CheckerSystemBaseStructures\CheckerSystemBaseStructures.csproj" />
+    <ProjectReference Include="..\Libs\ContestSystemDbStructure\ContestSystemDbStructure.csproj" />
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">

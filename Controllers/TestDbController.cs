@@ -1,5 +1,5 @@
-﻿using ContestSystem.Models;
-using ContestSystem.Models.Base;
+﻿using ContestSystemDbStructure;
+using ContestSystemDbStructure.BaseModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

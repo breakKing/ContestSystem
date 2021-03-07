@@ -1,6 +1,6 @@
 using ContestSystem.Extensions;
-using ContestSystem.Models;
-using ContestSystem.Models.Base;
+using ContestSystemDbStructure;
+using ContestSystemDbStructure.BaseModels;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -42,8 +42,6 @@ namespace ContestSystem
             {
                 configuration.RootPath = "ClientApp";
             });
-
-            services.AddFilesStorage();
 
             services.AddCheckerSystemConnector();
         }
