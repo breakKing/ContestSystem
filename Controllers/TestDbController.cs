@@ -14,7 +14,7 @@ namespace ContestSystem.Controllers
     [ApiController]
     public class TestDbController : ControllerBase
     {
-        private ContestSystemDbContext _dbContext;
+        private readonly ContestSystemDbContext _dbContext;
 
         public TestDbController(ContestSystemDbContext dbContext)
         {
@@ -39,14 +39,14 @@ namespace ContestSystem.Controllers
         [Route("examples")]
         public ActionResult<IEnumerable<ExampleBaseModel>> GetExamples()
         {
-            return _dbContext.Examples.Include(ex => ex.Problem).ToList();
+            return _dbContext.Examples.ToList();
         }
 
         [HttpGet]
         [Route("contests_problems")]
-        public ActionResult<IEnumerable<ContestsProblemsBaseModel>> GetAliases()
+        public ActionResult<IEnumerable<ContestsProblemsBaseModel>> GetContestProblems()
         {
-            return _dbContext.ContestsProblems.Include(pa => pa.Contest).Include(pa => pa.Problem).ToList();
+            return _dbContext.ContestsProblems.ToList();
         }
     }
 }

@@ -31,7 +31,10 @@ namespace ContestSystem
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ContestSystemDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+                options.UseLazyLoadingProxies();
+            });
 
             services.AddIdentity<UserBaseModel, IdentityRole>()
                 .AddEntityFrameworkStores<ContestSystemDbContext>();
