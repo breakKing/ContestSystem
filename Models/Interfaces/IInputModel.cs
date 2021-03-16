@@ -5,8 +5,10 @@ using System.Threading.Tasks;
 
 namespace ContestSystem.Models.Interfaces
 {
-    interface IInputModel<BaseModelType>
+    public interface IInputModel<BaseModelType, IdType>
     {
-        BaseModelType ReadFromInput();
+        public IdType Id { get; set; }
+        public BaseModelType ReadFromInput();
+        public Task<BaseModelType> ReadFromInputAsync();
     }
 }
