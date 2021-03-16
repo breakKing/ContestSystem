@@ -14,6 +14,7 @@ namespace ContestSystem.Models.Output
         public string EndDateTime { get; set; }
         public string Type { get; set; }
         public string CreatorUsername { get; set; }
+        
         public void TransformForOutput(ContestBaseModel baseModel, ContestSystemDbContext dbContext)
         {
             throw new NotImplementedException();
