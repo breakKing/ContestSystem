@@ -1,11 +1,50 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using ContestSystem.Models.Interfaces;
+using ContestSystemDbStructure.BaseModels;
+using ContestSystemDbStructure.Enums;
+using System;
 using System.Threading.Tasks;
 
 namespace ContestSystem.Models.Input
 {
-    public class SolutionInputModel
+    public class SolutionInputModel : IInputModel<SolutionBaseModel, long?>
     {
+        public long? Id { get; set; }
+        public long ProblemId { get; set; }
+        public string ParticipantId { get; set; }
+        public long ContestId { get; set; }
+        public string Code { get; set; }
+        public string Compiler { get; set; }
+
+        public SolutionBaseModel ReadFromInput()
+        {
+            return new SolutionBaseModel
+            {
+                Id = Id.GetValueOrDefault(),
+                ProblemId = ProblemId,
+                ParticipantId = ParticipantId,
+                ContestId = ContestId,
+                Code = Code,
+                Compiler = Compiler,
+                SubmitTime = DateTime.Now,
+                Verdict = VerdictType.Undefined,
+                ErrorsMessage = ""
+            };
+        }
+
+        public async Task<SolutionBaseModel> ReadFromInputAsync()
+        {
+            return new SolutionBaseModel
+            {
+                Id = Id.GetValueOrDefault(),
+                ProblemId = ProblemId,
+                ParticipantId = ParticipantId,
+                ContestId = ContestId,
+                Code = Code,
+                Compiler = Compiler,
+                SubmitTime = DateTime.Now,
+                Verdict = VerdictType.Undefined,
+                ErrorsMessage = ""
+            };
+        }
     }
 }

@@ -1,11 +1,42 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using ContestSystem.Models.Interfaces;
+using ContestSystemDbStructure.BaseModels;
 using System.Threading.Tasks;
 
 namespace ContestSystem.Models.Input
 {
-    public class TestInputModel
+    public class TestInputModel : IInputModel<TestBaseModel, long?>
     {
+        public long? Id { get; set; }
+        public short Number { get; set; }
+        public long ProblemId { get; set; }
+        public string Input { get; set; }
+        public string Answer { get; set; }
+        public short? AvailablePoints { get; set; }
+
+        public TestBaseModel ReadFromInput()
+        {
+            return new TestBaseModel
+            {
+                Id = Id.GetValueOrDefault(),
+                Number = Number,
+                ProblemId = ProblemId,
+                Input = Input,
+                Answer = Answer,
+                AvailablePoints = AvailablePoints.GetValueOrDefault(100)
+            };
+        }
+
+        public async Task<TestBaseModel> ReadFromInputAsync()
+        {
+            return new TestBaseModel
+            {
+                Id = Id.GetValueOrDefault(),
+                Number = Number,
+                ProblemId = ProblemId,
+                Input = Input,
+                Answer = Answer,
+                AvailablePoints = AvailablePoints.GetValueOrDefault(100)
+            };
+        }
     }
 }

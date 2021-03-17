@@ -18,7 +18,7 @@ namespace ContestSystem.Models.Input
             return new MessageBaseModel
             {
                 Id = Id.GetValueOrDefault(),
-                ContestId = ContestId,
+                SubjectId = ContestId,
                 SenderId = SenderId,
                 Text = Text,
                 MessageToReplyId = MessageToReplyId,
@@ -32,7 +32,7 @@ namespace ContestSystem.Models.Input
             return new MessageBaseModel
             {
                 Id = Id.GetValueOrDefault(),
-                ContestId = ContestId,
+                SubjectId = ContestId,
                 SenderId = SenderId,
                 Text = Text,
                 MessageToReplyId = MessageToReplyId,
