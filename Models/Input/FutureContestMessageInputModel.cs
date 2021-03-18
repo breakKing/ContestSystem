@@ -29,16 +29,7 @@ namespace ContestSystem.Models.Input
 
         public async Task<MessageBaseModel> ReadFromInputAsync()
         {
-            return new MessageBaseModel
-            {
-                Id = Id.GetValueOrDefault(),
-                SubjectId = ContestId,
-                SenderId = SenderId,
-                Text = Text,
-                MessageToReplyId = MessageToReplyId,
-                Type = MessageType.ChatWithGlobalContestModerator,
-                IsPublic = false
-            };
+            return ReadFromInput();
         }
     }
 }

@@ -33,18 +33,7 @@ namespace ContestSystem.Models.Input
 
         public async Task<SolutionBaseModel> ReadFromInputAsync()
         {
-            return new SolutionBaseModel
-            {
-                Id = Id.GetValueOrDefault(),
-                ProblemId = ProblemId,
-                ParticipantId = ParticipantId,
-                ContestId = ContestId,
-                Code = Code,
-                Compiler = Compiler,
-                SubmitTime = DateTime.Now,
-                Verdict = VerdictType.Undefined,
-                ErrorsMessage = ""
-            };
+            return ReadFromInput();
         }
     }
 }

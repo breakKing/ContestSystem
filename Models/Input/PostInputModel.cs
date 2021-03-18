@@ -27,15 +27,7 @@ namespace ContestSystem.Models.Input
 
         public async Task<PostBaseModel> ReadFromInputAsync()
         {
-            return new PostBaseModel
-            {
-                Id = Id.GetValueOrDefault(),
-                AuthorId = AuthorId,
-                Name = Name,
-                HtmlText = HtmlText,
-                Approved = false,
-                PromotedDateTime = DateTime.Now
-            };
+            return ReadFromInput();
         }
     }
 }

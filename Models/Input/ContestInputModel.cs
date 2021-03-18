@@ -37,19 +37,7 @@ namespace ContestSystem.Models.Input
 
         public async Task<ContestBaseModel> ReadFromInputAsync()
         {
-            return new ContestBaseModel
-            {
-                Id = Id.GetValueOrDefault(),
-                Name = Name,
-                Description = Description,
-                IsPublic = IsPublic,
-                Type = Type,
-                IsMonitorPublic = IsMonitorPublic,
-                StartDateTime = StartDateTime,
-                DurationInMinutes = DurationInMinutes,
-                CreatorId = CreatorId,
-                Approved = false
-            };
+            return ReadFromInput();
         }
     }
 }

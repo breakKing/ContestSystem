@@ -26,14 +26,7 @@ namespace ContestSystem.Models.Input
 
         public async Task<ExampleBaseModel> ReadFromInputAsync()
         {
-            return new ExampleBaseModel
-            {
-                Id = Id.GetValueOrDefault(),
-                Number = Number,
-                InputText = InputText,
-                OutputText = OutputText,
-                ProblemId = ProblemId
-            };
+            return ReadFromInput();
         }
     }
 }
