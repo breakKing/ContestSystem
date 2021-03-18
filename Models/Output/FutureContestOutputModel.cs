@@ -1,5 +1,4 @@
 ﻿using ContestSystem.Models.Interfaces;
-using ContestSystemDbStructure;
 using ContestSystemDbStructure.BaseModels;
 using ContestSystemDbStructure.Enums;
 using System;
@@ -16,7 +15,7 @@ namespace ContestSystem.Models.Output
         public string Type { get; set; }
         public string CreatorUsername { get; set; }
         
-        public void TransformForOutput(ContestBaseModel baseModel, ContestSystemDbContext dbContext)
+        public void TransformForOutput(ContestBaseModel baseModel)
         {
             Name = baseModel.Name;
             Description = baseModel.Description;
@@ -33,21 +32,9 @@ namespace ContestSystem.Models.Output
             CreatorUsername = baseModel.Creator.UserName;
         }
 
-        public async Task TransformForOutputAsync(ContestBaseModel baseModel, ContestSystemDbContext dbContext)
+        public async Task TransformForOutputAsync(ContestBaseModel baseModel)
         {
-            Name = baseModel.Name;
-            Description = baseModel.Description;
-            StartDateTime = baseModel.StartDateTime.ToString("f");
-            TimeSpan duration = new TimeSpan(0, baseModel.DurationInMinutes, 0);
-            EndDateTime = baseModel.StartDateTime.Add(duration).ToString("f");
-            Type = baseModel.Type switch
-            {
-                ContestType.Competition => "Соревнование",
-                ContestType.Training => "Тренировка",
-                ContestType.Undefined => "Не определено",
-                _ => "",
-            };
-            CreatorUsername = baseModel.Creator.UserName;
+            TransformForOutput(baseModel);
         }
     }
 }

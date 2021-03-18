@@ -1,5 +1,4 @@
 ﻿using ContestSystem.Models.Interfaces;
-using ContestSystemDbStructure;
 using ContestSystemDbStructure.BaseModels;
 using System.Threading.Tasks;
 
@@ -12,7 +11,7 @@ namespace ContestSystem.Models.Output
         public string Text { get; set; }
         public string EventDateTime { get; set; }
 
-        public void TransformForOutput(LogBaseModel baseModel, ContestSystemDbContext dbContext)
+        public void TransformForOutput(LogBaseModel baseModel)
         {
             Class = baseModel.Class;
             Severity = baseModel.Severity;
@@ -20,12 +19,9 @@ namespace ContestSystem.Models.Output
             EventDateTime = baseModel.EventDateTime.ToString("G");
         }
 
-        public async Task TransformForOutputAsync(LogBaseModel baseModel, ContestSystemDbContext dbContext)
+        public async Task TransformForOutputAsync(LogBaseModel baseModel)
         {
-            Class = baseModel.Class;
-            Severity = baseModel.Severity;
-            Text = baseModel.Text;
-            EventDateTime = baseModel.EventDateTime.ToString("G");
+            TransformForOutput(baseModel);
         }
     }
 }

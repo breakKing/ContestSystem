@@ -1,5 +1,4 @@
 ﻿using ContestSystem.Models.Interfaces;
-using ContestSystemDbStructure;
 using ContestSystemDbStructure.BaseModels;
 using ContestSystemDbStructure.Enums;
 using System;
@@ -14,7 +13,7 @@ namespace ContestSystem.Models.Output
         public string TimeLeft { get; set; }
         public string Type { get; set; }
 
-        public void TransformForOutput(ContestBaseModel baseModel, ContestSystemDbContext dbContext)
+        public void TransformForOutput(ContestBaseModel baseModel)
         {
             Name = baseModel.Name;
             Description = baseModel.Description;
@@ -29,19 +28,9 @@ namespace ContestSystem.Models.Output
             };
         }
 
-        public async Task TransformForOutputAsync(ContestBaseModel baseModel, ContestSystemDbContext dbContext)
+        public async Task TransformForOutputAsync(ContestBaseModel baseModel)
         {
-            Name = baseModel.Name;
-            Description = baseModel.Description;
-            TimeSpan timeLeft = DateTime.Now - baseModel.StartDateTime;
-            TimeLeft = timeLeft.ToString(@"hh\:mm\:ss");
-            Type = baseModel.Type switch
-            {
-                ContestType.Competition => "Соревнование",
-                ContestType.Training => "Тренировка",
-                ContestType.Undefined => "Не определено",
-                _ => "",
-            };
+            TransformForOutput(baseModel);
         }
     }
 }

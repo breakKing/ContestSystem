@@ -1,5 +1,4 @@
 ﻿using ContestSystem.Models.Interfaces;
-using ContestSystemDbStructure;
 using ContestSystemDbStructure.BaseModels;
 using System.Threading.Tasks;
 
@@ -14,7 +13,7 @@ namespace ContestSystem.Models.Output
         public string MessageToReplySenderUsername { get; set; }
         public string MessageToReplySentDateTime { get; set; }
 
-        public void TransformForOutput(MessageBaseModel baseModel, ContestSystemDbContext dbContext)
+        public void TransformForOutput(MessageBaseModel baseModel)
         {
             Text = baseModel.Text;
             SenderUsername = baseModel.Sender.UserName;
@@ -27,17 +26,10 @@ namespace ContestSystem.Models.Output
             }
         }
 
-        public async Task TransformForOutputAsync(MessageBaseModel baseModel, ContestSystemDbContext dbContext)
+        public async Task TransformForOutputAsync(MessageBaseModel baseModel)
         {
-            Text = baseModel.Text;
-            SenderUsername = baseModel.Sender.UserName;
-            SentDateTime = baseModel.SentDateTime.ToString("g");
-            if (baseModel.MessageToReplyId != null)
-            {
-                MessageToReplyText = baseModel.MessageToReply.Text;
-                MessageToReplySenderUsername = baseModel.MessageToReply.Sender.UserName;
-                MessageToReplySentDateTime = baseModel.MessageToReply.SentDateTime.ToString("g");
-            }
+            TransformForOutput(baseModel);
+
         }
     }
 }
