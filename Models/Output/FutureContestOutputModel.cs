@@ -1,6 +1,7 @@
 ﻿using ContestSystem.Models.Interfaces;
 using ContestSystemDbStructure;
 using ContestSystemDbStructure.BaseModels;
+using ContestSystemDbStructure.Enums;
 using System;
 using System.Threading.Tasks;
 
@@ -17,12 +18,36 @@ namespace ContestSystem.Models.Output
         
         public void TransformForOutput(ContestBaseModel baseModel, ContestSystemDbContext dbContext)
         {
-            throw new NotImplementedException();
+            Name = baseModel.Name;
+            Description = baseModel.Description;
+            StartDateTime = baseModel.StartDateTime.ToString("f");
+            TimeSpan duration = new TimeSpan(0, baseModel.DurationInMinutes, 0);
+            EndDateTime = baseModel.StartDateTime.Add(duration).ToString("f");
+            Type = baseModel.Type switch
+            {
+                ContestType.Competition => "Соревнование",
+                ContestType.Training => "Тренировка",
+                ContestType.Undefined => "Не определено",
+                _ => "",
+            };
+            CreatorUsername = baseModel.Creator.UserName;
         }
 
-        public Task TransformForOutputAsync(ContestBaseModel baseModel, ContestSystemDbContext dbContext)
+        public async Task TransformForOutputAsync(ContestBaseModel baseModel, ContestSystemDbContext dbContext)
         {
-            throw new NotImplementedException();
+            Name = baseModel.Name;
+            Description = baseModel.Description;
+            StartDateTime = baseModel.StartDateTime.ToString("f");
+            TimeSpan duration = new TimeSpan(0, baseModel.DurationInMinutes, 0);
+            EndDateTime = baseModel.StartDateTime.Add(duration).ToString("f");
+            Type = baseModel.Type switch
+            {
+                ContestType.Competition => "Соревнование",
+                ContestType.Training => "Тренировка",
+                ContestType.Undefined => "Не определено",
+                _ => "",
+            };
+            CreatorUsername = baseModel.Creator.UserName;
         }
     }
 }
