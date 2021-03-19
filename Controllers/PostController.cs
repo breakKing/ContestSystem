@@ -33,7 +33,7 @@ namespace ContestSystem.Controllers
                 return BadRequest();
             }
 
-            List<PostBaseModel> loadedPosts = await _dbContext.Posts.OrderByDescending(post => post.PublicationDateTime)
+            List<PostBaseModel> loadedPosts = await _dbContext.Posts.OrderByDescending(post => post.PublicationDateTimeUTC)
                                                                     .Skip((page - 1) * count)
                                                                     .Take(count)
                                                                     .ToListAsync();
@@ -41,7 +41,7 @@ namespace ContestSystem.Controllers
             List<PostOutputModel> postOutputs = (List<PostOutputModel>)loadedPosts.ConvertAll(async post =>
                                                                                     {
                                                                                         PostOutputModel postOut = new PostOutputModel();
-                                                                                        await postOut.TransformForOutputAsync(post, _dbContext);
+                                                                                        await postOut.TransformForOutputAsync(post);
                                                                                         return postOut;
                                                                                     })
                                                                                     .Select(postOut => postOut.Result);
@@ -59,7 +59,7 @@ namespace ContestSystem.Controllers
                 return NotFound();
             }
             PostOutputModel postOutput = new PostOutputModel();
-            await postOutput.TransformForOutputAsync(loadedPost, _dbContext);
+            await postOutput.TransformForOutputAsync(loadedPost);
             return postOutput;
         }
 
@@ -71,7 +71,7 @@ namespace ContestSystem.Controllers
             _dbContext.Posts.Add(post);
             await _dbContext.SaveChangesAsync();
             PostOutputModel postOutput = new PostOutputModel();
-            await postOutput.TransformForOutputAsync(post, _dbContext);
+            await postOutput.TransformForOutputAsync(post);
             return CreatedAtAction("GetPost", new { id = post.Id }, postOutput);
         }
 
