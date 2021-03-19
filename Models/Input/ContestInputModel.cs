@@ -14,9 +14,10 @@ namespace ContestSystem.Models.Input
         public bool IsPublic { get; set; }
         public ContestType Type { get; set; }
         public bool IsMonitorPublic { get; set; }
-        public DateTime StartDateTime { get; set; }
+        public DateTime StartDateTimeUTC { get; set; }
         public short DurationInMinutes { get; set; }
         public string CreatorId { get; set; }
+        public ContestMode Mode { get; set; }
 
         public ContestBaseModel ReadFromInput()
         {
@@ -27,8 +28,9 @@ namespace ContestSystem.Models.Input
                 Description = Description,
                 IsPublic = IsPublic,
                 Type = Type,
+                Mode = Mode,
                 IsMonitorPublic = IsMonitorPublic,
-                StartDateTime = StartDateTime,
+                StartDateTimeUTC = StartDateTimeUTC,
                 DurationInMinutes = DurationInMinutes,
                 CreatorId = CreatorId,
                 Approved = false

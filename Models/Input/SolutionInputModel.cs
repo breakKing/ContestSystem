@@ -25,9 +25,10 @@ namespace ContestSystem.Models.Input
                 ContestId = ContestId,
                 Code = Code,
                 Compiler = Compiler,
-                SubmitTime = DateTime.Now,
+                SubmitTimeUTC = DateTime.UtcNow,
                 Verdict = VerdictType.Undefined,
-                ErrorsMessage = ""
+                ErrorsMessage = "",
+                Points = 0
             };
         }
 

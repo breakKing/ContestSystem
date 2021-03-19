@@ -1,6 +1,7 @@
 ﻿using ContestSystem.Models.Interfaces;
 using ContestSystemDbStructure.BaseModels;
 using ContestSystemDbStructure.Enums;
+using Microsoft.Extensions.Localization;
 using System;
 using System.Threading.Tasks;
 
@@ -8,25 +9,31 @@ namespace ContestSystem.Models.Output
 {
     public class FutureContestOutputModel : IOutputModel<ContestBaseModel>
     {
+        private readonly IStringLocalizer<FutureContestOutputModel> _localizer;
+
         public string Name { get; set; }
         public string Description { get; set; }
-        public string StartDateTime { get; set; }
-        public string EndDateTime { get; set; }
+        public DateTime StartDateTimeUTC { get; set; }
+        public DateTime EndDateTimeUTC { get; set; }
         public string Type { get; set; }
         public string CreatorUsername { get; set; }
-        
+
+        public FutureContestOutputModel(IStringLocalizer<FutureContestOutputModel> localizer)
+        {
+            _localizer = localizer;
+        }
+
         public void TransformForOutput(ContestBaseModel baseModel)
         {
             Name = baseModel.Name;
             Description = baseModel.Description;
-            StartDateTime = baseModel.StartDateTime.ToString("f");
-            TimeSpan duration = new TimeSpan(0, baseModel.DurationInMinutes, 0);
-            EndDateTime = baseModel.StartDateTime.Add(duration).ToString("f");
+            StartDateTimeUTC = baseModel.StartDateTimeUTC;
+            EndDateTimeUTC = baseModel.StartDateTimeUTC.AddMinutes(baseModel.DurationInMinutes);
             Type = baseModel.Type switch
             {
-                ContestType.Competition => "Соревнование",
-                ContestType.Training => "Тренировка",
-                ContestType.Undefined => "Не определено",
+                ContestType.Competition => _localizer["CompetitionMode"],
+                ContestType.Training => _localizer["TrainingMode"],
+                ContestType.Undefined => "Undefined",
                 _ => "",
             };
             CreatorUsername = baseModel.Creator.UserName;

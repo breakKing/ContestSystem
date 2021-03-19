@@ -1,6 +1,7 @@
 ﻿using ContestSystem.Models.Interfaces;
 using ContestSystemDbStructure.BaseModels;
 using ContestSystemDbStructure.Enums;
+using System;
 using System.Threading.Tasks;
 
 namespace ContestSystem.Models.Input
@@ -24,7 +25,8 @@ namespace ContestSystem.Models.Input
                 Text = Text,
                 MessageToReplyId = MessageToReplyId,
                 Type = MessageType.ChatWhileContestInProgress,
-                IsPublic = IsPublic
+                IsPublic = IsPublic,
+                SentDateTimeUTC = DateTime.UtcNow
             };
         }
 

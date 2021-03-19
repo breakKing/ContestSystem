@@ -1,5 +1,6 @@
 ﻿using ContestSystem.Models.Interfaces;
 using ContestSystemDbStructure.BaseModels;
+using System;
 using System.Threading.Tasks;
 
 namespace ContestSystem.Models.Output
@@ -8,21 +9,21 @@ namespace ContestSystem.Models.Output
     {
         public string Text { get; set; }
         public string SenderUsername { get; set; }
-        public string SentDateTime { get; set; }
+        public DateTime SentDateTimeUTC { get; set; }
         public string MessageToReplyText { get; set; }
         public string MessageToReplySenderUsername { get; set; }
-        public string MessageToReplySentDateTime { get; set; }
+        public DateTime MessageToReplySentDateTimeUTC { get; set; }
 
         public void TransformForOutput(MessageBaseModel baseModel)
         {
             Text = baseModel.Text;
             SenderUsername = baseModel.Sender.UserName;
-            SentDateTime = baseModel.SentDateTime.ToString("g");
+            SentDateTimeUTC = baseModel.SentDateTimeUTC;
             if (baseModel.MessageToReplyId != null)
             {
                 MessageToReplyText = baseModel.MessageToReply.Text;
                 MessageToReplySenderUsername = baseModel.MessageToReply.Sender.UserName;
-                MessageToReplySentDateTime = baseModel.MessageToReply.SentDateTime.ToString("g");
+                MessageToReplySentDateTimeUTC = baseModel.MessageToReply.SentDateTimeUTC;
             }
         }
 

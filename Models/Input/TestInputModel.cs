@@ -1,4 +1,5 @@
-﻿using ContestSystem.Models.Interfaces;
+﻿using ContestSystem.Models.Constants;
+using ContestSystem.Models.Interfaces;
 using ContestSystemDbStructure.BaseModels;
 using System.Threading.Tasks;
 
@@ -22,7 +23,7 @@ namespace ContestSystem.Models.Input
                 ProblemId = ProblemId,
                 Input = Input,
                 Answer = Answer,
-                AvailablePoints = AvailablePoints.GetValueOrDefault(100)
+                AvailablePoints = AvailablePoints.GetValueOrDefault(SystemConstants.maxPointsForProblem)
             };
         }
 

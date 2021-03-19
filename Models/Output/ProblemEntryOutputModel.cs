@@ -7,12 +7,12 @@ namespace ContestSystem.Models.Output
 {
     public class ProblemEntryOutputModel : IOutputModel<ProblemBaseModel>
     {
-        public void TransformForOutput(ProblemBaseModel baseModel, ContestSystemDbContext dbContext)
+        public void TransformForOutput(ProblemBaseModel baseModel)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task TransformForOutputAsync(ProblemBaseModel baseModel, ContestSystemDbContext dbContext)
+        public async Task TransformForOutputAsync(ProblemBaseModel baseModel)
         {
             throw new System.NotImplementedException();
         }

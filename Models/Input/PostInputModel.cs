@@ -21,7 +21,7 @@ namespace ContestSystem.Models.Input
                 Name = Name,
                 HtmlText = HtmlText,
                 Approved = false,
-                PromotedDateTime = DateTime.Now
+                PromotedDateTimeUTC = DateTime.UtcNow
             };
         }
 

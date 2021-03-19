@@ -10,12 +10,12 @@ namespace ContestSystem.Models.Output
     {
         public char Alias { get; set; }
 
-        public void TransformForOutput(ProblemBaseModel baseModel, ContestSystemDbContext dbContext)
+        public void TransformForOutput(ProblemBaseModel baseModel)
         {
             throw new NotImplementedException();
         }
 
-        public Task TransformForOutputAsync(ProblemBaseModel baseModel, ContestSystemDbContext dbContext)
+        public async Task TransformForOutputAsync(ProblemBaseModel baseModel)
         {
             throw new NotImplementedException();
         }
