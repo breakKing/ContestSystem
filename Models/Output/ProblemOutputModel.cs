@@ -1,23 +1,50 @@
 ﻿using ContestSystem.Models.Interfaces;
-using ContestSystemDbStructure;
 using ContestSystemDbStructure.BaseModels;
-using System;
+using ContestSystemDbStructure.Enums;
+using Microsoft.Extensions.Localization;
 using System.Threading.Tasks;
 
 namespace ContestSystem.Models.Output
 {
-    public class ProblemOutputModel : IOutputModel<ProblemBaseModel>
+    public class ProblemOutputModel : IOutputModel<ContestsProblemsBaseModel>
     {
-        public char Alias { get; set; }
+        private readonly IStringLocalizer<ProblemOutputModel> _localizer;
 
-        public void TransformForOutput(ProblemBaseModel baseModel)
+        public long MemoryLimitInMegabytes { get; set; }
+        public double TimeLimitInSeconds { get; set; }
+        public string Alias { get; set; }
+        public string Type { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string InputBlock { get; set; }
+        public string OutputBlock { get; set; }
+
+        public ProblemOutputModel(IStringLocalizer<ProblemOutputModel> localizer)
         {
-            throw new NotImplementedException();
+            _localizer = localizer;
         }
 
-        public async Task TransformForOutputAsync(ProblemBaseModel baseModel)
+        public void TransformForOutput(ContestsProblemsBaseModel baseModel)
         {
-            throw new NotImplementedException();
+            MemoryLimitInMegabytes = baseModel.Problem.MemoryLimitInBytes / 1024 / 1024;
+            TimeLimitInSeconds = baseModel.Problem.TimeLimitInMilliseconds / 1000.0;
+            Alias = baseModel.Alias;
+            Name = baseModel.Problem.Name;
+            Description = baseModel.Problem.Description;
+            InputBlock = baseModel.Problem.InputBlock;
+            OutputBlock = baseModel.Problem.OutputBlock;
+            Type = baseModel.Problem.Type switch
+            {
+                ProblemType.FullSolution => _localizer["FullSolution"],
+                ProblemType.Scorable => _localizer["Scorable"],
+                ProblemType.Undefined => "Undefined",
+                _ => "",
+            };
+        }
+
+        public async Task TransformForOutputAsync(ContestsProblemsBaseModel baseModel)
+        {
+            TransformForOutput(baseModel);
         }
     }
 }

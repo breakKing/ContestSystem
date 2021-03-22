@@ -49,7 +49,7 @@ namespace ContestSystem.Models.Output
                     ScoreForProblem.Add(solutions.Where(sol => sol.ProblemId == problem.Id 
                                                                 && sol.Verdict != VerdictType.TestInProgress 
                                                                 && sol.Verdict != VerdictType.Undefined 
-                                                                && IsBeforeFreeze(baseModel.Contest, sol, currentDateUTC))
+                                                                && _isBeforeFreeze(baseModel.Contest, sol, currentDateUTC))
                                                     .Select(sol => sol.Points)
                                                     .Max());
                 }
@@ -57,19 +57,19 @@ namespace ContestSystem.Models.Output
                 {
                     ProblemSolved.Add(solutions.Any(sol => sol.ProblemId == problem.Id 
                                                         && sol.Verdict == VerdictType.Accepted 
-                                                        && IsBeforeFreeze(baseModel.Contest, sol, currentDateUTC)));
+                                                        && _isBeforeFreeze(baseModel.Contest, sol, currentDateUTC)));
 
                     ProblemTries.Add((short)solutions.Where(sol => sol.ProblemId == problem.Id
                                                                     && sol.Verdict != VerdictType.TestInProgress
                                                                     && sol.Verdict != VerdictType.Undefined
-                                                                    && IsBeforeFreeze(baseModel.Contest, sol, currentDateUTC))
+                                                                    && _isBeforeFreeze(baseModel.Contest, sol, currentDateUTC))
                                                         .Count());
 
                     if (ProblemSolved.Last())
                     {
                         LastSolutionDateTime.Add(solutions.Where(sol => sol.ProblemId == problem.Id
                                                                         && sol.Verdict == VerdictType.Accepted
-                                                                        && IsBeforeFreeze(baseModel.Contest, sol, currentDateUTC))
+                                                                        && _isBeforeFreeze(baseModel.Contest, sol, currentDateUTC))
                                                             .Select(sol => sol.SubmitTimeUTC - baseModel.Contest.StartDateTimeUTC)
                                                             .Max()
                                                             .ToString(@"hh\:mm"));
@@ -79,7 +79,7 @@ namespace ContestSystem.Models.Output
                         LastSolutionDateTime.Add(solutions.Where(sol => sol.ProblemId == problem.Id
                                                                         && sol.Verdict != VerdictType.TestInProgress
                                                                         && sol.Verdict != VerdictType.Undefined
-                                                                        && IsBeforeFreeze(baseModel.Contest, sol, currentDateUTC))
+                                                                        && _isBeforeFreeze(baseModel.Contest, sol, currentDateUTC))
                                                             .Select(sol => sol.SubmitTimeUTC - baseModel.Contest.StartDateTimeUTC)
                                                             .Max()
                                                             .ToString(@"hh\:mm"));
@@ -110,7 +110,7 @@ namespace ContestSystem.Models.Output
                     ScoreForProblem.Add(solutions.Where(sol => sol.ProblemId == problem.Id
                                                                 && sol.Verdict != VerdictType.TestInProgress
                                                                 && sol.Verdict != VerdictType.Undefined
-                                                                && IsBeforeFreeze(baseModel.Contest, sol, currentDateUTC))
+                                                                && _isBeforeFreeze(baseModel.Contest, sol, currentDateUTC))
                                                     .Select(sol => sol.Points)
                                                     .Max());
                 }
@@ -118,19 +118,19 @@ namespace ContestSystem.Models.Output
                 {
                     ProblemSolved.Add(solutions.Any(sol => sol.ProblemId == problem.Id
                                                         && sol.Verdict == VerdictType.Accepted
-                                                        && IsBeforeFreeze(baseModel.Contest, sol, currentDateUTC)));
+                                                        && _isBeforeFreeze(baseModel.Contest, sol, currentDateUTC)));
 
                     ProblemTries.Add((short)solutions.Where(sol => sol.ProblemId == problem.Id
                                                                     && sol.Verdict != VerdictType.TestInProgress
                                                                     && sol.Verdict != VerdictType.Undefined
-                                                                    && IsBeforeFreeze(baseModel.Contest, sol, currentDateUTC))
+                                                                    && _isBeforeFreeze(baseModel.Contest, sol, currentDateUTC))
                                                         .Count());
 
                     if (ProblemSolved.Last())
                     {
                         LastSolutionDateTime.Add(solutions.Where(sol => sol.ProblemId == problem.Id
                                                                         && sol.Verdict == VerdictType.Accepted
-                                                                        && IsBeforeFreeze(baseModel.Contest, sol, currentDateUTC))
+                                                                        && _isBeforeFreeze(baseModel.Contest, sol, currentDateUTC))
                                                             .Select(sol => sol.SubmitTimeUTC - baseModel.Contest.StartDateTimeUTC)
                                                             .Max()
                                                             .ToString(@"hh\:mm"));
@@ -140,7 +140,7 @@ namespace ContestSystem.Models.Output
                         LastSolutionDateTime.Add(solutions.Where(sol => sol.ProblemId == problem.Id
                                                                         && sol.Verdict != VerdictType.TestInProgress
                                                                         && sol.Verdict != VerdictType.Undefined
-                                                                        && IsBeforeFreeze(baseModel.Contest, sol, currentDateUTC))
+                                                                        && _isBeforeFreeze(baseModel.Contest, sol, currentDateUTC))
                                                             .Select(sol => sol.SubmitTimeUTC - baseModel.Contest.StartDateTimeUTC)
                                                             .Max()
                                                             .ToString(@"hh\:mm"));
@@ -149,7 +149,7 @@ namespace ContestSystem.Models.Output
             }
         }
 
-        private static bool IsBeforeFreeze(ContestBaseModel contest, SolutionBaseModel solution, DateTime curDateTimeUTC)
+        private static bool _isBeforeFreeze(ContestBaseModel contest, SolutionBaseModel solution, DateTime curDateTimeUTC)
         {
             return solution.SubmitTimeUTC.AddMinutes(Math.Max(contest.DurationInMinutes - SystemConstants.freezeWhenMinutesBeforeFinish, 0)) >= curDateTimeUTC;
         }
