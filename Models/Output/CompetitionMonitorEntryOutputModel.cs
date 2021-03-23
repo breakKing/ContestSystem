@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace ContestSystem.Models.Output
 {
-    public class CompetitionMonitorEntryOutputModel : IOutputModel<ContestsParticipantsBaseModel>
+    public class CompetitionMonitorEntryOutputModel : IOutputModel<ContestParticipantBaseModel>
     {
         private readonly ContestSystemDbContext _dbContext;
 
@@ -27,7 +27,7 @@ namespace ContestSystem.Models.Output
             _dbContext = dbContext;
         }
 
-        public void TransformForOutput(ContestsParticipantsBaseModel baseModel)
+        public void TransformForOutput(ContestParticipantBaseModel baseModel)
         {
             Username = baseModel.Alias;
             CompetitionMode = (int)baseModel.Contest.Mode;
@@ -88,7 +88,7 @@ namespace ContestSystem.Models.Output
             }
         }
 
-        public async Task TransformForOutputAsync(ContestsParticipantsBaseModel baseModel)
+        public async Task TransformForOutputAsync(ContestParticipantBaseModel baseModel)
         {
             Username = baseModel.Alias;
             CompetitionMode = (int)baseModel.Contest.Mode;

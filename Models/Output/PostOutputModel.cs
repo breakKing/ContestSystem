@@ -27,7 +27,7 @@ namespace ContestSystem.Models.Output
 
         public void TransformForOutput(PostBaseModel baseModel)
         {
-            AuthorUsername = baseModel.Author.UserName;
+            AuthorUsername = baseModel.Author.NormalizedUserName;
             Name = baseModel.Name;
             HtmlText = baseModel.HtmlText;
             PublicationDateTimeUTC = baseModel.PublicationDateTimeUTC;

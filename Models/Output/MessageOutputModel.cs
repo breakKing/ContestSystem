@@ -17,12 +17,12 @@ namespace ContestSystem.Models.Output
         public void TransformForOutput(MessageBaseModel baseModel)
         {
             Text = baseModel.Text;
-            SenderUsername = baseModel.Sender.UserName;
+            SenderUsername = baseModel.Sender.NormalizedUserName;
             SentDateTimeUTC = baseModel.SentDateTimeUTC;
             if (baseModel.MessageToReplyId != null)
             {
                 MessageToReplyText = baseModel.MessageToReply.Text;
-                MessageToReplySenderUsername = baseModel.MessageToReply.Sender.UserName;
+                MessageToReplySenderUsername = baseModel.MessageToReply.Sender.NormalizedUserName;
                 MessageToReplySentDateTimeUTC = baseModel.MessageToReply.SentDateTimeUTC;
             }
         }

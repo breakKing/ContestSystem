@@ -9,14 +9,14 @@ namespace ContestSystem.Models.Output
 {
     public class ContestInProgressOutputModel : IOutputModel<ContestBaseModel>
     {
-        private readonly IStringLocalizer<ContestInProgressOutputModel> _localizer;
+        private readonly IStringLocalizer<ContestManagementOutputModel> _localizer;
 
         public string Name { get; set; }
         public string Description { get; set; }
         public DateTime EndTimeUTC { get; set; }
         public string Type { get; set; }
 
-        public ContestInProgressOutputModel(IStringLocalizer<ContestInProgressOutputModel> localizer)
+        public ContestInProgressOutputModel(IStringLocalizer<ContestManagementOutputModel> localizer)
         {
             _localizer = localizer;
         }

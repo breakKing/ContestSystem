@@ -9,7 +9,7 @@ namespace ContestSystem.Models.Output
 {
     public class FutureContestOutputModel : IOutputModel<ContestBaseModel>
     {
-        private readonly IStringLocalizer<FutureContestOutputModel> _localizer;
+        private readonly IStringLocalizer<ContestManagementOutputModel> _localizer;
 
         public string Name { get; set; }
         public string Description { get; set; }
@@ -18,7 +18,7 @@ namespace ContestSystem.Models.Output
         public string Type { get; set; }
         public string CreatorUsername { get; set; }
 
-        public FutureContestOutputModel(IStringLocalizer<FutureContestOutputModel> localizer)
+        public FutureContestOutputModel(IStringLocalizer<ContestManagementOutputModel> localizer)
         {
             _localizer = localizer;
         }
@@ -36,7 +36,7 @@ namespace ContestSystem.Models.Output
                 ContestType.Undefined => "Undefined",
                 _ => "",
             };
-            CreatorUsername = baseModel.Creator.UserName;
+            CreatorUsername = baseModel.Creator.NormalizedUserName;
         }
 
         public async Task TransformForOutputAsync(ContestBaseModel baseModel)

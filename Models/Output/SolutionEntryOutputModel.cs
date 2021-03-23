@@ -12,14 +12,8 @@ namespace ContestSystem.Models.Output
 {
     public class SolutionEntryOutputModel : IOutputModel<SolutionBaseModel>
     {
-        private readonly IStringLocalizer<SolutionEntryOutputModel> _localizer;
+        private readonly IStringLocalizer<SolutionOutputModel> _localizer;
         private readonly ContestSystemDbContext _dbContext;
-
-        public SolutionEntryOutputModel(IStringLocalizer<SolutionEntryOutputModel> localizer, ContestSystemDbContext dbContext)
-        {
-            _localizer = localizer;
-            _dbContext = dbContext;
-        }
 
         public string Alias { get; set; }
         public string ProblemName { get; set; }
@@ -28,9 +22,15 @@ namespace ContestSystem.Models.Output
         public string Verdict { get; set; }
         public short Points { get; set; }
 
+        public SolutionEntryOutputModel(IStringLocalizer<SolutionOutputModel> localizer, ContestSystemDbContext dbContext)
+        {
+            _localizer = localizer;
+            _dbContext = dbContext;
+        }
+
         public void TransformForOutput(SolutionBaseModel baseModel)
         {
-            ContestsProblemsBaseModel contestProblem = _dbContext.ContestsProblems.FirstOrDefault(cp => cp.ContestId == baseModel.ContestId
+            ContestProblemBaseModel contestProblem = _dbContext.ContestsProblems.FirstOrDefault(cp => cp.ContestId == baseModel.ContestId
                                                                                                            && cp.ProblemId == baseModel.ProblemId);
 
             Alias = contestProblem.Alias;
@@ -58,7 +58,7 @@ namespace ContestSystem.Models.Output
 
         public async Task TransformForOutputAsync(SolutionBaseModel baseModel)
         {
-            ContestsProblemsBaseModel contestProblem = await _dbContext.ContestsProblems.FirstOrDefaultAsync(cp => cp.ContestId == baseModel.ContestId
+            ContestProblemBaseModel contestProblem = await _dbContext.ContestsProblems.FirstOrDefaultAsync(cp => cp.ContestId == baseModel.ContestId
                                                                                                                     && cp.ProblemId == baseModel.ProblemId);
 
             Alias = contestProblem.Alias;

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ContestSystem.Models.Output
 {
-    public class ProblemOutputModel : IOutputModel<ContestsProblemsBaseModel>
+    public class ProblemOutputModel : IOutputModel<ContestProblemBaseModel>
     {
         private readonly IStringLocalizer<ProblemOutputModel> _localizer;
 
@@ -24,7 +24,7 @@ namespace ContestSystem.Models.Output
             _localizer = localizer;
         }
 
-        public void TransformForOutput(ContestsProblemsBaseModel baseModel)
+        public void TransformForOutput(ContestProblemBaseModel baseModel)
         {
             MemoryLimitInMegabytes = baseModel.Problem.MemoryLimitInBytes / 1024 / 1024;
             TimeLimitInSeconds = baseModel.Problem.TimeLimitInMilliseconds / 1000.0;
@@ -42,7 +42,7 @@ namespace ContestSystem.Models.Output
             };
         }
 
-        public async Task TransformForOutputAsync(ContestsProblemsBaseModel baseModel)
+        public async Task TransformForOutputAsync(ContestProblemBaseModel baseModel)
         {
             TransformForOutput(baseModel);
         }

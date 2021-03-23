@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace ContestSystem.Models.Output
 {
-    public class ProblemEntryOutputModel : IOutputModel<ContestsProblemsBaseModel>
+    public class ProblemEntryOutputModel : IOutputModel<ContestProblemBaseModel>
     {
-        private readonly IStringLocalizer<ProblemEntryOutputModel> _localizer;
+        private readonly IStringLocalizer<ProblemOutputModel> _localizer;
 
         public long MemoryLimitInMegabytes { get; set; }
         public double TimeLimitInSeconds { get; set; }
@@ -16,12 +16,12 @@ namespace ContestSystem.Models.Output
         public string Name { get; set; }
         public string Alias { get; set; }
 
-        public ProblemEntryOutputModel(IStringLocalizer<ProblemEntryOutputModel> localizer)
+        public ProblemEntryOutputModel(IStringLocalizer<ProblemOutputModel> localizer)
         {
             _localizer = localizer;
         }
 
-        public void TransformForOutput(ContestsProblemsBaseModel baseModel)
+        public void TransformForOutput(ContestProblemBaseModel baseModel)
         {
             MemoryLimitInMegabytes = baseModel.Problem.MemoryLimitInBytes / 1024 / 1024;
             TimeLimitInSeconds = baseModel.Problem.TimeLimitInMilliseconds / 1000.0;
@@ -36,7 +36,7 @@ namespace ContestSystem.Models.Output
             };
         }
 
-        public async Task TransformForOutputAsync(ContestsProblemsBaseModel baseModel)
+        public async Task TransformForOutputAsync(ContestProblemBaseModel baseModel)
         {
             TransformForOutput(baseModel);
         }
