@@ -1,2 +1,7 @@
 ﻿wwwroot/bundle/*
 .idea/
+bin/*
+obj/*
+node_modules/*
+.vs/*
+ContestSystem.csproj.user
