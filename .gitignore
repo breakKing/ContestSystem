@@ -5,3 +5,4 @@ obj/*
 node_modules/*
 .vs/*
 ContestSystem.csproj.user
+package-lock.json
