@@ -1,5 +1,5 @@
 ﻿using ContestSystem.Models.Interfaces;
-using ContestSystemDbStructure.BaseModels;
+using ContestSystemDbStructure.Models;
 using ContestSystemDbStructure.Enums;
 using Microsoft.Extensions.Localization;
 using System;

@@ -1,6 +1,6 @@
 ﻿using ContestSystem.Models.Interfaces;
 using ContestSystemDbStructure;
-using ContestSystemDbStructure.BaseModels;
+using ContestSystemDbStructure.Models;
 using ContestSystemDbStructure.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
@@ -14,7 +14,7 @@ namespace ContestSystem.Models.Output
     public class SolutionOutputModel : IOutputModel<SolutionBaseModel>
     {
         private readonly IStringLocalizer<SolutionOutputModel> _localizer;
-        private readonly ContestSystemDbContext _dbContext;
+        private readonly MainDbContext _dbContext;
 
         public string Alias { get; set; }
         public string ProblemName { get; set; }
@@ -26,7 +26,7 @@ namespace ContestSystem.Models.Output
         public short Points { get; set; }
         public List<TestResultEntryOutputModel> TestsResults { get; set; } = new List<TestResultEntryOutputModel>();
 
-        public SolutionOutputModel(IStringLocalizer<SolutionOutputModel> localizer, ContestSystemDbContext dbContext)
+        public SolutionOutputModel(IStringLocalizer<SolutionOutputModel> localizer, MainDbContext dbContext)
         {
             _localizer = localizer;
             _dbContext = dbContext;

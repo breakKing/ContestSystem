@@ -1,6 +1,6 @@
 ﻿using ContestSystem.Models.Constants;
 using ContestSystem.Models.Interfaces;
-using ContestSystemDbStructure.BaseModels;
+using ContestSystemDbStructure.Models;
 using System.Threading.Tasks;
 
 namespace ContestSystem.Models.Input

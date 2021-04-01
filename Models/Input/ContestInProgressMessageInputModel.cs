@@ -1,5 +1,5 @@
 ﻿using ContestSystem.Models.Interfaces;
-using ContestSystemDbStructure.BaseModels;
+using ContestSystemDbStructure.Models;
 using ContestSystemDbStructure.Enums;
 using System;
 using System.Threading.Tasks;
@@ -15,9 +15,9 @@ namespace ContestSystem.Models.Input
         public string SenderId { get; set; }
         public bool IsPublic { get; set; }
 
-        public MessageBaseModel ReadFromInput()
+        public Message ReadFromInput()
         {
-            return new MessageBaseModel
+            return new Message
             {
                 Id = Id.GetValueOrDefault(),
                 SubjectId = ContestId,

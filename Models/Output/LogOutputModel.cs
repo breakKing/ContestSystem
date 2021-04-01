@@ -1,5 +1,5 @@
 ﻿using ContestSystem.Models.Interfaces;
-using ContestSystemDbStructure.BaseModels;
+using ContestSystemDbStructure.Models;
 using System;
 using System.Threading.Tasks;
 

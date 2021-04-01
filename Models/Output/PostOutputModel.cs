@@ -1,6 +1,6 @@
 ﻿using ContestSystem.Models.Interfaces;
 using ContestSystemDbStructure;
-using ContestSystemDbStructure.BaseModels;
+using ContestSystemDbStructure.Models;
 using ContestSystemDbStructure.Enums;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -12,7 +12,7 @@ namespace ContestSystem.Models.Output
 {
     public class PostOutputModel : IOutputModel<PostBaseModel>
     {
-        private readonly ContestSystemDbContext _dbContext;
+        private readonly MainDbContext _dbContext;
 
         public string AuthorUsername { get; set; }
         public string Name { get; set; }
@@ -20,7 +20,7 @@ namespace ContestSystem.Models.Output
         public DateTime PublicationDateTimeUTC { get; set; }
         public List<MessageOutputModel> Comments { get; set; } = new List<MessageOutputModel>();
 
-        public PostOutputModel(ContestSystemDbContext dbContext)
+        public PostOutputModel(MainDbContext dbContext)
         {
             _dbContext = dbContext;
         }

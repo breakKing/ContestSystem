@@ -1,13 +1,14 @@
 ﻿using ContestSystem.Models.Input;
 using ContestSystem.Models.Output;
 using ContestSystemDbStructure;
-using ContestSystemDbStructure.BaseModels;
+using ContestSystemDbStructure.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ContestSystem.Models.DbContexts;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -17,9 +18,9 @@ namespace ContestSystem.Controllers
     [ApiController]
     public class PostController : ControllerBase
     {
-        private readonly ContestSystemDbContext _dbContext;
+        private readonly MainDbContext _dbContext;
 
-        public PostController(ContestSystemDbContext dbContext)
+        public PostController(MainDbContext dbContext)
         {
             _dbContext = dbContext;
         }
@@ -33,7 +34,7 @@ namespace ContestSystem.Controllers
                 return BadRequest();
             }
 
-            List<PostBaseModel> loadedPosts = await _dbContext.Posts.OrderByDescending(post => post.PublicationDateTimeUTC)
+            List<Post> loadedPosts = await _dbContext.Posts.OrderByDescending(post => post.PublicationDateTimeUTC)
                                                                     .Skip((page - 1) * count)
                                                                     .Take(count)
                                                                     .ToListAsync();
@@ -53,7 +54,7 @@ namespace ContestSystem.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<PostOutputModel>> GetPost(long id)
         {
-            PostBaseModel loadedPost = await _dbContext.Posts.FindAsync(id);
+            Post loadedPost = await _dbContext.Posts.FindAsync(id);
             if (loadedPost == null)
             {
                 return NotFound();
@@ -83,7 +84,7 @@ namespace ContestSystem.Controllers
             {
                 return BadRequest();
             }
-            PostBaseModel post = await postInput.ReadFromInputAsync();
+            Post post = await postInput.ReadFromInputAsync();
             _dbContext.Entry(post).State = EntityState.Modified;
             try
             {
@@ -107,7 +108,7 @@ namespace ContestSystem.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePost(long id)
         {
-            PostBaseModel loadedPost = await _dbContext.Posts.FindAsync(id);
+            Post loadedPost = await _dbContext.Posts.FindAsync(id);
             if (loadedPost == null)
             {
                 return NotFound();

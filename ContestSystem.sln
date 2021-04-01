@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.31005.135
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ContestSystem", "ContestSystem.csproj", "{1BB121D9-987B-4A40-BC6B-1FF4512D5121}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ContestSystemDbStructure", "..\Libs\ContestSystemDbStructure\ContestSystemDbStructure.csproj", "{039E20AB-8ADE-4E1D-BA31-5D26ADF68954}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContestSystemDbStructure", "..\ContestSystemDbStructure\ContestSystemDbStructure.csproj", "{5351C48F-8B73-4819-B97A-BFCD6284E804}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{1BB121D9-987B-4A40-BC6B-1FF4512D5121}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1BB121D9-987B-4A40-BC6B-1FF4512D5121}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1BB121D9-987B-4A40-BC6B-1FF4512D5121}.Release|Any CPU.Build.0 = Release|Any CPU
-		{039E20AB-8ADE-4E1D-BA31-5D26ADF68954}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{039E20AB-8ADE-4E1D-BA31-5D26ADF68954}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{039E20AB-8ADE-4E1D-BA31-5D26ADF68954}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{039E20AB-8ADE-4E1D-BA31-5D26ADF68954}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5351C48F-8B73-4819-B97A-BFCD6284E804}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5351C48F-8B73-4819-B97A-BFCD6284E804}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5351C48F-8B73-4819-B97A-BFCD6284E804}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5351C48F-8B73-4819-B97A-BFCD6284E804}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

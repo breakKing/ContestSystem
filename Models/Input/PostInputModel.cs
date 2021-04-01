@@ -1,20 +1,20 @@
 ﻿using ContestSystem.Models.Interfaces;
-using ContestSystemDbStructure.BaseModels;
+using ContestSystemDbStructure.Models;
 using System;
 using System.Threading.Tasks;
 
 namespace ContestSystem.Models.Input
 {
-    public class PostInputModel : IInputModel<PostBaseModel, long?>
+    public class PostInputModel : IInputModel<Post, long?>
     {
         public long? Id { get; set; }
         public string AuthorId { get; set; }
         public string Name { get; set; }
         public string HtmlText { get; set; }
 
-        public PostBaseModel ReadFromInput()
+        public Post ReadFromInput()
         {
-            return new PostBaseModel
+            return new Post
             {
                 Id = Id.GetValueOrDefault(),
                 AuthorId = AuthorId,
@@ -25,7 +25,7 @@ namespace ContestSystem.Models.Input
             };
         }
 
-        public async Task<PostBaseModel> ReadFromInputAsync()
+        public async Task<Post> ReadFromInputAsync()
         {
             return ReadFromInput();
         }

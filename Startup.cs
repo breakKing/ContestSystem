@@ -1,6 +1,4 @@
 using ContestSystem.Extensions;
-using ContestSystemDbStructure;
-using ContestSystemDbStructure.BaseModels;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -16,7 +14,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using VueCliMiddleware;
+using ContestSystem.Models;
+using ContestSystem.Models.DbContexts;
+using ContestSystemDbStructure.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 namespace ContestSystem
 {
@@ -33,22 +35,54 @@ namespace ContestSystem
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddLocalization(options => options.ResourcesPath = "Resources");
+            
+            var jwtService = new JwtSettingsService();
+            Configuration.Bind("JwtConfiguration", jwtService);
+            services.AddSingleton<JwtSettingsService>(jwtService);
+            
+            services.AddDbContext<MainDbContext>(
+                x => x
+                    .UseLazyLoadingProxies()
+                    .UseNpgsql(Configuration.GetConnectionString("DBConnection"))
+                  //.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+            );
+            
 
-            services.AddDbContext<ContestSystemDbContext>(options =>
+            services.AddIdentity<User, Role>(options =>
             {
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
-                options.UseLazyLoadingProxies();
-            });
+                options.Password.RequireDigit = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequiredLength = 5;
 
-            services.AddIdentity<UserBaseModel, IdentityRole>()
-                .AddEntityFrameworkStores<ContestSystemDbContext>();
+                options.SignIn.RequireConfirmedEmail = false;
+                options.SignIn.RequireConfirmedPhoneNumber = false;
+            }).AddEntityFrameworkStores<MainDbContext>();
 
-            services.AddControllers();
+            services.AddAuthentication(x =>
+                {
+                    x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(options =>
+                {
+                    options.RequireHttpsMetadata = false;
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = jwtService.Issuer,
 
-            services.AddSpaStaticFiles(configuration =>
-            {
-                configuration.RootPath = "ClientApp";
-            });
+                        ValidateAudience = true,
+                        ValidAudience = jwtService.Audience,
+                        ValidateLifetime = true,
+
+                        IssuerSigningKey = jwtService.GetSymmetricSecurityKey(),
+                        ValidateIssuerSigningKey = true,
+                    };
+                });
+            services.AddControllersWithViews();
 
             services.AddCheckerSystemConnector();
         }
@@ -74,26 +108,23 @@ namespace ContestSystem
             });
 
             app.UseRouting();
-            app.UseSpaStaticFiles();
+            app.UseCors(builder => builder
+                .AllowAnyOrigin()
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+            );
+
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-            });
-
-            app.UseSpa(spa =>
-            {
-                if (env.IsDevelopment())
-                    spa.Options.SourcePath = "ClientApp/";
-                else
-                    spa.Options.SourcePath = "dist";
-
-                if (env.IsDevelopment())
-                {
-                    spa.UseVueCli(npmScript: "serve");
-                }
-
+                endpoints.MapControllerRoute(
+                    name: "CatchAll",
+                    pattern: "{*url}",
+                    defaults: new {controller = "Home", action = "Index"}
+                );
             });
         }
     }

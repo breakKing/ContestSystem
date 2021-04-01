@@ -1,7 +1,7 @@
 ﻿using ContestSystem.Models.Constants;
 using ContestSystem.Models.Interfaces;
 using ContestSystemDbStructure;
-using ContestSystemDbStructure.BaseModels;
+using ContestSystemDbStructure.Models;
 using ContestSystemDbStructure.Enums;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -13,7 +13,7 @@ namespace ContestSystem.Models.Output
 {
     public class CompetitionMonitorEntryOutputModel : IOutputModel<ContestParticipantBaseModel>
     {
-        private readonly ContestSystemDbContext _dbContext;
+        private readonly MainDbContext _dbContext;
 
         public string Username { get; set; }
         public int CompetitionMode { get; set; }
@@ -22,7 +22,7 @@ namespace ContestSystem.Models.Output
         public List<short> ProblemTries { get; set; } = new List<short>();
         public List<string> LastSolutionDateTime { get; set; } = new List<string>();
 
-        public CompetitionMonitorEntryOutputModel(ContestSystemDbContext dbContext)
+        public CompetitionMonitorEntryOutputModel(MainDbContext dbContext)
         {
             _dbContext = dbContext;
         }
