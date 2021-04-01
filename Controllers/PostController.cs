@@ -1,13 +1,4 @@
-﻿using ContestSystem.Models.Input;
-using ContestSystem.Models.Output;
-using ContestSystemDbStructure;
-using ContestSystemDbStructure.Models;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Mvc;
 using ContestSystem.Models.DbContexts;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -24,7 +15,7 @@ namespace ContestSystem.Controllers
         {
             _dbContext = dbContext;
         }
-
+        /*
         // GET: api/<PostController>
         [HttpGet("{count}/{page}")]
         public async Task<ActionResult<IEnumerable<PostOutputModel>>> GetPostsPage(int count, int page)
@@ -117,5 +108,6 @@ namespace ContestSystem.Controllers
             await _dbContext.SaveChangesAsync();
             return NoContent();
         }
+        */
     }
 }

@@ -20,6 +20,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\..\ContestSystemDbStructure\ContestSystemDbStructure.csproj" />
       <ProjectReference Include="..\ContestSystemDbStructure\ContestSystemDbStructure.csproj" />
+      <ProjectReference Include="..\Libs\ContestSystemDbStructure\ContestSystemDbStructure.csproj" />
     </ItemGroup>
 
 </Project>
