@@ -14,13 +14,17 @@ namespace ContestSystem.Models.DbContexts
             {
                 Description = "Администратор"
             },
-            new Role(RolesContainer.Manager)
+            new Role(RolesContainer.GlobalModerator)
             {
-                Description = "Менеджер"
+                Description = "Глобальный модератор"
+            },
+            new Role(RolesContainer.BlogModerator)
+            {
+                Description = "Модератор блога"
             },
             new Role(RolesContainer.User)
             {
-                Description = "Клиент"
+                Description = "Пользователь"
             },
         };
 
@@ -38,7 +42,7 @@ namespace ContestSystem.Models.DbContexts
                 UserName = "manager",
                 Email = "manager@manager.ru",
                 Password = "manager",
-                Role = RolesContainer.Manager,
+                Role = RolesContainer.GlobalModerator,
             },
         };
 
