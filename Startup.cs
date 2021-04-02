@@ -1,19 +1,12 @@
 using ContestSystem.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
 using ContestSystem.Models;
 using ContestSystem.Models.DbContexts;
 using ContestSystemDbStructure.Models;
@@ -43,8 +36,8 @@ namespace ContestSystem
             services.AddDbContext<MainDbContext>(
                 x => x
                     .UseLazyLoadingProxies()
-                    .UseNpgsql(Configuration.GetConnectionString("DBConnection"))
-                  //.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+                    //.UseNpgsql(Configuration.GetConnectionString("PgsqlConnection"))
+                    .UseSqlServer(Configuration.GetConnectionString("MssqlConnection"))
             );
             
 
