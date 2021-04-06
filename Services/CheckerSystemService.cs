@@ -94,6 +94,15 @@ namespace ContestSystem.Services
             return resultedChecker;
         }
 
+        // Отправка решения на компиляцию (ДО прогона по тестам)
+        public async Task<Solution> CompileSolutionAsync(Solution solution)
+        {
+            string server = await _getServerForSolutionAsync(solution.Id);
+            var content = JsonContent.Create(solution);
+            var response = await _httpClient.PostAsync($"http://{server}/api/solution", content);
+            return await response.Content.ReadFromJsonAsync<Solution>();
+        }
+
         // Отправка решения на проверку
         public async Task<TestResult> RunTestForSolutionAsync(Solution solution, short testNumber)
         {
