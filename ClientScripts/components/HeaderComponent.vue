@@ -1,6 +1,6 @@
 ﻿<template>
   <nav class="navbar navbar-expand-lg navbar-light bg-light mx-5 py-3 px-5 mb-4">
-    <router-link class="navbar-brand" :to="{name: 'Home'}">{{ userName || 'Питомник' }}</router-link>
+    <router-link class="navbar-brand" :to="{name: 'Home'}">{{ userName || 'Контест' }}</router-link>
     <div class="collapse navbar-collapse">
       <ul class="navbar-nav ml-auto">
         <template v-if="isAuthenticated">

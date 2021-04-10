@@ -2,7 +2,6 @@
 .idea/
 bin/*
 obj/*
-node_modules/*
-.vs/*
+node_modules/
+.vs/
 ContestSystem.csproj.user
-package-lock.json
