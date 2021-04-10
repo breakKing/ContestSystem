@@ -76,7 +76,7 @@ namespace ContestSystem.Controllers
                         .Select(roleId => _dbContext.Roles.FirstOrDefault(r => r.Id == roleId))
                         .Where(r => r != null)
                         .ToList();
-                    if (rolesToAssign.Count > 0)
+                    if (!rolesToAssign.IsEmpty())
                     {
                         user.Roles.AddRange(
                             rolesToAssign

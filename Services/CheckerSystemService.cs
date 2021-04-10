@@ -25,7 +25,8 @@ namespace ContestSystem.Services
         {
             _configuration = configuration;
             IConfigurationSection checkerServersSection = _configuration.GetSection("CheckerServers");
-            List<string> checkerServersFromConf = checkerServersSection.AsEnumerable().Select(keyValPair => keyValPair.Value).Skip(1).ToList();
+            List<string> checkerServersFromConf = checkerServersSection.AsEnumerable()
+                .Select(keyValPair => keyValPair.Value).Skip(1).ToList();
             foreach (var server in checkerServersFromConf)
             {
                 if (_pingServer(server))
@@ -33,10 +34,12 @@ namespace ContestSystem.Services
                     _checkerServers.Add(server);
                 }
             }
+
             if (_checkerServers.Count > 0)
             {
                 _currentServerIndex = 0;
             }
+
             _httpClient.DefaultRequestHeaders.Accept.Clear();
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
@@ -52,19 +55,22 @@ namespace ContestSystem.Services
                 if (await _pingServerAsync(server))
                 {
                     var response = await _httpClient.GetAsync($"http://{server}/api/compiler");
-                    compilersLists.Add((List<string>)await response.Content.ReadFromJsonAsync<IEnumerable<string>>());
+                    compilersLists.Add((List<string>) await response.Content.ReadFromJsonAsync<IEnumerable<string>>());
                 }
             }
+
             if (compilersLists.Count == 0)
             {
                 var response = await _httpClient.GetAsync($"http://localhost:{_localPort}/api/compiler");
                 return await response.Content.ReadFromJsonAsync<IEnumerable<string>>();
             }
+
             finalCompilers.AddRange(compilersLists[0]);
             foreach (var list in compilersLists)
             {
-                finalCompilers = (List<string>)finalCompilers.Intersect(list);
+                finalCompilers = (List<string>) finalCompilers.Intersect(list);
             }
+
             return finalCompilers;
         }
 
@@ -89,6 +95,7 @@ namespace ContestSystem.Services
                     }
                 }
             }
+
             content = JsonContent.Create(checker);
             await _httpClient.PostAsync($"http://localhost:{_localPort}/api/checker", content);
             return resultedChecker;
@@ -126,6 +133,7 @@ namespace ContestSystem.Services
                     {
                         return _checkerServers[serverIndex];
                     }
+
                     index = (index + 1) % _checkerServers.Count;
                 } while (index != serverIndex);
             }
@@ -140,9 +148,11 @@ namespace ContestSystem.Services
                         _serverForSolution.Add(solutionId, _currentServerIndex);
                         return _checkerServers[_currentServerIndex];
                     }
+
                     index = (index + 1) % _checkerServers.Count;
                 } while (index != _currentServerIndex);
             }
+
             return $"localhost:{_localPort}";
         }
 
@@ -175,6 +185,7 @@ namespace ContestSystem.Services
                     return false;
                 }
             }
+
             return false;
         }
 
@@ -207,6 +218,7 @@ namespace ContestSystem.Services
                     return false;
                 }
             }
+
             return false;
         }
 
@@ -218,6 +230,7 @@ namespace ContestSystem.Services
             {
                 return server.Substring(0, server.LastIndexOf(':'));
             }
+
             return server;
         }
     }

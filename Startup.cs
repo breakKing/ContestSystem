@@ -28,18 +28,18 @@ namespace ContestSystem
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddLocalization(options => options.ResourcesPath = "Resources");
-            
+
             var jwtService = new JwtSettingsService();
             Configuration.Bind("JwtConfiguration", jwtService);
             services.AddSingleton<JwtSettingsService>(jwtService);
-            
+
             services.AddDbContext<MainDbContext>(
                 x => x
                     .UseLazyLoadingProxies()
                     //.UseNpgsql(Configuration.GetConnectionString("PgsqlConnection"))
                     .UseSqlServer(Configuration.GetConnectionString("MssqlConnection"))
             );
-            
+
 
             services.AddIdentity<User, Role>(options =>
             {
@@ -99,7 +99,7 @@ namespace ContestSystem
                 SupportedCultures = supportedCultures,
                 SupportedUICultures = supportedCultures
             });
-
+            app.UseStaticFiles();
             app.UseRouting();
             app.UseCors(builder => builder
                 .AllowAnyOrigin()

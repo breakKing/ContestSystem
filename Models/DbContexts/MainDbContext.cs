@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ContestSystem.Models.DbContexts
 {
-    public class MainDbContext : IdentityDbContext<User, Role, string>
+    public class MainDbContext : IdentityDbContext<User, Role, long>
     {
         public DbSet<Contest> Contests { get; set; }
         public DbSet<Example> Examples { get; set; }
@@ -42,7 +42,7 @@ namespace ContestSystem.Models.DbContexts
             builder.Entity<User>()
                 .HasMany(u => u.Roles)
                 .WithMany(r => r.Users)
-                .UsingEntity<IdentityUserRole<string>>(
+                .UsingEntity<IdentityUserRole<long>>(
                     userRole => userRole.HasOne<Role>().WithMany().HasForeignKey(ur => ur.RoleId).IsRequired(),
                     userRole => userRole.HasOne<User>().WithMany().HasForeignKey(ur => ur.UserId).IsRequired());
         }

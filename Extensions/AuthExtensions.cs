@@ -10,16 +10,21 @@ namespace ContestSystem.Extensions
 {
     public static class AuthExtensions
     {
-        public static string GetUserId(this HttpContext httpContext)
+        public static long GetUserId(this HttpContext httpContext)
         {
-            return httpContext.User?.Claims?.SingleOrDefault(x => x.Type == "Id")?.Value;
+            if (long.TryParse(httpContext.User?.Claims?.SingleOrDefault(x => x.Type == "Id")?.Value, out var result))
+            {
+                return result;
+            }
+
+            return default(long);
         }
 
         public static async Task<User> GetCurrentUser(this HttpContext httpContext,
             UserManager<User> userManager = null)
         {
             userManager ??= httpContext.RequestServices.GetRequiredService<UserManager<User>>();
-            return await userManager.FindByIdAsync(httpContext.GetUserId());
+            return await userManager.FindByIdAsync(httpContext.GetUserId().ToString());
         }
     }
 }
