@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace ContestSystem.Migrations
 {
-    public partial class InitialCreate : Migration
+    public partial class CreateDatabase : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -11,7 +11,8 @@ namespace ContestSystem.Migrations
                 name: "AspNetRoles",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -26,7 +27,8 @@ namespace ContestSystem.Migrations
                 name: "AspNetUsers",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Surname = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Patronymic = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -74,7 +76,7 @@ namespace ContestSystem.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    RoleId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    RoleId = table.Column<long>(type: "bigint", nullable: false),
                     ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
@@ -95,7 +97,7 @@ namespace ContestSystem.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    UserId = table.Column<long>(type: "bigint", nullable: false),
                     ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
@@ -117,7 +119,7 @@ namespace ContestSystem.Migrations
                     LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ProviderKey = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ProviderDisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    UserId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -134,8 +136,8 @@ namespace ContestSystem.Migrations
                 name: "AspNetUserRoles",
                 columns: table => new
                 {
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    RoleId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    UserId = table.Column<long>(type: "bigint", nullable: false),
+                    RoleId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -158,7 +160,7 @@ namespace ContestSystem.Migrations
                 name: "AspNetUserTokens",
                 columns: table => new
                 {
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    UserId = table.Column<long>(type: "bigint", nullable: false),
                     LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Value = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -182,7 +184,7 @@ namespace ContestSystem.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    AuthorId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    AuthorId = table.Column<long>(type: "bigint", nullable: true),
                     Code = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsPublic = table.Column<bool>(type: "bit", nullable: false),
                     CompilationVerdict = table.Column<int>(type: "int", nullable: false),
@@ -201,12 +203,42 @@ namespace ContestSystem.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Courses",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    IsHidden = table.Column<bool>(type: "bit", nullable: false),
+                    Timestamp = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true),
+                    IsPublic = table.Column<bool>(type: "bit", nullable: false),
+                    CreatorId = table.Column<long>(type: "bigint", nullable: true),
+                    Approved = table.Column<bool>(type: "bit", nullable: false),
+                    ApprovingGlobalModeratorId = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Courses", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Courses_AspNetUsers_ApprovingGlobalModeratorId",
+                        column: x => x.ApprovingGlobalModeratorId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Courses_AspNetUsers_CreatorId",
+                        column: x => x.CreatorId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Notifications",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    UserId = table.Column<long>(type: "bigint", nullable: false),
                     Type = table.Column<int>(type: "int", nullable: false),
                     GenerationDateTimeUTC = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Text = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -221,7 +253,7 @@ namespace ContestSystem.Migrations
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -230,10 +262,10 @@ namespace ContestSystem.Migrations
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    AuthorId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    AuthorId = table.Column<long>(type: "bigint", nullable: true),
                     PromotedDateTimeUTC = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Approved = table.Column<bool>(type: "bit", nullable: false),
-                    ApprovingBlogModeratorId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    ApprovingBlogModeratorId = table.Column<long>(type: "bigint", nullable: true),
                     PublicationDateTimeUTC = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Timestamp = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
                 },
@@ -262,7 +294,7 @@ namespace ContestSystem.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    AuthorId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    AuthorId = table.Column<long>(type: "bigint", nullable: true),
                     CountMode = table.Column<int>(type: "int", nullable: false),
                     PenaltyForCompilationError = table.Column<bool>(type: "bit", nullable: false),
                     PenaltyForOneTry = table.Column<long>(type: "bigint", nullable: false),
@@ -296,15 +328,15 @@ namespace ContestSystem.Migrations
                     IsPublic = table.Column<bool>(type: "bit", nullable: false),
                     CheckerId = table.Column<long>(type: "bigint", nullable: true),
                     Approved = table.Column<bool>(type: "bit", nullable: false),
-                    ApprovingGlobalContestModeratorId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    ApprovingGlobalModeratorId = table.Column<long>(type: "bigint", nullable: true),
                     Timestamp = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Problems", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Problems_AspNetUsers_ApprovingGlobalContestModeratorId",
-                        column: x => x.ApprovingGlobalContestModeratorId,
+                        name: "FK_Problems_AspNetUsers_ApprovingGlobalModeratorId",
+                        column: x => x.ApprovingGlobalModeratorId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -317,6 +349,122 @@ namespace ContestSystem.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "CoursesLocalizers",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CourseId = table.Column<long>(type: "bigint", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Timestamp = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true),
+                    Culture = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CoursesLocalizers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CoursesLocalizers_Courses_CourseId",
+                        column: x => x.CourseId,
+                        principalTable: "Courses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CoursesLocalModerators",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CourseId = table.Column<long>(type: "bigint", nullable: false),
+                    LocalModeratorId = table.Column<long>(type: "bigint", nullable: false),
+                    Alias = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Timestamp = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CoursesLocalModerators", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CoursesLocalModerators_AspNetUsers_LocalModeratorId",
+                        column: x => x.LocalModeratorId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CoursesLocalModerators_Courses_CourseId",
+                        column: x => x.CourseId,
+                        principalTable: "Courses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CoursesPages",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CourseId = table.Column<long>(type: "bigint", nullable: false),
+                    CoursePageParentId = table.Column<long>(type: "bigint", nullable: true),
+                    HtmlText = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Timestamp = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CoursesPages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CoursesPages_Courses_CourseId",
+                        column: x => x.CourseId,
+                        principalTable: "Courses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CoursesPages_CoursesPages_CoursePageParentId",
+                        column: x => x.CoursePageParentId,
+                        principalTable: "CoursesPages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CoursesParticipants",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CourseId = table.Column<long>(type: "bigint", nullable: false),
+                    ParticipantId = table.Column<long>(type: "bigint", nullable: false),
+                    ConfirmedByLocalModerator = table.Column<bool>(type: "bit", nullable: false),
+                    ConfirmedByParticipant = table.Column<bool>(type: "bit", nullable: false),
+                    ConfirmingLocalModeratorId = table.Column<long>(type: "bigint", nullable: true),
+                    Alias = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Timestamp = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CoursesParticipants", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CoursesParticipants_AspNetUsers_ConfirmingLocalModeratorId",
+                        column: x => x.ConfirmingLocalModeratorId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_CoursesParticipants_AspNetUsers_ParticipantId",
+                        column: x => x.ParticipantId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CoursesParticipants_Courses_CourseId",
+                        column: x => x.CourseId,
+                        principalTable: "Courses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Comments",
                 columns: table => new
                 {
@@ -325,7 +473,7 @@ namespace ContestSystem.Migrations
                     PostId = table.Column<long>(type: "bigint", nullable: false),
                     Text = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CommentToReplyId = table.Column<long>(type: "bigint", nullable: true),
-                    SenderId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    SenderId = table.Column<long>(type: "bigint", nullable: true),
                     SentDateTimeUTC = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Timestamp = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
                 },
@@ -381,22 +529,22 @@ namespace ContestSystem.Migrations
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    IsPublic = table.Column<bool>(type: "bit", nullable: false),
-                    Type = table.Column<int>(type: "int", nullable: false),
                     RulesSetId = table.Column<long>(type: "bigint", nullable: true),
                     StartDateTimeUTC = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DurationInMinutes = table.Column<short>(type: "smallint", nullable: false),
-                    CreatorId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    Image = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
+                    Timestamp = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true),
+                    IsPublic = table.Column<bool>(type: "bit", nullable: false),
+                    CreatorId = table.Column<long>(type: "bigint", nullable: true),
                     Approved = table.Column<bool>(type: "bit", nullable: false),
-                    ApprovingGlobalContestModeratorId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    Timestamp = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
+                    ApprovingGlobalModeratorId = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Contests", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Contests_AspNetUsers_ApprovingGlobalContestModeratorId",
-                        column: x => x.ApprovingGlobalContestModeratorId,
+                        name: "FK_Contests_AspNetUsers_ApprovingGlobalModeratorId",
+                        column: x => x.ApprovingGlobalModeratorId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -412,6 +560,33 @@ namespace ContestSystem.Migrations
                         principalTable: "RulesSets",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CoursesProblems",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CourseId = table.Column<long>(type: "bigint", nullable: false),
+                    ProblemId = table.Column<long>(type: "bigint", nullable: false),
+                    Timestamp = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CoursesProblems", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CoursesProblems_Courses_CourseId",
+                        column: x => x.CourseId,
+                        principalTable: "Courses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CoursesProblems_Problems_ProblemId",
+                        column: x => x.ProblemId,
+                        principalTable: "Problems",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -469,9 +644,10 @@ namespace ContestSystem.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ProblemId = table.Column<long>(type: "bigint", nullable: false),
-                    ParticipantId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    ParticipantId = table.Column<long>(type: "bigint", nullable: true),
                     Code = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Compiler = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CompilerGUID = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CompilerName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SubmitTimeUTC = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ErrorsMessage = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Verdict = table.Column<int>(type: "int", nullable: false),
@@ -520,15 +696,60 @@ namespace ContestSystem.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "CoursesPagesFiles",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CoursePageId = table.Column<long>(type: "bigint", nullable: false),
+                    Timestamp = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Path = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CoursesPagesFiles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CoursesPagesFiles_CoursesPages_CoursePageId",
+                        column: x => x.CoursePageId,
+                        principalTable: "CoursesPages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CoursesPagesLocalizers",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CoursePageId = table.Column<long>(type: "bigint", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    HtmlText = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Timestamp = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true),
+                    Culture = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CoursesPagesLocalizers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CoursesPagesLocalizers_CoursesPages_CoursePageId",
+                        column: x => x.CoursePageId,
+                        principalTable: "CoursesPages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ContestsFiles",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ContestId = table.Column<long>(type: "bigint", nullable: false),
+                    Timestamp = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Path = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Timestamp = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
+                    Path = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -548,8 +769,7 @@ namespace ContestSystem.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     SecondsAfterStart = table.Column<int>(type: "int", nullable: false),
-                    ParticipantId = table.Column<short>(type: "smallint", nullable: false),
-                    ParticipantId1 = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    ParticipantId = table.Column<long>(type: "bigint", nullable: false),
                     ContestId = table.Column<long>(type: "bigint", nullable: false),
                     ProblemId = table.Column<long>(type: "bigint", nullable: false),
                     Verdict = table.Column<int>(type: "int", nullable: false),
@@ -560,11 +780,11 @@ namespace ContestSystem.Migrations
                 {
                     table.PrimaryKey("PK_ContestsHistories", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ContestsHistories_AspNetUsers_ParticipantId1",
-                        column: x => x.ParticipantId1,
+                        name: "FK_ContestsHistories_AspNetUsers_ParticipantId",
+                        column: x => x.ParticipantId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_ContestsHistories_Contests_ContestId",
                         column: x => x.ContestId,
@@ -609,7 +829,7 @@ namespace ContestSystem.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ContestId = table.Column<long>(type: "bigint", nullable: false),
-                    LocalModeratorId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    LocalModeratorId = table.Column<long>(type: "bigint", nullable: false),
                     Alias = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Timestamp = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
                 },
@@ -621,7 +841,7 @@ namespace ContestSystem.Migrations
                         column: x => x.LocalModeratorId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_ContestsLocalModerators_Contests_ContestId",
                         column: x => x.ContestId,
@@ -637,10 +857,10 @@ namespace ContestSystem.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ContestId = table.Column<long>(type: "bigint", nullable: false),
-                    ParticipantId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    ParticipantId = table.Column<long>(type: "bigint", nullable: false),
                     ConfirmedByLocalModerator = table.Column<bool>(type: "bit", nullable: false),
                     ConfirmedByParticipant = table.Column<bool>(type: "bit", nullable: false),
-                    ConfirmingLocalContestModeratorId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    ConfirmingLocalModeratorId = table.Column<long>(type: "bigint", nullable: true),
                     Alias = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Result = table.Column<long>(type: "bigint", nullable: false),
                     Timestamp = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
@@ -649,8 +869,8 @@ namespace ContestSystem.Migrations
                 {
                     table.PrimaryKey("PK_ContestsParticipants", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ContestsParticipants_AspNetUsers_ConfirmingLocalContestModeratorId",
-                        column: x => x.ConfirmingLocalContestModeratorId,
+                        name: "FK_ContestsParticipants_AspNetUsers_ConfirmingLocalModeratorId",
+                        column: x => x.ConfirmingLocalModeratorId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -659,7 +879,7 @@ namespace ContestSystem.Migrations
                         column: x => x.ParticipantId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_ContestsParticipants_Contests_ContestId",
                         column: x => x.ContestId,
@@ -676,7 +896,7 @@ namespace ContestSystem.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ContestId = table.Column<long>(type: "bigint", nullable: false),
                     ProblemId = table.Column<long>(type: "bigint", nullable: false),
-                    Alias = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Letter = table.Column<string>(type: "nvarchar(1)", nullable: false),
                     Timestamp = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
                 },
                 constraints: table =>
@@ -706,8 +926,8 @@ namespace ContestSystem.Migrations
                     Type = table.Column<int>(type: "int", nullable: false),
                     Text = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     MessageToReplyId = table.Column<long>(type: "bigint", nullable: true),
-                    SenderId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    ReceiverId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    SenderId = table.Column<long>(type: "bigint", nullable: true),
+                    ReceiverId = table.Column<long>(type: "bigint", nullable: true),
                     SentDateTimeUTC = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Timestamp = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
                 },
@@ -746,7 +966,7 @@ namespace ContestSystem.Migrations
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ParticipantId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    ParticipantId = table.Column<long>(type: "bigint", nullable: false),
                     ContestId = table.Column<long>(type: "bigint", nullable: false),
                     StartDateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Timestamp = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
@@ -759,7 +979,7 @@ namespace ContestSystem.Migrations
                         column: x => x.ParticipantId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_VirtualContests_Contests_ContestId",
                         column: x => x.ContestId,
@@ -855,9 +1075,9 @@ namespace ContestSystem.Migrations
                 column: "SenderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Contests_ApprovingGlobalContestModeratorId",
+                name: "IX_Contests_ApprovingGlobalModeratorId",
                 table: "Contests",
-                column: "ApprovingGlobalContestModeratorId");
+                column: "ApprovingGlobalModeratorId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Contests_CreatorId",
@@ -880,9 +1100,9 @@ namespace ContestSystem.Migrations
                 column: "ContestId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ContestsHistories_ParticipantId1",
+                name: "IX_ContestsHistories_ParticipantId",
                 table: "ContestsHistories",
-                column: "ParticipantId1");
+                column: "ParticipantId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ContestsHistories_ProblemId",
@@ -905,9 +1125,9 @@ namespace ContestSystem.Migrations
                 column: "LocalModeratorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ContestsParticipants_ConfirmingLocalContestModeratorId",
+                name: "IX_ContestsParticipants_ConfirmingLocalModeratorId",
                 table: "ContestsParticipants",
-                column: "ConfirmingLocalContestModeratorId");
+                column: "ConfirmingLocalModeratorId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ContestsParticipants_ContestId",
@@ -927,6 +1147,76 @@ namespace ContestSystem.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_ContestsProblems_ProblemId",
                 table: "ContestsProblems",
+                column: "ProblemId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Courses_ApprovingGlobalModeratorId",
+                table: "Courses",
+                column: "ApprovingGlobalModeratorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Courses_CreatorId",
+                table: "Courses",
+                column: "CreatorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CoursesLocalizers_CourseId",
+                table: "CoursesLocalizers",
+                column: "CourseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CoursesLocalModerators_CourseId",
+                table: "CoursesLocalModerators",
+                column: "CourseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CoursesLocalModerators_LocalModeratorId",
+                table: "CoursesLocalModerators",
+                column: "LocalModeratorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CoursesPages_CourseId",
+                table: "CoursesPages",
+                column: "CourseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CoursesPages_CoursePageParentId",
+                table: "CoursesPages",
+                column: "CoursePageParentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CoursesPagesFiles_CoursePageId",
+                table: "CoursesPagesFiles",
+                column: "CoursePageId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CoursesPagesLocalizers_CoursePageId",
+                table: "CoursesPagesLocalizers",
+                column: "CoursePageId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CoursesParticipants_ConfirmingLocalModeratorId",
+                table: "CoursesParticipants",
+                column: "ConfirmingLocalModeratorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CoursesParticipants_CourseId",
+                table: "CoursesParticipants",
+                column: "CourseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CoursesParticipants_ParticipantId",
+                table: "CoursesParticipants",
+                column: "ParticipantId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CoursesProblems_CourseId",
+                table: "CoursesProblems",
+                column: "CourseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CoursesProblems_ProblemId",
+                table: "CoursesProblems",
                 column: "ProblemId");
 
             migrationBuilder.CreateIndex(
@@ -975,9 +1265,9 @@ namespace ContestSystem.Migrations
                 column: "PostId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Problems_ApprovingGlobalContestModeratorId",
+                name: "IX_Problems_ApprovingGlobalModeratorId",
                 table: "Problems",
-                column: "ApprovingGlobalContestModeratorId");
+                column: "ApprovingGlobalModeratorId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Problems_CheckerId",
@@ -1064,6 +1354,24 @@ namespace ContestSystem.Migrations
                 name: "ContestsProblems");
 
             migrationBuilder.DropTable(
+                name: "CoursesLocalizers");
+
+            migrationBuilder.DropTable(
+                name: "CoursesLocalModerators");
+
+            migrationBuilder.DropTable(
+                name: "CoursesPagesFiles");
+
+            migrationBuilder.DropTable(
+                name: "CoursesPagesLocalizers");
+
+            migrationBuilder.DropTable(
+                name: "CoursesParticipants");
+
+            migrationBuilder.DropTable(
+                name: "CoursesProblems");
+
+            migrationBuilder.DropTable(
                 name: "Examples");
 
             migrationBuilder.DropTable(
@@ -1094,6 +1402,9 @@ namespace ContestSystem.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
+                name: "CoursesPages");
+
+            migrationBuilder.DropTable(
                 name: "Posts");
 
             migrationBuilder.DropTable(
@@ -1101,6 +1412,9 @@ namespace ContestSystem.Migrations
 
             migrationBuilder.DropTable(
                 name: "Contests");
+
+            migrationBuilder.DropTable(
+                name: "Courses");
 
             migrationBuilder.DropTable(
                 name: "Problems");

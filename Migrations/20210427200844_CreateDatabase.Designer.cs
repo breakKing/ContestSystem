@@ -10,15 +10,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ContestSystem.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    [Migration("20210402194837_FixForContestHistoryFKToParticipant")]
-    partial class FixForContestHistoryFKToParticipant
+    [Migration("20210427200844_CreateDatabase")]
+    partial class CreateDatabase
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("ProductVersion", "5.0.4")
+                .HasAnnotation("ProductVersion", "5.0.5")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("ContestSystemDbStructure.Models.Checker", b =>
@@ -28,8 +28,8 @@ namespace ContestSystem.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("AuthorId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<long?>("AuthorId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Code")
                         .HasColumnType("nvarchar(max)");
@@ -74,8 +74,8 @@ namespace ContestSystem.Migrations
                     b.Property<long>("PostId")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("SenderId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<long?>("SenderId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime>("SentDateTimeUTC")
                         .HasColumnType("datetime2");
@@ -109,14 +109,17 @@ namespace ContestSystem.Migrations
                     b.Property<bool>("Approved")
                         .HasColumnType("bit");
 
-                    b.Property<string>("ApprovingGlobalContestModeratorId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<long?>("ApprovingGlobalModeratorId")
+                        .HasColumnType("bigint");
 
-                    b.Property<string>("CreatorId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<long?>("CreatorId")
+                        .HasColumnType("bigint");
 
                     b.Property<short>("DurationInMinutes")
                         .HasColumnType("smallint");
+
+                    b.Property<byte[]>("Image")
+                        .HasColumnType("varbinary(max)");
 
                     b.Property<bool>("IsPublic")
                         .HasColumnType("bit");
@@ -132,12 +135,9 @@ namespace ContestSystem.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("ApprovingGlobalContestModeratorId");
+                    b.HasIndex("ApprovingGlobalModeratorId");
 
                     b.HasIndex("CreatorId");
 
@@ -187,8 +187,8 @@ namespace ContestSystem.Migrations
                     b.Property<long>("ContestId")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("ParticipantId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<long>("ParticipantId")
+                        .HasColumnType("bigint");
 
                     b.Property<long>("ProblemId")
                         .HasColumnType("bigint");
@@ -228,8 +228,8 @@ namespace ContestSystem.Migrations
                     b.Property<long>("ContestId")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("LocalModeratorId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<long>("LocalModeratorId")
+                        .HasColumnType("bigint");
 
                     b.Property<byte[]>("Timestamp")
                         .IsConcurrencyToken()
@@ -292,14 +292,14 @@ namespace ContestSystem.Migrations
                     b.Property<bool>("ConfirmedByParticipant")
                         .HasColumnType("bit");
 
-                    b.Property<string>("ConfirmingLocalContestModeratorId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<long?>("ConfirmingLocalModeratorId")
+                        .HasColumnType("bigint");
 
                     b.Property<long>("ContestId")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("ParticipantId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<long>("ParticipantId")
+                        .HasColumnType("bigint");
 
                     b.Property<long>("Result")
                         .HasColumnType("bigint");
@@ -311,7 +311,7 @@ namespace ContestSystem.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ConfirmingLocalContestModeratorId");
+                    b.HasIndex("ConfirmingLocalModeratorId");
 
                     b.HasIndex("ContestId");
 
@@ -327,11 +327,12 @@ namespace ContestSystem.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("Alias")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<long>("ContestId")
                         .HasColumnType("bigint");
+
+                    b.Property<string>("Letter")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(1)");
 
                     b.Property<long>("ProblemId")
                         .HasColumnType("bigint");
@@ -348,6 +349,260 @@ namespace ContestSystem.Migrations
                     b.HasIndex("ProblemId");
 
                     b.ToTable("ContestsProblems");
+                });
+
+            modelBuilder.Entity("ContestSystemDbStructure.Models.Course", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("Approved")
+                        .HasColumnType("bit");
+
+                    b.Property<long?>("ApprovingGlobalModeratorId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("CreatorId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("IsHidden")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPublic")
+                        .HasColumnType("bit");
+
+                    b.Property<byte[]>("Timestamp")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApprovingGlobalModeratorId");
+
+                    b.HasIndex("CreatorId");
+
+                    b.ToTable("Courses");
+                });
+
+            modelBuilder.Entity("ContestSystemDbStructure.Models.CourseLocalModerator", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Alias")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("CourseId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("LocalModeratorId")
+                        .HasColumnType("bigint");
+
+                    b.Property<byte[]>("Timestamp")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("LocalModeratorId");
+
+                    b.ToTable("CoursesLocalModerators");
+                });
+
+            modelBuilder.Entity("ContestSystemDbStructure.Models.CourseLocalizer", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<long>("CourseId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Culture")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("Timestamp")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("CoursesLocalizers");
+                });
+
+            modelBuilder.Entity("ContestSystemDbStructure.Models.CoursePage", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<long>("CourseId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("CoursePageParentId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("HtmlText")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("Timestamp")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("CoursePageParentId");
+
+                    b.ToTable("CoursesPages");
+                });
+
+            modelBuilder.Entity("ContestSystemDbStructure.Models.CoursePageFile", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<long>("CoursePageId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Path")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("Timestamp")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CoursePageId");
+
+                    b.ToTable("CoursesPagesFiles");
+                });
+
+            modelBuilder.Entity("ContestSystemDbStructure.Models.CoursePageLocalizer", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<long>("CoursePageId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Culture")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("HtmlText")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("Timestamp")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CoursePageId");
+
+                    b.ToTable("CoursesPagesLocalizers");
+                });
+
+            modelBuilder.Entity("ContestSystemDbStructure.Models.CourseParticipant", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Alias")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("ConfirmedByLocalModerator")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("ConfirmedByParticipant")
+                        .HasColumnType("bit");
+
+                    b.Property<long?>("ConfirmingLocalModeratorId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("CourseId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("ParticipantId")
+                        .HasColumnType("bigint");
+
+                    b.Property<byte[]>("Timestamp")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConfirmingLocalModeratorId");
+
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("ParticipantId");
+
+                    b.ToTable("CoursesParticipants");
+                });
+
+            modelBuilder.Entity("ContestSystemDbStructure.Models.CourseProblem", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<long>("CourseId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("ProblemId")
+                        .HasColumnType("bigint");
+
+                    b.Property<byte[]>("Timestamp")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("ProblemId");
+
+                    b.ToTable("CoursesProblems");
                 });
 
             modelBuilder.Entity("ContestSystemDbStructure.Models.Example", b =>
@@ -423,11 +678,11 @@ namespace ContestSystem.Migrations
                     b.Property<long?>("MessageToReplyId")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("ReceiverId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<long?>("ReceiverId")
+                        .HasColumnType("bigint");
 
-                    b.Property<string>("SenderId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<long?>("SenderId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime>("SentDateTimeUTC")
                         .HasColumnType("datetime2");
@@ -480,8 +735,8 @@ namespace ContestSystem.Migrations
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -500,11 +755,11 @@ namespace ContestSystem.Migrations
                     b.Property<bool>("Approved")
                         .HasColumnType("bit");
 
-                    b.Property<string>("ApprovingBlogModeratorId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<long?>("ApprovingBlogModeratorId")
+                        .HasColumnType("bigint");
 
-                    b.Property<string>("AuthorId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<long?>("AuthorId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime>("PromotedDateTimeUTC")
                         .HasColumnType("datetime2");
@@ -567,8 +822,8 @@ namespace ContestSystem.Migrations
                     b.Property<bool>("Approved")
                         .HasColumnType("bit");
 
-                    b.Property<string>("ApprovingGlobalContestModeratorId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<long?>("ApprovingGlobalModeratorId")
+                        .HasColumnType("bigint");
 
                     b.Property<long?>("CheckerId")
                         .HasColumnType("bigint");
@@ -589,7 +844,7 @@ namespace ContestSystem.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApprovingGlobalContestModeratorId");
+                    b.HasIndex("ApprovingGlobalModeratorId");
 
                     b.HasIndex("CheckerId");
 
@@ -635,8 +890,10 @@ namespace ContestSystem.Migrations
 
             modelBuilder.Entity("ContestSystemDbStructure.Models.Role", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -670,8 +927,8 @@ namespace ContestSystem.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("AuthorId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<long?>("AuthorId")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("CountMode")
                         .HasColumnType("int");
@@ -728,14 +985,17 @@ namespace ContestSystem.Migrations
                     b.Property<string>("Code")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Compiler")
+                    b.Property<string>("CompilerGUID")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CompilerName")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ErrorsMessage")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ParticipantId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<long?>("ParticipantId")
+                        .HasColumnType("bigint");
 
                     b.Property<short>("Points")
                         .HasColumnType("smallint");
@@ -842,8 +1102,10 @@ namespace ContestSystem.Migrations
 
             modelBuilder.Entity("ContestSystemDbStructure.Models.User", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
@@ -929,8 +1191,8 @@ namespace ContestSystem.Migrations
                     b.Property<long>("ContestId")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("ParticipantId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<long>("ParticipantId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime>("StartDateTime")
                         .HasColumnType("datetime2");
@@ -949,7 +1211,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("VirtualContests");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<long>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -962,9 +1224,8 @@ namespace ContestSystem.Migrations
                     b.Property<string>("ClaimValue")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("RoleId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<long>("RoleId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -973,7 +1234,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("AspNetRoleClaims");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<long>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -986,9 +1247,8 @@ namespace ContestSystem.Migrations
                     b.Property<string>("ClaimValue")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -997,7 +1257,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("AspNetUserClaims");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<long>", b =>
                 {
                     b.Property<string>("LoginProvider")
                         .HasColumnType("nvarchar(450)");
@@ -1008,9 +1268,8 @@ namespace ContestSystem.Migrations
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
@@ -1019,13 +1278,13 @@ namespace ContestSystem.Migrations
                     b.ToTable("AspNetUserLogins");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<long>", b =>
                 {
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
 
-                    b.Property<string>("RoleId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<long>("RoleId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("UserId", "RoleId");
 
@@ -1034,10 +1293,10 @@ namespace ContestSystem.Migrations
                     b.ToTable("AspNetUserRoles");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<long>", b =>
                 {
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("LoginProvider")
                         .HasColumnType("nvarchar(450)");
@@ -1087,9 +1346,9 @@ namespace ContestSystem.Migrations
 
             modelBuilder.Entity("ContestSystemDbStructure.Models.Contest", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.User", "ApprovingGlobalContestModerator")
+                    b.HasOne("ContestSystemDbStructure.Models.User", "ApprovingGlobalModerator")
                         .WithMany()
-                        .HasForeignKey("ApprovingGlobalContestModeratorId");
+                        .HasForeignKey("ApprovingGlobalModeratorId");
 
                     b.HasOne("ContestSystemDbStructure.Models.User", "Creator")
                         .WithMany()
@@ -1099,7 +1358,7 @@ namespace ContestSystem.Migrations
                         .WithMany()
                         .HasForeignKey("RulesSetId");
 
-                    b.Navigation("ApprovingGlobalContestModerator");
+                    b.Navigation("ApprovingGlobalModerator");
 
                     b.Navigation("Creator");
 
@@ -1127,7 +1386,9 @@ namespace ContestSystem.Migrations
 
                     b.HasOne("ContestSystemDbStructure.Models.User", "Participant")
                         .WithMany()
-                        .HasForeignKey("ParticipantId");
+                        .HasForeignKey("ParticipantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("ContestSystemDbStructure.Models.Problem", "Problem")
                         .WithMany()
@@ -1152,7 +1413,9 @@ namespace ContestSystem.Migrations
 
                     b.HasOne("ContestSystemDbStructure.Models.User", "LocalModerator")
                         .WithMany()
-                        .HasForeignKey("LocalModeratorId");
+                        .HasForeignKey("LocalModeratorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Contest");
 
@@ -1172,9 +1435,9 @@ namespace ContestSystem.Migrations
 
             modelBuilder.Entity("ContestSystemDbStructure.Models.ContestParticipant", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.User", "ConfirmingLocalContestModerator")
+                    b.HasOne("ContestSystemDbStructure.Models.User", "ConfirmingLocalModerator")
                         .WithMany()
-                        .HasForeignKey("ConfirmingLocalContestModeratorId");
+                        .HasForeignKey("ConfirmingLocalModeratorId");
 
                     b.HasOne("ContestSystemDbStructure.Models.Contest", "Contest")
                         .WithMany()
@@ -1184,9 +1447,11 @@ namespace ContestSystem.Migrations
 
                     b.HasOne("ContestSystemDbStructure.Models.User", "Participant")
                         .WithMany()
-                        .HasForeignKey("ParticipantId");
+                        .HasForeignKey("ParticipantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("ConfirmingLocalContestModerator");
+                    b.Navigation("ConfirmingLocalModerator");
 
                     b.Navigation("Contest");
 
@@ -1208,6 +1473,134 @@ namespace ContestSystem.Migrations
                         .IsRequired();
 
                     b.Navigation("Contest");
+
+                    b.Navigation("Problem");
+                });
+
+            modelBuilder.Entity("ContestSystemDbStructure.Models.Course", b =>
+                {
+                    b.HasOne("ContestSystemDbStructure.Models.User", "ApprovingGlobalModerator")
+                        .WithMany()
+                        .HasForeignKey("ApprovingGlobalModeratorId");
+
+                    b.HasOne("ContestSystemDbStructure.Models.User", "Creator")
+                        .WithMany()
+                        .HasForeignKey("CreatorId");
+
+                    b.Navigation("ApprovingGlobalModerator");
+
+                    b.Navigation("Creator");
+                });
+
+            modelBuilder.Entity("ContestSystemDbStructure.Models.CourseLocalModerator", b =>
+                {
+                    b.HasOne("ContestSystemDbStructure.Models.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ContestSystemDbStructure.Models.User", "LocalModerator")
+                        .WithMany()
+                        .HasForeignKey("LocalModeratorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+
+                    b.Navigation("LocalModerator");
+                });
+
+            modelBuilder.Entity("ContestSystemDbStructure.Models.CourseLocalizer", b =>
+                {
+                    b.HasOne("ContestSystemDbStructure.Models.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+                });
+
+            modelBuilder.Entity("ContestSystemDbStructure.Models.CoursePage", b =>
+                {
+                    b.HasOne("ContestSystemDbStructure.Models.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ContestSystemDbStructure.Models.CoursePage", "CoursePageParent")
+                        .WithMany()
+                        .HasForeignKey("CoursePageParentId");
+
+                    b.Navigation("Course");
+
+                    b.Navigation("CoursePageParent");
+                });
+
+            modelBuilder.Entity("ContestSystemDbStructure.Models.CoursePageFile", b =>
+                {
+                    b.HasOne("ContestSystemDbStructure.Models.CoursePage", "CoursePage")
+                        .WithMany()
+                        .HasForeignKey("CoursePageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CoursePage");
+                });
+
+            modelBuilder.Entity("ContestSystemDbStructure.Models.CoursePageLocalizer", b =>
+                {
+                    b.HasOne("ContestSystemDbStructure.Models.CoursePage", "CoursePage")
+                        .WithMany()
+                        .HasForeignKey("CoursePageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CoursePage");
+                });
+
+            modelBuilder.Entity("ContestSystemDbStructure.Models.CourseParticipant", b =>
+                {
+                    b.HasOne("ContestSystemDbStructure.Models.User", "ConfirmingLocalModerator")
+                        .WithMany()
+                        .HasForeignKey("ConfirmingLocalModeratorId");
+
+                    b.HasOne("ContestSystemDbStructure.Models.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ContestSystemDbStructure.Models.User", "Participant")
+                        .WithMany()
+                        .HasForeignKey("ParticipantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ConfirmingLocalModerator");
+
+                    b.Navigation("Course");
+
+                    b.Navigation("Participant");
+                });
+
+            modelBuilder.Entity("ContestSystemDbStructure.Models.CourseProblem", b =>
+                {
+                    b.HasOne("ContestSystemDbStructure.Models.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ContestSystemDbStructure.Models.Problem", "Problem")
+                        .WithMany()
+                        .HasForeignKey("ProblemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
 
                     b.Navigation("Problem");
                 });
@@ -1256,7 +1649,9 @@ namespace ContestSystem.Migrations
                 {
                     b.HasOne("ContestSystemDbStructure.Models.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -1289,15 +1684,15 @@ namespace ContestSystem.Migrations
 
             modelBuilder.Entity("ContestSystemDbStructure.Models.Problem", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.User", "ApprovingGlobalContestModerator")
+                    b.HasOne("ContestSystemDbStructure.Models.User", "ApprovingGlobalModerator")
                         .WithMany()
-                        .HasForeignKey("ApprovingGlobalContestModeratorId");
+                        .HasForeignKey("ApprovingGlobalModeratorId");
 
                     b.HasOne("ContestSystemDbStructure.Models.Checker", "Checker")
                         .WithMany()
                         .HasForeignKey("CheckerId");
 
-                    b.Navigation("ApprovingGlobalContestModerator");
+                    b.Navigation("ApprovingGlobalModerator");
 
                     b.Navigation("Checker");
                 });
@@ -1342,7 +1737,7 @@ namespace ContestSystem.Migrations
             modelBuilder.Entity("ContestSystemDbStructure.Models.Test", b =>
                 {
                     b.HasOne("ContestSystemDbStructure.Models.Problem", "Problem")
-                        .WithMany()
+                        .WithMany("Tests")
                         .HasForeignKey("ProblemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1371,14 +1766,16 @@ namespace ContestSystem.Migrations
 
                     b.HasOne("ContestSystemDbStructure.Models.User", "Participant")
                         .WithMany()
-                        .HasForeignKey("ParticipantId");
+                        .HasForeignKey("ParticipantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Contest");
 
                     b.Navigation("Participant");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<long>", b =>
                 {
                     b.HasOne("ContestSystemDbStructure.Models.Role", null)
                         .WithMany()
@@ -1387,7 +1784,7 @@ namespace ContestSystem.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<long>", b =>
                 {
                     b.HasOne("ContestSystemDbStructure.Models.User", null)
                         .WithMany()
@@ -1396,7 +1793,7 @@ namespace ContestSystem.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<long>", b =>
                 {
                     b.HasOne("ContestSystemDbStructure.Models.User", null)
                         .WithMany()
@@ -1405,7 +1802,7 @@ namespace ContestSystem.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<long>", b =>
                 {
                     b.HasOne("ContestSystemDbStructure.Models.Role", null)
                         .WithMany()
@@ -1420,13 +1817,18 @@ namespace ContestSystem.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<long>", b =>
                 {
                     b.HasOne("ContestSystemDbStructure.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("ContestSystemDbStructure.Models.Problem", b =>
+                {
+                    b.Navigation("Tests");
                 });
 #pragma warning restore 612, 618
         }
