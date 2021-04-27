@@ -1,4 +1,5 @@
-﻿using ContestSystemDbStructure.Models;
+﻿using ContestSystem.Models.Misc;
+using ContestSystemDbStructure.Models;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,7 +30,7 @@ namespace ContestSystem.Services
                 .Select(keyValPair => keyValPair.Value).Skip(1).ToList();
             foreach (var server in checkerServersFromConf)
             {
-                if (_pingServer(server))
+                if (PingServer(server))
                 {
                     _checkerServers.Add(server);
                 }
@@ -45,30 +46,30 @@ namespace ContestSystem.Services
         }
 
         // Получение списка компиляторов, поддержка которых есть НА ВСЕХ серверах
-        public async Task<IEnumerable<string>> GetAvailableCompilersAsync()
+        public async Task<IEnumerable<CompilerInfo>> GetAvailableCompilersAsync()
         {
-            List<string> finalCompilers = new List<string>();
-            List<List<string>> compilersLists = new List<List<string>>();
+            List<CompilerInfo> finalCompilers = new List<CompilerInfo>();
+            List<List<CompilerInfo>> compilersLists = new List<List<CompilerInfo>>();
             for (int i = 0; i < _checkerServers.Count; i++)
             {
                 string server = _checkerServers[i];
-                if (await _pingServerAsync(server))
+                if (await PingServerAsync(server))
                 {
                     var response = await _httpClient.GetAsync($"http://{server}/api/compiler");
-                    compilersLists.Add((List<string>) await response.Content.ReadFromJsonAsync<IEnumerable<string>>());
+                    compilersLists.Add((List<CompilerInfo>)await response.Content.ReadFromJsonAsync<IEnumerable<CompilerInfo>>());
                 }
             }
 
             if (compilersLists.Count == 0)
             {
                 var response = await _httpClient.GetAsync($"http://localhost:{_localPort}/api/compiler");
-                return await response.Content.ReadFromJsonAsync<IEnumerable<string>>();
+                return await response.Content.ReadFromJsonAsync<IEnumerable<CompilerInfo>>();
             }
 
             finalCompilers.AddRange(compilersLists[0]);
             foreach (var list in compilersLists)
             {
-                finalCompilers = (List<string>) finalCompilers.Intersect(list);
+                finalCompilers = (List<CompilerInfo>)finalCompilers.Intersect(list);
             }
 
             return finalCompilers;
@@ -84,7 +85,7 @@ namespace ContestSystem.Services
             for (int i = 0; i < _checkerServers.Count; i++)
             {
                 string server = _checkerServers[i];
-                if (await _pingServerAsync(server))
+                if (await PingServerAsync(server))
                 {
                     content = JsonContent.Create(checker);
                     response = await _httpClient.PostAsync($"http://{server}/api/checker", content);
@@ -104,7 +105,7 @@ namespace ContestSystem.Services
         // Отправка решения на компиляцию (ДО прогона по тестам)
         public async Task<Solution> CompileSolutionAsync(Solution solution)
         {
-            string server = await _getServerForSolutionAsync(solution.Id);
+            string server = await GetServerForSolutionAsync(solution.Id);
             var content = JsonContent.Create(solution);
             var response = await _httpClient.PostAsync($"http://{server}/api/solution", content);
             return await response.Content.ReadFromJsonAsync<Solution>();
@@ -113,14 +114,14 @@ namespace ContestSystem.Services
         // Отправка решения на проверку
         public async Task<TestResult> RunTestForSolutionAsync(Solution solution, short testNumber)
         {
-            string server = await _getServerForSolutionAsync(solution.Id);
+            string server = await GetServerForSolutionAsync(solution.Id);
             var content = JsonContent.Create(solution);
             var response = await _httpClient.PostAsync($"http://{server}/api/test?testNumber={testNumber}", content);
             return await response.Content.ReadFromJsonAsync<TestResult>();
         }
 
         // Выбор сервера проверки по приницпу Round-Robin
-        private async Task<string> _getServerForSolutionAsync(long solutionId)
+        private async Task<string> GetServerForSolutionAsync(long solutionId)
         {
             int serverIndex;
             if (_serverForSolution.ContainsKey(solutionId))
@@ -129,7 +130,7 @@ namespace ContestSystem.Services
                 int index = serverIndex;
                 do
                 {
-                    if (await _pingServerAsync(_checkerServers[index]))
+                    if (await PingServerAsync(_checkerServers[index]))
                     {
                         return _checkerServers[serverIndex];
                     }
@@ -142,7 +143,7 @@ namespace ContestSystem.Services
                 int index = _currentServerIndex + 1;
                 do
                 {
-                    if (await _pingServerAsync(_checkerServers[index]))
+                    if (await PingServerAsync(_checkerServers[index]))
                     {
                         _currentServerIndex = index;
                         _serverForSolution.Add(solutionId, _currentServerIndex);
@@ -157,9 +158,9 @@ namespace ContestSystem.Services
         }
 
         // Синхронный пинг
-        private bool _pingServer(string server)
+        private bool PingServer(string server)
         {
-            string hostnameOrAddress = _parseHostnameOrAddressWithoutPort(server);
+            string hostnameOrAddress = ParseHostnameOrAddressWithoutPort(server);
             PingOptions pingOptions = new PingOptions(128, true);
             Ping ping = new Ping();
             byte[] buffer = new byte[32];
@@ -190,9 +191,9 @@ namespace ContestSystem.Services
         }
 
         // Асинхронный пинг
-        private async Task<bool> _pingServerAsync(string server)
+        private async Task<bool> PingServerAsync(string server)
         {
-            string hostnameOrAddress = _parseHostnameOrAddressWithoutPort(server);
+            string hostnameOrAddress = ParseHostnameOrAddressWithoutPort(server);
             PingOptions pingOptions = new PingOptions(128, true);
             Ping ping = new Ping();
             byte[] buffer = new byte[32];
@@ -223,7 +224,7 @@ namespace ContestSystem.Services
         }
 
         // Получение адреса или FQDN без номера порта(так как сервер может быть задан с портом, например localhost:1337)
-        private string _parseHostnameOrAddressWithoutPort(string server)
+        private string ParseHostnameOrAddressWithoutPort(string server)
         {
             Regex regexWithPort = new Regex(@"(\w)*\:[0-9]*");
             if (regexWithPort.IsMatch(server))
