@@ -1,5 +1,8 @@
 ﻿<template>
   <v-form @submit="saveForm" :validation-schema="userSchema">
+    <div v-if="!!success_message" class="alert alert-success" role="alert">
+      {{ success_message }}
+    </div>
     <div>
       <label class="font-weight-bold">Имя</label>
       <v-field v-model="firstName" class="form-control" name="firstName"/>
@@ -31,17 +34,32 @@
       <error-message name="dateOfBirth"></error-message>
     </div>
     <div>
-      <label class="font-weight-bold">Баланс</label>
-      <v-field v-model="balance" type="number" class="form-control" name="balance"/>
-      <error-message name="balance"></error-message>
+      <label class="font-weight-bold">Ограничен в создании соревнований</label>
+      <v-field v-model="isLimitedInContests" type="checkbox" class="form-control" name="isLimitedInContests"/>
+      <error-message name="isLimitedInContests"></error-message>
+    </div>
+    <div>
+      <label class="font-weight-bold">Ограничен в создании постов</label>
+      <v-field v-model="isLimitedInPosts" type="checkbox" class="form-control" name="isLimitedInPosts"/>
+      <error-message name="isLimitedInPosts"></error-message>
+    </div>
+    <div>
+      <label class="font-weight-bold">Ограничен в создании курсов</label>
+      <v-field v-model="isLimitedInCourses" type="checkbox" class="form-control" name="isLimitedInCourses"/>
+      <error-message name="isLimitedInCourses"></error-message>
+    </div>
+    <div>
+      <label class="font-weight-bold">Ограничен в создании задач</label>
+      <v-field v-model="isLimitedInProblems" type="checkbox" class="form-control" name="isLimitedInProblems"/>
+      <error-message name="isLimitedInProblems"></error-message>
     </div>
     <div>
       <div>
         <label class="font-weight-bold">Роли</label>
       </div>
       <div class="form-check d-flex align-items-center" v-for="role in all_roles">
-        <label class="mr-4">{{ role.description }}</label>
-        <v-field v-model="roles" type="checkbox" :value="role.id" class="form-check-label" name="roles"/>
+        <label class="me-4">{{ role.description }}</label>
+        <v-field v-model="roles" type="checkbox" :value="role.name" class="form-check-label" name="roles"/>
       </div>
       <error-message name="roles"></error-message>
     </div>
@@ -63,20 +81,20 @@ export default {
   name: "UserFormComponent",
   props: {
     user_id: {
-      type: String,
+      type: Number,
       required: true
     },
   },
   data() {
     return {
       ...this.getInitParamsFromUser(),
+      success_message: '',
       userSchema: Yup.object({
         firstName: Yup.string().required('не может быть пустым'),
         surname: Yup.string().required('не может быть пустым'),
         patronymic: Yup.string().nullable(),
         email: Yup.string().email().required('не может быть пустым'),
         phoneNumber: Yup.string().nullable(),
-        balance: Yup.number(),
         dateOfBirth: Yup.string().required('не может быть пустым'),
         roles: Yup.array().required('Выберите хотябы одну роль')
       })
@@ -99,8 +117,11 @@ export default {
         patronymic,
         email,
         phoneNumber,
-        balance,
         dateOfBirth,
+        isLimitedInContests,
+        isLimitedInPosts,
+        isLimitedInCourses,
+        isLimitedInProblems,
         roles
       } = this.$store.getters.getUserById(this.user_id)
       return {
@@ -109,7 +130,10 @@ export default {
         patronymic,
         email,
         phoneNumber,
-        balance,
+        isLimitedInContests,
+        isLimitedInPosts,
+        isLimitedInCourses,
+        isLimitedInProblems,
         dateOfBirth: moment(dateOfBirth).toISOString().substr(0, 10),
         roles: _.map(roles, (r) => r.name),
       }
@@ -122,11 +146,15 @@ export default {
         patronymic: this.patronymic,
         email: this.email,
         phoneNumber: this.phoneNumber,
-        balance: this.balance,
         dateOfBirth: this.dateOfBirth,
-        roles: _.map(this.roles, (id) => {
-          return {id}
-        }),
+        isLimitedInContests: this.isLimitedInContests,
+        isLimitedInPosts: this.isLimitedInPosts,
+        isLimitedInCourses: this.isLimitedInCourses,
+        isLimitedInProblems: this.isLimitedInProblems,
+        roles: this.roles,
+      }).then(async () => {
+        await this.fetchAllUsers(true)
+        this.success_message = 'Пользователь успешно обновлён'
       })
     }
   },
@@ -137,7 +165,7 @@ export default {
   },
   async created() {
     moment.locale('ru')
-    await this.fetchAllRoles()
+    await this.fetchAllRoles(true)
   },
   components: {
     VForm: Form,

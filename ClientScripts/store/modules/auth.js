@@ -1,20 +1,21 @@
 ﻿import axios from 'axios'
 import * as _ from 'lodash'
+import $ from "jquery";
 
 export default {
     state: () => ({
         token: localStorage.getItem('auth-token') || null,
         user_roles: [],
         all_roles: [],
+        current_user: null,
         selected_role: null,
-        user_name: null,
         auth_initialized: false,
         auth_error: null,
         potential_headers: ['Authorization', 'Content-Type']
     }),
     mutations: {
         setAllRolesArray(state, val) {
-            state.all_roles = val || []
+            state.all_roles = (val || [])
         },
         setCurrentRole(state, val) {
             state.selected_role = val
@@ -33,19 +34,22 @@ export default {
             }
             state.token = newValue
         },
-        setUserName(state, val) {
-            state.user_name = val
-        },
         setUserRoles(state, val) {
             state.user_roles = val
+        },
+        setCurrentUser(state, val) {
+            state.current_user = val
         }
     },
     getters: {
         userName(state, getters) {
+            return getters.currentUser?.fullName
+        },
+        currentUser(state, getters) {
             if (!getters.isAuthenticated) {
                 return null
             }
-            return state.user_name
+            return state.current_user
         },
         currentRole(state, getters) {
             if (!getters.isAuthenticated) {
@@ -83,6 +87,12 @@ export default {
         updateTokenAndHeaders({commit, state, dispatch, getters}, token) {
             commit('setToken', token)
             axios.defaults.headers.common = getters.getHeaders
+
+            $.ajaxSetup({
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('Authorization', getters.getHeaders['Authorization']);
+                }
+            });
         },
         async initAuth({commit, state, dispatch, getters}) {
             if (!state.auth_initialized) {
@@ -93,7 +103,7 @@ export default {
                         let {data} = await axios.post('/api/session/verify-token', {})
                         if (data.token) {
                             dispatch('updateTokenAndHeaders', data.token)
-                            commit('setUserName', data.user_name)
+                            commit('setCurrentUser', data.user)
                             commit('setUserRoles', data.roles)
                         }
                     } catch (e) {
@@ -112,7 +122,7 @@ export default {
                 })
                 if (data.status) {
                     dispatch('updateTokenAndHeaders', data.token)
-                    commit('setUserName', data.user_name)
+                    commit('setCurrentUser', data.user)
                     commit('setUserRoles', data.roles)
                     commit('setAuthError', null)
 
@@ -134,7 +144,7 @@ export default {
                 let {data} = await axios.post('/api/session/register', request_data)
                 if (data.status) {
                     dispatch('updateTokenAndHeaders', data.token)
-                    commit('setUserName', data.user_name)
+                    commit('setCurrentUser', data.user)
                     commit('setUserRoles', data.roles)
                     commit('setAuthError', null)
 
@@ -151,10 +161,17 @@ export default {
                 return false
             }
         },
-        logout({commit, state, dispatch, getters}) {
+        logout({commit, state, dispatch, getters,}) {
             dispatch('updateTokenAndHeaders', null)
-            commit('setUserName', null)
+            commit('setCurrentUser', null)
             commit('setUserRoles', null)
+
+            commit('setCurrentUserPosts', [], {root: true})
+            commit('setRunningContests', [], {root: true})
+            commit('setAvailableContests', [], {root: true})
+            commit('setParticipatingContests', [], {root: true})
+            commit('setCurrentUserCheckers', [], {root: true})
+            commit('setAvailableCheckers', [], {root: true})
         },
         async fetchAllRoles({commit, state, dispatch, getters}, force = false) {
             if (!force && state.all_roles && state.all_roles.length > 0) {

@@ -1,11 +1,11 @@
 ﻿<template>
   <header-component></header-component>
-  <div class="mx-auto w-25" style="margin-top: 25vh;">
+  <div class="mx-auto w-25" style="padding-top: 8%; height: 62.2vh">
     <div v-if="authError" class="alert alert-danger" role="alert">
       {{ authError }}
     </div>
     <h2>Вход в систему</h2>
-    <v-form @submit="onSubmit" :validation-schema="loginSchema">
+    <v-form @submit="onSubmit" :validation-schema="loginSchema" class="mb-3">
       <div>
         <label>Логин</label>
         <v-field v-model="login" class="form-control" name="login"/>
@@ -20,8 +20,9 @@
         <button class="btn btn-primary" type="submit">Войти</button>
       </div>
     </v-form>
-    <router-link :to="{name: 'Register'}">Ещё не зарегистрированы?</router-link>
+    <router-link style="margin-top: 10px" :to="{name: 'Register'}">Ещё не зарегистрированы?</router-link>
   </div>
+  <!-- eslint-disable-next-line -->
   <footer-component></footer-component>
 </template>
 

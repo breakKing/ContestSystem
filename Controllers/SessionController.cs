@@ -1,12 +1,10 @@
 ﻿using System.Threading.Tasks;
+using ContestSystemDbStructure.Models;
 using ContestSystem.Extensions;
 using ContestSystem.Models;
 using ContestSystem.Models.Attributes;
 using ContestSystem.Models.DbContexts;
 using ContestSystem.Models.FormModels;
-using ContestSystemDbStructure.Models;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -47,7 +45,7 @@ namespace ContestSystem.Controllers
                 return Json(new
                 {
                     status = true,
-                    user_name = user?.FullName,
+                    user = user.ResponseStructure,
                     roles = await _userManager.GetRolesAsync(user),
                     token = _jwtSettingsService.GenerateTokenString(user, this._userManager)
                 });
@@ -107,7 +105,7 @@ namespace ContestSystem.Controllers
                     {
                         status = true,
                         token,
-                        user_name = user?.FullName,
+                        user = user?.ResponseStructure,
                         roles = await _userManager.GetRolesAsync(user),
                     });
                 }
@@ -129,12 +127,12 @@ namespace ContestSystem.Controllers
             return Json(
                 new
                 {
-                    user_name = user?.FullName,
+                    user = user?.ResponseStructure,
                     roles = await _userManager.GetRolesAsync(user),
                     token = _jwtSettingsService.GenerateTokenString(user, this._userManager)
                 });
         }
-        
+
         [AuthorizeByJwt]
         [HttpPost("get-all-roles")]
         public async Task<IActionResult> GetAllRoles()

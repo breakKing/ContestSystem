@@ -1,11 +1,11 @@
 ﻿<template>
   <header-component></header-component>
-  <div class="mx-auto w-25" style="margin-top: 5vh;">
+  <div class="mx-auto w-25" style="margin: 5vh 0;">
     <div v-if="authError" class="alert alert-danger" role="alert">
       {{ authError }}
     </div>
     <h2>Регистрация</h2>
-    <v-form @submit="onSubmit" :validation-schema="registrationSchema">
+    <v-form @submit="onSubmit" :validation-schema="registrationSchema" class="mb-3">
       <div>
         <label>Логин</label>
         <v-field v-model="login" class="form-control" name="login"/>
@@ -57,6 +57,7 @@
     </v-form>
     <router-link :to="{name: 'Login'}">Уже зарегистрировны?</router-link>
   </div>
+  <!-- eslint-disable-next-line -->
   <footer-component></footer-component>
 </template>
 
@@ -78,10 +79,10 @@ export default {
       first_name: '',
       surname: '',
       patronymic: '',
-      date_of_birth: '',
+      date_of_birth: null,
       registrationSchema: Yup.object({
         login: Yup.string().required('Логин это обязательное поле').label('Логин'),
-        password: Yup.string().required('Пароль это обязательное поле').label('Пароль'),
+        password: Yup.string().required('Пароль это обязательное поле').label('Пароль').min(5,'Минимум 5 символов'),
         first_name: Yup.string().required('Имя это обязательное поле'),
         surname: Yup.string().required('Фамилия это обязательное поле'),
         patronymic: Yup.string().nullable(),

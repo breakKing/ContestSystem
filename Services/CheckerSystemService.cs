@@ -1,7 +1,4 @@
-﻿using ContestSystem.Models.Misc;
-using ContestSystemDbStructure.Models;
-using Microsoft.Extensions.Configuration;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -10,6 +7,9 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using ContestSystemDbStructure.Models;
+using ContestSystem.Models.Misc;
+using Microsoft.Extensions.Configuration;
 
 namespace ContestSystem.Services
 {
@@ -20,7 +20,7 @@ namespace ContestSystem.Services
         private int _currentServerIndex = -1;
         private readonly Dictionary<long, int> _serverForSolution = new Dictionary<long, int>();
         private readonly HttpClient _httpClient = new HttpClient();
-        private readonly int _localPort = 5005;
+        private readonly int _localPort = 6500;
 
         public CheckerSystemService(IConfiguration configuration)
         {
@@ -60,11 +60,11 @@ namespace ContestSystem.Services
                 }
             }
 
-            if (compilersLists.Count == 0)
+            /*if (compilersLists.Count == 0)
             {
                 var response = await _httpClient.GetAsync($"http://localhost:{_localPort}/api/compiler");
                 return await response.Content.ReadFromJsonAsync<IEnumerable<CompilerInfo>>();
-            }
+            }*/
 
             finalCompilers.AddRange(compilersLists[0]);
             foreach (var list in compilersLists)
@@ -97,8 +97,8 @@ namespace ContestSystem.Services
                 }
             }
 
-            content = JsonContent.Create(checker);
-            await _httpClient.PostAsync($"http://localhost:{_localPort}/api/checker", content);
+            /*content = JsonContent.Create(checker);
+            await _httpClient.PostAsync($"http://localhost:{_localPort}/api/checker", content);*/
             return resultedChecker;
         }
 

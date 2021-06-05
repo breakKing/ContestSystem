@@ -1,0 +1,101 @@
+﻿import axios from 'axios'
+import * as _ from 'lodash'
+import $ from "jquery";
+
+export default {
+    state: () => ({
+        posts_list: [],
+        current_user_posts_list: [],
+    }),
+    mutations: {
+        setPostsList(state, val) {
+            state.posts_list = (val || [])
+        },
+        setCurrentUserPosts(state, val) {
+            state.current_user_posts_list = (val || [])
+        },
+    },
+    getters: {
+        postsList(state, getters) {
+            return state.posts_list
+        },
+        currentUserPostsList(state, getters) {
+            return state.current_user_posts_list
+        },
+        currentUserPendingPostsList(state, getters) {
+            return _.filter(getters.currentUserPostsList, (el) => Number(el.approvalStatus) === 0)
+        },
+        currentUserRejectedPostsList(state, getters) {
+            return _.filter(getters.currentUserPostsList, (el) => Number(el.approvalStatus) === 1)
+        },
+        currentUserApprovedPostsList(state, getters) {
+            return _.filter(getters.currentUserPostsList, (el) => Number(el.approvalStatus) === 2)
+        },
+        latestPosts(state, getters) {
+            return getters.postsList.sort((a, b) => {
+                // todo format
+                return b.publicationDateTimeUTC - a.publicationDateTimeUTC
+            })
+        },
+    },
+    actions: {
+        async fetchPostsList({commit, state, dispatch, getters}, force = false) {
+            if (!force && state.posts_list && state.posts_list.length > 0) {
+                return
+            }
+            try {
+                let {data} = await axios.get('/api/posts/ru')
+                commit('setPostsList', data.roles)
+            } catch (e) {
+                console.error(e)
+            }
+        },
+        async getPostInfo({commit, state, dispatch, getters}, blog_id) {
+            if (!blog_id){
+                return null
+            }
+            try {
+                let {data} = await axios.get(`/api/posts/${blog_id}/ru`)
+                return data
+            } catch (e) {
+                console.error(e)
+                return null
+            }
+        },
+        async savePostInfo({commit, state, dispatch, getters}, request_data, post_id = null) {
+            try {
+                if (post_id) {
+                    return await $.ajax({
+                        url: `/api/posts/edit-post/${post_id}`,
+                        data: request_data,
+                        processData: false,
+                        contentType: false,
+                        type: 'PUT'
+                    })
+                } else {
+                    return await $.ajax({
+                        url: `/api/posts/add-post`,
+                        data: request_data,
+                        processData: false,
+                        contentType: false,
+                        type: 'POST',
+                    })
+                }
+            } catch (e) {
+                console.error(e)
+                return false
+            }
+        },
+        async fetchUserPostsList({commit, state, dispatch, getters, rootGetters}, force = false) {
+            if (!force && state.current_user_posts_list && state.current_user_posts_list.length > 0) {
+                return
+            }
+            try {
+                let {data} = await axios.get(`/api/posts/get-user-posts/${rootGetters.currentUser.id}/ru`)
+                commit('setCurrentUserPosts', data)
+            } catch (e) {
+                console.error(e)
+            }
+        },
+    }
+}

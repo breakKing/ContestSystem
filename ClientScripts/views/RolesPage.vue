@@ -31,7 +31,7 @@ export default {
   },
   async created() {
     await this.fetchAllRoles(true)
-  }
+  },
 }
 </script>
 

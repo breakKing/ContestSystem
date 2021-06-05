@@ -16,7 +16,7 @@ namespace ContestSystem.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("ProductVersion", "5.0.5")
+                .HasAnnotation("ProductVersion", "5.0.6")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("ContestSystemDbStructure.Models.Checker", b =>
@@ -25,6 +25,12 @@ namespace ContestSystem.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("ApprovalStatus")
+                        .HasColumnType("int");
+
+                    b.Property<long?>("ApprovingModeratorId")
+                        .HasColumnType("bigint");
 
                     b.Property<long?>("AuthorId")
                         .HasColumnType("bigint");
@@ -44,6 +50,9 @@ namespace ContestSystem.Migrations
                     b.Property<bool>("IsPublic")
                         .HasColumnType("bit");
 
+                    b.Property<string>("ModerationMessage")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
@@ -53,6 +62,8 @@ namespace ContestSystem.Migrations
                         .HasColumnType("rowversion");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ApprovingModeratorId");
 
                     b.HasIndex("AuthorId");
 
@@ -104,10 +115,10 @@ namespace ContestSystem.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<bool>("Approved")
-                        .HasColumnType("bit");
+                    b.Property<int>("ApprovalStatus")
+                        .HasColumnType("int");
 
-                    b.Property<long?>("ApprovingGlobalModeratorId")
+                    b.Property<long?>("ApprovingModeratorId")
                         .HasColumnType("bigint");
 
                     b.Property<bool>("AreVirtualContestsAvailable")
@@ -119,11 +130,14 @@ namespace ContestSystem.Migrations
                     b.Property<short>("DurationInMinutes")
                         .HasColumnType("smallint");
 
-                    b.Property<byte[]>("Image")
-                        .HasColumnType("varbinary(max)");
+                    b.Property<string>("Image")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsPublic")
                         .HasColumnType("bit");
+
+                    b.Property<string>("ModerationMessage")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<long?>("RulesSetId")
                         .HasColumnType("bigint");
@@ -138,7 +152,7 @@ namespace ContestSystem.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApprovingGlobalModeratorId");
+                    b.HasIndex("ApprovingModeratorId");
 
                     b.HasIndex("CreatorId");
 
@@ -359,20 +373,29 @@ namespace ContestSystem.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<bool>("Approved")
-                        .HasColumnType("bit");
+                    b.Property<int>("ApprovalStatus")
+                        .HasColumnType("int");
 
-                    b.Property<long?>("ApprovingGlobalModeratorId")
+                    b.Property<long?>("ApprovingModeratorId")
                         .HasColumnType("bigint");
 
                     b.Property<long?>("CreatorId")
                         .HasColumnType("bigint");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Image")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsHidden")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsPublic")
                         .HasColumnType("bit");
+
+                    b.Property<string>("ModerationMessage")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<byte[]>("Timestamp")
                         .IsConcurrencyToken()
@@ -381,7 +404,7 @@ namespace ContestSystem.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApprovingGlobalModeratorId");
+                    b.HasIndex("ApprovingModeratorId");
 
                     b.HasIndex("CreatorId");
 
@@ -753,14 +776,20 @@ namespace ContestSystem.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<bool>("Approved")
-                        .HasColumnType("bit");
+                    b.Property<int>("ApprovalStatus")
+                        .HasColumnType("int");
 
-                    b.Property<long?>("ApprovingBlogModeratorId")
+                    b.Property<long?>("ApprovingModeratorId")
                         .HasColumnType("bigint");
 
                     b.Property<long?>("AuthorId")
                         .HasColumnType("bigint");
+
+                    b.Property<string>("ModerationMessage")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PreviewImage")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("PromotedDateTimeUTC")
                         .HasColumnType("datetime2");
@@ -775,7 +804,7 @@ namespace ContestSystem.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApprovingBlogModeratorId");
+                    b.HasIndex("ApprovingModeratorId");
 
                     b.HasIndex("AuthorId");
 
@@ -801,6 +830,9 @@ namespace ContestSystem.Migrations
                     b.Property<long>("PostId")
                         .HasColumnType("bigint");
 
+                    b.Property<string>("PreviewText")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<byte[]>("Timestamp")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
@@ -820,13 +852,16 @@ namespace ContestSystem.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<bool>("Approved")
-                        .HasColumnType("bit");
+                    b.Property<int>("ApprovalStatus")
+                        .HasColumnType("int");
 
-                    b.Property<long?>("ApprovingGlobalModeratorId")
+                    b.Property<long?>("ApprovingModeratorId")
                         .HasColumnType("bigint");
 
                     b.Property<long?>("CheckerId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("CreatorId")
                         .HasColumnType("bigint");
 
                     b.Property<bool>("IsPublic")
@@ -834,6 +869,9 @@ namespace ContestSystem.Migrations
 
                     b.Property<long>("MemoryLimitInBytes")
                         .HasColumnType("bigint");
+
+                    b.Property<string>("ModerationMessage")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("TimeLimitInMilliseconds")
                         .HasColumnType("int");
@@ -845,9 +883,11 @@ namespace ContestSystem.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApprovingGlobalModeratorId");
+                    b.HasIndex("ApprovingModeratorId");
 
                     b.HasIndex("CheckerId");
+
+                    b.HasIndex("CreatorId");
 
                     b.ToTable("Problems");
                 });
@@ -937,6 +977,9 @@ namespace ContestSystem.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsPublic")
+                        .HasColumnType("bit");
+
                     b.Property<int>("MaxTriesForOneProblem")
                         .HasColumnType("int");
 
@@ -992,6 +1035,9 @@ namespace ContestSystem.Migrations
                     b.Property<string>("CompilerName")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<long>("ContestId")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("ErrorsMessage")
                         .HasColumnType("nvarchar(max)");
 
@@ -1016,6 +1062,8 @@ namespace ContestSystem.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ContestId");
 
                     b.HasIndex("ParticipantId");
 
@@ -1128,6 +1176,18 @@ namespace ContestSystem.Migrations
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsLimitedInContests")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsLimitedInCourses")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsLimitedInPosts")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsLimitedInProblems")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -1315,9 +1375,15 @@ namespace ContestSystem.Migrations
 
             modelBuilder.Entity("ContestSystemDbStructure.Models.Checker", b =>
                 {
+                    b.HasOne("ContestSystemDbStructure.Models.User", "ApprovingModerator")
+                        .WithMany()
+                        .HasForeignKey("ApprovingModeratorId");
+
                     b.HasOne("ContestSystemDbStructure.Models.User", "Author")
                         .WithMany()
                         .HasForeignKey("AuthorId");
+
+                    b.Navigation("ApprovingModerator");
 
                     b.Navigation("Author");
                 });
@@ -1347,9 +1413,9 @@ namespace ContestSystem.Migrations
 
             modelBuilder.Entity("ContestSystemDbStructure.Models.Contest", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.User", "ApprovingGlobalModerator")
+                    b.HasOne("ContestSystemDbStructure.Models.User", "ApprovingModerator")
                         .WithMany()
-                        .HasForeignKey("ApprovingGlobalModeratorId");
+                        .HasForeignKey("ApprovingModeratorId");
 
                     b.HasOne("ContestSystemDbStructure.Models.User", "Creator")
                         .WithMany()
@@ -1359,7 +1425,7 @@ namespace ContestSystem.Migrations
                         .WithMany()
                         .HasForeignKey("RulesSetId");
 
-                    b.Navigation("ApprovingGlobalModerator");
+                    b.Navigation("ApprovingModerator");
 
                     b.Navigation("Creator");
 
@@ -1426,7 +1492,7 @@ namespace ContestSystem.Migrations
             modelBuilder.Entity("ContestSystemDbStructure.Models.ContestLocalizer", b =>
                 {
                     b.HasOne("ContestSystemDbStructure.Models.Contest", "Contest")
-                        .WithMany()
+                        .WithMany("ContestLocalizers")
                         .HasForeignKey("ContestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1480,15 +1546,15 @@ namespace ContestSystem.Migrations
 
             modelBuilder.Entity("ContestSystemDbStructure.Models.Course", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.User", "ApprovingGlobalModerator")
+                    b.HasOne("ContestSystemDbStructure.Models.User", "ApprovingModerator")
                         .WithMany()
-                        .HasForeignKey("ApprovingGlobalModeratorId");
+                        .HasForeignKey("ApprovingModeratorId");
 
                     b.HasOne("ContestSystemDbStructure.Models.User", "Creator")
                         .WithMany()
                         .HasForeignKey("CreatorId");
 
-                    b.Navigation("ApprovingGlobalModerator");
+                    b.Navigation("ApprovingModerator");
 
                     b.Navigation("Creator");
                 });
@@ -1609,7 +1675,7 @@ namespace ContestSystem.Migrations
             modelBuilder.Entity("ContestSystemDbStructure.Models.Example", b =>
                 {
                     b.HasOne("ContestSystemDbStructure.Models.Problem", "Problem")
-                        .WithMany()
+                        .WithMany("Examples")
                         .HasForeignKey("ProblemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1659,15 +1725,15 @@ namespace ContestSystem.Migrations
 
             modelBuilder.Entity("ContestSystemDbStructure.Models.Post", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.User", "ApprovingBlogModerator")
+                    b.HasOne("ContestSystemDbStructure.Models.User", "ApprovingModerator")
                         .WithMany()
-                        .HasForeignKey("ApprovingBlogModeratorId");
+                        .HasForeignKey("ApprovingModeratorId");
 
                     b.HasOne("ContestSystemDbStructure.Models.User", "Author")
                         .WithMany()
                         .HasForeignKey("AuthorId");
 
-                    b.Navigation("ApprovingBlogModerator");
+                    b.Navigation("ApprovingModerator");
 
                     b.Navigation("Author");
                 });
@@ -1675,7 +1741,7 @@ namespace ContestSystem.Migrations
             modelBuilder.Entity("ContestSystemDbStructure.Models.PostLocalizer", b =>
                 {
                     b.HasOne("ContestSystemDbStructure.Models.Post", "Post")
-                        .WithMany()
+                        .WithMany("PostLocalizers")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1685,23 +1751,29 @@ namespace ContestSystem.Migrations
 
             modelBuilder.Entity("ContestSystemDbStructure.Models.Problem", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.User", "ApprovingGlobalModerator")
+                    b.HasOne("ContestSystemDbStructure.Models.User", "ApprovingModerator")
                         .WithMany()
-                        .HasForeignKey("ApprovingGlobalModeratorId");
+                        .HasForeignKey("ApprovingModeratorId");
 
                     b.HasOne("ContestSystemDbStructure.Models.Checker", "Checker")
                         .WithMany()
                         .HasForeignKey("CheckerId");
 
-                    b.Navigation("ApprovingGlobalModerator");
+                    b.HasOne("ContestSystemDbStructure.Models.User", "Creator")
+                        .WithMany()
+                        .HasForeignKey("CreatorId");
+
+                    b.Navigation("ApprovingModerator");
 
                     b.Navigation("Checker");
+
+                    b.Navigation("Creator");
                 });
 
             modelBuilder.Entity("ContestSystemDbStructure.Models.ProblemLocalizer", b =>
                 {
                     b.HasOne("ContestSystemDbStructure.Models.Problem", "Problem")
-                        .WithMany()
+                        .WithMany("ProblemLocalizers")
                         .HasForeignKey("ProblemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1720,6 +1792,12 @@ namespace ContestSystem.Migrations
 
             modelBuilder.Entity("ContestSystemDbStructure.Models.Solution", b =>
                 {
+                    b.HasOne("ContestSystemDbStructure.Models.Contest", "Contest")
+                        .WithMany()
+                        .HasForeignKey("ContestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("ContestSystemDbStructure.Models.User", "Participant")
                         .WithMany()
                         .HasForeignKey("ParticipantId");
@@ -1729,6 +1807,8 @@ namespace ContestSystem.Migrations
                         .HasForeignKey("ProblemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Contest");
 
                     b.Navigation("Participant");
 
@@ -1827,8 +1907,22 @@ namespace ContestSystem.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("ContestSystemDbStructure.Models.Contest", b =>
+                {
+                    b.Navigation("ContestLocalizers");
+                });
+
+            modelBuilder.Entity("ContestSystemDbStructure.Models.Post", b =>
+                {
+                    b.Navigation("PostLocalizers");
+                });
+
             modelBuilder.Entity("ContestSystemDbStructure.Models.Problem", b =>
                 {
+                    b.Navigation("Examples");
+
+                    b.Navigation("ProblemLocalizers");
+
                     b.Navigation("Tests");
                 });
 #pragma warning restore 612, 618

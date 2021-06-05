@@ -1,16 +1,14 @@
+using ContestSystemDbStructure.Models;
 using ContestSystem.Extensions;
+using ContestSystem.Models;
+using ContestSystem.Models.DbContexts;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Globalization;
-using ContestSystem.Models;
-using ContestSystem.Models.DbContexts;
-using ContestSystemDbStructure.Models;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
 namespace ContestSystem
@@ -31,7 +29,7 @@ namespace ContestSystem
 
             var jwtService = new JwtSettingsService();
             Configuration.Bind("JwtConfiguration", jwtService);
-            services.AddSingleton<JwtSettingsService>(jwtService);
+            services.AddSingleton(jwtService);
 
             services.AddDbContext<MainDbContext>(
                 x => x
@@ -78,6 +76,8 @@ namespace ContestSystem
             services.AddControllersWithViews();
 
             services.AddCheckerSystemConnector();
+
+            services.AddSwaggerGen();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -86,19 +86,13 @@ namespace ContestSystem
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseSwagger();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "ContestSystem API v0.1 beta");
+                });
             }
 
-            CultureInfo[] supportedCultures = new[]
-            {
-                new CultureInfo("en"),
-                new CultureInfo("ru"),
-            };
-            app.UseRequestLocalization(new RequestLocalizationOptions
-            {
-                DefaultRequestCulture = new RequestCulture("ru"),
-                SupportedCultures = supportedCultures,
-                SupportedUICultures = supportedCultures
-            });
             app.UseStaticFiles();
             app.UseRouting();
             app.UseCors(builder => builder

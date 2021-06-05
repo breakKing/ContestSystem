@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace ContestSystem.Models.DbContexts
 {
-    public class DefaultEntitiesInitializer
+    public static class DefaultEntitiesInitializer
     {
         private static readonly List<Role> Roles = new List<Role>()
         {
@@ -14,13 +14,9 @@ namespace ContestSystem.Models.DbContexts
             {
                 Description = "Администратор"
             },
-            new Role(RolesContainer.GlobalModerator)
+            new Role(RolesContainer.Moderator)
             {
-                Description = "Глобальный модератор"
-            },
-            new Role(RolesContainer.BlogModerator)
-            {
-                Description = "Модератор блога"
+                Description = "Модератор"
             },
             new Role(RolesContainer.User)
             {
@@ -42,7 +38,7 @@ namespace ContestSystem.Models.DbContexts
                 UserName = "manager",
                 Email = "manager@manager.ru",
                 Password = "manager",
-                Role = RolesContainer.GlobalModerator,
+                Role = RolesContainer.Moderator,
             },
         };
 

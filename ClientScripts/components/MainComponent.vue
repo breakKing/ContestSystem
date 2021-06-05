@@ -1,4 +1,4 @@
-﻿<template>
+﻿<template style="background-color: #fff">
   <router-view></router-view>
 </template>
 
@@ -11,4 +11,5 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+  
 </style>

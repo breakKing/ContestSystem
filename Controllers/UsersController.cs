@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
+using ContestSystemDbStructure.Models;
 using ContestSystem.Extensions;
 using ContestSystem.Models;
 using ContestSystem.Models.Attributes;
 using ContestSystem.Models.DbContexts;
-using ContestSystemDbStructure.Models;
+using ContestSystem.Models.FormModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -54,36 +54,33 @@ namespace ContestSystem.Controllers
 
         [HttpPost("update-user")]
         [AuthorizeByJwt(Roles = RolesContainer.Admin)]
-        public async Task<IActionResult> UpdateUser([FromBody] User userFromBody)
+        public async Task<IActionResult> UpdateUser([FromBody] UserSavingForm userFromBody)
         {
             if (ModelState.IsValid)
             {
                 if (userFromBody.Id != default)
                 {
-                    var user = await _dbContext.Users.Where(u => u.Id == userFromBody.Id).Include(u => u.Roles)
+                    var user = await _dbContext.Users
+                        .Where(u => u.Id == userFromBody.Id)
+                        .Include(u => u.Roles)
                         .FirstAsync();
-                    var selectedRoleNames = userFromBody.Roles.Select(r => r.Id).ToList();
+
                     user.FirstName = userFromBody.FirstName;
                     user.Surname = userFromBody.Surname;
                     user.Patronymic = userFromBody.Patronymic;
                     user.DateOfBirth = userFromBody.DateOfBirth;
                     user.Email = userFromBody.Email;
                     user.PhoneNumber = userFromBody.PhoneNumber;
-
-                    var currentRoles = user.Roles.Select(r => r.Id).ToList();
-                    user.Roles.RemoveAll(r => !selectedRoleNames.Contains(r.Id));
-                    var rolesToAssign = selectedRoleNames.Except(currentRoles)
-                        .Select(roleId => _dbContext.Roles.FirstOrDefault(r => r.Id == roleId))
+                    user.IsLimitedInContests = userFromBody.IsLimitedInContests;
+                    user.IsLimitedInPosts = userFromBody.IsLimitedInPosts;
+                    user.IsLimitedInCourses = userFromBody.IsLimitedInCourses;
+                    user.IsLimitedInProblems = userFromBody.IsLimitedInProblems;
+                    var rolesToAssign = userFromBody.Roles
+                        .Select(roleName => _dbContext.Roles.FirstOrDefault(r => r.Name == roleName))
                         .Where(r => r != null)
                         .ToList();
-                    if (!rolesToAssign.IsEmpty())
-                    {
-                        user.Roles.AddRange(
-                            rolesToAssign
-                        );
-                    }
+                    user.Roles = rolesToAssign;
 
-                    _dbContext.Update(user);
                     await _dbContext.SaveChangesAsync();
                     return Json(new
                     {
