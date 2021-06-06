@@ -102,13 +102,13 @@ export default {
                     try {
                         let {data} = await axios.post('/api/session/verify-token', {})
                         if (data.token) {
-                            dispatch('updateTokenAndHeaders', data.token)
+                            await dispatch('updateTokenAndHeaders', data.token)
                             commit('setCurrentUser', data.user)
                             commit('setUserRoles', data.roles)
                         }
                     } catch (e) {
                         console.error(e)
-                        dispatch('logout')
+                        await dispatch('logout')
                     }
                 }
                 commit('setAuthInitializationStatus', true)
@@ -121,7 +121,7 @@ export default {
                     password
                 })
                 if (data.status) {
-                    dispatch('updateTokenAndHeaders', data.token)
+                    await dispatch('updateTokenAndHeaders', data.token)
                     commit('setCurrentUser', data.user)
                     commit('setUserRoles', data.roles)
                     commit('setAuthError', null)
@@ -129,12 +129,12 @@ export default {
                     return true
                 } else {
                     commit('setAuthError', data.message)
-                    dispatch('logout')
+                    await dispatch('logout')
                     return false
                 }
             } catch (e) {
                 console.error(e)
-                dispatch('logout')
+                await dispatch('logout')
 
                 return false
             }
@@ -143,7 +143,7 @@ export default {
             try {
                 let {data} = await axios.post('/api/session/register', request_data)
                 if (data.status) {
-                    dispatch('updateTokenAndHeaders', data.token)
+                    await dispatch('updateTokenAndHeaders', data.token)
                     commit('setCurrentUser', data.user)
                     commit('setUserRoles', data.roles)
                     commit('setAuthError', null)
@@ -156,13 +156,13 @@ export default {
                 }
             } catch (e) {
                 console.error(e)
-                dispatch('logout')
+                await dispatch('logout')
 
                 return false
             }
         },
-        logout({commit, state, dispatch, getters,}) {
-            dispatch('updateTokenAndHeaders', null)
+        async logout({commit, state, dispatch, getters,}) {
+            await dispatch('updateTokenAndHeaders', null)
             commit('setCurrentUser', null)
             commit('setUserRoles', null)
 

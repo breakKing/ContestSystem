@@ -468,7 +468,7 @@ router.beforeEach(async (to, from, next) => {
 
         if (authorize.length && !authorize.includes(store.getters.currentRole)) {
             // нет нужной роли
-            store.dispatch('globalAlert', {message: 'Вы куда это?)'})
+            await store.dispatch('globalAlert', {message: 'Вы куда это?)'})
             return next(false)
         }
     }

@@ -1,5 +1,5 @@
 ﻿<template>
-  <h3 class="text-center mt-5" v-if="!limitedLatestPosts || limitedLatestPosts.length===0">Пока нет записей :)</h3>
+  <h3 class="text-center mt-5" v-if="!limitedLatestPosts || limitedLatestPosts.length === 0">Пока нет записей :)</h3>
   <template v-else>
     <post-preview-component v-for="post of limitedLatestPosts" :post="post"></post-preview-component>
   </template>
@@ -20,24 +20,13 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['postsList', 'latestPosts']),
+    ...mapGetters(['latestPosts']),
     limitedLatestPosts() {
       if (!this.maxPosts) {
         return this.latestPosts
       }
       return _.slice(this.latestPosts, 0, this.maxPosts)
     }
-  },
-  methods: {
-    ...mapActions(['fetchPostsList', 'getPostInfo']),
-  },
-  watch: {
-    async $route(to, from) {
-      await this.fetchPostsList()
-    }
-  },
-  async created() {
-    await this.fetchPostsList(true)
   },
 }
 </script>

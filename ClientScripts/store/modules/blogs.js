@@ -62,7 +62,7 @@ export default {
                 return null
             }
         },
-        async savePostInfo({commit, state, dispatch, getters}, request_data, post_id = null) {
+        async savePostInfo({commit, state, dispatch, getters}, {request_data, post_id}) {
             try {
                 if (post_id) {
                     return await $.ajax({
@@ -87,6 +87,9 @@ export default {
             }
         },
         async fetchUserPostsList({commit, state, dispatch, getters, rootGetters}, force = false) {
+            if (!rootGetters.currentUser) {
+                return
+            }
             if (!force && state.current_user_posts_list && state.current_user_posts_list.length > 0) {
                 return
             }

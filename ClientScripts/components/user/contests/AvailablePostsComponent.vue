@@ -1,6 +1,6 @@
 <template>
-<!--eslint-disable -->
-<contest-preview-component v-for="contest of availableContests" :contest="contest"></contest-preview-component>
+  <!--eslint-disable -->
+  <contest-preview-component v-for="contest of availableContests" :contest="contest"></contest-preview-component>
 </template>
 
 <script>
@@ -19,11 +19,13 @@ export default {
   },
   watch: {
     async $route(to, from) {
-      await this.fetchAvailableContests(true)
+      if (to.name === 'AvailableContestsPage') {
+        await this.fetchAvailableContests(true)
+      }
     }
   },
   async created() {
-     await this.fetchAvailableContests(true)
+    await this.fetchAvailableContests(true)
   },
 }
 </script>

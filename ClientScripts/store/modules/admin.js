@@ -33,7 +33,7 @@ export default {
             try {
                 let {data} = await axios.post('/api/users/update-user', params)
                 if (data.success) {
-                    dispatch('fetchAllUsers', true)
+                    await dispatch('fetchAllUsers', true)
                 } else if (data.errors) {
                     console.error(data.errors)
                 }

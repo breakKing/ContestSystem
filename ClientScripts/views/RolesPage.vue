@@ -26,7 +26,9 @@ export default {
   },
   watch: {
     async $route(to, from) {
-      await this.fetchAllRoles()
+      if (to.name === 'RoleSelector') {
+        await this.fetchAllRoles()
+      }
     }
   },
   async created() {

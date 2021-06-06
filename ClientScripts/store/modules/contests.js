@@ -1,5 +1,6 @@
 ﻿import axios from 'axios'
 import * as _ from 'lodash'
+
 export default {
     state: () => ({
         currently_running_contests: [],
@@ -79,7 +80,10 @@ export default {
             }
         },
         async fetchCurrentUserContestsList({commit, state, dispatch, getters, rootGetters}, force = false) {
-            if (!force && state.current_user_contests_list && state.current_user_contests_list.length > 0) {
+            if (!rootGetters.currentUser) {
+                return
+            }
+            if (!force && state.current_user_contests && state.current_user_contests.length > 0) {
                 return
             }
             try {

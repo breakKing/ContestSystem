@@ -184,7 +184,7 @@ namespace ContestSystem.Controllers
                 }
                 else
                 {
-                    if ((await HttpContext.GetCurrentUser()).Id != rules.AuthorId)
+                    if (HttpContext.GetCurrentUser().GetAwaiter().GetResult().Id != rules.AuthorId)
                     {
                         return Json(new
                         {

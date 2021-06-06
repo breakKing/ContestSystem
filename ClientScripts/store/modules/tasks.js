@@ -33,6 +33,9 @@ export default {
     },
     actions: {
         async fetchCurrentUserTasks({commit, state, dispatch, getters, rootGetters}, force = false) {
+            if (!rootGetters.currentUser) {
+                return
+            }
             if (!force && state.current_user_tasks && state.current_user_tasks.length > 0) {
                 return
             }
@@ -44,6 +47,9 @@ export default {
             }
         },
         async fetchAvailableTasks({commit, state, dispatch, getters, rootGetters}, force = false) {
+            if (!rootGetters.currentUser) {
+                return
+            }
             if (!force && state.available_for_select_tasks && state.available_for_select_tasks.length > 0) {
                 return
             }

@@ -4,7 +4,7 @@
 </template>
 
 <script>
-import {mapActions, mapGetters} from "vuex";
+import {mapGetters} from "vuex";
 import CheckerPreviewComponent from "./CheckerPreviewComponent";
 
 export default {

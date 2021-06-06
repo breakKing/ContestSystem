@@ -118,6 +118,10 @@ export default {
   methods: {
     ...mapActions(['getPostInfo', 'savePostInfo', 'fetchPostsList']),
     async savePost() {
+      if (!this.currentUser) {
+        this.error_msg = 'С вашими авторизационными данными что-то не так'
+        return
+      }
       let formData = new FormData();
       let tmp_form = $('<form enctype="multipart/form-data"></form>');
       tmp_form.append($('<input type="hidden"/>').attr('name', 'id').val(this.post_id))
@@ -129,7 +133,10 @@ export default {
 
       tmp_form.append($('[name="previewImage"]').clone())
 
-      let result = await this.savePostInfo(new FormData(tmp_form[0]), this.post_id)
+      let result = await this.savePostInfo({
+        request_data: new FormData(tmp_form[0]),
+        post_id: this.post_id
+      })
       if (result.status) {
         await this.fetchPostsList(true);
         let modal = new Modal(document.querySelector('#' + this.modalId));

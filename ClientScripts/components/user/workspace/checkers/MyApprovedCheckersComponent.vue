@@ -6,7 +6,6 @@
 
 <script>
 import {mapActions, mapGetters} from "vuex";
-import ContestPreviewComponent from "../../contests/ContestPreviewComponent";
 import CheckerPreviewComponent from "./CheckerPreviewComponent";
 
 export default {

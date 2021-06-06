@@ -185,12 +185,14 @@ export default {
       }
     }
   },
-  created() {
-    this.updateFields()
+  async created() {
+    await this.updateFields()
   },
   watch: {
     async $route(to, from) {
-      this.updateFields()
+      if (to.name === 'WorkSpaceEditRuleSetPage') {
+        await this.updateFields()
+      }
     }
   },
 }

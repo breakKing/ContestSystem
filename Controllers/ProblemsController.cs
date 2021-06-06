@@ -272,7 +272,7 @@ namespace ContestSystem.Controllers
                 }
                 else
                 {
-                    if ((await HttpContext.GetCurrentUser()).Id != problem.CreatorId)
+                    if (HttpContext.GetCurrentUser().GetAwaiter().GetResult().Id != problem.CreatorId)
                     {
                         return Json(new
                         {

@@ -127,6 +127,10 @@ export default {
       }
     },
     async saveContest() {
+      if (!this.currentUser) {
+        this.error_msg = 'С вашими авторизационными данными что-то не так'
+        return
+      }
       let tmp_form = $('<form enctype="multipart/form-data"></form>');
       tmp_form.append($('<input type="hidden"/>').attr('name', 'id').val(this.contest_id))
       tmp_form.append($('<input type="hidden"/>').attr('name', 'creatorUserId').val(this.currentUser.id))
@@ -185,7 +189,9 @@ export default {
   },
   watch: {
     async $route(to, from) {
-      await this.updateFields()
+      if (to.name === 'WorkSpaceEditContestPage') {
+        await this.updateFields()
+      }
     }
   },
   async created() {

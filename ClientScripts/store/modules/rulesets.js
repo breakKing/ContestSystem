@@ -24,6 +24,9 @@ export default {
     },
     actions: {
         async fetchAvailableRuleSets({commit, state, dispatch, getters, rootGetters}, force = false) {
+            if (!rootGetters.currentUser) {
+                return
+            }
             if (!force && state.available_for_user_rulesets && state.available_for_user_rulesets.length > 0) {
                 return
             }
@@ -35,6 +38,9 @@ export default {
             }
         },
         async fetchCurrentUserRuleSets({commit, state, dispatch, getters, rootGetters}, force = false) {
+            if (!rootGetters.currentUser) {
+                return
+            }
             if (!force && state.current_user_rulesets && state.current_user_rulesets.length > 0) {
                 return
             }

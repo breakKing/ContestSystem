@@ -46,7 +46,9 @@ export default {
   },
   watch: {
     async $route(to, from) {
-      this.post_info = await this.getPostInfo(this.post_id)
+      if (to.name === 'ViewPost') {
+        this.post_info = await this.getPostInfo(this.post_id)
+      }
     }
   },
   async created() {

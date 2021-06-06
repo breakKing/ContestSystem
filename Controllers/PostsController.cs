@@ -129,9 +129,9 @@ namespace ContestSystem.Controllers
                 {
                     imageData = binaryReader.ReadBytes((int) postForm.PreviewImage.Length);
                 }*/
-                using (var ms = new MemoryStream())
+                await using (var ms = new MemoryStream())
                 {
-                    postForm.PreviewImage.CopyTo(ms);
+                    await postForm.PreviewImage.CopyToAsync(ms);
                     imageData = ms.ToArray();
                 }
 
@@ -196,7 +196,7 @@ namespace ContestSystem.Controllers
 
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         [HttpPut("edit-post/{id}")]
-        public async Task<IActionResult> EditPost([FromBody] PostForm postForm, long id)
+        public async Task<IActionResult> EditPost([FromForm] PostForm postForm, long id)
         {
             if (postForm.Id == null || id <= 0 || id != postForm.Id)
             {
@@ -220,7 +220,7 @@ namespace ContestSystem.Controllers
                 }
                 else
                 {
-                    if ((await HttpContext.GetCurrentUser()).Id != post.AuthorId)
+                    if (HttpContext.GetCurrentUser().GetAwaiter().GetResult().Id != post.AuthorId)
                     {
                         return Json(new
                         {
@@ -234,9 +234,9 @@ namespace ContestSystem.Controllers
                 {
                     imageData = binaryReader.ReadBytes((int) postForm.PreviewImage.Length);
                 }*/
-                    using (var ms = new MemoryStream())
+                    await using (var ms = new MemoryStream())
                     {
-                        postForm.PreviewImage.CopyTo(ms);
+                        await postForm.PreviewImage.CopyToAsync(ms);
                         imageData = ms.ToArray();
                     }
 

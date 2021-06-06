@@ -1,5 +1,5 @@
 ﻿<template>
-<!--eslint-disable -->
+  <!--eslint-disable -->
   <div v-if="!!errors" class="alert alert-danger" role="alert">
     {{ errors }}
   </div>
@@ -11,17 +11,19 @@
     </div>
     <div>
       <label class="text-light fs-3">Описание</label>
-      <v-field v-model="description" class="form-control" name="description" as="textarea" placeholder="Краткое описание работы программы-чекера"/>
+      <v-field v-model="description" class="form-control" name="description" as="textarea"
+               placeholder="Краткое описание работы программы-чекера"/>
       <error-message name="description"></error-message>
     </div>
     <div>
-      <v-field v-model="isPublic" class="custom-checkbox" id="isPublic" name="isPublic" type="checkbox"  value="1"/>
+      <v-field v-model="isPublic" class="custom-checkbox" id="isPublic" name="isPublic" type="checkbox" value="1"/>
       <label class="text-light fs-5" for="isPublic">Виден всем</label>
       <error-message name="isPublic"></error-message>
     </div>
     <div>
       <label class="text-light fs-3">Код</label>
-      <v-field v-model="code" class="form-control" name="code" as="textarea" placeholder="Код программы-чекера" rows="6"/>
+      <v-field v-model="code" class="form-control" name="code" as="textarea" placeholder="Код программы-чекера"
+               rows="6"/>
       <error-message name="code"></error-message>
     </div>
     <button type="submit">Сохранить</button>
@@ -69,6 +71,10 @@ export default {
       this.isPublic = checker?.isPublic
     },
     async onSubmit() {
+      if (!this.currentUser) {
+        this.errors = 'Произошла ошибка авторизации'
+        return
+      }
       let request = {
         id: (!!this.id ? this.id : null),
         name: this.name,
@@ -102,7 +108,9 @@ export default {
   },
   watch: {
     async $route(to, from) {
-      await this.updateFields()
+      if (to.name === 'WorkSpaceEditCheckersPage') {
+        await this.updateFields()
+      }
     }
   },
 
@@ -110,29 +118,34 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-div *{
+div * {
   margin: 10px 0;
 }
-span[role=alert]{
+
+span[role=alert] {
   color: white;
 }
-form{
+
+form {
   padding: 10px;
   border: 1px solid blue;
   border-radius: 0 16px 16px 0;
   background-color: #0D6EFD;
 }
+
 .custom-checkbox {
   position: absolute;
   z-index: -1;
   opacity: 0;
 }
-.custom-checkbox+label {
+
+.custom-checkbox + label {
   display: inline-flex;
   align-items: center;
   user-select: none;
 }
-.custom-checkbox+label::before {
+
+.custom-checkbox + label::before {
   content: '';
   display: inline-block;
   width: 1em;
@@ -146,30 +159,65 @@ form{
   background-position: center center;
   background-size: 50% 50%;
 }
-.custom-checkbox:checked+label::before {
+
+.custom-checkbox:checked + label::before {
   background-color: #0b76ef;
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23fff' d='M6.564.75l-3.59 3.612-1.538-1.55L0 4.26 2.974 7.25 8 2.193z'/%3e%3c/svg%3e");
 }
 
-.form-control{
+.form-control {
   border-radius: 16px 0 16px 0;
 }
-button{
+
+button {
   padding: 5px 10px;
   background-color: #fff;
   border-radius: 16px 0 16px 0;
   border: 1px solid blue;
-  &:hover{
+
+  &:hover {
     background-color: #0b76ef;
     color: white;
   }
 }
-.form-control::-webkit-input-placeholder       {opacity: 1; transition: opacity 0.3s ease;}
-.form-control::-moz-placeholder                {opacity: 1; transition: opacity 0.3s ease;}
-.form-control:-moz-placeholder                 {opacity: 1; transition: opacity 0.3s ease;}
-.form-control:-ms-input-placeholder            {opacity: 1; transition: opacity 0.3s ease;}
-.form-control:focus::-webkit-input-placeholder {opacity: 0; transition: opacity 0.3s ease;}
-.form-control:focus::-moz-placeholder          {opacity: 0; transition: opacity 0.3s ease;}
-.form-control:focus:-moz-placeholder           {opacity: 0; transition: opacity 0.3s ease;}
-.form-control:focus:-ms-input-placeholder      {opacity: 0; transition: opacity 0.3s ease;}
+
+.form-control::-webkit-input-placeholder {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.form-control::-moz-placeholder {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.form-control:-moz-placeholder {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.form-control:-ms-input-placeholder {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.form-control:focus::-webkit-input-placeholder {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.form-control:focus::-moz-placeholder {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.form-control:focus:-moz-placeholder {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.form-control:focus:-ms-input-placeholder {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
 </style>

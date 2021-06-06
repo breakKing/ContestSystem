@@ -330,7 +330,7 @@ namespace ContestSystem.Controllers
                 }
                 else
                 {
-                    if ((await HttpContext.GetCurrentUser()).Id != contest.CreatorId)
+                    if (HttpContext.GetCurrentUser().GetAwaiter().GetResult().Id != contest.CreatorId)
                     {
                         return Json(new
                         {

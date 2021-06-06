@@ -1,5 +1,5 @@
 <template>
-<!--eslint-disable -->
+  <!--eslint-disable -->
 
   <contest-preview-component v-for="contest of participatingContests" :contest="contest"></contest-preview-component>
 </template>
@@ -21,11 +21,13 @@ export default {
   },
   watch: {
     async $route(to, from) {
-      await this.fetchParticipatingContests()
+      if (to.name === 'ParticipatingContestsPage') {
+        await this.fetchParticipatingContests()
+      }
     }
   },
   async created() {
-     await this.fetchParticipatingContests(true)
+    await this.fetchParticipatingContests(true)
   },
 }
 </script>

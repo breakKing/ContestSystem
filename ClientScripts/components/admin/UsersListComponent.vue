@@ -82,7 +82,9 @@ export default {
   },
   watch: {
     async $route(to, from) {
-      await this.fetchAllUsers()
+      if (to.name === 'AdminUsersList') {
+        await this.fetchAllUsers()
+      }
     }
   },
   async created() {

@@ -33,6 +33,9 @@ export default {
     },
     actions: {
         async fetchCurrentUserCheckers({commit, state, dispatch, getters, rootGetters}, force = false) {
+            if (!rootGetters.currentUser) {
+                return
+            }
             if (!force && state.current_user_checkers && state.current_user_checkers.length > 0) {
                 return
             }
@@ -44,6 +47,9 @@ export default {
             }
         },
         async fetchAvailableCheckers({commit, state, dispatch, getters, rootGetters}, force = false) {
+            if (!rootGetters.currentUser) {
+                return
+            }
             if (!force && state.available_for_select_checkers && state.available_for_select_checkers.length > 0) {
                 return
             }
@@ -55,7 +61,7 @@ export default {
             }
         },
         async getChecker({commit, state, dispatch, getters, rootGetters}, checker_id) {
-            if (!checker_id){
+            if (!checker_id) {
                 return null
             }
             try {
