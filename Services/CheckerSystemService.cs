@@ -60,11 +60,11 @@ namespace ContestSystem.Services
                 }
             }
 
-            /*if (compilersLists.Count == 0)
+            if (compilersLists.Count == 0)
             {
                 var response = await _httpClient.GetAsync($"http://localhost:{_localPort}/api/compiler");
                 return await response.Content.ReadFromJsonAsync<IEnumerable<CompilerInfo>>();
-            }*/
+            }
 
             finalCompilers.AddRange(compilersLists[0]);
             foreach (var list in compilersLists)
@@ -97,8 +97,8 @@ namespace ContestSystem.Services
                 }
             }
 
-            /*content = JsonContent.Create(checker);
-            await _httpClient.PostAsync($"http://localhost:{_localPort}/api/checker", content);*/
+            content = JsonContent.Create(checker);
+            await _httpClient.PostAsync($"http://localhost:{_localPort}/api/checker", content);
             return resultedChecker;
         }
 
@@ -140,7 +140,7 @@ namespace ContestSystem.Services
             }
             else
             {
-                int index = _currentServerIndex + 1;
+                int index = (_currentServerIndex + 1) % _checkerServers.Count;
                 do
                 {
                     if (await PingServerAsync(_checkerServers[index]))
