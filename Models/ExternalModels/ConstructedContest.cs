@@ -19,5 +19,32 @@ namespace ContestSystem.Models.ExternalModels
         public string ModerationMessage { get; set; }
         public List<ProblemEntry> Problems { get; set; }
         public RulesSet Rules { get; set; }
+
+        public static ConstructedContest GetFromModel(Contest contest, List<ContestProblem> problems)
+        {
+            return new ConstructedContest
+            {
+                Id = contest.Id,
+                Localizers = contest.ContestLocalizers,
+                Image = contest.Image,
+                StartDateTimeUTC = contest.StartDateTimeUTC,
+                EndDateTimeUTC = contest.EndDateTimeUTC,
+                DurationInMinutes = contest.DurationInMinutes,
+                Creator = contest.Creator?.ResponseStructure,
+                ApprovalStatus = contest.ApprovalStatus,
+                Rules = contest.RulesSet,
+                ApprovingModerator = contest.ApprovingModerator?.ResponseStructure,
+                ModerationMessage = contest.ModerationMessage,
+                Problems = problems.ConvertAll(cp =>
+                {
+                    return new ProblemEntry
+                    {
+                        Letter = cp.Letter,
+                        ProblemId = cp.ProblemId,
+                        ContestId = cp.ContestId
+                    };
+                })
+            };
+        }
     }
 }

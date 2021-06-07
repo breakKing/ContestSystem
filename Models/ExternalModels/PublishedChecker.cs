@@ -1,4 +1,5 @@
 ﻿using ContestSystemDbStructure.Enums;
+using ContestSystemDbStructure.Models;
 
 namespace ContestSystem.Models.ExternalModels
 {
@@ -13,5 +14,21 @@ namespace ContestSystem.Models.ExternalModels
         public string Errors { get; set; }
         public string ModerationMessage { get; set; }
         public ApproveType ApprovalStatus { get; set; }
+
+        public static PublishedChecker GetFromModel(Checker checker)
+        {
+            return new PublishedChecker
+            {
+                Id = checker.Id,
+                Name = checker.Name,
+                Description = checker.Description,
+                CompilationVerdict = checker.CompilationVerdict,
+                Errors = checker.Errors,
+                IsPublic = checker.IsPublic,
+                Author = checker.Author?.ResponseStructure,
+                ModerationMessage = checker.ModerationMessage,
+                ApprovalStatus = checker.ApprovalStatus
+            };
+        }
     }
 }

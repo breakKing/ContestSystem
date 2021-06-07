@@ -35,23 +35,7 @@ namespace ContestSystem.Controllers
             var rules = await _dbContext.RulesSets.Where(r => r.AuthorId == id).ToListAsync();
             var publishedRules = rules.ConvertAll(r =>
             {
-                var pr = new ConstructedRulesSet
-                {
-                    Id = r.Id,
-                    Name = r.Name,
-                    Description = r.Description,
-                    ShowFullTestsResults = r.ShowFullTestsResults,
-                    PointsForBestSolution = r.PointsForBestSolution,
-                    CountMode = r.CountMode,
-                    MaxTriesForOneProblem = r.MaxTriesForOneProblem,
-                    PenaltyForOneMinute = r.PenaltyForOneMinute,
-                    MonitorFreezeTimeBeforeFinishInMinutes = r.MonitorFreezeTimeBeforeFinishInMinutes,
-                    PenaltyForCompilationError = r.PenaltyForCompilationError,
-                    PenaltyForOneTry = r.PenaltyForOneTry,
-                    PublicMonitor = r.PublicMonitor,
-                    Author = r.Author?.ResponseStructure,
-                    IsPublic = r.IsPublic
-                };
+                var pr = ConstructedRulesSet.GetFromModel(r);
                 return pr;
             });
             return Json(publishedRules);
@@ -64,23 +48,7 @@ namespace ContestSystem.Controllers
             var rules = await _dbContext.RulesSets.Where(rs => rs.AuthorId == id || rs.IsPublic).ToListAsync();
             var publishedRules = rules.ConvertAll(r =>
             {
-                var pr = new ConstructedRulesSet
-                {
-                    Id = r.Id,
-                    Name = r.Name,
-                    Description = r.Description,
-                    ShowFullTestsResults = r.ShowFullTestsResults,
-                    PointsForBestSolution = r.PointsForBestSolution,
-                    CountMode = r.CountMode,
-                    MaxTriesForOneProblem = r.MaxTriesForOneProblem,
-                    PenaltyForOneMinute = r.PenaltyForOneMinute,
-                    MonitorFreezeTimeBeforeFinishInMinutes = r.MonitorFreezeTimeBeforeFinishInMinutes,
-                    PenaltyForCompilationError = r.PenaltyForCompilationError,
-                    PenaltyForOneTry = r.PenaltyForOneTry,
-                    PublicMonitor = r.PublicMonitor,
-                    Author = r.Author?.ResponseStructure,
-                    IsPublic = r.IsPublic
-                };
+                var pr = ConstructedRulesSet.GetFromModel(r);
                 return pr;
             });
             return Json(publishedRules);
@@ -93,23 +61,7 @@ namespace ContestSystem.Controllers
             var rules = await _dbContext.RulesSets.FirstOrDefaultAsync(r => r.Id == id);
             if (rules != null)
             {
-                var publishedRules = new ConstructedRulesSet
-                {
-                    Id = rules.Id,
-                    Name = rules.Name,
-                    Description = rules.Description,
-                    ShowFullTestsResults = rules.ShowFullTestsResults,
-                    PointsForBestSolution = rules.PointsForBestSolution,
-                    CountMode = rules.CountMode,
-                    MaxTriesForOneProblem = rules.MaxTriesForOneProblem,
-                    PenaltyForOneMinute = rules.PenaltyForOneMinute,
-                    MonitorFreezeTimeBeforeFinishInMinutes = rules.MonitorFreezeTimeBeforeFinishInMinutes,
-                    PenaltyForCompilationError = rules.PenaltyForCompilationError,
-                    PenaltyForOneTry = rules.PenaltyForOneTry,
-                    PublicMonitor = rules.PublicMonitor,
-                    Author = rules.Author?.ResponseStructure,
-                    IsPublic = rules.IsPublic
-                };
+                var publishedRules = ConstructedRulesSet.GetFromModel(rules);
                 return Json(publishedRules);
             }
             return Json(new

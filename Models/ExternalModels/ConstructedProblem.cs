@@ -18,5 +18,24 @@ namespace ContestSystem.Models.ExternalModels
         public object ApprovingModerator { get; set; }
         public List<Test> Tests { get; set; }
         public List<Example> Examples { get; set; }
+
+        public static ConstructedProblem GetFromModel(Problem problem)
+        {
+            return new ConstructedProblem
+            {
+                Id = problem.Id,
+                MemoryLimitInBytes = problem.MemoryLimitInBytes,
+                TimeLimitInMilliseconds = problem.TimeLimitInMilliseconds,
+                Creator = problem.Creator?.ResponseStructure,
+                ModerationMessage = problem.ModerationMessage,
+                ApprovalStatus = problem.ApprovalStatus,
+                ApprovingModerator = problem.ApprovingModerator,
+                Checker = problem.Checker,
+                IsPublic = problem.IsPublic,
+                Localizers = problem.ProblemLocalizers,
+                Tests = problem.Tests,
+                Examples = problem.Examples
+            };
+        }
     }
 }

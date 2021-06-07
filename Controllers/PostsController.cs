@@ -40,19 +40,9 @@ namespace ContestSystem.Controllers
             var publishedPosts = new List<PublishedPost>();
             for (int i = 0; i < posts.Count; i++)
             {
-                publishedPosts.Add(new PublishedPost
-                {
-                    Id = posts[i].Id,
-                    Author = posts[i].Author,
-                    HtmlLocalizedText = null,
-                    LocalizedName = localizers[i].Name,
-                    PublicationDateTimeUTC = posts[i].PublicationDateTimeUTC,
-                    PreviewImage = posts[i].PreviewImage,
-                    PreviewText = localizers[i].PreviewText,
-                    ApprovalStatus = posts[i].ApprovalStatus
-                });
+                var pp = PublishedPost.GetFromModel(posts[i], localizers[i]);
+                publishedPosts.Add(pp);
             }
-
             return Json(publishedPosts);
         }
 
@@ -64,18 +54,7 @@ namespace ContestSystem.Controllers
             List<PublishedPost> publishedPosts = posts.ConvertAll(p =>
             {
                 var localizer = p.PostLocalizers.FirstOrDefault(pl => pl.Culture == culture);
-                PublishedPost pp = new PublishedPost
-                {
-                    Id = p.Id,
-                    LocalizedName = localizer?.Name,
-                    HtmlLocalizedText = localizer?.HtmlText,
-                    PublicationDateTimeUTC = p.PublicationDateTimeUTC,
-                    Author = p.Author?.ResponseStructure,
-                    PreviewImage = p.PreviewImage,
-                    PreviewText = localizer?.PreviewText,
-                    ModerationMessage = p.ModerationMessage,
-                    ApprovalStatus = p.ApprovalStatus
-                };
+                var pp = PublishedPost.GetFromModel(p, localizer);
                 return pp;
             });
             return Json(publishedPosts);
@@ -97,17 +76,7 @@ namespace ContestSystem.Controllers
                     });
                 }
 
-                var publishedPost = new PublishedPost
-                {
-                    Id = post.Id,
-                    LocalizedName = localizer.Name,
-                    HtmlLocalizedText = localizer.HtmlText,
-                    PublicationDateTimeUTC = post.PublicationDateTimeUTC,
-                    Author = post.Author?.ResponseStructure,
-                    PreviewImage = post.PreviewImage,
-                    PreviewText = localizer.PreviewText,
-                    ApprovalStatus = post.ApprovalStatus
-                };
+                var publishedPost = PublishedPost.GetFromModel(post, localizer);
                 return Json(publishedPost);
             }
 
@@ -341,16 +310,7 @@ namespace ContestSystem.Controllers
             var posts = await _dbContext.Posts.ToListAsync();
             var requests = posts.ConvertAll(p =>
             {
-                ConstructedPost pr = new ConstructedPost
-                {
-                    Id = p.Id,
-                    Author = p.Author,
-                    PromotedDateTimeUTC = p.PromotedDateTimeUTC,
-                    ApprovalStatus = p.ApprovalStatus,
-                    ApprovingModerator = p.ApprovingModerator,
-                    Localizers = p.PostLocalizers,
-                    ModerationMessage = p.ModerationMessage
-                };
+                ConstructedPost pr = ConstructedPost.GetFromModel(p);
                 return pr;
             });
             return Json(requests);
@@ -370,16 +330,7 @@ namespace ContestSystem.Controllers
                 });
             }
 
-            var request = new ConstructedPost
-            {
-                Id = post.Id,
-                Author = post.Author,
-                PromotedDateTimeUTC = post.PromotedDateTimeUTC,
-                ApprovalStatus = post.ApprovalStatus,
-                ApprovingModerator = post.ApprovingModerator,
-                Localizers = post.PostLocalizers,
-                ModerationMessage = post.ModerationMessage
-            };
+            var request = ConstructedPost.GetFromModel(post);
             return Json(Request);
         }
 

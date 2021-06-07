@@ -1,4 +1,5 @@
 ﻿using ContestSystemDbStructure.Enums;
+using ContestSystemDbStructure.Models;
 using System;
 
 namespace ContestSystem.Models.ExternalModels
@@ -14,5 +15,20 @@ namespace ContestSystem.Models.ExternalModels
         public DateTime PublicationDateTimeUTC { get; set; }
         public string ModerationMessage { get; set; }
         public ApproveType ApprovalStatus { get; set; }
+        
+        public static PublishedPost GetFromModel(Post post, PostLocalizer localizer)
+        {
+            return new PublishedPost
+            {
+                Id = post.Id,
+                LocalizedName = localizer?.Name,
+                HtmlLocalizedText = localizer?.HtmlText,
+                PublicationDateTimeUTC = post.PublicationDateTimeUTC,
+                Author = post.Author?.ResponseStructure,
+                PreviewImage = post.PreviewImage,
+                PreviewText = localizer?.PreviewText,
+                ApprovalStatus = post.ApprovalStatus
+            };
+        }
     }
 }

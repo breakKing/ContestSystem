@@ -37,19 +37,7 @@ namespace ContestSystem.Controllers
             var publishedProblems = problems.ConvertAll(p =>
             {
                 var localizer = p.ProblemLocalizers.FirstOrDefault(pl => pl.Culture == culture);
-                var pp = new PublishedProblem
-                {
-                    Id = p.Id,
-                    LocalizedName = localizer?.Name,
-                    LocalizedDescription = localizer?.Description,
-                    LocalizedInputBlock = localizer?.InputBlock,
-                    LocalizedOutputBlock = localizer?.OutputBlock,
-                    MemoryLimitInBytes = p.MemoryLimitInBytes,
-                    TimeLimitInMilliseconds = p.TimeLimitInMilliseconds,
-                    Creator = p.Creator?.ResponseStructure,
-                    ModerationMessage = p.ModerationMessage,
-                    ApprovalStatus = p.ApprovalStatus
-                };
+                var pp = PublishedProblem.GetFromModel(p, localizer);
                 return pp;
             });
             return Json(publishedProblems);
@@ -63,19 +51,7 @@ namespace ContestSystem.Controllers
             var publishedProblems = problems.ConvertAll(p =>
             {
                 var localizer = p.ProblemLocalizers.FirstOrDefault(pl => pl.Culture == culture);
-                var pp = new PublishedProblem
-                {
-                    Id = p.Id,
-                    LocalizedName = localizer?.Name,
-                    LocalizedDescription = localizer?.Description,
-                    LocalizedInputBlock = localizer?.InputBlock,
-                    LocalizedOutputBlock = localizer?.OutputBlock,
-                    MemoryLimitInBytes = p.MemoryLimitInBytes,
-                    TimeLimitInMilliseconds = p.TimeLimitInMilliseconds,
-                    Creator = p.Creator?.ResponseStructure,
-                    ModerationMessage = p.ModerationMessage,
-                    ApprovalStatus = p.ApprovalStatus
-                };
+                var pp = PublishedProblem.GetFromModel(p, localizer);
                 return pp;
             });
             return Json(publishedProblems);
@@ -97,19 +73,7 @@ namespace ContestSystem.Controllers
                         errors = new List<string> { "Такой локализации под данную задачу не существует" }
                     });
                 }
-                var publishedProblem = new PublishedProblem
-                {
-                    Id = problem.Id,
-                    LocalizedName = localizer?.Name,
-                    LocalizedDescription = localizer?.Description,
-                    LocalizedInputBlock = localizer?.InputBlock,
-                    LocalizedOutputBlock = localizer?.OutputBlock,
-                    MemoryLimitInBytes = problem.MemoryLimitInBytes,
-                    TimeLimitInMilliseconds = problem.TimeLimitInMilliseconds,
-                    Creator = problem.Creator?.ResponseStructure,
-                    ModerationMessage = problem.ModerationMessage,
-                    ApprovalStatus = problem.ApprovalStatus
-                };
+                var publishedProblem = PublishedProblem.GetFromModel(problem, localizer);
                 return Json(publishedProblem);
             }
             return Json(new
@@ -126,21 +90,7 @@ namespace ContestSystem.Controllers
             var problem = await _dbContext.Problems.FirstOrDefaultAsync(p => p.Id == id);
             if (problem != null)
             {
-                var constructedProblem = new ConstructedProblem
-                {
-                    Id = problem.Id,
-                    MemoryLimitInBytes = problem.MemoryLimitInBytes,
-                    TimeLimitInMilliseconds = problem.TimeLimitInMilliseconds,
-                    Creator = problem.Creator?.ResponseStructure,
-                    ModerationMessage = problem.ModerationMessage,
-                    ApprovalStatus = problem.ApprovalStatus,
-                    ApprovingModerator = problem.ApprovingModerator,
-                    Checker = problem.Checker,
-                    IsPublic = problem.IsPublic,
-                    Localizers = problem.ProblemLocalizers,
-                    Tests = problem.Tests,
-                    Examples = problem.Examples
-                };
+                var constructedProblem = ConstructedProblem.GetFromModel(problem);
                 return Json(constructedProblem);
             }
             return Json(new

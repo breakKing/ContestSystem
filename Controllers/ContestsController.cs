@@ -44,18 +44,8 @@ namespace ContestSystem.Controllers
             var publishedContests = new List<PublishedContest>();
             for (int i = 0; i < contests.Count; i++)
             {
-                publishedContests.Add(new PublishedContest
-                {
-                    Id = contests[i].Id,
-                    Creator = contests[i].Creator?.ResponseStructure,
-                    LocalizedDescription = localizers[i].Description,
-                    LocalizedName = localizers[i].Name,
-                    StartDateTimeUTC = contests[i].StartDateTimeUTC,
-                    EndDateTimeUTC = contests[i].EndDateTimeUTC,
-                    Image = contests[i].Image,
-                    ParticipantsCount = await _dbContext.ContestsParticipants.CountAsync(cp => cp.ContestId == contests[i].Id),
-                    ApprovalStatus = contests[i].ApprovalStatus
-                });
+                int participantsCount = await _dbContext.ContestsParticipants.CountAsync(cp => cp.ContestId == contests[i].Id);
+                publishedContests.Add(PublishedContest.GetFromModel(contests[i], localizers[i], participantsCount));
             }
             return Json(publishedContests);
         }
@@ -73,18 +63,8 @@ namespace ContestSystem.Controllers
             var publishedContests = new List<PublishedContest>();
             for (int i = 0; i < contests.Count; i++)
             {
-                publishedContests.Add(new PublishedContest
-                {
-                    Id = contests[i].Id,
-                    Creator = contests[i].Creator?.ResponseStructure,
-                    LocalizedDescription = localizers[i].Description,
-                    LocalizedName = localizers[i].Name,
-                    StartDateTimeUTC = contests[i].StartDateTimeUTC,
-                    EndDateTimeUTC = contests[i].EndDateTimeUTC,
-                    Image = contests[i].Image,
-                    ParticipantsCount = await _dbContext.ContestsParticipants.CountAsync(cp => cp.ContestId == contests[i].Id),
-                    ApprovalStatus = contests[i].ApprovalStatus
-                });
+                int participantsCount = await _dbContext.ContestsParticipants.CountAsync(cp => cp.ContestId == contests[i].Id);
+                publishedContests.Add(PublishedContest.GetFromModel(contests[i], localizers[i], participantsCount));
             }
             return Json(publishedContests);
         }
@@ -104,18 +84,8 @@ namespace ContestSystem.Controllers
             var publishedContests = new List<PublishedContest>();
             for (int i = 0; i < contests.Count; i++)
             {
-                publishedContests.Add(new PublishedContest
-                {
-                    Id = contests[i].Id,
-                    Creator = contests[i].Creator?.ResponseStructure,
-                    LocalizedDescription = localizers[i].Description,
-                    LocalizedName = localizers[i].Name,
-                    StartDateTimeUTC = contests[i].StartDateTimeUTC,
-                    EndDateTimeUTC = contests[i].EndDateTimeUTC,
-                    Image = contests[i].Image,
-                    ParticipantsCount = await _dbContext.ContestsParticipants.CountAsync(cp => cp.ContestId == contests[i].Id),
-                    ApprovalStatus = contests[i].ApprovalStatus
-                });
+                int participantsCount = await _dbContext.ContestsParticipants.CountAsync(cp => cp.ContestId == contests[i].Id);
+                publishedContests.Add(PublishedContest.GetFromModel(contests[i], localizers[i], participantsCount));
             }
             return Json(publishedContests);
         }
@@ -136,18 +106,8 @@ namespace ContestSystem.Controllers
                         errors = new List<string> { "Такой локализации под данный контест не существует" }
                     });
                 }
-                var publishedContest = new PublishedContest
-                {
-                    Id = contest.Id,
-                    LocalizedName = localizer.Name,
-                    LocalizedDescription = localizer.Description,
-                    Image = contest.Image,
-                    StartDateTimeUTC = contest.StartDateTimeUTC,
-                    EndDateTimeUTC = contest.EndDateTimeUTC,
-                    Creator = contest.Creator?.ResponseStructure,
-                    ParticipantsCount = await _dbContext.ContestsParticipants.CountAsync(cp => cp.ContestId == contest.Id),
-                    ApprovalStatus = contest.ApprovalStatus
-                };
+                int participantsCount = await _dbContext.ContestsParticipants.CountAsync(cp => cp.ContestId == contest.Id);
+                var publishedContest = PublishedContest.GetFromModel(contest, localizer, participantsCount);
                 return Json(publishedContest);
             }
             return Json(new
@@ -164,31 +124,8 @@ namespace ContestSystem.Controllers
             var contest = await _dbContext.Contests.FirstOrDefaultAsync(p => p.Id == id);
             if (contest != null)
             {
-                var constructedContest = new ConstructedContest
-                {
-                    Id = contest.Id,
-                    Localizers = contest.ContestLocalizers,
-                    Image = contest.Image,
-                    StartDateTimeUTC = contest.StartDateTimeUTC,
-                    EndDateTimeUTC = contest.EndDateTimeUTC,
-                    DurationInMinutes = contest.DurationInMinutes,
-                    Creator = contest.Creator?.ResponseStructure,
-                    ApprovalStatus = contest.ApprovalStatus,
-                    Rules = contest.RulesSet,
-                    ApprovingModerator = contest.ApprovingModerator?.ResponseStructure,
-                    ModerationMessage = contest.ModerationMessage,
-                    Problems = (await _dbContext.ContestsProblems.Where(cp => cp.ContestId == contest.Id)
-                                                                    .ToListAsync())
-                                                                    .ConvertAll(cp =>
-                                                                    {
-                                                                        return new ProblemEntry
-                                                                        {
-                                                                            Letter = cp.Letter,
-                                                                            ProblemId = cp.ProblemId,
-                                                                            ContestId = cp.ContestId
-                                                                        };
-                                                                    })
-                };
+                var problems = await _dbContext.ContestsProblems.Where(cp => cp.ContestId == contest.Id).ToListAsync();
+                var constructedContest = ConstructedContest.GetFromModel(contest, problems);
                 return Json(constructedContest);
             }
             return Json(new
@@ -206,20 +143,8 @@ namespace ContestSystem.Controllers
             var publishedContests = contests.ConvertAll(async c =>
             {
                 var localizer = c.ContestLocalizers.FirstOrDefault(pl => pl.Culture == culture);
-                var pc = new PublishedContest
-                {
-                    Id = c.Id,
-                    LocalizedName = localizer?.Name,
-                    LocalizedDescription = localizer?.Description,
-                    StartDateTimeUTC = c.StartDateTimeUTC,
-                    EndDateTimeUTC = c.EndDateTimeUTC,
-                    DurationInMinutes = c.DurationInMinutes,
-                    Creator = c.Creator?.ResponseStructure,
-                    Image = c.Image,
-                    ModerationMessage = c.ModerationMessage,
-                    ParticipantsCount = await _dbContext.ContestsParticipants.CountAsync(cp => cp.ContestId == c.Id),
-                    ApprovalStatus = c.ApprovalStatus
-                };
+                int participantsCount = await _dbContext.ContestsParticipants.CountAsync(cp => cp.ContestId == c.Id);
+                var pc = PublishedContest.GetFromModel(c, localizer, participantsCount);
                 return pc;
             });
             return Json(publishedContests.Select(pc => pc.Result));

@@ -16,5 +16,21 @@ namespace ContestSystem.Models.ExternalModels
         public ApproveType ApprovalStatus { get; set; }
         public object ApprovingModerator { get; set; }
         public string ModerationMessage { get; set; }
+
+        public static ConstructedPost GetFromModel(Post post)
+        {
+            return new ConstructedPost
+            {
+                Id = post.Id,
+                Author = post.Author?.ResponseStructure,
+                PromotedDateTimeUTC = post.PromotedDateTimeUTC,
+                ApprovalStatus = post.ApprovalStatus,
+                ApprovingModerator = post.ApprovingModerator,
+                Localizers = post.PostLocalizers,
+                ModerationMessage = post.ModerationMessage,
+                PublicationDateTimeUTC = post.PublicationDateTimeUTC,
+                PreviewImage = post.PreviewImage
+            };
+        }
     }
 }

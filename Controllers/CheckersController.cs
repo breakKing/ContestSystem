@@ -40,18 +40,7 @@ namespace ContestSystem.Controllers
             var checkers = await _dbContext.Checkers.Where(p => p.AuthorId == id).ToListAsync();
             var publishedCheckers = checkers.ConvertAll(c =>
             {
-                var pc = new PublishedChecker
-                {
-                    Id = c.Id,
-                    Name = c.Name,
-                    Description = c.Description,
-                    CompilationVerdict = c.CompilationVerdict,
-                    Errors = c.Errors,
-                    IsPublic = c.IsPublic,
-                    Author = c.Author?.ResponseStructure,
-                    ModerationMessage = c.ModerationMessage,
-                    ApprovalStatus = c.ApprovalStatus
-                };
+                var pc = PublishedChecker.GetFromModel(c);
                 return pc;
             });
             return Json(publishedCheckers);
@@ -64,18 +53,7 @@ namespace ContestSystem.Controllers
             var checkers = await _dbContext.Checkers.Where(c => c.AuthorId == id || c.IsPublic).ToListAsync();
             var publishedCheckers = checkers.ConvertAll(c =>
             {
-                var pc = new PublishedChecker
-                {
-                    Id = c.Id,
-                    Name = c.Name,
-                    Description = c.Description,
-                    CompilationVerdict = c.CompilationVerdict,
-                    Errors = c.Errors,
-                    IsPublic = c.IsPublic,
-                    Author = c.Author?.ResponseStructure,
-                    ModerationMessage = c.ModerationMessage,
-                    ApprovalStatus = c.ApprovalStatus
-                };
+                var pc = PublishedChecker.GetFromModel(c);
                 return pc;
             });
             return Json(publishedCheckers);
@@ -95,18 +73,7 @@ namespace ContestSystem.Controllers
                 });
             }
 
-            var publishedChecker = new PublishedChecker
-            {
-                Id = checker.Id,
-                Name = checker.Name,
-                Description = checker.Description,
-                CompilationVerdict = checker.CompilationVerdict,
-                Errors = checker.Errors,
-                IsPublic = checker.IsPublic,
-                Author = checker.Author?.ResponseStructure,
-                ModerationMessage = checker.ModerationMessage,
-                ApprovalStatus = checker.ApprovalStatus
-            };
+            var publishedChecker = PublishedChecker.GetFromModel(checker);
             return Json(publishedChecker);
         }
 
@@ -124,20 +91,7 @@ namespace ContestSystem.Controllers
                 });
             }
 
-            var constructedChecker = new ConstructedChecker
-            {
-                Id = checker.Id,
-                Name = checker.Name,
-                Description = checker.Description,
-                CompilationVerdict = checker.CompilationVerdict,
-                Errors = checker.Errors,
-                IsPublic = checker.IsPublic,
-                Author = checker.Author?.ResponseStructure,
-                ModerationMessage = checker.ModerationMessage,
-                ApprovalStatus = checker.ApprovalStatus,
-                ApprovingModerator = checker.ApprovingModerator?.ResponseStructure,
-                Code = checker.Code
-            };
+            var constructedChecker = ConstructedChecker.GetFromModel(checker);
             return Json(constructedChecker);
         }
 

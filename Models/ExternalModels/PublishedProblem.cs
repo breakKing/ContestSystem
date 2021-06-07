@@ -1,4 +1,5 @@
 ﻿using ContestSystemDbStructure.Enums;
+using ContestSystemDbStructure.Models;
 
 namespace ContestSystem.Models.ExternalModels
 {
@@ -14,5 +15,22 @@ namespace ContestSystem.Models.ExternalModels
         public int TimeLimitInMilliseconds { get; set; } 
         public string ModerationMessage { get; set; }
         public ApproveType ApprovalStatus { get; set; }
+
+        public static PublishedProblem GetFromModel(Problem problem, ProblemLocalizer localizer)
+        {
+            return new PublishedProblem
+            {
+                Id = problem.Id,
+                LocalizedName = localizer?.Name,
+                LocalizedDescription = localizer?.Description,
+                LocalizedInputBlock = localizer?.InputBlock,
+                LocalizedOutputBlock = localizer?.OutputBlock,
+                MemoryLimitInBytes = problem.MemoryLimitInBytes,
+                TimeLimitInMilliseconds = problem.TimeLimitInMilliseconds,
+                Creator = problem.Creator?.ResponseStructure,
+                ModerationMessage = problem.ModerationMessage,
+                ApprovalStatus = problem.ApprovalStatus
+            };
+        }
     }
 }

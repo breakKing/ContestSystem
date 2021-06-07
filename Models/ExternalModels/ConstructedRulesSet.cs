@@ -1,4 +1,5 @@
 ﻿using ContestSystemDbStructure.Enums;
+using ContestSystemDbStructure.Models;
 
 namespace ContestSystem.Models.ExternalModels
 {
@@ -18,5 +19,26 @@ namespace ContestSystem.Models.ExternalModels
         public short MonitorFreezeTimeBeforeFinishInMinutes { get; set; }
         public bool ShowFullTestsResults { get; set; }
         public bool IsPublic { get; set; }
+
+        public static ConstructedRulesSet GetFromModel(RulesSet rules)
+        {
+            return new ConstructedRulesSet
+            {
+                Id = rules.Id,
+                Name = rules.Name,
+                Description = rules.Description,
+                ShowFullTestsResults = rules.ShowFullTestsResults,
+                PointsForBestSolution = rules.PointsForBestSolution,
+                CountMode = rules.CountMode,
+                MaxTriesForOneProblem = rules.MaxTriesForOneProblem,
+                PenaltyForOneMinute = rules.PenaltyForOneMinute,
+                MonitorFreezeTimeBeforeFinishInMinutes = rules.MonitorFreezeTimeBeforeFinishInMinutes,
+                PenaltyForCompilationError = rules.PenaltyForCompilationError,
+                PenaltyForOneTry = rules.PenaltyForOneTry,
+                PublicMonitor = rules.PublicMonitor,
+                Author = rules.Author?.ResponseStructure,
+                IsPublic = rules.IsPublic
+            };
+        }
     }
 }
