@@ -158,14 +158,13 @@ export default {
       })
     }
   },
-  watch: {
-    async $route(to, from) {
-      await this.fetchAllRoles()
-    }
+  beforeRouteEnter(to, from, next) {
+    next(async vm => {
+      await vm.fetchAllRoles()
+    })
   },
   async created() {
     moment.locale('ru')
-    await this.fetchAllRoles(true)
   },
   components: {
     VForm: Form,

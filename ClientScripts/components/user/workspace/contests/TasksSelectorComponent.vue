@@ -59,25 +59,17 @@ export default {
         return alphabet.upper[0]
       }
       return alphabet.upper[this.tasks.length]
-    },
-    logThis(data) {
-      console.log(data)
     }
   },
   computed: {
     ...mapGetters(['availableTasks']),
   },
-  watch: {
-    async $route(to, from) {
-      await this.fetchAvailableTasks()
-      this.selected_ids = _.map(this.tasks, (t) => t?.problemId)
-    }
-  },
-  async mounted() {
-    await this.fetchAvailableTasks(true)
-    this.selected_ids = _.map(this.tasks, (t) => t?.problemId)
-  },
-
+  beforeRouteEnter(to, from, next) {
+    next(async vm => {
+      await vm.fetchAvailableTasks()
+      vm.selected_ids = _.map(vm.tasks, (t) => t?.problemId)
+    })
+  }
 }
 </script>
 

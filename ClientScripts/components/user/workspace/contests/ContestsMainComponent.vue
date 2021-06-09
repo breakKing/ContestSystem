@@ -10,13 +10,10 @@ export default {
   methods: {
     ...mapActions(['fetchCurrentUserContestsList'])
   },
-  watch: {
-    async $route(to, from) {
-      await this.fetchCurrentUserContestsList()
-    }
-  },
-  async created() {
-     await this.fetchCurrentUserContestsList(true)
+  beforeRouteEnter(to, from, next) {
+    next(async vm => {
+      await vm.fetchCurrentUserContestsList()
+    })
   },
 }
 </script>

@@ -4,10 +4,11 @@ import LoginPage from '../views/LoginPage'
 import RegisterPage from '../views/RegisterPage'
 import RolesPage from '../views/RolesPage'
 import UserStarterPage from '../views/user/UserStarterPage'
-import UserRoutes from "modules/user_routes";
-import ManagerRoutes from "modules/moder_routes";
-import AdminRoutes from "modules/admin_routes";
-
+import UserRoutes from "./modules/user_routes";
+import ManagerRoutes from "./modules/moder_routes";
+import AdminRoutes from "./modules/admin_routes";
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css';
 
 const router = createRouter({
     history: createWebHistory(),
@@ -71,6 +72,20 @@ const router = createRouter({
         },
     ],
 })
+
+router.beforeResolve((to, from, next) => {
+    if (to.name) {
+        // Запустить отображение загрузки
+        NProgress.start()
+    }
+    next()
+})
+
+router.afterEach(() => {
+    // Завершить отображение загрузки
+    NProgress.done()
+})
+
 router.beforeEach(async (to, from, next) => {
     await store.dispatch('initAuth') // ensure auth synced with server
     let isAuthenticated = store.getters.isAuthenticated

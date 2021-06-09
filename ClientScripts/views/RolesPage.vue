@@ -24,15 +24,10 @@ export default {
     ...mapMutations(['setCurrentRole']),
     ...mapActions(['fetchAllRoles',]),
   },
-  watch: {
-    async $route(to, from) {
-      if (to.name === 'RoleSelector') {
-        await this.fetchAllRoles()
-      }
-    }
-  },
-  async created() {
-    await this.fetchAllRoles(true)
+  beforeRouteEnter(to, from, next) {
+    next(async vm => {
+      await vm.fetchAllRoles()
+    })
   },
 }
 </script>

@@ -45,7 +45,7 @@ export default {
             }
             try {
                 let {data} = await axios.get('/api/posts/ru')
-                commit('setPostsList', data.roles)
+                commit('setPostsList', data)
             } catch (e) {
                 console.error(e)
             }

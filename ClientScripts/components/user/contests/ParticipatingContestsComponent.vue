@@ -19,15 +19,10 @@ export default {
   methods: {
     ...mapActions(['fetchParticipatingContests']),
   },
-  watch: {
-    async $route(to, from) {
-      if (to.name === 'ParticipatingContestsPage') {
-        await this.fetchParticipatingContests()
-      }
-    }
-  },
-  async created() {
-    await this.fetchParticipatingContests(true)
+  beforeRouteEnter(to, from, next) {
+    next(async vm => {
+      await vm.fetchParticipatingContests()
+    })
   },
 }
 </script>

@@ -10,13 +10,10 @@ export default {
   methods: {
     ...mapActions(['fetchCurrentUserTasks'])
   },
-  watch: {
-    async $route(to, from) {
-      await this.fetchCurrentUserTasks(true)
-    }
-  },
-  async created() {
-     await this.fetchCurrentUserTasks(true)
+  beforeRouteEnter(to, from, next) {
+    next(async vm => {
+      await vm.fetchCurrentUserTasks()
+    })
   },
 }
 </script>

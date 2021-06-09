@@ -17,15 +17,10 @@ export default {
   methods: {
     ...mapActions(['fetchPostsList']),
   },
-  watch: {
-    async $route(to, from) {
-      if (to.name === 'PostsPage') {
-        await this.fetchPostsList()
-      }
-    }
-  },
-  async created() {
-    await this.fetchPostsList(true)
+  beforeRouteEnter(to, from, next) {
+    next(async vm => {
+      await vm.fetchPostsList()
+    })
   },
 }
 </script>

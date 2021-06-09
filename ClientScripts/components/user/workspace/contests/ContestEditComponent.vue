@@ -187,15 +187,10 @@ export default {
       return 'data:image/jpeg;base64,' + this.image
     },
   },
-  watch: {
-    async $route(to, from) {
-      if (to.name === 'WorkSpaceEditContestPage') {
-        await this.updateFields()
-      }
-    }
-  },
-  async created() {
-    await this.updateFields()
+  beforeRouteEnter(to, from, next) {
+    next(async vm => {
+      await vm.updateFields()
+    })
   },
 }
 </script>

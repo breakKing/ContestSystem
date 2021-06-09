@@ -17,15 +17,10 @@ export default {
   methods: {
     ...mapActions(['fetchAvailableContests']),
   },
-  watch: {
-    async $route(to, from) {
-      if (to.name === 'AvailableContestsPage') {
-        await this.fetchAvailableContests(true)
-      }
-    }
-  },
-  async created() {
-    await this.fetchAvailableContests(true)
+  beforeRouteEnter(to, from, next) {
+    next(async vm => {
+      await vm.fetchAvailableContests()
+    })
   },
 }
 </script>

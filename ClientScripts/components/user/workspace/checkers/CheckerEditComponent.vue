@@ -103,17 +103,11 @@ export default {
       }
     }
   },
-  async created() {
-    await this.updateFields()
+  beforeRouteEnter(to, from, next) {
+    next(async vm => {
+      await vm.updateFields()
+    })
   },
-  watch: {
-    async $route(to, from) {
-      if (to.name === 'WorkSpaceEditCheckersPage') {
-        await this.updateFields()
-      }
-    }
-  },
-
 }
 </script>
 

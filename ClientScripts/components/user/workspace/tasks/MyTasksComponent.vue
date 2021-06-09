@@ -6,7 +6,6 @@
 
 <script>
 import {mapActions, mapGetters} from "vuex";
-import ContestPreviewComponent from "../../contests/ContestPreviewComponent";
 import TaskPreviewComponent from "./TaskPreviewComponent";
 
 export default {
@@ -18,13 +17,10 @@ export default {
   computed: {
     ...mapGetters(['availableTasks'])
   },
-  watch: {
-    async $route(to, from) {
-      await this.fetchAvailableTasks()
-    }
-  },
-  async created() {
-    await this.fetchAvailableTasks(true)
+  beforeRouteEnter(to, from, next) {
+    next(async vm => {
+      await vm.fetchAvailableTasks()
+    })
   },
 }
 </script>

@@ -10,13 +10,10 @@ export default {
   methods: {
     ...mapActions(['fetchCurrentUserRuleSets'])
   },
-  watch: {
-    async $route(to, from) {
-      await this.fetchCurrentUserRuleSets()
-    }
-  },
-  async created() {
-     await this.fetchCurrentUserRuleSets(true)
+  beforeRouteEnter(to, from, next) {
+    next(async vm => {
+      await vm.fetchCurrentUserRuleSets()
+    })
   },
 }
 </script>
