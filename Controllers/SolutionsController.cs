@@ -2,7 +2,6 @@
 using ContestSystem.Models.Attributes;
 using ContestSystem.Models.DbContexts;
 using ContestSystem.Services;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -21,13 +20,11 @@ namespace ContestSystem.Controllers
     public class SolutionsController : Controller
     {
         private readonly MainDbContext _dbContext;
-        private readonly UserManager<User> _userManager;
         private readonly CheckerSystemService _checkerSystemService;
 
-        public SolutionsController(MainDbContext dbContext, UserManager<User> userManager, CheckerSystemService checkerSystemService)
+        public SolutionsController(MainDbContext dbContext, CheckerSystemService checkerSystemService)
         {
             _dbContext = dbContext;
-            _userManager = userManager;
             _checkerSystemService = checkerSystemService;
         }
 
