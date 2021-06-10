@@ -6,6 +6,7 @@ import contests from './modules/contests'
 import checkers from './modules/checkers'
 import tasks from './modules/tasks'
 import rulesets from './modules/rulesets'
+import solutions from './modules/solutions'
 
 export default createStore({
     strict: process.env.NODE_ENV !== 'production',
@@ -17,6 +18,7 @@ export default createStore({
         checkers,
         tasks,
         rulesets,
+        solutions,
     },
     actions: {
         globalAlert({commit, state, dispatch, getters}, {message}) {

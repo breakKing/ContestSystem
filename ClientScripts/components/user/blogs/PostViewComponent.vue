@@ -34,7 +34,7 @@ export default {
   },
   computed: {
     dataUrl() {
-      if (!this.post_info) {
+      if (!this.post_info || !this.post_info?.previewImage) {
         return '';
       }
       return 'data:image/jpeg;base64,' + this.post_info?.previewImage

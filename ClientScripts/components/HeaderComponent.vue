@@ -3,8 +3,8 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-primary ">
     <div class="container-xl">
       <router-link class="navbar-brand me-5 text-light" :to="{name: 'Home'}">
-        ContestSystem
-        <!--<img src="~../../Images/logo.png" alt="logo">-->
+        <img src="~../../Images/logo.png" alt="logo" class="me-2">
+        <span>ContestSystem</span>
       </router-link> 
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample07XL" aria-controls="navbarsExample07XL" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -15,7 +15,7 @@
           <li class="nav-item me-2 fs-5">
             <router-link class="nav-link text-light" :to="{name: 'Home'}">Главная</router-link>
           </li>
-          <li class="nav-item me-2 fs-5">
+          <li class="nav-item me-2 fs-5" v-if="isAuthenticated && currentRole === 'user'">
             <router-link class="nav-link text-light" :to="{name: 'ContestsPage'}">Контесты</router-link>
           </li>
           <li class="nav-item me-2 fs-5">
