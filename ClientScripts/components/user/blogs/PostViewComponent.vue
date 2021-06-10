@@ -10,7 +10,7 @@
     </div>
     <div class="row">
       <div class="col">
-        <img :src="dataUrl" :alt="post_info?.localizedName">
+        <img class="img-fluid" :src="dataUrl" :alt="post_info?.localizedName">
       </div>
     </div>
     <div class="row">

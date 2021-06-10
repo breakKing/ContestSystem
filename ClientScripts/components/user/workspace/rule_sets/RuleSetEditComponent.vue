@@ -128,7 +128,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(['getRuleSet', 'fetchAvailableRuleSets']),
+    ...mapActions(['getRuleSet', 'fetchAvailableRuleSets', 'fetchCurrentUserRuleSets']),
     async updateFields() {
       this.ruleSet = await this.getRuleSet(this.set_id)
 
@@ -176,6 +176,7 @@ export default {
         if (data.status) {
           this.error_msg = ''
           await this.fetchAvailableRuleSets(true)
+          await this.fetchCurrentUserRuleSets(true)
           await this.$router.push({name: 'WorkSpaceMyRuleSetsPage'})
         } else {
           this.error_msg = (data.errors || []).join(', ')

@@ -13,7 +13,7 @@
         <button @click.prevent="previewClick" class="btn btn-info">Подробнее</button>
       </div>
       <div class="col-md-5 col-12">
-        <img :src="dataUrl" :alt="post.Name">
+        <img style="max-height: 10rem;" class="img-fluid" :src="dataUrl" :alt="post.Name">
       </div>
     </div>
   </div>

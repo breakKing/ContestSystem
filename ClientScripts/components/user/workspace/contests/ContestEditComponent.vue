@@ -44,7 +44,7 @@
         </div>
       </div>
       <div class="col" v-if="!!dataUrl">
-        <img :src="dataUrl"/>
+        <img class="img-fluid" :src="dataUrl"/>
       </div>
     </div>
     <tasks-selector-component :tasks="sortedTasks" @update:tasks="updateEvent"></tasks-selector-component>
@@ -91,7 +91,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['getContestById', 'fetchAvailableRuleSets']),
+    ...mapActions(['getContestById', 'fetchAvailableRuleSets', 'fetchRunningContests', 'fetchAvailableContests', 'fetchParticipatingContests', 'fetchCurrentUserContestsList']),
     async updateFields() {
       await this.fetchAvailableRuleSets();
       let post = await this.getContestById(this.contest_id)
@@ -168,6 +168,11 @@ export default {
       })
       if (result.status) {
         this.error_msg = ''
+
+        await this.fetchRunningContests(true)
+        await this.fetchAvailableContests(true)
+        await this.fetchParticipatingContests(true)
+        await this.fetchCurrentUserContestsList(true)
         await this.$router.push({name: 'WorkSpaceMyContestsPage'})
 
       } else {
