@@ -18,6 +18,7 @@ namespace ContestSystem.Models.ExternalModels
         public string ErrorsMessage { get; set; }
         public VerdictType Verdict { get; set; }
         public short Points { get; set; }
+        public List<TestResult> TestResults { get; set; } = new List<TestResult>();
 
         public static ConstructedSolution GetFromModel(Solution solution, List<ContestProblem> problemsInContest)
         {
@@ -33,7 +34,8 @@ namespace ContestSystem.Models.ExternalModels
                 SubmitTimeUTC = solution.SubmitTimeUTC,
                 ErrorsMessage = solution.ErrorsMessage,
                 Verdict = solution.Verdict,
-                Points = solution.Points
+                Points = solution.Points,
+                TestResults = solution.TestResults
             };
         }
     }
