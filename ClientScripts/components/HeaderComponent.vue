@@ -16,12 +16,12 @@
             <router-link class="nav-link text-light" :to="{name: 'Home'}">Главная</router-link>
           </li>
           <li class="nav-item me-2 fs-5">
-            <router-link class="nav-link text-light" :to="{name: 'Home'}">Контесты</router-link>
+            <router-link class="nav-link text-light" :to="{name: 'ContestsPage'}">Контесты</router-link>
           </li>
           <li class="nav-item me-2 fs-5">
             <router-link class="nav-link text-light" :to="{name: 'PostsPage'}">Блог</router-link>
           </li>
-          <template v-if="isAuthenticated && currentRole == 'user'">
+          <template v-if="isAuthenticated && currentRole === 'user'">
           <li class="nav-item me-2 fs-5" >
             <router-link class="nav-link text-light" :to="{name: 'CoursePage'}">Учебные курсы</router-link>
           </li>

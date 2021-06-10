@@ -9,7 +9,7 @@ import * as _ from 'lodash'
 import ContestPreviewComponent from "./ContestPreviewComponent";
 
 export default {
-  name: "AvailablePostsComponent",
+  name: "AvailableContestsComponent",
   components: {ContestPreviewComponent},
   computed: {
     ...mapGetters(['availableContests'])

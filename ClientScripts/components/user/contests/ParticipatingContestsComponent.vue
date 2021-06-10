@@ -7,7 +7,6 @@
 
 <script>
 import {mapState, mapActions, mapGetters, mapMutations} from 'vuex'
-import * as _ from 'lodash'
 import ContestPreviewComponent from "./ContestPreviewComponent";
 
 export default {
