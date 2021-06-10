@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ContestSystem.Models.ExternalModels;
 
 namespace ContestSystem.Controllers
 {
@@ -41,7 +42,9 @@ namespace ContestSystem.Controllers
                     errors = new List<string> { "Нет решения с таким идентификатором" }
                 });
             }
-            return null;
+            var problemsInContest = await _dbContext.ContestsProblems.Where(cp => cp.ContestId == solution.ContestId).ToListAsync();
+            var constructedSolution = ConstructedSolution.GetFromModel(solution, problemsInContest);
+            return Json(constructedSolution);
         }
     }
 }
