@@ -393,6 +393,92 @@ namespace ContestSystem.Controllers
             });
         }
 
+        [HttpPost("{contestId}/add-participant")]
+        [AuthorizeByJwt(Roles = RolesContainer.User)]
+        public async Task<IActionResult> AddParticipant(long contestId, [FromBody] ParticipantForm participantForm)
+        {
+            if (ModelState.IsValid)
+            {
+                var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == contestId);
+                if (contest == null)
+                {
+                    return Json(new
+                    {
+                        status = false,
+                        errors = new List<string> { "Попытка добавить участника в несуществующий контест" }
+                    });
+                }
+                var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == participantForm.UserId);
+                if (user == null)
+                {
+                    return Json(new
+                    {
+                        status = false,
+                        errors = new List<string> { "Попытка добавить несуществующего пользователя в контест" }
+                    });
+                }
+                if (await _dbContext.ContestsParticipants.AnyAsync(cp => cp.ContestId == contestId && cp.ParticipantId == participantForm.UserId))
+                {
+                    return Json(new
+                    {
+                        status = false,
+                        errors = new List<string> { "Такой участник в контесте уже есть" }
+                    });
+                }
+                var contestParticipant = new ContestParticipant
+                {
+                    ParticipantId = participantForm.UserId,
+                    ContestId = participantForm.ContestId,
+                    Alias = participantForm.Alias,
+                    Result = 0,
+                    ConfirmedByParticipant = true, // TODO: сделать нормальные проверки на инвайты и прочую чепухню
+                    ConfirmedByLocalModerator = true,
+                    ConfirmingLocalModeratorId = contest.CreatorId
+                };
+                await _dbContext.ContestsParticipants.AddAsync(contestParticipant);
+                await _dbContext.SaveChangesAsync();
+            }
+            return Json(new
+            {
+                status = false,
+                errors = ModelState.Values
+                                         .SelectMany(x => x.Errors)
+                                         .Select(x => x.ErrorMessage)
+                                         .ToList()
+            });
+        }
+
+        [HttpDelete("{contestId}/delete-participant/{userId}")]
+        [AuthorizeByJwt(Roles = RolesContainer.User)]
+        public async Task<IActionResult> DeleteParticipant(long contestId, long userId)
+        {
+            var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == contestId);
+            if (contest == null)
+            {
+                return Json(new
+                {
+                    status = false,
+                    errors = new List<string> { "Попытка добавить участника в несуществующий контест" }
+                });
+            }
+            var contestParticipant = await _dbContext.ContestsParticipants.FirstOrDefaultAsync(cp => cp.ContestId == contestId && cp.ParticipantId == userId);
+            if (contestParticipant == null)
+            {
+                return Json(new
+                {
+                    status = false,
+                    errors = new List<string> { "Такого участника нет в контесте" }
+                });
+            }
+            _dbContext.ContestsParticipants.Remove(contestParticipant);
+            await _dbContext.SaveChangesAsync();
+            return Json(new
+            {
+                status = true,
+                message = ""
+            });
+        }
+
         /*[HttpGet("get-contest-requests")]
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetAllPostsRequests()
