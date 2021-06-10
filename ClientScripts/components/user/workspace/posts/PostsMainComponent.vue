@@ -10,13 +10,10 @@ export default {
   methods: {
     ...mapActions(['fetchUserPostsList'])
   },
-  watch: {
-    async $route(to, from) {
-      await this.fetchUserPostsList()
-    }
-  },
-  async created() {
-     await this.fetchUserPostsList(true)
+  beforeRouteEnter(to, from, next) {
+    next(async vm => {
+      await vm.fetchUserPostsList()
+    })
   },
 }
 </script>

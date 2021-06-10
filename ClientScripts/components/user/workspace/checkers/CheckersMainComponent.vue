@@ -10,13 +10,10 @@ export default {
   methods: {
     ...mapActions(['fetchCurrentUserCheckers'])
   },
-  watch: {
-    async $route(to, from) {
-      await this.fetchCurrentUserCheckers()
-    }
-  },
-  async created() {
-     await this.fetchCurrentUserCheckers(true)
+  beforeRouteEnter(to, from, next) {
+    next(async vm => {
+      await vm.fetchCurrentUserCheckers()
+    })
   },
 }
 </script>

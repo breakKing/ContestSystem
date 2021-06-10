@@ -53,7 +53,7 @@
 
 <script>
 import {Modal} from 'bootstrap';
-import {mapState, mapActions, mapGetters, mapMutations} from 'vuex'
+import {mapActions, mapGetters} from 'vuex'
 import {Field, Form, ErrorMessage} from "vee-validate";
 import * as Yup from 'yup';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
@@ -86,15 +86,7 @@ export default {
     }
   },
   async mounted() {
-    if (this.post_id) {
-      let post_data = await this.getPostInfo(this.post_id)
-      if (post_data) {
-        this.postName = post_data.localizedName
-        this.previewImage = post_data.previewImage
-        this.postPreview = post_data.previewText
-        this.postText = post_data.htmlLocalizedText
-      }
-    }
+    await this.updateFields()
   },
   computed: {
     ...mapGetters(['currentUser']),
@@ -116,7 +108,21 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['getPostInfo', 'savePostInfo', 'fetchPostsList']),
+    ...mapActions(['getPostInfo', 'savePostInfo', 'fetchPostsList', 'fetchUserPostsList']),
+    async updateFields() {
+      if (this.post_id) {
+        let post_data = await this.getPostInfo(this.post_id)
+        if (post_data) {
+          this.postName = post_data.localizedName
+          this.previewImage = post_data.previewImage
+          this.postPreview = post_data.previewText
+          this.postText = post_data.htmlLocalizedText
+        }
+      }
+    },
+    hideModal() {
+      document.querySelector(`#${this.modalId} [data-bs-dismiss="modal"]`).click()
+    },
     async savePost() {
       if (!this.currentUser) {
         this.error_msg = 'С вашими авторизационными данными что-то не так'
@@ -139,8 +145,9 @@ export default {
       })
       if (result.status) {
         await this.fetchPostsList(true);
-        let modal = new Modal(document.querySelector('#' + this.modalId));
-        modal.hide();
+        await this.fetchUserPostsList(true);
+        await this.updateFields()
+        this.hideModal()
         this.error_msg = '';
       } else if (result.errors) {
         this.error_msg = result.errors.join(', ')

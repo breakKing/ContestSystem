@@ -43,6 +43,7 @@ namespace ContestSystem.Controllers
                 var pp = PublishedPost.GetFromModel(posts[i], localizers[i]);
                 publishedPosts.Add(pp);
             }
+
             return Json(publishedPosts);
         }
 
@@ -72,7 +73,7 @@ namespace ContestSystem.Controllers
                     return Json(new
                     {
                         status = false,
-                        errors = new List<string> { "Такой локализации под данный пост не существует" }
+                        errors = new List<string> {"Такой локализации под данный пост не существует"}
                     });
                 }
 
@@ -83,7 +84,7 @@ namespace ContestSystem.Controllers
             return Json(new
             {
                 status = false,
-                errors = new List<string> { "Поста с таким идентификатором не существует" }
+                errors = new List<string> {"Поста с таким идентификатором не существует"}
             });
         }
 
@@ -94,21 +95,20 @@ namespace ContestSystem.Controllers
             if (ModelState.IsValid)
             {
                 byte[] imageData = null;
-                /*using (var binaryReader = new BinaryReader(postForm.PreviewImage.OpenReadStream()))
+                if (postForm.PreviewImage != null)
                 {
-                    imageData = binaryReader.ReadBytes((int) postForm.PreviewImage.Length);
-                }*/
-                await using (var ms = new MemoryStream())
-                {
-                    await postForm.PreviewImage.CopyToAsync(ms);
-                    imageData = ms.ToArray();
+                    await using (var ms = new MemoryStream())
+                    {
+                        await postForm.PreviewImage.CopyToAsync(ms);
+                        imageData = ms.ToArray();
+                    }
                 }
 
                 Post post = new Post
                 {
                     PromotedDateTimeUTC = DateTime.UtcNow,
                     AuthorId = postForm.AuthorUserId,
-                    PreviewImage = Convert.ToBase64String(imageData),
+                    PreviewImage = imageData == null ? null : Convert.ToBase64String(imageData),
                     PostLocalizers = new List<PostLocalizer>()
                 };
                 /*
@@ -172,7 +172,7 @@ namespace ContestSystem.Controllers
                 return Json(new
                 {
                     success = false,
-                    errors = new List<string> { "Id в запросе не совпадает с Id в форме" }
+                    errors = new List<string> {"Id в запросе не совпадает с Id в форме"}
                 });
             }
 
@@ -184,7 +184,7 @@ namespace ContestSystem.Controllers
                     return Json(new
                     {
                         status = false,
-                        errors = new List<string> { "Попытка изменить несуществующий пост" }
+                        errors = new List<string> {"Попытка изменить несуществующий пост"}
                     });
                 }
                 else
@@ -194,23 +194,26 @@ namespace ContestSystem.Controllers
                         return Json(new
                         {
                             status = false,
-                            errors = new List<string> { "Попытка изменить не свой пост" }
+                            errors = new List<string> {"Попытка изменить не свой пост"}
                         });
                     }
 
                     byte[] imageData = null;
-                    /*using (var binaryReader = new BinaryReader(postForm.PreviewImage.OpenReadStream()))
-                {
-                    imageData = binaryReader.ReadBytes((int) postForm.PreviewImage.Length);
-                }*/
-                    await using (var ms = new MemoryStream())
+                    if (postForm.PreviewImage != null)
                     {
-                        await postForm.PreviewImage.CopyToAsync(ms);
-                        imageData = ms.ToArray();
+                        await using (var ms = new MemoryStream())
+                        {
+                            await postForm.PreviewImage.CopyToAsync(ms);
+                            imageData = ms.ToArray();
+                        }
                     }
 
                     post.AuthorId = postForm.AuthorUserId;
-                    post.PreviewImage = Convert.ToBase64String(imageData);
+                    if (imageData != null)
+                    {
+                        post.PreviewImage = Convert.ToBase64String(imageData);
+                    }
+
                     post.PublicationDateTimeUTC = DateTime.UtcNow;
                     _dbContext.Posts.Update(post);
                     for (int i = 0; i < postForm.Localizers.Count; i++)
@@ -248,7 +251,7 @@ namespace ContestSystem.Controllers
                         return Json(new
                         {
                             status = false,
-                            errors = new List<string> { "Ошибка параллельного сохранения" }
+                            errors = new List<string> {"Ошибка параллельного сохранения"}
                         });
                     }
 
@@ -279,7 +282,7 @@ namespace ContestSystem.Controllers
                 return Json(new
                 {
                     status = false,
-                    errors = new List<string> { "Попытка удалить несуществующий пост" }
+                    errors = new List<string> {"Попытка удалить несуществующий пост"}
                 });
             }
 
@@ -290,7 +293,7 @@ namespace ContestSystem.Controllers
                 return Json(new
                 {
                     status = false,
-                    errors = new List<string> { "Попытка удалить не свой пост или без админских прав" }
+                    errors = new List<string> {"Попытка удалить не свой пост или без админских прав"}
                 });
             }
 
@@ -326,7 +329,7 @@ namespace ContestSystem.Controllers
                 return Json(new
                 {
                     success = false,
-                    errors = new List<string> { "Такого поста не существует" }
+                    errors = new List<string> {"Такого поста не существует"}
                 });
             }
 
@@ -343,7 +346,7 @@ namespace ContestSystem.Controllers
                 return Json(new
                 {
                     success = false,
-                    errors = new List<string> { "Id в запросе не совпадает с Id в форме" }
+                    errors = new List<string> {"Id в запросе не совпадает с Id в форме"}
                 });
             }
 
@@ -355,7 +358,7 @@ namespace ContestSystem.Controllers
                     return Json(new
                     {
                         status = false,
-                        errors = new List<string> { "Попытка модерировать несуществующий пост" }
+                        errors = new List<string> {"Попытка модерировать несуществующий пост"}
                     });
                 }
                 else
@@ -373,7 +376,7 @@ namespace ContestSystem.Controllers
                         return Json(new
                         {
                             status = false,
-                            errors = new List<string> { "Ошибка параллельного сохранения" }
+                            errors = new List<string> {"Ошибка параллельного сохранения"}
                         });
                     }
 

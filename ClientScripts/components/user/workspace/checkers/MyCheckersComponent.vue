@@ -18,13 +18,10 @@ export default {
   computed: {
     ...mapGetters(['availableCheckers'])
   },
-  watch: {
-    async $route(to, from) {
-      await this.fetchAvailableCheckers()
-    }
-  },
-  async created() {
-    await this.fetchAvailableCheckers(true)
+  beforeRouteEnter(to, from, next) {
+    next(async vm => {
+      await vm.fetchAvailableCheckers()
+    })
   },
 }
 </script>

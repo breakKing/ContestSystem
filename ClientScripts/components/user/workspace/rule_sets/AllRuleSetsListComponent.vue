@@ -17,13 +17,10 @@ export default {
   methods: {
     ...mapActions(['fetchAvailableRuleSets'])
   },
-  watch: {
-    async $route(to, from) {
-      await this.fetchAvailableRuleSets()
-    }
-  },
-  async created() {
-    await this.fetchAvailableRuleSets(true)
+  beforeRouteEnter(to, from, next) {
+    next(async vm => {
+      await vm.fetchAvailableRuleSets()
+    })
   },
 }
 </script>

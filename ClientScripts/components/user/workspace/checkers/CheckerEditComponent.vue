@@ -62,7 +62,7 @@ export default {
     ...mapGetters(['currentUser']),
   },
   methods: {
-    ...mapActions(['getChecker']),
+    ...mapActions(['getChecker', 'fetchCurrentUserCheckers', 'fetchAvailableCheckers']),
     async updateFields() {
       let checker = await this.getChecker(this.id)
       this.name = checker?.name
@@ -81,7 +81,7 @@ export default {
         description: this.description,
         code: this.code,
         authorId: this.currentUser.id,
-        isPublic: this.isPublic == 1,
+        isPublic: +this.isPublic === 1,
       }
       let result;
       try {
@@ -97,23 +97,19 @@ export default {
         this.errors = 'При сохранении произошла фатальная ошибка'
       }
       if (result.status) {
+        await this.fetchCurrentUserCheckers(true)
+        await this.fetchAvailableCheckers(true)
         await this.$router.push({name: 'WorkSpaceMyApprovedCheckersPage'})
       } else if (result.errors) {
         this.errors = result.errors.join(', ')
       }
     }
   },
-  async created() {
-    await this.updateFields()
+  beforeRouteEnter(to, from, next) {
+    next(async vm => {
+      await vm.updateFields()
+    })
   },
-  watch: {
-    async $route(to, from) {
-      if (to.name === 'WorkSpaceEditCheckersPage') {
-        await this.updateFields()
-      }
-    }
-  },
-
 }
 </script>
 

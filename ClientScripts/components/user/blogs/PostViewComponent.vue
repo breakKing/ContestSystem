@@ -10,7 +10,7 @@
     </div>
     <div class="row">
       <div class="col">
-        <img :src="dataUrl" :alt="post_info?.localizedName">
+        <img class="img-fluid" :src="dataUrl" :alt="post_info?.localizedName">
       </div>
     </div>
     <div class="row">
@@ -44,15 +44,10 @@ export default {
   methods: {
     ...mapActions(['getPostInfo'])
   },
-  watch: {
-    async $route(to, from) {
-      if (to.name === 'ViewPost') {
-        this.post_info = await this.getPostInfo(this.post_id)
-      }
-    }
-  },
-  async created() {
-    this.post_info = await this.getPostInfo(this.post_id)
+  beforeRouteEnter(to, from, next) {
+    next(async vm => {
+      vm.post_info = await vm.getPostInfo(vm.post_id)
+    })
   },
 }
 </script>

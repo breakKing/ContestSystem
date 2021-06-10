@@ -11,15 +11,10 @@ export default {
   methods: {
     ...mapActions(['fetchPostsList']),
   },
-  watch: {
-    async $route(to, from) {
-      if (to.name === 'UserStarterPage') {
-        await this.fetchPostsList()
-      }
-    }
-  },
-  async created() {
-    await this.fetchPostsList(true)
+  beforeRouteEnter(to, from, next) {
+    next(async vm => {
+      await vm.fetchPostsList()
+    })
   },
   components: {PostsListComponent}
 }

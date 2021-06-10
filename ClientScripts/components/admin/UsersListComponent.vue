@@ -80,16 +80,13 @@ export default {
       return moment(date).format('MMMM DD YYYY')
     }
   },
-  watch: {
-    async $route(to, from) {
-      if (to.name === 'AdminUsersList') {
-        await this.fetchAllUsers()
-      }
-    }
-  },
   async created() {
     moment.locale('ru')
-    await this.fetchAllUsers(true)
+  },
+  beforeRouteEnter(to, from, next) {
+    next(async vm => {
+      await vm.fetchAllUsers()
+    })
   },
   components: {
     UserChangeComponent,

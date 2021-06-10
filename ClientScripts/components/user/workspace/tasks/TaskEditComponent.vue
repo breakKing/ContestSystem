@@ -118,7 +118,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['getTask', 'fetchAvailableCheckers']),
+    ...mapActions(['getTask', 'fetchAvailableCheckers', 'fetchCurrentUserTasks', 'fetchAvailableTasks']),
     async updateFields() {
       await this.fetchAvailableCheckers();
       let data = await this.getTask(this.task_id)
@@ -172,6 +172,8 @@ export default {
       }
       if (result.status) {
         this.error_msg = '';
+        await this.fetchCurrentUserTasks(true)
+        await this.fetchAvailableTasks(true)
         await this.$router.push({name: 'WorkSpaceMyApprovedTasksPage'})
       } else {
         this.error_msg = (result.errors || []).join(', ')
@@ -238,17 +240,11 @@ export default {
       }
     },
   },
-  async created() {
-    await this.updateFields()
+  beforeRouteEnter(to, from, next) {
+    next(async vm => {
+      await vm.updateFields()
+    })
   },
-  watch: {
-    async $route(to, from) {
-      if (to.name === 'WorkSpaceEditTaskPage') {
-        await this.updateFields()
-      }
-    }
-  },
-
 }
 </script>
 

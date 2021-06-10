@@ -18,15 +18,10 @@ export default {
   methods: {
     ...mapActions(['fetchRunningContests']),
   },
-  watch: {
-    async $route(to, from) {
-      if (to.name === 'CurrentlyRunningContestsComponentPage') {
-        await this.fetchRunningContests()
-      }
-    }
-  },
-  async created() {
-    await this.fetchAllUsers(true)
+  beforeRouteEnter(to, from, next) {
+    next(async vm => {
+      await vm.fetchRunningContests()
+    })
   },
 }
 </script>
