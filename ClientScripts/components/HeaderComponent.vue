@@ -15,7 +15,7 @@
           <li class="nav-item me-2 fs-5">
             <router-link class="nav-link text-light" :to="{name: 'Home'}">Главная</router-link>
           </li>
-          <li class="nav-item me-2 fs-5">
+          <li class="nav-item me-2 fs-5" v-if="isAuthenticated && currentRole === 'user'">
             <router-link class="nav-link text-light" :to="{name: 'ContestsPage'}">Контесты</router-link>
           </li>
           <li class="nav-item me-2 fs-5">

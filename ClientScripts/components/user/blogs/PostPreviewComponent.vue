@@ -46,7 +46,7 @@ export default {
   computed: {
     ...mapGetters(['currentUser']),
     dataUrl() {
-      if (!this.post) {
+      if (!this.post || !this.post?.previewImage) {
         return '';
       }
       return 'data:image/jpeg;base64,' + this.post?.previewImage

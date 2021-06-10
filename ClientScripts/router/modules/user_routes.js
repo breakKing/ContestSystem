@@ -15,7 +15,7 @@ export default {
     component: UserPage,
     children: [
         {
-            path: '',
+            path: '/home',
             name: 'UserStarterPage',
             component: UserStarterPage,
         },
