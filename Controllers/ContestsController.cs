@@ -5,7 +5,6 @@ using ContestSystem.Models.Attributes;
 using ContestSystem.Models.DbContexts;
 using ContestSystem.Models.ExternalModels;
 using ContestSystem.Models.FormModels;
-using ContestSystem.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -23,22 +22,29 @@ namespace ContestSystem.Controllers
     {
         private readonly MainDbContext _dbContext;
         private readonly UserManager<User> _userManager;
-        private readonly CheckerSystemService _checkerSystemService;
 
-        public ContestsController(MainDbContext dbContext, UserManager<User> userManager, CheckerSystemService checkerSystemService)
+        public ContestsController(MainDbContext dbContext, UserManager<User> userManager)
         {
             _dbContext = dbContext;
             _userManager = userManager;
-            _checkerSystemService = checkerSystemService;
         }
 
         [HttpGet("get-available-contests/{culture}")]
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> GetAvailableContests(string culture)
         {
+            var currentUser = await HttpContext.GetCurrentUser();
+            var participatingContests = await _dbContext.ContestsParticipants.Where(cp => cp.ParticipantId == currentUser.Id)
+                                                                                .Select(cp => cp.Contest)
+                                                                                .ToListAsync();
+            var moderatedContests = await _dbContext.ContestsLocalModerators.Where(clm => clm.LocalModeratorId == currentUser.Id)
+                                                                                .Select(cp => cp.Contest)
+                                                                                .ToListAsync();
             var contests = await _dbContext.Contests.Where(c => c.ApprovalStatus == ApproveType.Accepted
                                                             && c.StartDateTimeUTC > DateTime.UtcNow
-                                                            && c.IsPublic)
+                                                            && c.IsPublic
+                                                            && !participatingContests.Any(pc => pc.Id == c.Id)
+                                                            && !moderatedContests.Any(mc => mc.Id == c.Id))
                                                     .ToListAsync();
             var localizers = contests.ConvertAll(c => c.ContestLocalizers.FirstOrDefault(cl => cl.Culture == culture));
             var publishedContests = new List<PublishedContest>();
@@ -174,6 +180,7 @@ namespace ContestSystem.Controllers
                     RulesSetId = contestForm.RulesSetId
                 };
                 /*
+                TODO: нормальная проверка на лимиты
                 var user = await HttpContext.GetCurrentUser(_userManager);
                 if (user.IsLimitedInContests)
                 {
@@ -193,6 +200,14 @@ namespace ContestSystem.Controllers
                 }*/
                 contest.ApprovalStatus = ApproveType.Accepted;
                 await _dbContext.Contests.AddAsync(contest);
+                await _dbContext.SaveChangesAsync();
+                var localModerator = new ContestLocalModerator
+                {
+                    ContestId = contest.Id,
+                    Alias = contest.Creator.FullName, // TODO: надо получать алиас из формы
+                    LocalModeratorId = contest.CreatorId.GetValueOrDefault()
+                };
+                await _dbContext.ContestsLocalModerators.AddAsync(localModerator);
                 await _dbContext.SaveChangesAsync();
                 for (int i = 0; i < contestForm.Localizers.Count; i++)
                 {
@@ -227,7 +242,8 @@ namespace ContestSystem.Controllers
                 status = false,
                 errors = ModelState.Values
                                          .SelectMany(x => x.Errors)
-                                         .Select(x => x.ErrorMessage).ToList()
+                                         .Select(x => x.ErrorMessage)
+                                         .ToList()
             });
         }
         [AuthorizeByJwt(Roles = RolesContainer.User)]
@@ -340,7 +356,8 @@ namespace ContestSystem.Controllers
                 status = false,
                 errors = ModelState.Values
                                          .SelectMany(x => x.Errors)
-                                         .Select(x => x.ErrorMessage).ToList()
+                                         .Select(x => x.ErrorMessage)
+                                         .ToList()
             });
         }
 
@@ -364,7 +381,7 @@ namespace ContestSystem.Controllers
                 return Json(new
                 {
                     status = false,
-                    errors = new List<string> { "Попытка удалить не свой контест или без админских прав" }
+                    errors = new List<string> { "Попытка удалить не свой контест или без модераторских прав" }
                 });
             }
             _dbContext.Contests.Remove(loadedContest);
