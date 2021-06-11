@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace ContestSystem.Models.ExternalModels
 {
-    public class ConstructedSolution
+    public class SolutionExternalModel
     {
         public long Id { get; set; }
         public ConstructedProblem Problem { get; set; }
@@ -20,9 +20,9 @@ namespace ContestSystem.Models.ExternalModels
         public short Points { get; set; }
         public List<TestResult> TestResults { get; set; } = new List<TestResult>();
 
-        public static ConstructedSolution GetFromModel(Solution solution, List<ContestProblem> problemsInContest)
+        public static SolutionExternalModel GetFromModel(Solution solution, List<ContestProblem> problemsInContest)
         {
-            return new ConstructedSolution
+            return new SolutionExternalModel
             {
                 Id = solution.Id,
                 Participant = solution.Participant?.ResponseStructure,
