@@ -36,6 +36,18 @@ export default {
                 return null
             }
         },
+        async getUserSolutionsInContest({commit, state, dispatch, getters}, {contest_id, user_id}) {
+            if (!contest_id || !user_id) {
+                return null
+            }
+            try {
+                let {data} = await axios.get(`/api/contests/${contest_id}/get-solutions/${user_id}`)
+                return data
+            } catch (e) {
+                console.error(e)
+                return null
+            }
+        },
         async fetchAvailableCompilers({commit, state, dispatch, getters}, force = false) {
             if (!force && state.available_compilers && state.available_compilers.length > 0) {
                 return
