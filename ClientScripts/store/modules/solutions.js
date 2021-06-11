@@ -3,14 +3,9 @@ import * as _ from 'lodash'
 
 export default {
     state: () => ({
-        // выбранное для просмотра
-        current_solution: null,
         available_compilers: [],
     }),
     mutations: {
-        setCurrentSolution(state, val) {
-            state.current_solution = val
-        },
         setAvailableCompilers(state, val) {
             state.available_compilers = (val || [])
         },
@@ -19,9 +14,6 @@ export default {
         availableCompilers(state, getters) {
             return state.available_compilers
         },
-        currentSolution(state, getters) {
-            return state.current_solution
-        },
     },
     actions: {
         async getSolution({commit, state, dispatch, getters}, solution_id) {
@@ -29,19 +21,7 @@ export default {
                 return null
             }
             try {
-                let {data} = await axios.get(`/api/solutions/constructed/${solution_id}`)
-                return data
-            } catch (e) {
-                console.error(e)
-                return null
-            }
-        },
-        async getUserSolutionsInContest({commit, state, dispatch, getters}, {contest_id, user_id}) {
-            if (!contest_id || !user_id) {
-                return null
-            }
-            try {
-                let {data} = await axios.get(`/api/contests/${contest_id}/get-solutions/${user_id}`)
+                let {data} = await axios.get(`/api/solutions/${solution_id}`)
                 return data
             } catch (e) {
                 console.error(e)

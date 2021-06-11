@@ -38,10 +38,12 @@ namespace ContestSystem.Controllers
                 return Json(new
                 {
                     status = false,
-                    errors = new List<string> { "Нет решения с таким идентификатором" }
+                    errors = new List<string> {"Нет решения с таким идентификатором"}
                 });
             }
-            var problemsInContest = await _dbContext.ContestsProblems.Where(cp => cp.ContestId == solution.ContestId).ToListAsync();
+
+            var problemsInContest = await _dbContext.ContestsProblems.Where(cp => cp.ContestId == solution.ContestId)
+                .ToListAsync();
             var constructedSolution = SolutionExternalModel.GetFromModel(solution, problemsInContest);
             return Json(constructedSolution);
         }
@@ -68,7 +70,8 @@ namespace ContestSystem.Controllers
                     ParticipantId = solutionForm.UserId,
                     ProblemId = solutionForm.ProblemId,
                     SubmitTimeUTC = DateTime.UtcNow,
-                    CompilerName = (await _checkerSystemService.GetAvailableCompilersAsync()).FirstOrDefault(c => c.GUID == solutionForm.CompilerGUID).Name,
+                    CompilerName = (await _checkerSystemService.GetAvailableCompilersAsync())
+                        .FirstOrDefault(c => c.GUID == solutionForm.CompilerGUID)?.Name,
                     ErrorsMessage = "",
                     Verdict = VerdictType.Undefined,
                     Points = 0
@@ -81,9 +84,11 @@ namespace ContestSystem.Controllers
                 return Json(new
                 {
                     status = true,
-                    message = ""
+                    data = solution.Id,
+                    errors = new List<string>()
                 });
             }
+
             return Json(new
             {
                 status = false,
@@ -103,25 +108,28 @@ namespace ContestSystem.Controllers
                 return Json(new
                 {
                     status = false,
-                    errors = new List<string> { "Такого решения не существует" }
+                    errors = new List<string> {"Такого решения не существует"}
                 });
             }
+
             if (!solution.Problem.Tests.Any(t => t.Number == testNumber))
             {
                 return Json(new
                 {
                     status = false,
-                    errors = new List<string> { "У данной задачи нет теста с таким номером" }
+                    errors = new List<string> {"У данной задачи нет теста с таким номером"}
                 });
             }
+
             if (solution.TestResults.Any(tr => tr.Number == testNumber))
             {
                 return Json(new
                 {
                     status = false,
-                    errors = new List<string> { "Данное решение уже проверено/проверяется на данном тесте" }
+                    errors = new List<string> {"Данное решение уже проверено/проверяется на данном тесте"}
                 });
             }
+
             var testResult = await _checkerSystemService.RunTestForSolutionAsync(solution, testNumber);
             await _dbContext.TestsResults.AddAsync(testResult);
             solution.Verdict = testResult.Verdict;

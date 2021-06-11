@@ -30,7 +30,11 @@
         </template>
       </template>
       <template v-else>
-
+        <router-link class="btn btn-info" v-if="currentContestIsRunning" :to="{name: 'ContestParticipatingPage', params: {contest_id: currentContest?.id}}">Начать</router-link>
+        <span v-else-if="currentContestIsInTheFuture">Соревнование начинается в {{
+            currentContest?.startDateTimeUTC
+          }}</span>
+        <span v-else>Соревнование окончено</span>
       </template>
     </div>
   </div>
@@ -66,6 +70,9 @@ export default {
       'currentContestMonitorEntries',
       'currentUserIsOwnerOfCurrentContest',
       'currentUserIsParticipantOfCurrentContest',
+      'currentContestIsRunning',
+      'currentContestIsInPast',
+      'currentContestIsInTheFuture',
     ]),
     dataUrl() {
       if (!this.currentContest || !this.currentContest?.image) {

@@ -1,6 +1,8 @@
 ﻿using ContestSystemDbStructure.Enums;
 using ContestSystemDbStructure.Models;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ContestSystem.Models.ExternalModels
 {
@@ -17,6 +19,8 @@ namespace ContestSystem.Models.ExternalModels
         public short DurationInMinutes { get; set; }
         public string ModerationMessage { get; set; }
         public ApproveType ApprovalStatus { get; set; }
+        public RulesSet Rules { get; set; }
+        public List<ProblemEntry> Problems { get; set; }
 
         public static PublishedContest GetFromModel(Contest contest, ContestLocalizer localizer, int participantsCount)
         {
@@ -30,7 +34,19 @@ namespace ContestSystem.Models.ExternalModels
                 EndDateTimeUTC = contest.EndDateTimeUTC,
                 Image = contest.Image,
                 ParticipantsCount = participantsCount,
-                ApprovalStatus = contest.ApprovalStatus
+                ApprovalStatus = contest.ApprovalStatus,
+                Rules = contest.RulesSet,
+                Problems = contest.ContestProblems.ConvertAll(cp =>
+                {
+                    return new ProblemEntry
+                    {
+                        Letter = cp.Letter,
+                        ProblemId = cp.ProblemId,
+                        ContestId = cp.ContestId,
+                        Problem = PublishedProblem.GetFromModel(cp.Problem,
+                            cp.Problem.ProblemLocalizers.First(pl => pl.Culture == localizer.Culture)),
+                    };
+                })
             };
         }
     }

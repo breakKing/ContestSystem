@@ -53,6 +53,18 @@ namespace ContestSystem.Models.DbContexts
                 .UsingEntity<IdentityUserRole<long>>(
                     userRole => userRole.HasOne<Role>().WithMany().HasForeignKey(ur => ur.RoleId).IsRequired(),
                     userRole => userRole.HasOne<User>().WithMany().HasForeignKey(ur => ur.UserId).IsRequired());
+
+            
+            // контесты - проблемы
+            builder.Entity<ContestProblem>()
+                .HasOne<Contest>(cp => cp.Contest)
+                .WithMany(c => c.ContestProblems)
+                .HasForeignKey(cp => cp.ContestId);
+            
+            builder.Entity<ContestProblem>()
+                .HasOne<Problem>(cp => cp.Problem)
+                .WithMany(c => c.ContestProblems)
+                .HasForeignKey(cp => cp.ProblemId);
         }
     }
 }

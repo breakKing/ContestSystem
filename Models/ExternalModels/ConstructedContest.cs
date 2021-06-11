@@ -2,6 +2,7 @@
 using ContestSystemDbStructure.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ContestSystem.Models.ExternalModels
 {
@@ -41,7 +42,8 @@ namespace ContestSystem.Models.ExternalModels
                     {
                         Letter = cp.Letter,
                         ProblemId = cp.ProblemId,
-                        ContestId = cp.ContestId
+                        ContestId = cp.ContestId,
+                        Problem = PublishedProblem.GetFromModel(cp.Problem, cp.Problem.ProblemLocalizers.First()),
                     };
                 })
             };
