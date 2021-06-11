@@ -37,7 +37,7 @@ export default {
       if (!this.post_info || !this.post_info?.previewImage) {
         return '';
       }
-      return 'data:image/jpeg;base64,' + this.post_info?.previewImage
+      return 'data:image/jpeg;base64,' + this.post_info.previewImage
 
     },
   },

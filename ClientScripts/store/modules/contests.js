@@ -46,7 +46,18 @@ export default {
         currentContestMonitorEntries(state, getters) {
             return state.current_contest_monitor_entries
         },
-
+        currentUserIsOwnerOfCurrentContest(state, getters) {
+            if (!getters.currentUser || !getters.currentContest?.creator) {
+                return false
+            }
+            return +getters.currentContest.creator.id === +getters.currentUser.id
+        },
+        currentUserIsParticipantOfCurrentContest(state, getters) {
+            if (!getters.currentUser || !getters.currentContest) {
+                return false
+            }
+            return !!_.find(getters.currentContestParticipants, (p) => +p.id === +getters.currentUser.id)
+        },
         runningContests(state, getters) {
             return state.currently_running_contests
         },
@@ -71,7 +82,10 @@ export default {
     },
     actions: {
         // контест и все связанные данные
-        async changeCurrentContest({commit, state, dispatch, getters}, contest_id) {
+        async changeCurrentContest({commit, state, dispatch, getters}, {force, contest_id}) {
+            if (!force && +getters.currentContest?.id === +contest_id) {
+                return
+            }
             let contest = await dispatch('getContestById', contest_id)
             let participants = await dispatch('getContestParticipants', contest_id)
             let monitor = await dispatch('getContestMonitor', contest_id)
@@ -177,8 +191,10 @@ export default {
         },
         async addUserToContest({commit, state, dispatch, getters}, {user_name, user_id, contest_id}) {
             try {
-                let {data} = await axios.post(`/api/contests/${contest_id}/add-participant`,{
-                    // псевдоним и user_id
+                let {data} = await axios.post(`/api/contests/${contest_id}/add-participant`, {
+                    userId: user_id,
+                    contestId: contest_id,
+                    alias: user_name,
                 })
                 return data
             } catch (e) {
@@ -188,7 +204,7 @@ export default {
         },
         async removeUserFromContest({commit, state, dispatch, getters}, {user_id, contest_id}) {
             try {
-                let {data} = await axios.post(`/api/contests/${contest_id}/delete-participant/${user_id}`)
+                let {data} = await axios.delete(`/api/contests/${contest_id}/delete-participant/${user_id}`)
                 return data
             } catch (e) {
                 console.error(e)

@@ -24,14 +24,16 @@
       <img class="img-fluid" alt="картинка" :src="dataUrl"/>
     </div>
     <div class="col-2">
-      <button v-if="currentUserIsOwner" type="button" class="btn btn-info" @click.prevent="goToContest">Редактировать
+      <button v-if="currentUserIsOwner" type="button" class="btn btn-info" @click.prevent="editContest">Редактировать
+      </button>
+      <button type="button" class="btn btn-info" @click.prevent="goToContest">Войти
       </button>
     </div>
   </div>
 </template>
 
 <script>
-import {mapGetters} from "vuex";
+import {mapActions, mapGetters} from "vuex";
 
 export default {
   name: "ContestPreviewComponent",
@@ -39,8 +41,11 @@ export default {
     contest: Object
   },
   methods: {
-    goToContest() {
-      this.$router.push({name: 'WorkSpaceEditContestPage', params: {contest_id: this.contest.id}})
+    async editContest() {
+      await this.$router.push({name: 'WorkSpaceEditContestPage', params: {contest_id: this.contest.id}})
+    },
+    async goToContest() {
+      await this.$router.push({name: 'ContestPage', params: {contest_id: this.contest.id}})
     },
   },
   computed: {
@@ -55,7 +60,7 @@ export default {
       if (!this.contest || !this.contest?.image) {
         return '';
       }
-      return 'data:image/jpeg;base64,' + this.contest?.image
+      return 'data:image/jpeg;base64,' + this.contest.image
 
     },
   }

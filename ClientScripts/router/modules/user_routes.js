@@ -8,6 +8,7 @@ import AvailableContestsComponent from "../../components/user/contests/Available
 import ParticipatingContestsComponent from "../../components/user/contests/ParticipatingContestsComponent";
 import CurrentlyRunningContestsComponent from "../../components/user/contests/CurrentlyRunningContestsComponent";
 import WorkSpaceRoutes from './user_routes/workspace_routes';
+import SingleContestRoutes from './user_routes/single_contest_routes';
 
 export default {
     path: '/user',
@@ -72,6 +73,7 @@ export default {
                 },
             ]
         },
+        SingleContestRoutes,
         WorkSpaceRoutes,
     ],
 }
