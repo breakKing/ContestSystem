@@ -12,7 +12,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -128,11 +127,18 @@ namespace ContestSystem.Controllers
                     PreviewImage = imageData == null ? null : Convert.ToBase64String(imageData),
                     PostLocalizers = new List<PostLocalizer>()
                 };
-                /*
-                var user = await HttpContext.GetCurrentUser(_userManager);
+                var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == postForm.AuthorUserId);
+                if (user == null)
+                {
+                    return Json(new
+                    {
+                        status = false,
+                        errors = new List<string> { "Автор является несуществующим пользователем" }
+                    });
+                }
                 if (user.IsLimitedInPosts)
                 {
-                    if (await _dbContext.Posts.AnyAsync(c => c.AuthorId == user.Id))
+                    if (await _dbContext.Posts.CountAsync(p => p.AuthorId == user.Id && p.ApprovalStatus == ApproveType.NotModeratedYet) == 1)
                     {
                         return Json(new
                         {
@@ -145,9 +151,7 @@ namespace ContestSystem.Controllers
                 else
                 {
                     post.ApprovalStatus = ApproveType.Accepted;
-                }*/
-                post.ApprovalStatus = ApproveType.Accepted;
-                post.PublicationDateTimeUTC = DateTime.UtcNow;
+                }
                 _dbContext.Posts.Add(post);
                 await _dbContext.SaveChangesAsync();
                 for (int i = 0; i < postForm.Localizers.Count; i++)
@@ -162,7 +166,6 @@ namespace ContestSystem.Controllers
                     };
                     post.PostLocalizers.Add(localizer);
                 }
-
                 await _dbContext.SaveChangesAsync();
                 return Json(new
                 {
@@ -289,7 +292,7 @@ namespace ContestSystem.Controllers
             });
         }
 
-        [AuthorizeByJwt(Roles = RolesContainer.User)]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
         [HttpDelete("delete-post/{id}")]
         public async Task<IActionResult> DeletePost(long id)
         {
@@ -336,6 +339,32 @@ namespace ContestSystem.Controllers
             return Json(requests);
         }
 
+        [HttpGet("get-approved")]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
+        public async Task<IActionResult> GetApprovedPosts()
+        {
+            var posts = await _dbContext.Posts.Where(p => p.ApprovalStatus == ApproveType.Accepted).ToListAsync();
+            var requests = posts.ConvertAll(p =>
+            {
+                ConstructedPost pr = ConstructedPost.GetFromModel(p);
+                return pr;
+            });
+            return Json(requests);
+        }
+
+        [HttpGet("get-rejected")]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
+        public async Task<IActionResult> GetRejectedPosts()
+        {
+            var posts = await _dbContext.Posts.Where(p => p.ApprovalStatus == ApproveType.Rejected).ToListAsync();
+            var requests = posts.ConvertAll(p =>
+            {
+                ConstructedPost pr = ConstructedPost.GetFromModel(p);
+                return pr;
+            });
+            return Json(requests);
+        }
+
         [HttpPut("moderate/{id}")]
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> ApproveOrRejectPost([FromBody] PostRequestForm postRequestForm, long id)
@@ -365,6 +394,7 @@ namespace ContestSystem.Controllers
                     post.ApprovalStatus = postRequestForm.ApprovalStatus;
                     post.ApprovingModeratorId = postRequestForm.ApprovingModeratorId;
                     post.ModerationMessage = postRequestForm.ModerationMessage;
+                    post.PublicationDateTimeUTC = DateTime.UtcNow;
                     _dbContext.Posts.Update(post);
                     try
                     {
