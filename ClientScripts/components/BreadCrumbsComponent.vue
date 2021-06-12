@@ -2,7 +2,7 @@
   <div>
     <a-breadcrumb :routes="routes">
       <template #itemRender="{ route, routes }">
-        <span v-if="routes.indexOf(route) === routes.length - 1">
+        <span v-if="routes.indexOf(route) === routes.length - 1 || !route.to">
           {{ route.breadcrumbName }}
         </span>
         <router-link v-else :to="route.to">

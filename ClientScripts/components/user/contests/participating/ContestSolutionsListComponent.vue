@@ -1,4 +1,5 @@
 <template>
+  <bread-crumbs-component :routes="bread_crumb_routes"></bread-crumbs-component>
   <table class="table">
     <thead>
     <tr>
@@ -29,9 +30,12 @@
 import {mapActions, mapGetters, mapMutations} from "vuex";
 import * as _ from 'lodash'
 import TestResultVerdicts from "../../../../dictionaries/TestResultVerdicts";
+import BreadCrumbsComponent from "../../../BreadCrumbsComponent";
+import ContestMySolutionsBreads from "../../../../dictionaries/bread_crumbs/contest/ContestMySolutionsBreads";
 
 export default {
   name: "ContestSolutionsListComponent",
+  components: {BreadCrumbsComponent},
   props: ['contest_id', 'solution_id'],
   data() {
     return {
@@ -42,6 +46,9 @@ export default {
     ...mapGetters(['currentUser', 'currentContestSolutionsForCurrentUser']),
     sortedSolutions() {
       return _.sortBy(this.currentContestSolutionsForCurrentUser, (s) => +s.id === +this.solution_id)
+    },
+    bread_crumb_routes() {
+      return ContestMySolutionsBreads(this.contest_id)
     }
   },
   methods: {

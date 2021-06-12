@@ -1,4 +1,5 @@
 <template>
+  <bread-crumbs-component :routes="bread_crumb_routes"></bread-crumbs-component>
   <h2>Решение {{ problemName }}</h2>
   <p><i>({{ problem?.timeLimitInMilliseconds }} мсек, {{ problem?.memoryLimitInBytes }} байт)</i></p>
   <p>{{ solution?.submitTimeUTC }}</p>
@@ -20,9 +21,12 @@ import {mapActions} from "vuex";
 import CodeMirror from "codemirror";
 import * as _ from 'lodash'
 import TestResultVerdicts from "../../../../dictionaries/TestResultVerdicts";
+import BreadCrumbsComponent from "../../../BreadCrumbsComponent";
+import MySolutionViewBreads from "../../../../dictionaries/bread_crumbs/contest/MySolutionViewBreads";
 
 export default {
   name: "SolutionViewComponent",
+  components: {BreadCrumbsComponent},
   props: ['contest_id', 'solution_id'],
   data() {
     return {
@@ -59,6 +63,9 @@ export default {
     },
     lastTestNumber() {
       return this.getLastTestNumber(this.solution)
+    },
+    bread_crumb_routes() {
+      return MySolutionViewBreads(this.contest_id, this.solution_id)
     }
   },
   mounted() {
