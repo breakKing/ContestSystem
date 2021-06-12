@@ -73,7 +73,7 @@ namespace ContestSystem.Controllers
                     return Json(new
                     {
                         status = false,
-                        errors = new List<string> {"Такой локализации под данный пост не существует"}
+                        errors = new List<string> { "Такой локализации под данный пост не существует" }
                     });
                 }
 
@@ -84,7 +84,24 @@ namespace ContestSystem.Controllers
             return Json(new
             {
                 status = false,
-                errors = new List<string> {"Поста с таким идентификатором не существует"}
+                errors = new List<string> { "Поста с таким идентификатором не существует" }
+            });
+        }
+
+        [HttpGet("constructed/{id}")]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
+        public async Task<IActionResult> GetConstructedPost(long id)
+        {
+            var post = await _dbContext.Posts.FirstOrDefaultAsync(p => p.Id == id);
+            if (post != null)
+            {
+                var constructedPost = ConstructedPost.GetFromModel(post);
+                return Json(constructedPost);
+            }
+            return Json(new
+            {
+                status = false,
+                errors = new List<string> { "Поста с таким идентификатором не существует" }
             });
         }
 
@@ -306,11 +323,11 @@ namespace ContestSystem.Controllers
             });
         }
 
-        [HttpGet("get-post-requests")]
+        [HttpGet("get-requests")]
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
-        public async Task<IActionResult> GetAllPostsRequests()
+        public async Task<IActionResult> GetPostsRequests()
         {
-            var posts = await _dbContext.Posts.ToListAsync();
+            var posts = await _dbContext.Posts.Where(p => p.ApprovalStatus == ApproveType.NotModeratedYet).ToListAsync();
             var requests = posts.ConvertAll(p =>
             {
                 ConstructedPost pr = ConstructedPost.GetFromModel(p);
@@ -319,29 +336,11 @@ namespace ContestSystem.Controllers
             return Json(requests);
         }
 
-        [HttpGet("get-post-requests/{id}")]
-        [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
-        public async Task<IActionResult> GetPostRequest(long id)
-        {
-            var post = await _dbContext.Posts.FirstOrDefaultAsync(p => p.Id == id);
-            if (post == null)
-            {
-                return Json(new
-                {
-                    success = false,
-                    errors = new List<string> {"Такого поста не существует"}
-                });
-            }
-
-            var request = ConstructedPost.GetFromModel(post);
-            return Json(Request);
-        }
-
-        [HttpPut("approve-post/{id}")]
+        [HttpPut("moderate/{id}")]
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> ApproveOrRejectPost([FromBody] PostRequestForm postRequestForm, long id)
         {
-            if (postRequestForm.Id != id || id < 0)
+            if (postRequestForm.PostId != id || id < 0)
             {
                 return Json(new
                 {
