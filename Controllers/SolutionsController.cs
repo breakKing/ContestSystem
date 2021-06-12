@@ -96,7 +96,18 @@ namespace ContestSystem.Controllers
                 // Отправка на компиляцию
                 solution = await _checkerSystemService.CompileSolutionAsync(solution);
                 _dbContext.Solutions.Update(solution);
-                await _dbContext.SaveChangesAsync();
+                try
+                {
+                    await _dbContext.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    return Json(new
+                    {
+                        status = false,
+                        errors = new List<string> { "Ошибка параллельного сохранения" }
+                    });
+                }
                 return Json(new
                 {
                     status = true,
@@ -127,7 +138,18 @@ namespace ContestSystem.Controllers
             bool state = true;
             solution.Verdict = VerdictType.TestInProgress;
             _dbContext.Solutions.Update(solution);
-            await _dbContext.SaveChangesAsync();
+            try
+            {
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return Json(new
+                {
+                    status = false,
+                    errors = new List<string> { "Ошибка параллельного сохранения" }
+                });
+            }
             foreach (var test in solution.Problem.Tests.OrderBy(t => t.Number))
             {
                 var result = await RunSingleTest(test, solution);
@@ -142,7 +164,21 @@ namespace ContestSystem.Controllers
             var contestParticipant = await _dbContext.ContestsParticipants.FirstOrDefaultAsync(cp => cp.ParticipantId == solution.ParticipantId && cp.ContestId == solution.ContestId);
             contestParticipant.Result += _verdicter.GetResultForSolution(solution);
             _dbContext.ContestsParticipants.Update(contestParticipant);
-            await _dbContext.SaveChangesAsync();
+            bool saved = false;
+            while (!saved)
+            {
+                try
+                {
+                    await _dbContext.SaveChangesAsync();
+                    saved = true;
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    contestParticipant = await _dbContext.ContestsParticipants.FirstOrDefaultAsync(cp => cp.ParticipantId == solution.ParticipantId && cp.ContestId == solution.ContestId);
+                    contestParticipant.Result += _verdicter.GetResultForSolution(solution);
+                    _dbContext.ContestsParticipants.Update(contestParticipant);
+                }
+            }
             return Json(state);
         }
 
@@ -153,7 +189,6 @@ namespace ContestSystem.Controllers
             {
                 testResult = await _checkerSystemService.RunTestForSolutionAsync(solution, test.Number);
                 await _dbContext.TestsResults.AddAsync(testResult);
-                _dbContext.Solutions.Update(solution);
                 await _dbContext.SaveChangesAsync();
             }
             return testResult;
