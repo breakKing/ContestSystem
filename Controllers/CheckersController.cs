@@ -117,7 +117,18 @@ namespace ContestSystem.Controllers
                 {
                     checker = await _checkerSystemService.SendCheckerForCompilationAsync(checker);
                     _dbContext.Checkers.Update(checker);
-                    await _dbContext.SaveChangesAsync();
+                    try
+                    {
+                        await _dbContext.SaveChangesAsync();
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        return Json(new
+                        {
+                            status = false,
+                            errors = new List<string> { "Ошибка параллельного сохранения" }
+                        });
+                    }
                 }
                 return Json(new
                 {
@@ -161,7 +172,18 @@ namespace ContestSystem.Controllers
                 {
                     checker = await _checkerSystemService.SendCheckerForCompilationAsync(checker);
                     _dbContext.Checkers.Update(checker);
-                    await _dbContext.SaveChangesAsync();
+                    try
+                    {
+                        await _dbContext.SaveChangesAsync();
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        return Json(new
+                        {
+                            status = false,
+                            errors = new List<string> { "Ошибка параллельного сохранения" }
+                        });
+                    }
                 }
 
                 return Json(new
