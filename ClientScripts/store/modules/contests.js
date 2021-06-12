@@ -12,7 +12,7 @@ export default {
         available_for_user_contests: [],
         participating_contests: [],
         current_user_contests: [],
-        current_contest_solutions: [],
+        current_contest_solutions_for_current_user: [],
     }),
     mutations: {
         setRunningContests(state, val) {
@@ -27,8 +27,8 @@ export default {
         setCurrentUserContests(state, val) {
             state.current_user_contests = (val || [])
         },
-        setCurrentContestSolutions(state, val) {
-            state.current_contest_solutions = (val || [])
+        setCurrentContestSolutionsForCurrentUser(state, val) {
+            state.current_contest_solutions_for_current_user = (val || [])
         },
 
         setCurrentContest(state, val) {
@@ -48,8 +48,8 @@ export default {
         currentContestParticipants(state, getters) {
             return state.current_contest_participants
         },
-        currentContestSolutions(state, getters) {
-            return state.current_contest_solutions
+        currentContestSolutionsForCurrentUser(state, getters) {
+            return state.current_contest_solutions_for_current_user
         },
         currentContestMonitorEntries(state, getters) {
             return state.current_contest_monitor_entries
@@ -108,19 +108,22 @@ export default {
     },
     actions: {
         // контест и все связанные данные
-        async changeCurrentContest({commit, state, dispatch, getters}, {force, contest_id}) {
+        async changeCurrentContest({commit, state, dispatch, getters, rootGetters}, {force, contest_id}) {
             if (!force && +getters.currentContest?.id === +contest_id) {
                 return
             }
             let contest = await dispatch('getContestById', contest_id)
             let participants = await dispatch('getContestParticipants', contest_id)
             let monitor = await dispatch('getContestMonitor', contest_id)
-            let solutions = await dispatch('getUserSolutionsInContest', {})
+            let solutions = await dispatch('getUserSolutionsInContest', {
+                contest_id,
+                user_id: rootGetters.currentUser?.id
+            })
 
             commit('setCurrentContest', contest)
             commit('setCurrentContestParticipants', participants)
             commit('setCurrentContestMonitor', monitor)
-            commit('setCurrentContestSolutions', solutions)
+            commit('setCurrentContestSolutionsForCurrentUser', solutions)
         },
         async getContestById({commit, state, dispatch, getters}, contest_id) {
             await dispatch('fetchAvailableContests');
@@ -159,14 +162,14 @@ export default {
         },
         async getUserSolutionsInContest({commit, state, dispatch, getters}, {contest_id, user_id}) {
             if (!contest_id || !user_id) {
-                return null
+                return []
             }
             try {
                 let {data} = await axios.get(`/api/contests/${contest_id}/get-solutions/${user_id}`)
                 return data
             } catch (e) {
                 console.error(e)
-                return null
+                return []
             }
         },
         async fetchRunningContests({commit, state, dispatch, getters}, force = false) {

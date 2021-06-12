@@ -45,26 +45,35 @@ namespace ContestSystem.Models.DbContexts
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            
+
             // связь ролей и пользователей
             builder.Entity<User>()
                 .HasMany(u => u.Roles)
                 .WithMany(r => r.Users)
                 .UsingEntity<IdentityUserRole<long>>(
                     userRole => userRole.HasOne<Role>().WithMany().HasForeignKey(ur => ur.RoleId).IsRequired(),
-                    userRole => userRole.HasOne<User>().WithMany().HasForeignKey(ur => ur.UserId).IsRequired());
+                    userRole => userRole.HasOne<User>().WithMany().HasForeignKey(ur => ur.UserId).IsRequired()
+                );
 
-            
+
             // контесты - проблемы
-            builder.Entity<ContestProblem>()
-                .HasOne<Contest>(cp => cp.Contest)
-                .WithMany(c => c.ContestProblems)
-                .HasForeignKey(cp => cp.ContestId);
+            builder.Entity<Contest>()
+                .HasMany<Problem>(c => c.Problems)
+                .WithMany(p => p.Contests)
+                .UsingEntity<ContestProblem>(
+                    contestProblem => contestProblem
+                        .HasOne<Problem>(cp => cp.Problem)
+                        .WithMany(c => c.ContestProblems)
+                        .HasForeignKey(cp => cp.ProblemId)
+                        .IsRequired(),
+                    contestProblem => contestProblem
+                        .HasOne<Contest>(cp => cp.Contest)
+                        .WithMany(c => c.ContestProblems)
+                        .HasForeignKey(cp => cp.ContestId)
+                        .IsRequired()
+                );
             
-            builder.Entity<ContestProblem>()
-                .HasOne<Problem>(cp => cp.Problem)
-                .WithMany(c => c.ContestProblems)
-                .HasForeignKey(cp => cp.ProblemId);
+            
         }
     }
 }

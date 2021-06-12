@@ -3,6 +3,7 @@ using ContestSystemDbStructure.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ContestSystemDbStructure.Models.common;
 
 namespace ContestSystem.Models.ExternalModels
 {

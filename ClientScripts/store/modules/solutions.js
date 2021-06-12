@@ -48,9 +48,9 @@ export default {
                 return null
             }
         },
-        async runSolutionTest({commit, state, dispatch, getters}, {solution_id, test_number}) {
+        async runSolutionTests({commit, state, dispatch, getters}, solution_id) {
             try {
-                let {data} = await axios.post(`/api/solutions/${solution_id}/run-test/${test_number}`)
+                let {data} = await axios.post(`/api/solutions/${solution_id}/run-tests`)
                 return data
             } catch (e) {
                 console.error(e)

@@ -62,22 +62,36 @@ namespace ContestSystem.Controllers
         {
             if (ModelState.IsValid)
             {
-                Solution solution = new Solution
+                // находим собранное с тем же кодом
+                var solution = await _dbContext.Solutions
+                    .Where(s => s.ContestId == solutionForm.ContestId)
+                    .Where(s => s.ParticipantId == solutionForm.UserId)
+                    .Where(s => s.ProblemId == solutionForm.ProblemId)
+                    .Where(s => s.CompilerGUID == solutionForm.CompilerGUID)
+                    .Where(s => s.Code == solutionForm.Code)
+                    .FirstOrDefaultAsync();
+                if (solution == null)
                 {
-                    Code = solutionForm.Code,
-                    CompilerGUID = solutionForm.CompilerGUID,
-                    ContestId = solutionForm.ContestId,
-                    ParticipantId = solutionForm.UserId,
-                    ProblemId = solutionForm.ProblemId,
-                    SubmitTimeUTC = DateTime.UtcNow,
-                    CompilerName = (await _checkerSystemService.GetAvailableCompilersAsync())
-                        .FirstOrDefault(c => c.GUID == solutionForm.CompilerGUID)?.Name,
-                    ErrorsMessage = "",
-                    Verdict = VerdictType.Undefined,
-                    Points = 0
-                };
-                await _dbContext.Solutions.AddAsync(solution);
-                await _dbContext.SaveChangesAsync();
+                    // компиляция нового
+                    solution = new Solution
+                    {
+                        Code = solutionForm.Code,
+                        CompilerGUID = solutionForm.CompilerGUID,
+                        ContestId = solutionForm.ContestId,
+                        ParticipantId = solutionForm.UserId,
+                        ProblemId = solutionForm.ProblemId,
+                        SubmitTimeUTC = DateTime.UtcNow,
+                        CompilerName = (await _checkerSystemService.GetAvailableCompilersAsync())
+                            .FirstOrDefault(c => c.GUID == solutionForm.CompilerGUID)?.Name,
+                        ErrorsMessage = "",
+                        Verdict = VerdictType.Undefined,
+                        Points = 0
+                    };
+                    await _dbContext.Solutions.AddAsync(solution);
+                    await _dbContext.SaveChangesAsync();
+                }
+
+                // проверка что файл реально собран
                 solution = await _checkerSystemService.CompileSolutionAsync(solution);
                 _dbContext.Solutions.Update(solution);
                 await _dbContext.SaveChangesAsync();
@@ -98,45 +112,45 @@ namespace ContestSystem.Controllers
             });
         }
 
-        [HttpPost("{solutionId}/run-test/{testNumber}")]
+        [HttpPost("{solutionId}/run-tests")]
         [AuthorizeByJwt(Roles = RolesContainer.User)]
-        public async Task<IActionResult> RunTest(long solutionId, short testNumber)
+        public async Task<IActionResult> RunTest(long solutionId)
         {
             var solution = await _dbContext.Solutions.FirstOrDefaultAsync(s => s.Id == solutionId);
             if (solution == null)
             {
-                return Json(new
-                {
-                    status = false,
-                    errors = new List<string> {"Такого решения не существует"}
-                });
+                return NotFound("Такого решения не существует");
             }
 
-            if (!solution.Problem.Tests.Any(t => t.Number == testNumber))
+            bool state = true;
+            foreach (var test in solution.Problem.Tests)
             {
-                return Json(new
+                var result = await this.RunSingleTest(test, solution);
+                if (result.Verdict != VerdictType.Accepted)
                 {
-                    status = false,
-                    errors = new List<string> {"У данной задачи нет теста с таким номером"}
-                });
+                    state = false;
+                    break;
+                }
             }
 
-            if (solution.TestResults.Any(tr => tr.Number == testNumber))
+
+            return Json(state);
+        }
+
+        protected async Task<TestResult> RunSingleTest(Test test, Solution solution)
+        {
+            var testResult = solution.TestResults.FirstOrDefault(tr => tr.Number == test.Number);
+            if (testResult == null)
             {
-                return Json(new
-                {
-                    status = false,
-                    errors = new List<string> {"Данное решение уже проверено/проверяется на данном тесте"}
-                });
+                testResult = await _checkerSystemService.RunTestForSolutionAsync(solution, test.Number);
+                await _dbContext.TestsResults.AddAsync(testResult);
+                solution.Verdict = testResult.Verdict;
+                solution.Points += testResult.GotPoints;
+                _dbContext.Solutions.Update(solution);
+                await _dbContext.SaveChangesAsync();
             }
 
-            var testResult = await _checkerSystemService.RunTestForSolutionAsync(solution, testNumber);
-            await _dbContext.TestsResults.AddAsync(testResult);
-            solution.Verdict = testResult.Verdict;
-            solution.Points += testResult.GotPoints;
-            _dbContext.Solutions.Update(solution);
-            await _dbContext.SaveChangesAsync();
-            return Json(testResult);
+            return testResult;
         }
     }
 }

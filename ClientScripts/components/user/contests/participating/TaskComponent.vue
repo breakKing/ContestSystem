@@ -1,13 +1,19 @@
 <template>
   <div class="row">
     <div class="col-12 col-md-3">
-      <tasks-navigation-component :active_task_id="actualTaskId" :tasks="orderedTasks"></tasks-navigation-component>
+      <tasks-navigation-component :active_task_id="actualTaskId" :tasks="orderedTasks"
+                                  :mapped_solutions="mapped_solutions"></tasks-navigation-component>
     </div>
     <div class="col">
+      <router-link class="btn btn-info" :to="{name: 'ContestMySolutionsPage', params:{contest_id: contest_id}}">Мои
+        попытки
+      </router-link>
+
       <div v-if="!!error_msg" class="alert alert-danger" role="alert">
         {{ error_msg }}
       </div>
       <h2>{{ problem_name }}</h2>
+      <p><i>({{ problem?.timeLimitInMilliseconds }} мсек, {{ problem?.memoryLimitInBytes }} байт)</i></p>
       <p>{{ problem_description }}</p>
       <p>{{ problem_input }}</p>
       <p>{{ problem_output }}</p>
@@ -78,7 +84,7 @@ export default {
     ...mapGetters([
       'currentUser',
       'currentContest',
-      'currentContestSolutions', // тут инфа о попытках каждого таска(для навигатора)
+      'currentContestSolutionsForCurrentUser', // тут инфа о попытках каждого таска(для навигатора)
       'availableCompilers',
     ]),
     orderedTasks() {
@@ -108,10 +114,12 @@ export default {
     sortedExamples() {
       return _.sortBy((this.problem?.examples || []), ['number'])
     },
-
+    mapped_solutions() {
+      return _.groupBy(this.currentContestSolutionsForCurrentUser, (s) => +s.problem.id)
+    }
   },
   methods: {
-    ...mapActions(['getTask', 'changeCurrentContest', 'fetchAvailableCompilers', 'compileSolution', 'runSolutionTest']),
+    ...mapActions(['getTask', 'changeCurrentContest', 'fetchAvailableCompilers', 'compileSolution', 'runSolutionTests']),
     async onSubmitSolution() {
       this.loading = true
       let {data: solution_id, status, errors} = await this.compileSolution({
@@ -123,9 +131,16 @@ export default {
       })
       if (solution_id) {
         this.error_msg = ''
-        // todo run Tests
+        // запустили и пофиг на результат
+        this.runSolutionTests(solution_id)
+
+        await this.$router.push({
+          name: 'ContestMySolutionsPage',
+          params: {solution_id: solution_id, contest_id: this.contest_id}
+        })
+
       } else {
-        this.error_msg = errors.join(', ')
+        this.error_msg = (errors || []).join(', ')
       }
       this.loading = false
     }
