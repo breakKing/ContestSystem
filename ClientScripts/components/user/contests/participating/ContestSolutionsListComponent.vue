@@ -7,6 +7,8 @@
       <th>Время отправки</th>
       <th>Вердикт</th>
       <th>Очки</th>
+      <th>Время</th>
+      <th>Память</th>
     </tr>
     </thead>
     <tbody>
@@ -16,6 +18,8 @@
       <td>{{ solution.submitTimeUTC }}</td>
       <td>{{ solution.verdict }}</td>
       <td>{{ solution.points }}</td>
+      <td>{{ maxSpentTime(solution.testResults) }}</td>
+      <td>{{ maxUsedMemory(solution.testResults) }}</td>
     </tr>
     </tbody>
   </table>
@@ -48,6 +52,12 @@ export default {
         user_id: this.currentUser?.id
       })
       this.setCurrentContestSolutionsForCurrentUser(solutions)
+    },
+    maxUsedMemory(results) {
+      return _.maxBy(results, (r) => r.usedMemoryInBytes)?.usedMemoryInBytes
+    },
+    maxSpentTime(results) {
+      return _.maxBy(results, (r) => r.usedTimeInMillis)?.usedTimeInMillis
     },
   },
   beforeRouteEnter(to, from, next) {
