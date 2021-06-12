@@ -48,15 +48,18 @@
             currentContest?.startDateTimeUTC
           }}</span>
         <span v-else>Соревнование окончено</span>
-        
-        <router-link v-if="!currentContestIsInTheFuture" class="btn btn-info" :to="{name: 'ContestMySolutionsPage', params: {contest_id: currentContest?.id }}">Мои отправки</router-link>
+
+        <router-link v-if="!currentContestIsInTheFuture" class="btn btn-success"
+                     :to="{name: 'ContestMySolutionsPage', params: {contest_id: currentContest?.id }}">Мои отправки
+        </router-link>
+        <button class="btn btn-danger" v-else @click="removeFromParticipants">Не учавствовать</button>
       </template>
     </div>
   </div>
 </template>
 
 <script>
-import {mapActions, mapGetters} from "vuex";
+import {mapActions, mapGetters, mapMutations} from "vuex";
 import {ErrorMessage, Field, Form} from "vee-validate";
 import * as Yup from "yup";
 import BreadCrumbsComponent from "../../BreadCrumbsComponent";
@@ -103,19 +106,33 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['addUserToContest', 'changeCurrentContest']),
+    ...mapActions(['addUserToContest', 'changeCurrentContest', 'removeUserFromContest', 'getContestParticipants']),
+    ...mapMutations(['setCurrentContestParticipants']),
     resetParticipateTry() {
       this.wants_participate = false
       this.nickname = ''
     },
     async joinContest() {
-      await this.addUserToContest({
+      let {status, errors} = await this.addUserToContest({
         user_name: this.nickname,
         user_id: this.currentUser.id,
         contest_id: this.currentContest.id,
       })
-      await this.changeCurrentContest({force: true, contest_id: this.currentContest?.id})
-      await this.$router.push({name: 'ParticipatingContestsPage'})
+      if (status) {
+        await this.changeCurrentContest({force: true, contest_id: this.currentContest?.id})
+        await this.$router.push({name: 'ParticipatingContestsPage'})
+      }
+    },
+    async removeFromParticipants() {
+      let {status, errors} = await this.removeUserFromContest({
+        user_id: this.currentUser?.id,
+        contest_id: this.currentContest?.id
+      })
+      if (status) {
+        let participants = await this.getContestParticipants(this.contest_id)
+        this.setCurrentContestParticipants(participants)
+        this.resetParticipateTry()
+      }
     }
   },
   beforeRouteEnter(to, from, next) {

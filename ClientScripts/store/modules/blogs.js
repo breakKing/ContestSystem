@@ -51,7 +51,7 @@ export default {
             }
         },
         async getPostInfo({commit, state, dispatch, getters}, blog_id) {
-            if (!blog_id){
+            if (!blog_id) {
                 return null
             }
             try {
@@ -83,7 +83,7 @@ export default {
                 }
             } catch (e) {
                 console.error(e)
-                return false
+                return {}
             }
         },
         async fetchUserPostsList({commit, state, dispatch, getters, rootGetters}, force = false) {
@@ -96,6 +96,14 @@ export default {
             try {
                 let {data} = await axios.get(`/api/posts/get-user-posts/${rootGetters.currentUser.id}/ru`)
                 commit('setCurrentUserPosts', data)
+            } catch (e) {
+                console.error(e)
+            }
+        },
+        async deletePost({commit, state, dispatch, getters}, post_id) {
+            try {
+                let {data} = await axios.get(`/api/posts/delete-post/${post_id}`)
+                return data
             } catch (e) {
                 console.error(e)
             }

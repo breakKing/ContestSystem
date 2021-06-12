@@ -138,26 +138,26 @@ export default {
         },
         async getContestParticipants({commit, state, dispatch, getters}, contest_id) {
             if (!contest_id) {
-                return null
+                return []
             }
             try {
                 let {data} = await axios.get(`/api/contests/${contest_id}/get-participants`)
                 return data
             } catch (e) {
                 console.error(e)
-                return null
+                return []
             }
         },
         async getContestMonitor({commit, state, dispatch, getters}, contest_id) {
             if (!contest_id) {
-                return null
+                return []
             }
             try {
                 let {data} = await axios.get(`/api/contests/${contest_id}/get-monitor`)
                 return data
             } catch (e) {
                 console.error(e)
-                return null
+                return []
             }
         },
         async getUserSolutionsInContest({commit, state, dispatch, getters}, {contest_id, user_id}) {
@@ -242,16 +242,29 @@ export default {
             } catch (e) {
                 console.error(e)
             }
-            return null
+            return {}
         },
         async removeUserFromContest({commit, state, dispatch, getters}, {user_id, contest_id}) {
+            if (!user_id || !contest_id) {
+                return {}
+            }
             try {
                 let {data} = await axios.delete(`/api/contests/${contest_id}/delete-participant/${user_id}`)
                 return data
             } catch (e) {
                 console.error(e)
             }
-            return null
+            return {}
         },
+        async deleteContest({commit, state, dispatch, getters}, contest_id) {
+            try {
+                let {data} = await axios.delete(`/api/contests/delete-contest/${contest_id}`)
+                return data
+            } catch (e) {
+                console.error(e)
+            }
+            return {}
+
+        }
     }
 }
