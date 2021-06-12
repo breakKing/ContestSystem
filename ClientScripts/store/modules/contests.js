@@ -1,4 +1,5 @@
 ﻿import axios from 'axios'
+import moment from 'moment'
 import * as _ from 'lodash'
 
 export default {
@@ -11,6 +12,7 @@ export default {
         available_for_user_contests: [],
         participating_contests: [],
         current_user_contests: [],
+        current_contest_solutions_for_current_user: [],
     }),
     mutations: {
         setRunningContests(state, val) {
@@ -24,6 +26,9 @@ export default {
         },
         setCurrentUserContests(state, val) {
             state.current_user_contests = (val || [])
+        },
+        setCurrentContestSolutionsForCurrentUser(state, val) {
+            state.current_contest_solutions_for_current_user = (val || [])
         },
 
         setCurrentContest(state, val) {
@@ -43,6 +48,9 @@ export default {
         currentContestParticipants(state, getters) {
             return state.current_contest_participants
         },
+        currentContestSolutionsForCurrentUser(state, getters) {
+            return state.current_contest_solutions_for_current_user
+        },
         currentContestMonitorEntries(state, getters) {
             return state.current_contest_monitor_entries
         },
@@ -51,6 +59,24 @@ export default {
                 return false
             }
             return +getters.currentContest.creator.id === +getters.currentUser.id
+        },
+        currentContestIsRunning(state, getters) {
+            if (!getters.currentContest) {
+                return false
+            }
+            return !getters.currentContestIsInPast && !getters.currentContestIsInTheFuture
+        },
+        currentContestIsInPast(state, getters) {
+            if (!getters.currentContest) {
+                return true
+            }
+            return moment(getters.currentContest.endDateTimeUTC).isSameOrBefore(moment())
+        },
+        currentContestIsInTheFuture(state, getters) {
+            if (!getters.currentContest) {
+                return true
+            }
+            return moment(getters.currentContest.startDateTimeUTC).isAfter(moment())
         },
         currentUserIsParticipantOfCurrentContest(state, getters) {
             if (!getters.currentUser || !getters.currentContest) {
@@ -82,17 +108,22 @@ export default {
     },
     actions: {
         // контест и все связанные данные
-        async changeCurrentContest({commit, state, dispatch, getters}, {force, contest_id}) {
+        async changeCurrentContest({commit, state, dispatch, getters, rootGetters}, {force, contest_id}) {
             if (!force && +getters.currentContest?.id === +contest_id) {
                 return
             }
             let contest = await dispatch('getContestById', contest_id)
             let participants = await dispatch('getContestParticipants', contest_id)
             let monitor = await dispatch('getContestMonitor', contest_id)
+            let solutions = await dispatch('getUserSolutionsInContest', {
+                contest_id,
+                user_id: rootGetters.currentUser?.id
+            })
 
             commit('setCurrentContest', contest)
             commit('setCurrentContestParticipants', participants)
             commit('setCurrentContestMonitor', monitor)
+            commit('setCurrentContestSolutionsForCurrentUser', solutions)
         },
         async getContestById({commit, state, dispatch, getters}, contest_id) {
             await dispatch('fetchAvailableContests');
@@ -129,7 +160,18 @@ export default {
                 return null
             }
         },
-
+        async getUserSolutionsInContest({commit, state, dispatch, getters}, {contest_id, user_id}) {
+            if (!contest_id || !user_id) {
+                return []
+            }
+            try {
+                let {data} = await axios.get(`/api/contests/${contest_id}/get-solutions/${user_id}`)
+                return data
+            } catch (e) {
+                console.error(e)
+                return []
+            }
+        },
         async fetchRunningContests({commit, state, dispatch, getters}, force = false) {
             if (!force && state.currently_running_contests && state.currently_running_contests.length > 0) {
                 return

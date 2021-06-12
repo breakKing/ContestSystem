@@ -2,6 +2,8 @@
 using ContestSystemDbStructure.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using ContestSystemDbStructure.Models.common;
 
 namespace ContestSystem.Models.ExternalModels
 {
@@ -41,7 +43,9 @@ namespace ContestSystem.Models.ExternalModels
                     {
                         Letter = cp.Letter,
                         ProblemId = cp.ProblemId,
-                        ContestId = cp.ContestId
+                        ContestId = cp.ContestId,
+                        Problem = PublishedProblem.GetFromModel(cp.Problem,
+                            cp.Problem.ProblemLocalizers.First(pl => pl.Culture == "ru")),
                     };
                 })
             };
