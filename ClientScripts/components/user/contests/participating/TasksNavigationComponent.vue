@@ -1,7 +1,6 @@
 <template>
   <ul>
-    <li v-for="task of tasks" :class="{active: +task.id === +active_task_id}"
-        :class="(isResolved(+task.id) ? 'resolved' : (triedToResolve(+task.id) ? 'tried' : ''))">
+    <li v-for="task of tasks" :class="calcClass(+task.id)">
       <router-link :to="{name: 'ContestParticipatingPage', params: {contest_id: currentContest?.id, task_id: task.id}}">
         {{ task.letter }} {{ task?.problem?.localizedName }}
       </router-link>
@@ -21,6 +20,14 @@ export default {
     ...mapGetters(['currentContest']),
   },
   methods: {
+    calcClass(task_id) {
+      let resolved = this.isResolved(+task_id)
+      return {
+        active: +task_id === +this.active_task_id,
+        resolved: resolved,
+        tried: !resolved && this.triedToResolve(+task_id)
+      }
+    },
     isResolved(task_id) {
       return _.some(this.mapped_solutions[task_id], (s) => s.verdict === TestResultVerdicts.Accepted)
     },
