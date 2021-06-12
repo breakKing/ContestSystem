@@ -52,7 +52,7 @@ export default {
             return state.current_contest_solutions_for_current_user
         },
         currentContestMonitorEntries(state, getters) {
-            return state.current_contest_monitor_entries
+            return _.sortBy((state.current_contest_monitor_entries || []), ['position'])
         },
         currentUserIsOwnerOfCurrentContest(state, getters) {
             if (!getters.currentUser || !getters.currentContest?.creator) {
