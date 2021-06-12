@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using ContestSystem.Services;
 
 namespace ContestSystem.Controllers
 {
@@ -22,11 +23,13 @@ namespace ContestSystem.Controllers
     {
         private readonly MainDbContext _dbContext;
         private readonly UserManager<User> _userManager;
+        private readonly VerdicterService _verdicter;
 
-        public ContestsController(MainDbContext dbContext, UserManager<User> userManager)
+        public ContestsController(MainDbContext dbContext, UserManager<User> userManager, VerdicterService verdicter)
         {
             _dbContext = dbContext;
             _userManager = userManager;
+            _verdicter = verdicter;
         }
 
         [HttpGet("get-available-contests/{culture}")]
@@ -539,7 +542,72 @@ namespace ContestSystem.Controllers
         [HttpGet("{contestId}/get-monitor")]
         public async Task<IActionResult> GetMonitor(long contestId)
         {
-            return null;
+            var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == contestId);
+            if (contest == null)
+            {
+                return NotFound("Такого контеста не существует");
+            }
+            var contestParticipants = await _dbContext.ContestsParticipants.Where(cp => cp.ContestId == contestId).ToListAsync();
+            var solutions = await _dbContext.Solutions.Where(s => s.ContestId == contestId).ToListAsync();
+            var monitorEntries = new List<MonitorEntry>();
+            var problems = contest.ContestProblems.OrderBy(cp => cp.Letter).ToList();
+            foreach (var cp in contestParticipants)
+            {
+                var participantSolutions = solutions.Where(s => s.ParticipantId == cp.ParticipantId);
+                var monitorEntry = new MonitorEntry
+                {
+                    ContestId = contestId,
+                    UserId = cp.ParticipantId,
+                    Alias = cp.Alias,
+                    Position = 0,
+                    Result = cp.Result,
+                    ProblemsSolvedCount = 0,
+                    ProblemTries = new List<ProblemTriesEntry>()
+                };
+                foreach (var problem in problems)
+                {
+                    var participantProblemSolutions = participantSolutions.Where(ps => ps.ProblemId == problem.ProblemId)
+                                                                            .OrderBy(ps => ps.SubmitTimeUTC)
+                                                                            .ToList();
+                    var problemTriesEntry = new ProblemTriesEntry
+                    {
+                        ContestId = contestId,
+                        UserId = cp.ParticipantId,
+                        ProblemId = problem.ProblemId,
+                        Letter = problem.Letter,
+                        TriesCount = participantProblemSolutions.Count,
+                        LastTryMinutesAfterStart = (short)(participantProblemSolutions.Last().SubmitTimeUTC - contest.StartDateTimeUTC).TotalMinutes,
+                        Solved = participantProblemSolutions.Any(pps => pps.Verdict == VerdictType.Accepted || pps.Verdict == VerdictType.PartialSolution)
+                    };
+                    if (problemTriesEntry.Solved)
+                    {
+                        monitorEntry.ProblemsSolvedCount++;
+                    }
+                    if (contest.RulesSet.PointsForBestSolution)
+                    {
+                        problemTriesEntry.GotPoints = participantProblemSolutions.Max(pps => pps.Points);
+                    }
+                    else
+                    {
+                        problemTriesEntry.GotPoints = participantProblemSolutions.Last().Points;
+                    }
+                    monitorEntry.ProblemTries.Add(problemTriesEntry);
+                }
+                monitorEntries.Add(monitorEntry);
+            }
+            if (contest.RulesSet.CountMode == RulesCountMode.CountPenalty)
+            {
+                monitorEntries = monitorEntries.OrderByDescending(me => me.ProblemsSolvedCount).ThenBy(me => me.Result).ToList();
+            }
+            else
+            {
+                monitorEntries = monitorEntries.OrderByDescending(me => me.Result).ToList();
+            }
+            for (int i = 0; i < monitorEntries.Count; i++)
+            {
+                monitorEntries[i].Position = i + 1;
+            }
+            return Json(monitorEntries);
         }
 
         [HttpGet("{contestId}/get-solutions/{userId}")]
