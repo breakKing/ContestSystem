@@ -16,7 +16,7 @@
       <td>{{ solution.problem.localizedName }}</td>
       <td>{{ solution.compilerName }}</td>
       <td>{{ solution.submitTimeUTC }}</td>
-      <td>{{ solution.verdict }}</td>
+      <td>{{ getVerdictName(solution.verdict) }}{{ additionalVerdictInfo(solution) }}</td>
       <td>{{ solution.points }}</td>
       <td>{{ maxSpentTime(solution.testResults) }}</td>
       <td>{{ maxUsedMemory(solution.testResults) }}</td>
@@ -28,6 +28,7 @@
 <script>
 import {mapActions, mapGetters, mapMutations} from "vuex";
 import * as _ from 'lodash'
+import TestResultVerdicts from "../../../../dictionaries/TestResultVerdicts";
 
 export default {
   name: "ContestSolutionsListComponent",
@@ -44,7 +45,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['getUserSolutionsInContest']),
+    ...mapActions(['getUserSolutionsInContest', 'getVerdictName']),
     ...mapMutations(['setCurrentContestSolutionsForCurrentUser']),
     async updateList() {
       let solutions = await this.getUserSolutionsInContest({
@@ -59,6 +60,15 @@ export default {
     maxSpentTime(results) {
       return _.maxBy(results, (r) => r.usedTimeInMillis)?.usedTimeInMillis
     },
+    additionalVerdictInfo(solution) {
+      if (+solution?.verdict !== +TestResultVerdicts.Accepted) {
+        let lastTestNumber = this.getLastTestNumber(solution);
+        if (lastTestNumber) {
+          return `Тест ${lastTestNumber}`
+        }
+      }
+      return '';
+    }
   },
   beforeRouteEnter(to, from, next) {
     next(async vm => {
