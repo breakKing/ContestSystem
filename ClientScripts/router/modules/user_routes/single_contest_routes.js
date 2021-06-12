@@ -49,7 +49,7 @@ export default {
             meta: {
                 authorize: ['user']
             },
-        },  
+        },
         {
             path: ':contest_id/my-solutions/:solution_id',
             name: 'SolutionViewPage',

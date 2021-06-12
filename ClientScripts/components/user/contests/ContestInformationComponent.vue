@@ -1,4 +1,5 @@
 <template>
+  <bread-crumbs-component :routes="bread_crumb_routes"></bread-crumbs-component>
   <div class="row">
     <div class="col">
       <div class="row">
@@ -58,10 +59,13 @@
 import {mapActions, mapGetters} from "vuex";
 import {ErrorMessage, Field, Form} from "vee-validate";
 import * as Yup from "yup";
+import BreadCrumbsComponent from "../../BreadCrumbsComponent";
+import ContestPageBreads from "../../../dictionaries/bread_crumbs/contest/ContestPageBreads";
 
 export default {
   name: "ContestInformationComponent",
   components: {
+    BreadCrumbsComponent,
     VForm: Form,
     VField: Field,
     ErrorMessage,
@@ -94,6 +98,9 @@ export default {
       }
       return 'data:image/jpeg;base64,' + this.currentContest.image
     },
+    bread_crumb_routes() {
+      return ContestPageBreads(this.contest_id)
+    }
   },
   methods: {
     ...mapActions(['addUserToContest', 'changeCurrentContest']),

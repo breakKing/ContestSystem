@@ -21,7 +21,7 @@
 </template>
 
 <script>
-import {mapState, mapActions, mapGetters, mapMutations} from 'vuex'
+import {mapActions} from 'vuex'
 import BreadCrumbsComponent from "../../BreadCrumbsComponent";
 import PostViewBreadCrumbs from "../../../dictionaries/bread_crumbs/PostViewBreadCrumbs";
 

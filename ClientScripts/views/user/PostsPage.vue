@@ -1,4 +1,5 @@
 <template>
+  <bread-crumbs-component :routes="bread_crumb_routes"></bread-crumbs-component>
   <!-- eslint-disable-next-line -->
   <posts-list-component></posts-list-component>
 </template>
@@ -7,12 +8,17 @@
 import PostsListComponent from "../../components/user/blogs/PostsListComponent";
 import PostEditComponent from "../../components/user/blogs/PostEditComponent";
 import {mapActions, mapGetters} from "vuex";
+import BreadCrumbsComponent from "../../components/BreadCrumbsComponent";
+import PostsListBreads from "../../../dictionaries/bread_crumbs/PostsListBreads";
 
 export default {
   name: "PostsPage",
-  components: {PostEditComponent, PostsListComponent},
+  components: {BreadCrumbsComponent, PostEditComponent, PostsListComponent},
   computed: {
-    ...mapGetters(['isAuthenticated'])
+    ...mapGetters(['isAuthenticated']),
+    bread_crumb_routes() {
+      return PostsListBreads
+    }
   },
   methods: {
     ...mapActions(['fetchPostsList']),

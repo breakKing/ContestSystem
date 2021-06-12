@@ -1,4 +1,5 @@
 <template>
+  <bread-crumbs-component :routes="bread_crumb_routes"></bread-crumbs-component>
   <div class="row">
     <div class="col-12 col-md-3">
       <tasks-navigation-component :active_task_id="actualTaskId" :tasks="orderedTasks"
@@ -56,10 +57,14 @@ import * as _ from "lodash";
 import {ErrorMessage, Field, Form} from "vee-validate";
 import * as Yup from "yup";
 import CodeMirror from 'codemirror'
+import BreadCrumbsComponent from "../../../BreadCrumbsComponent";
+import ContestParticipatingTaskBreads
+  from "../../../../dictionaries/bread_crumbs/contest/ContestParticipatingTaskBreads";
 
 export default {
   name: "TaskComponent",
   components: {
+    BreadCrumbsComponent,
     TasksNavigationComponent,
     VForm: Form,
     VField: Field,
@@ -117,6 +122,9 @@ export default {
     },
     mapped_solutions() {
       return _.groupBy(this.currentContestSolutionsForCurrentUser, (s) => +s.problem.id)
+    },
+    bread_crumb_routes() {
+      return ContestParticipatingTaskBreads(this.contest_id, this.task_id)
     }
   },
   methods: {
