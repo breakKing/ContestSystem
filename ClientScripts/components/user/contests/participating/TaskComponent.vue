@@ -50,12 +50,12 @@
 </template>
 
 <script>
-import {mapActions, mapGetters} from "vuex";
+import {mapActions, mapGetters, mapMutations} from "vuex";
 import TasksNavigationComponent from "./TasksNavigationComponent";
 import * as _ from "lodash";
 import {ErrorMessage, Field, Form} from "vee-validate";
 import * as Yup from "yup";
-import 'codemirror'
+import CodeMirror from 'codemirror'
 
 export default {
   name: "TaskComponent",
@@ -120,7 +120,8 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['getTask', 'changeCurrentContest', 'fetchAvailableCompilers', 'compileSolution', 'runSolutionTests']),
+    ...mapMutations(['setCurrentContestSolutionsForCurrentUser']),
+    ...mapActions(['getTask', 'changeCurrentContest', 'fetchAvailableCompilers', 'compileSolution', 'runSolutionTests', 'getUserSolutionsInContest']),
     async onSubmitSolution() {
       this.loading = true
       let {data: solution_id, status, errors} = await this.compileSolution({
@@ -133,7 +134,13 @@ export default {
       if (solution_id) {
         this.error_msg = ''
         // запустили и пофиг на результат
-        this.runSolutionTests(solution_id)
+        this.runSolutionTests(solution_id).then(async () => {
+          let solutions = await this.getUserSolutionsInContest({
+            contest_id: this.contest_id,
+            user_id: this.currentUser?.id
+          })
+          this.setCurrentContestSolutionsForCurrentUser(solutions)
+        })
 
         await this.$router.push({
           name: 'ContestMySolutionsPage',

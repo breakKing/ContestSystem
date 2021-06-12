@@ -4,6 +4,7 @@ import TaskComponent from "../../../components/user/contests/participating/TaskC
 import ContestSolutionsListComponent
     from "../../../components/user/contests/participating/ContestSolutionsListComponent";
 import ContestMonitoringComponent from "../../../components/user/contests/participating/ContestMonitoringComponent";
+import SolutionViewComponent from "../../../components/user/contests/participating/SolutionViewComponent";
 
 export default {
     path: 'contest',
@@ -44,6 +45,15 @@ export default {
             path: ':contest_id/my-solutions',
             name: 'ContestMySolutionsPage',
             component: ContestSolutionsListComponent,
+            props: true,
+            meta: {
+                authorize: ['user']
+            },
+        },  
+        {
+            path: ':contest_id/my-solutions/:solution_id',
+            name: 'SolutionViewPage',
+            component: SolutionViewComponent,
             props: true,
             meta: {
                 authorize: ['user']

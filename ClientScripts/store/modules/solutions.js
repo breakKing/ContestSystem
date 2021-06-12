@@ -1,5 +1,6 @@
 ﻿import axios from 'axios'
 import * as _ from 'lodash'
+import TestResultVerdicts from "../../dictionaries/TestResultVerdicts";
 
 export default {
     state: () => ({
@@ -16,6 +17,13 @@ export default {
         },
     },
     actions: {
+        getVerdictName({commit, state, dispatch, getters}, verdict) {
+            return _.find(_.toPairs(TestResultVerdicts), (p) => +p[1] === +verdict)[0]
+        },
+
+        getLastTestNumber({commit, state, dispatch, getters}, solution) {
+            return _.maxBy((solution?.testResults || []), (t) => +t.number)?.number
+        },
         async getSolution({commit, state, dispatch, getters}, solution_id) {
             if (!solution_id) {
                 return null

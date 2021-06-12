@@ -1,4 +1,5 @@
 ﻿<template>
+  <bread-crumbs-component :routes="bread_crumb_routes"></bread-crumbs-component>
   <div class="container">
     <div class="row">
       <div class="col-12 col-md-9">
@@ -17,15 +18,16 @@
       <div class="col" v-html="post_info?.htmlLocalizedText"></div>
     </div>
   </div>
-  <!-- todo comments -->
 </template>
 
 <script>
 import {mapState, mapActions, mapGetters, mapMutations} from 'vuex'
-import {Base64} from 'js-base64';
+import BreadCrumbsComponent from "../../BreadCrumbsComponent";
+import PostViewBreadCrumbs from "../../../dictionaries/bread_crumbs/PostViewBreadCrumbs";
 
 export default {
   name: "PostViewComponent",
+  components: {BreadCrumbsComponent},
   props: ['post_id'],
   data() {
     return {
@@ -40,6 +42,9 @@ export default {
       return 'data:image/jpeg;base64,' + this.post_info.previewImage
 
     },
+    bread_crumb_routes() {
+      return PostViewBreadCrumbs(this.post_id)
+    }
   },
   methods: {
     ...mapActions(['getPostInfo'])

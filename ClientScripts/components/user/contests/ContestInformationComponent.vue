@@ -7,9 +7,12 @@
       </div>
       <p>{{ currentContest?.localizedDescription }}</p>
 
-      <div class="row" v-if="currentUserIsOwnerOfCurrentContest || currentUserIsParticipantOfCurrentContest">
+      <div class="row"
+           v-if="currentUserIsOwnerOfCurrentContest || currentUserIsParticipantOfCurrentContest || currentContest?.rules?.publicMonitor">
         <div class="col">
-          <router-link class="btn btn-info" :to="{name: 'ContestMonitorPage', params: {contest_id: currentContest.id}}">Монитор</router-link>
+          <router-link class="btn btn-info" :to="{name: 'ContestMonitorPage', params: {contest_id: currentContest.id}}">
+            Монитор
+          </router-link>
         </div>
       </div>
 
@@ -44,6 +47,8 @@
             currentContest?.startDateTimeUTC
           }}</span>
         <span v-else>Соревнование окончено</span>
+        
+        <router-link v-if="!currentContestIsInTheFuture" class="btn btn-info" :to="{name: 'ContestMySolutionsPage', params: {contest_id: currentContest?.id }}">Мои отправки</router-link>
       </template>
     </div>
   </div>
