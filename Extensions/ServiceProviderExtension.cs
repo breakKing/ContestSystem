@@ -9,5 +9,10 @@ namespace ContestSystem.Extensions
         {
             services.AddSingleton<CheckerSystemService>();
         }
+
+        public static void AddVerdicter(this IServiceCollection services)
+        {
+            services.AddSingleton<VerdicterService>();
+        }
     }
 }
