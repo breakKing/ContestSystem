@@ -3,6 +3,7 @@ import ContestInformationComponent from "../../../components/user/contests/Conte
 import TaskComponent from "../../../components/user/contests/participating/TaskComponent";
 import ContestSolutionsListComponent
     from "../../../components/user/contests/participating/ContestSolutionsListComponent";
+import ContestMonitoringComponent from "../../../components/user/contests/participating/ContestMonitoringComponent";
 
 export default {
     path: 'contest',
@@ -25,6 +26,15 @@ export default {
             path: ':contest_id/participate/:task_id?',
             name: 'ContestParticipatingPage',
             component: TaskComponent,
+            props: true,
+            meta: {
+                authorize: ['user']
+            },
+        },
+        {
+            path: ':contest_id/monitor',
+            name: 'ContestMonitorPage',
+            component: ContestMonitoringComponent,
             props: true,
             meta: {
                 authorize: ['user']

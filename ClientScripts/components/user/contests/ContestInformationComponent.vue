@@ -3,9 +3,16 @@
     <div class="col">
       <div class="row">
         <div class="col"><h2>{{ currentContest?.localizedName }}</h2></div>
-        <div class="col">{{ this.currentContest?.creator?.fullName }}</div>
+        <div class="col">{{ currentContest?.creator?.fullName }}</div>
       </div>
       <p>{{ currentContest?.localizedDescription }}</p>
+
+      <div class="row" v-if="currentUserIsOwnerOfCurrentContest || currentUserIsParticipantOfCurrentContest">
+        <div class="col">
+          <router-link class="btn btn-info" :to="{name: 'ContestMonitorPage', params: {contest_id: currentContest.id}}">Монитор</router-link>
+        </div>
+      </div>
+
     </div>
     <div class="col-4" v-if="!!dataUrl">
       <img alt="картинка" class="img-fluid" :src="dataUrl"/>
@@ -30,7 +37,9 @@
         </template>
       </template>
       <template v-else>
-        <router-link class="btn btn-info" v-if="currentContestIsRunning" :to="{name: 'ContestParticipatingPage', params: {contest_id: currentContest?.id}}">Начать</router-link>
+        <router-link class="btn btn-info" v-if="currentContestIsRunning"
+                     :to="{name: 'ContestParticipatingPage', params: {contest_id: currentContest?.id}}">Начать
+        </router-link>
         <span v-else-if="currentContestIsInTheFuture">Соревнование начинается в {{
             currentContest?.startDateTimeUTC
           }}</span>

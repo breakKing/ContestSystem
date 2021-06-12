@@ -86,6 +86,7 @@ export default {
       'currentContest',
       'currentContestSolutionsForCurrentUser', // тут инфа о попытках каждого таска(для навигатора)
       'availableCompilers',
+      'currentContestIsInPast',
     ]),
     orderedTasks() {
       return _.sortBy((this.currentContest?.problems || []), ['letter'])
@@ -146,7 +147,6 @@ export default {
     }
   },
   mounted() {
-    // todo import
     CodeMirror.fromTextArea(document.querySelector('.code-input'), {
       lineNumbers: true,
     })
@@ -154,6 +154,9 @@ export default {
   beforeRouteEnter(to, from, next) {
     next(async vm => {
       await vm.changeCurrentContest({force: false, contest_id: vm.contest_id})
+      if (vm.currentContest && vm.currentContestIsInPast) {
+        return await vm.$router.replace({name: 'ContestPage', params: {contest_id: vm.currentContest.id}})
+      }
       vm.problem = await vm.getTask(vm.actualTaskId)
       await vm.fetchAvailableCompilers()
       vm.loading = false
