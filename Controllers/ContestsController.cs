@@ -13,7 +13,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using ContestSystem.Services;
 
 namespace ContestSystem.Controllers
 {
@@ -23,13 +22,11 @@ namespace ContestSystem.Controllers
     {
         private readonly MainDbContext _dbContext;
         private readonly UserManager<User> _userManager;
-        private readonly VerdicterService _verdicter;
 
-        public ContestsController(MainDbContext dbContext, UserManager<User> userManager, VerdicterService verdicter)
+        public ContestsController(MainDbContext dbContext, UserManager<User> userManager)
         {
             _dbContext = dbContext;
             _userManager = userManager;
-            _verdicter = verdicter;
         }
 
         [HttpGet("get-available-contests/{culture}")]

@@ -21,11 +21,13 @@ namespace ContestSystem.Controllers
     {
         private readonly MainDbContext _dbContext;
         private readonly CheckerSystemService _checkerSystemService;
+        private readonly VerdicterService _verdicter;
 
-        public SolutionsController(MainDbContext dbContext, CheckerSystemService checkerSystemService)
+        public SolutionsController(MainDbContext dbContext, CheckerSystemService checkerSystemService, VerdicterService verdicter)
         {
             _dbContext = dbContext;
             _checkerSystemService = checkerSystemService;
+            _verdicter = verdicter;
         }
 
         [HttpGet("{id}")]
@@ -62,7 +64,7 @@ namespace ContestSystem.Controllers
         {
             if (ModelState.IsValid)
             {
-                // находим собранное с тем же кодом
+                // находим в БД с тем же кодом
                 var solution = await _dbContext.Solutions
                     .Where(s => s.ContestId == solutionForm.ContestId)
                     .Where(s => s.ParticipantId == solutionForm.UserId)
@@ -72,7 +74,7 @@ namespace ContestSystem.Controllers
                     .FirstOrDefaultAsync();
                 if (solution == null)
                 {
-                    // компиляция нового
+                    // добавляем в БД новое
                     solution = new Solution
                     {
                         Code = solutionForm.Code,
@@ -91,7 +93,7 @@ namespace ContestSystem.Controllers
                     await _dbContext.SaveChangesAsync();
                 }
 
-                // проверка что файл реально собран
+                // Отправка на компиляцию
                 solution = await _checkerSystemService.CompileSolutionAsync(solution);
                 _dbContext.Solutions.Update(solution);
                 await _dbContext.SaveChangesAsync();
@@ -114,7 +116,7 @@ namespace ContestSystem.Controllers
 
         [HttpPost("{solutionId}/run-tests")]
         [AuthorizeByJwt(Roles = RolesContainer.User)]
-        public async Task<IActionResult> RunTest(long solutionId)
+        public async Task<IActionResult> RunTests(long solutionId)
         {
             var solution = await _dbContext.Solutions.FirstOrDefaultAsync(s => s.Id == solutionId);
             if (solution == null)
@@ -123,17 +125,24 @@ namespace ContestSystem.Controllers
             }
 
             bool state = true;
-            foreach (var test in solution.Problem.Tests)
+            solution.Verdict = VerdictType.TestInProgress;
+            _dbContext.Solutions.Update(solution);
+            await _dbContext.SaveChangesAsync();
+            foreach (var test in solution.Problem.Tests.OrderBy(t => t.Number))
             {
-                var result = await this.RunSingleTest(test, solution);
-                if (result.Verdict != VerdictType.Accepted)
+                var result = await RunSingleTest(test, solution);
+                if (result.Verdict != VerdictType.Accepted && solution.Contest.RulesSet.CountMode == RulesCountMode.CountPenalty)
                 {
                     state = false;
                     break;
                 }
             }
-
-
+            solution.Points = _verdicter.SumPointsForAllTests(solution.TestResults);
+            solution.Verdict = _verdicter.GetVerdictForSolution(solution);
+            var contestParticipant = await _dbContext.ContestsParticipants.FirstOrDefaultAsync(cp => cp.ParticipantId == solution.ParticipantId && cp.ContestId == solution.ContestId);
+            contestParticipant.Result += _verdicter.GetResultForSolution(solution);
+            _dbContext.ContestsParticipants.Update(contestParticipant);
+            await _dbContext.SaveChangesAsync();
             return Json(state);
         }
 
@@ -144,12 +153,9 @@ namespace ContestSystem.Controllers
             {
                 testResult = await _checkerSystemService.RunTestForSolutionAsync(solution, test.Number);
                 await _dbContext.TestsResults.AddAsync(testResult);
-                solution.Verdict = testResult.Verdict;
-                solution.Points += testResult.GotPoints;
                 _dbContext.Solutions.Update(solution);
                 await _dbContext.SaveChangesAsync();
             }
-
             return testResult;
         }
     }

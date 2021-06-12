@@ -191,13 +191,13 @@ namespace ContestSystem.Services
             return verdict;
         }
 
-        private static long SumPointsForAllTests(List<TestResult> testResults)
+        public short SumPointsForAllTests(List<TestResult> testResults)
         {
             if (testResults == null || testResults.Count == 0)
             {
                 return 0;
             }
-            return testResults.Sum(tr => tr.GotPoints);
+            return (short)testResults.Sum(tr => tr.GotPoints);
         }
 
         private static long GetTimePenaltyForSolution(Solution solution)
