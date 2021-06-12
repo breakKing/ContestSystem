@@ -479,6 +479,37 @@ namespace ContestSystem.Controllers
             });
         }
 
+        [HttpGet("{contestId}/get-participants")]
+        [AuthorizeByJwt(Roles = RolesContainer.User)]
+        public async Task<IActionResult> GetParticipants(long contestId)
+        {
+            var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == contestId);
+            if (contest == null)
+            {
+                return NotFound("Такого контеста не существует");
+            }
+            var contestParticipants = await _dbContext.ContestsParticipants.Where(cp => cp.ContestId == contestId).ToListAsync();
+            var participants = contestParticipants.ConvertAll(cp =>
+            {
+                var p = ParticipantExternalModel.GetFromModel(cp);
+                return p;
+            });
+            return Json(participants);
+        }
+
+        [HttpGet("{contestId}/get-monitor")]
+        public async Task<IActionResult> GetMonitor(long contestId)
+        {
+            return null;
+        }
+
+        [HttpGet("{contestId}/get-solutions/{userId}")]
+        [AuthorizeByJwt(Roles = RolesContainer.User)]
+        public async Task<IActionResult> GetParticipantSolutions(long contestId, long userId)
+        {
+            return null;
+        }
+
         /*[HttpGet("get-contest-requests")]
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetAllPostsRequests()
