@@ -83,7 +83,7 @@ export default {
         authorId: this.currentUser.id,
         isPublic: +this.isPublic === 1,
       }
-      let result;
+      let result = {};
       try {
         if (this.id) {
           let {data} = await axios.put(`/api/checkers/edit-checker/${this.id}`, request)
