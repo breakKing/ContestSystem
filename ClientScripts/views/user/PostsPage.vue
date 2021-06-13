@@ -9,7 +9,7 @@ import PostsListComponent from "../../components/user/blogs/PostsListComponent";
 import PostEditComponent from "../../components/user/blogs/PostEditComponent";
 import {mapActions, mapGetters} from "vuex";
 import BreadCrumbsComponent from "../../components/BreadCrumbsComponent";
-import PostsListBreads from "../../../dictionaries/bread_crumbs/PostsListBreads";
+import PostsListBreads from "../../dictionaries/bread_crumbs/PostsListBreads";
 
 export default {
   name: "PostsPage",
