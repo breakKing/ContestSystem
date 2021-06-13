@@ -13,9 +13,7 @@
   <!-- eslint-disable-next-line -->
   <div class="tab-content">
     <div class="tab-pane fade show active" role="tabpanel">
-      <transition name="fade">
-        <router-view></router-view>
-      </transition>
+      <router-view></router-view>
     </div>
   </div>
 </template>
