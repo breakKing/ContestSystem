@@ -1,6 +1,6 @@
 ﻿<template>
   <header-component></header-component>
-  <div class="mx-auto w-25" style="padding-top: 8%; height: 62.2vh">
+  <div class="mx-auto w-25" style="padding-top: 7%; height: 61.1vh">
     <div v-if="authError" class="alert alert-danger" role="alert">
       {{ authError }}
     </div>

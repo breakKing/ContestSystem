@@ -7,37 +7,37 @@
       </div>
       <v-form @submit="saveTask" :validation-schema="schema">
         <div>
-          <label class="text-light fs-3">Название</label>
+          <label class="fs-4">Название</label>
           <v-field v-model="name" class="form-control" name="name"/>
           <error-message name="name"></error-message>
         </div>
         <div>
-          <label class="text-light fs-3">Описание</label>
+          <label class="fs-4">Описание</label>
           <v-field v-model="description" class="form-control" name="description"/>
           <error-message name="description"></error-message>
         </div>
         <div>
-          <label class="text-light fs-3">Входные данные</label>
+          <label class="fs-4">Входные данные</label>
           <v-field v-model="inputBlock" class="form-control" name="inputBlock"/>
           <error-message name="inputBlock"></error-message>
         </div>
         <div>
-          <label class="text-light fs-3">Выходные данные</label>
+          <label class="fs-4">Выходные данные</label>
           <v-field v-model="outputBlock" class="form-control" name="outputBlock"/>
           <error-message name="outputBlock"></error-message>
         </div>
         <div>
-          <label class="text-light fs-3">Лимит занимаемого RAM (bytes)</label>
+          <label class="fs-4">Лимит занимаемого RAM (bytes)</label>
           <v-field v-model="memoryLimitInBytes" class="form-control" name="memoryLimitInBytes"/>
           <error-message name="memoryLimitInBytes"></error-message>
         </div>
         <div>
-          <label class="text-light fs-3">Лимит времени выполнения (мсек)</label>
+          <label class="fs-4">Лимит времени выполнения (мсек)</label>
           <v-field v-model="timeLimitInMilliseconds" class="form-control" name="timeLimitInMilliseconds"/>
           <error-message name="timeLimitInMilliseconds"></error-message>
         </div>
         <div>
-          <label class="text-light fs-3">Механизм проверки</label>
+          <label class="fs-4">Механизм проверки</label>
           <v-field v-model="checker" class="form-control" name="checker" as="select">
             <option v-for="checker of availableCheckers" :value="checker.id">{{ checker.name }}</option>
           </v-field>
@@ -45,7 +45,7 @@
         </div>
         <div>
           <v-field v-model="isPublic" class="custom-checkbox" id="isPublic" name="isPublic" type="checkbox" value="1"/>
-          <label class="text-light fs-5" for="isPublic">Виден всем</label>
+          <label class="fs-4" for="isPublic">Виден всем</label>
           <error-message name="isPublic"></error-message>
         </div>
         <div>
@@ -250,18 +250,16 @@ export default {
 
 <style lang="scss" scoped>
 div * {
-  margin: 10px 0;
+    margin: 5px;
+    color: #04295E;
 }
 
 span[role=alert] {
-  color: white;
+  color: red;
 }
 
 form {
   padding: 10px;
-  border: 1px solid blue;
-  border-radius: 0 16px 16px 0;
-  background-color: #0D6EFD;
 }
 
 .custom-checkbox {
@@ -297,13 +295,13 @@ form {
 }
 
 .form-control {
-  border-radius: 16px 0 16px 0;
+  border-radius: 16px;
 }
 
 button {
   padding: 5px 10px;
   background-color: #fff;
-  border-radius: 16px 0 16px 0;
+  border-radius: 16px;
   border: 1px solid blue;
 
   &:hover {

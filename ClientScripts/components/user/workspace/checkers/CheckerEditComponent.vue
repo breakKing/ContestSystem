@@ -5,23 +5,23 @@
   </div>
   <v-form @submit="onSubmit" :validation-schema="schema" class="container-fluid mb-3">
     <div>
-      <label class="text-light fs-3">Название</label>
+      <label class=" fs-3">Название</label>
       <v-field v-model="name" class="form-control" placeholder="Название программы-чекера" name="name"/>
       <error-message name="name"></error-message>
     </div>
     <div>
-      <label class="text-light fs-3">Описание</label>
+      <label class=" fs-3">Описание</label>
       <v-field v-model="description" class="form-control" name="description" as="textarea"
                placeholder="Краткое описание работы программы-чекера"/>
       <error-message name="description"></error-message>
     </div>
     <div>
       <v-field v-model="isPublic" class="custom-checkbox" id="isPublic" name="isPublic" type="checkbox" value="1"/>
-      <label class="text-light fs-5" for="isPublic">Виден всем</label>
+      <label class=" fs-5" for="isPublic">Виден всем</label>
       <error-message name="isPublic"></error-message>
     </div>
     <div>
-      <label class="text-light fs-3">Код</label>
+      <label class=" fs-3">Код</label>
       <v-field v-model="code" class="form-control" name="code" as="textarea" placeholder="Код программы-чекера"
                rows="6"/>
       <error-message name="code"></error-message>
@@ -114,19 +114,17 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-div * {
-  margin: 10px 0;
-}
+    div * {
+        margin: 5px;
+        color: #04295E;
+    }
 
 span[role=alert] {
-  color: white;
+  color: red;
 }
 
 form {
   padding: 10px;
-  border: 1px solid blue;
-  border-radius: 0 16px 16px 0;
-  background-color: #0D6EFD;
 }
 
 .custom-checkbox {
@@ -168,7 +166,7 @@ form {
 button {
   padding: 5px 10px;
   background-color: #fff;
-  border-radius: 16px 0 16px 0;
+  border-radius: 16px;
   border: 1px solid blue;
 
   &:hover {
