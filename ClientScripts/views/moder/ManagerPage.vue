@@ -3,7 +3,7 @@
   <div class="container">
     <div class="row">
       <div class="col-3" v-if="!$route.meta.hide_sidebar">
-        <router-view name="sidebar"></router-view>
+        <moder-side-bar-component></moder-side-bar-component>
       </div>
       <div class="col">
         <router-view></router-view>
@@ -17,10 +17,11 @@
 <script>
 import HeaderComponent from "../../components/HeaderComponent";
 import FooterComponent from "../../components/FooterComponent";
+import ModerSideBarComponent from "../../components/moder/ModerSideBarComponent";
 
 export default {
   name: "ManagerPage",
-  components: {FooterComponent, HeaderComponent}
+  components: {ModerSideBarComponent, FooterComponent, HeaderComponent}
 }
 </script>
 

@@ -24,10 +24,16 @@
       <img class="img-fluid" alt="картинка" :src="dataUrl"/>
     </div>
     <div class="col-2">
-      <button v-if="currentUserIsOwner" type="button" class="btn btn-info" @click.prevent="editContest">Редактировать
-      </button>
-      <button type="button" class="btn btn-info" @click.prevent="goToContest">Войти
-      </button>
+      <template v-if="currentRole === 'user'">
+        <button v-if="currentUserIsOwner" type="button" class="btn btn-info" @click.prevent="editContest">Редактировать
+        </button>
+        <button type="button" class="btn btn-info" @click.prevent="goToContest">Войти
+        </button>
+      </template>
+      <template v-else-if="currentRole === 'moderator'">
+        <button type="button" class="btn btn-info" @click.prevent="moderateContest">Подробнее
+        </button>
+      </template>
     </div>
   </div>
 </template>
@@ -47,9 +53,17 @@ export default {
     async goToContest() {
       await this.$router.push({name: 'ContestPage', params: {contest_id: this.contest.id}})
     },
+    async moderateContest() {
+      await this.$router.push({
+        name: 'ModeratorContestModerationPage',
+        params: {
+          contest_id: +this.contest.id
+        }
+      })
+    }
   },
   computed: {
-    ...mapGetters(['currentUser']),
+    ...mapGetters(['currentUser', 'currentRole']),
     currentUserIsOwner() {
       if (!this.currentUser || !this.contest?.creator) {
         return false

@@ -84,10 +84,11 @@ export default {
         async moderateCourse({commit, state, dispatch, getters}, {course_id, request_body}) {
             try {
                 let {data} = await axios.put(`/api/courses/moderate/${course_id}`, request_body)
-                commit('setCurrentModeratingCourse', data)
+                return data
             } catch (e) {
                 console.error(e)
             }
+            return {}
         },
     }
 }

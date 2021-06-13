@@ -28,6 +28,22 @@ export default {
         currentModeratingPost(state, getters) {
             return state.moderating_post
         },
+        currentModeratingPostLocalizer() {
+            return _.find((getters.currentModeratingPost?.localizers || []), (l) => l.culture === 'ru')
+        },
+        currentModeratingPostApprovalStatusName() {
+            if (!getters.currentModeratingPost) {
+                return ''
+            }
+            switch (+getters.currentModeratingPost.approvalStatus) {
+                case ApproveTypes.NotModeratedYet:
+                    return 'Не проверено'
+                case ApproveTypes.Accepted:
+                    return 'Подтверждено'
+                case ApproveTypes.Rejected:
+                    return 'Отклонено'
+            }
+        },
         postsToModerate(state, getters) {
             return state.posts_to_moderate
         },
@@ -84,10 +100,11 @@ export default {
         async moderatePost({commit, state, dispatch, getters}, {post_id, request_body}) {
             try {
                 let {data} = await axios.put(`/api/posts/moderate/${post_id}`, request_body)
-                commit('setCurrentModeratingPost', data)
+                return data
             } catch (e) {
                 console.error(e)
             }
+            return {}
         },
     }
 }

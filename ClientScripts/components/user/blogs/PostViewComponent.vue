@@ -40,7 +40,6 @@ export default {
         return '';
       }
       return 'data:image/jpeg;base64,' + this.post_info.previewImage
-
     },
     bread_crumb_routes() {
       return PostViewBreadCrumbs(this.post_id)
