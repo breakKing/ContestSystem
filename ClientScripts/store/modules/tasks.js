@@ -72,5 +72,14 @@ export default {
             }
             return null
         },
+        async deleteTask({commit, state, dispatch, getters, rootGetters}, task_id) {
+            try {
+                let {data} = await axios.get(`/api/problems/delete-problem/${task_id}`)
+                return data
+            } catch (e) {
+                console.error(e)
+            }
+            return {}
+        },
     }
 }

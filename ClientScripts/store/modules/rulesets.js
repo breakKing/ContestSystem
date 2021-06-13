@@ -51,12 +51,21 @@ export default {
                 console.error(e)
             }
         },
-        async getRuleSet({getters,dispatch}, set_id) {
+        async getRuleSet({getters, dispatch}, set_id) {
             if (!set_id) {
                 return null
             }
             await dispatch('fetchAvailableRuleSets')
             return _.find(getters.availableRuleSets, (rs) => +rs.id === +set_id)
+        },
+        async deleteRuleSet({getters, dispatch}, ruleset_id) {
+            try {
+                let {data} = await axios.get(`/api/rules/delete-rules/${ruleset_id}`)
+                return data
+            } catch (e) {
+                console.error(e)
+            }
+            return {}
         }
     }
 }
