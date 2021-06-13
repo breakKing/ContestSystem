@@ -105,6 +105,10 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> AddProblem([FromBody] ProblemForm problemForm)
         {
+            if (problemForm.Tests.Sum(t => t.AvailablePoints) != 100)
+            {
+                ModelState.AddModelError("Tests", "Sum of available points for all tests is not equal to 100");
+            }
             if (ModelState.IsValid)
             {
                 if (!await _dbContext.Checkers.AnyAsync(ch => ch.Id == problemForm.CheckerId))
@@ -215,7 +219,10 @@ namespace ContestSystem.Controllers
                     errors = new List<string> { "Id в запросе не совпадает с Id в форме" }
                 });
             }
-
+            if (problemForm.Tests.Sum(t => t.AvailablePoints) != 100)
+            {
+                ModelState.AddModelError("Tests", "Sum of available points for all tests is not equal to 100");
+            }
             if (ModelState.IsValid)
             {
                 var problem = await _dbContext.Problems.FirstOrDefaultAsync(p => p.Id == id);
