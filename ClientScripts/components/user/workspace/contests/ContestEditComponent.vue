@@ -85,8 +85,8 @@ export default {
       name: '',
 
       schema: Yup.object({
-        name: Yup.string().required(),
-        description: Yup.string().required(),
+        name: Yup.string().required().nullable(),
+        description: Yup.string().required().nullable(),
       })
     }
   },
@@ -95,15 +95,14 @@ export default {
     async updateFields() {
       await this.fetchAvailableRuleSets();
       let post = await this.getContestById(this.contest_id)
-
-      this.name = post?.localizers[0].name
-      this.description = post?.localizers[0].description
-      this.startDateTimeUTC = post?.startDateTimeUTC
-      this.durationInMinutes = post?.durationInMinutes
+      this.name = (post?.localizers || [])[0]?.name || null
+      this.description = (post?.localizers || [])[0]?.description || null
+      this.startDateTimeUTC = post?.startDateTimeUTC || null
+      this.durationInMinutes = post?.durationInMinutes || null
       this.areVirtualContestsAvailable = +post?.areVirtualContestsAvailable === 1
       this.isPublic = +post?.isPublic === 1
-      this.rulesSetId = post?.rulesSetId
-      this.image = post?.image
+      this.rulesSetId = post?.rulesSetId || null
+      this.image = post?.image || null
     },
     updateEvent(data) {
       if (data.type === 'add') {

@@ -52,9 +52,9 @@ export default {
       code: '',
       isPublic: '',
       schema: Yup.object({
-        name: Yup.string('Название должно быть строкой').required('Название это обязательное поле'),
-        description: Yup.string('Описание должно быть строкой').required('Описание это обязательное поле'),
-        code: Yup.string('Код должен быть строкой').required('Код это обязательное поле'),
+        name: Yup.string('Название должно быть строкой').nullable().required('Название это обязательное поле'),
+        description: Yup.string('Описание должно быть строкой').nullable().required('Описание это обязательное поле'),
+        code: Yup.string('Код должен быть строкой').nullable().required('Код это обязательное поле'),
       })
     }
   },
@@ -65,10 +65,10 @@ export default {
     ...mapActions(['getChecker', 'fetchCurrentUserCheckers', 'fetchAvailableCheckers']),
     async updateFields() {
       let checker = await this.getChecker(this.id)
-      this.name = checker?.name
-      this.description = checker?.description
-      this.code = checker?.code
-      this.isPublic = checker?.isPublic
+      this.name = checker?.name || null
+      this.description = checker?.description || null
+      this.code = checker?.code || null
+      this.isPublic = checker?.isPublic || null
     },
     async onSubmit() {
       if (!this.currentUser) {
@@ -76,7 +76,7 @@ export default {
         return
       }
       let request = {
-        id: (!!this.id ? this.id : null),
+        id: this.id,
         name: this.name,
         description: this.description,
         code: this.code,
@@ -114,10 +114,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-    div * {
-        margin: 5px;
-        color: #04295E;
-    }
+div * {
+  margin: 5px;
+  color: #04295E;
+}
 
 span[role=alert] {
   color: red;

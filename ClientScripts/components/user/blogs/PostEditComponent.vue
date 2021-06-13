@@ -79,9 +79,9 @@ export default {
       postPreview: '',
       postCreationSchema: Yup.object({
         previewImage: Yup.mixed().nullable().required('Изображение поста это обязательное поле').label('Изображение поста'),
-        postName: Yup.string().required('Название поста это обязательное поле').label('Название поста'),
-        postText: Yup.string().required('Текст поста это обязательное поле').label('Текст поста'),
-        postPreview: Yup.string().required('Превью поста это обязательное поле').label('Краткое описание'),
+        postName: Yup.string().nullable().required('Название поста это обязательное поле').label('Название поста'),
+        postText: Yup.string().nullable().required('Текст поста это обязательное поле').label('Текст поста'),
+        postPreview: Yup.string().nullable().required('Превью поста это обязательное поле').label('Краткое описание'),
       })
     }
   },
@@ -112,12 +112,10 @@ export default {
     async updateFields() {
       if (this.post_id) {
         let post_data = await this.getPostInfo(this.post_id)
-        if (post_data) {
-          this.postName = post_data.localizedName
-          this.previewImage = post_data.previewImage
-          this.postPreview = post_data.previewText
-          this.postText = post_data.htmlLocalizedText
-        }
+        this.postName = post_data.localizedName || null
+        this.previewImage = post_data.previewImage || null
+        this.postPreview = post_data.previewText || null
+        this.postText = post_data.htmlLocalizedText || null
       }
     },
     hideModal() {

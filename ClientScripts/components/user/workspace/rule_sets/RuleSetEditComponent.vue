@@ -122,8 +122,8 @@ export default {
       isPublic: null,
 
       schema: Yup.object({
-        name: Yup.string().required(),
-        description: Yup.string().required(),
+        name: Yup.string().required().nullable(),
+        description: Yup.string().required().nullable(),
       })
     }
   },
@@ -132,19 +132,18 @@ export default {
     ...mapActions(['getRuleSet', 'fetchAvailableRuleSets', 'fetchCurrentUserRuleSets']),
     async updateFields() {
       this.ruleSet = await this.getRuleSet(this.set_id)
-
-      this.name = this.ruleSet?.name
-      this.description = this.ruleSet?.description
-      this.countMode = this.ruleSet?.countMode
-      this.penaltyForCompilationError = this.ruleSet?.penaltyForCompilationError
-      this.penaltyForOneTry = this.ruleSet?.penaltyForOneTry
-      this.penaltyForOneMinute = this.ruleSet?.penaltyForOneMinute
-      this.pointsForBestSolution = this.ruleSet?.pointsForBestSolution
-      this.maxTriesForOneProblem = this.ruleSet?.maxTriesForOneProblem
-      this.publicMonitor = this.ruleSet?.publicMonitor
-      this.monitorFreezeTimeBeforeFinishInMinutes = this.ruleSet?.monitorFreezeTimeBeforeFinishInMinutes
-      this.showFullTestsResults = this.ruleSet?.showFullTestsResults
-      this.isPublic = this.ruleSet?.isPublic
+      this.name = this.ruleSet?.name || null
+      this.description = this.ruleSet?.description || null
+      this.countMode = this.ruleSet?.countMode || null
+      this.penaltyForCompilationError = this.ruleSet?.penaltyForCompilationError || null
+      this.penaltyForOneTry = this.ruleSet?.penaltyForOneTry || null
+      this.penaltyForOneMinute = this.ruleSet?.penaltyForOneMinute || null
+      this.pointsForBestSolution = this.ruleSet?.pointsForBestSolution || null
+      this.maxTriesForOneProblem = this.ruleSet?.maxTriesForOneProblem || null
+      this.publicMonitor = this.ruleSet?.publicMonitor || null
+      this.monitorFreezeTimeBeforeFinishInMinutes = this.ruleSet?.monitorFreezeTimeBeforeFinishInMinutes || null
+      this.showFullTestsResults = this.ruleSet?.showFullTestsResults || null
+      this.isPublic = this.ruleSet?.isPublic || null
     },
     async saveRule() {
       let url;
