@@ -125,14 +125,14 @@ export default {
     async updateFields() {
       await this.fetchAvailableCheckers();
       let data = await this.getTask(this.task_id)
-      this.memoryLimitInBytes = data?.memoryLimitInBytes
-      this.timeLimitInMilliseconds = data?.timeLimitInMilliseconds
-      this.isPublic = data?.isPublic
-      this.checker = data?.checker.id
-      this.name = data?.localizers[0]?.name
-      this.description = data?.localizers[0]?.description
-      this.inputBlock = data?.localizers[0]?.inputBlock
-      this.outputBlock = data?.localizers[0]?.outputBlock
+      this.memoryLimitInBytes = data?.memoryLimitInBytes || null
+      this.timeLimitInMilliseconds = data?.timeLimitInMilliseconds || null
+      this.isPublic = data?.isPublic || null
+      this.checker = data?.checker?.id || null
+      this.name = (data?.localizers || [])[0]?.name || null
+      this.description = (data?.localizers || [])[0]?.description || null
+      this.inputBlock = (data?.localizers || [])[0]?.inputBlock || null
+      this.outputBlock = (data?.localizers || [])[0]?.outputBlock || null
       this.tests = (data?.tests || [])
       this.examples = (data?.examples || [])
     },
@@ -153,7 +153,7 @@ export default {
         method = 'post'
       }
       let data = {
-        id: (!!this.task_id ? this.task_id : null),
+        id: this.task_id,
         creatorId: this.currentUser.id,
         localizers: [
           {
