@@ -3,7 +3,7 @@
   <table class="table">
     <thead>
     <tr class="d-flex justify-content-between w-100">
-      <th class="text-light fs-2 fw-normal">Примеры</th>
+      <th class="fs-4 fw-normal">Примеры</th>
       <th>
         <button class="btn btn-success" @click="$emit('update:examples', {type: 'add'})">Добавить</button>
       </th>
@@ -12,13 +12,13 @@
     <tbody class="container">
     <tr v-for="(example, example_idx) of examples" class="row">
       <td class="col-2 d-flex align-items-center justify-content-center">
-        <span class="text-light fs-5">
+        <span class="fs-5">
           {{ example.number }}
         </span>
       </td>
        <td class="col">
         <div class="d-flex align-items-center">
-          <label class="w-50 text-light fs-5">Входные данные</label>
+          <label class="w-50 fs-5">Входные данные</label>
           <textarea :value="example.inputText" @change="$emit('update:examples',{
             type: 'change',
             index: example_idx,
@@ -29,7 +29,7 @@
             class="w-50 mb-2"></textarea>
         </div>
         <div  class="d-flex align-items-center">
-          <label class="w-50 text-light fs-5">Выходные данные</label>
+          <label class="w-50 fs-5">Выходные данные</label>
           <textarea :value="example.outputText" @change="$emit('update:examples', {
             type: 'change',
             index: example_idx,
@@ -43,16 +43,18 @@
       <td class="col d-flex flex-column align-items-center justify-content-around">
         <div>
           
-          <button class="btn btn-info me-2" style="width: 100px" @click="$emit('update:examples', {
+            <button class="btn btn-info me-2" style="width: 100px" @click="$emit('update:examples', {
           type: 'up-order',
           index: example_idx
-          })">Вверх
-          </button>
-          <button class="btn btn-info" style="width: 100px" @click="$emit('update:examples', {
+          })">
+                🠉
+            </button>
+            <button class="btn btn-info" style="width: 100px" @click="$emit('update:examples', {
             type: 'down-order',
             index: example_idx
-          })">Вниз
-          </button>
+          })">
+                🠋
+            </button>
         </div>
         <button class="btn btn-danger w-25" @click="$emit('update:examples', {
           type: 'delete',
@@ -80,6 +82,10 @@ export default {
    tr{
      background-color: rgba(255, 255, 255, 0.2);
      margin-bottom: 10px;
+   }
+   textarea{
+    color: black;
+    border-radius: 16px;
    }
  }
 </style>
