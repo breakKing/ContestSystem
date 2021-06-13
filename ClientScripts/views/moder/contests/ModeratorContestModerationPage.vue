@@ -19,7 +19,7 @@
       </div>
       <div>
         <span>Дата начала</span>
-        <span>{{ currentModeratingContest?.startDateTimeUTC }}</span>
+        <span>{{ formatted_start_date }}</span>
       </div>
       <div>
         <span>Продолжительность в минутах</span>
@@ -31,10 +31,10 @@
       </div>
       <div class="row" v-for="problem of sortedTasks">
         <div class="col">
-          <span>{{problem.letter}} {{problem.problem.localizedName }}</span>
+          <span>{{ problem.letter }} {{ problem.problem.localizedName }}</span>
         </div>
       </div>
-      
+
       <div class="row">
         <div class="col">
           <v-form @submit="submitEntity" :validation-schema="schema" class="mb-3">
@@ -67,6 +67,7 @@ import {mapActions, mapGetters} from "vuex";
 import * as Yup from "yup";
 import {ErrorMessage, Field, Form} from "vee-validate";
 import * as _ from "lodash";
+import moment from "moment";
 
 export default {
   name: "ModeratorContestModerationPage",
@@ -77,6 +78,9 @@ export default {
       'currentModeratingContest',
       'currentModeratingContestLocalizer',
     ]),
+    formatted_start_date() {
+      return this.getFormattedFullDateTime(this.currentModeratingContest?.startDateTimeUTC)
+    },
     sortedTasks() {
       return _.sortBy(this.currentModeratingContest.problems, ['letter'])
     },
@@ -95,7 +99,7 @@ export default {
       'fetchApprovedContests',
       'moderateContest',
     ]),
-    ...mapActions(['deleteContest']),
+    ...mapActions(['deleteContest', 'getFormattedFullDateTime']),
     async deleteEntity() {
       this.error_msg = ''
       let {status, errors} = await this.deleteContest(this.contest_id)

@@ -8,7 +8,7 @@
     </div>
     <div class="col-12 col-md-2">
       <button v-if="+currentUser?.id === +ruleSet.author.id" class="btn btn-primary"
-              @click="$router.push({name: 'WorkSpaceEditRuleSetPage', params: { set_id: ruleSet.id }})">Редактировать
+              @click.prevent="$router.push({name: 'WorkSpaceEditRuleSetPage', params: { set_id: ruleSet.id }})">Редактировать
       </button>
     </div>
   </div>

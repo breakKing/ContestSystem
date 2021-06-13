@@ -2,7 +2,7 @@
   <bread-crumbs-component :routes="bread_crumb_routes"></bread-crumbs-component>
   <h2>Решение {{ problemName }}</h2>
   <p><i>({{ problem?.timeLimitInMilliseconds }} мсек, {{ problem?.memoryLimitInBytes }} байт)</i></p>
-  <p>{{ solution?.submitTimeUTC }}</p>
+  <p>{{ getFormattedFullDateTime(solution?.submitTimeUTC) }}</p>
   <p>{{ verdictName }}</p>
   <p v-if="!isSuccess">Тест: {{ lastTestNumber }}</p>
   <div>
@@ -43,7 +43,7 @@ export default {
     })
   },
   methods: {
-    ...mapActions(['getSolution', 'changeCurrentContest', 'getVerdictName', 'getLastTestNumber']),
+    ...mapActions(['getSolution', 'changeCurrentContest', 'getVerdictName', 'getLastTestNumber', 'getFormattedFullDateTime']),
     getProblemName(problem) {
       return _.find((problem?.localizers || []), (l) => l.culture === 'ru')?.name
     },

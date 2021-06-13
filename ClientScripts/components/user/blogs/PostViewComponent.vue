@@ -6,7 +6,7 @@
         <h2>{{ post_info?.localizedName }}</h2>
       </div>
       <div class="col">
-        <p>{{ post_info?.author?.fullName }} {{ post_info?.publicationDateTimeUTC }}</p>
+        <p>{{ post_info?.author?.fullName }} {{ formatted_pub_date }}</p>
       </div>
     </div>
     <div class="row">
@@ -21,6 +21,7 @@
 </template>
 
 <script>
+import moment from 'moment'
 import {mapActions} from 'vuex'
 import BreadCrumbsComponent from "../../BreadCrumbsComponent";
 import PostViewBreadCrumbs from "../../../dictionaries/bread_crumbs/PostViewBreadCrumbs";
@@ -43,10 +44,13 @@ export default {
     },
     bread_crumb_routes() {
       return PostViewBreadCrumbs(this.post_id)
+    },
+    formatted_pub_date() {
+      return this.getFormattedFullDateTime(this.post_info?.publicationDateTimeUTC)
     }
   },
   methods: {
-    ...mapActions(['getPostInfo'])
+    ...mapActions(['getPostInfo', 'getFormattedFullDateTime'])
   },
   beforeRouteEnter(to, from, next) {
     next(async vm => {

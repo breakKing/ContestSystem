@@ -13,6 +13,7 @@ import moder_contests from './modules/moder/contests'
 import moder_courses from './modules/moder/courses'
 import moder_problems from './modules/moder/problems'
 import ApproveTypes from "../dictionaries/ApproveTypes";
+import moment from "moment";
 
 export default createStore({
     strict: process.env.NODE_ENV !== 'production',
@@ -37,6 +38,11 @@ export default createStore({
         },
     },
     actions: {
+        getFormattedFullDateTime({commit, state, dispatch, getters}, date) {
+            moment.locale('ru')
+            return moment(date).format('LLLL')
+
+        },
         globalAlert({commit, state, dispatch, getters}, {message}) {
             if (message) {
                 alert(message)

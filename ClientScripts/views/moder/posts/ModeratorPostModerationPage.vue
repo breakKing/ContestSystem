@@ -9,7 +9,8 @@
         <span>{{ currentModeratingPostApprovalStatusName }}</span>
       </div>
       <div class="col">
-        <p>{{ currentModeratingPost?.author?.fullName }} {{ currentModeratingPost?.publicationDateTimeUTC }}</p>
+        <p>{{ currentModeratingPost?.author?.fullName }}
+          {{ getFormattedFullDateTime(currentModeratingPost?.publicationDateTimeUTC) }}</p>
       </div>
     </div>
     <div class="row">
@@ -75,7 +76,7 @@ export default {
       'fetchApprovedPosts',
       'moderatePost',
     ]),
-    ...mapActions(['deletePost']),
+    ...mapActions(['deletePost', 'getFormattedFullDateTime']),
     async deleteEntity() {
       this.error_msg = ''
       let {status, errors} = await this.deletePost(this.post_id)

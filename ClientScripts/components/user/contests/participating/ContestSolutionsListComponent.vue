@@ -16,7 +16,7 @@
     <tr v-for="solution of sortedSolutions" :class="{current: +solution.id === +solution_id}">
       <td>{{ solution.problem.localizedName }}</td>
       <td>{{ solution.compilerName }}</td>
-      <td>{{ solution.submitTimeUTC }}</td>
+      <td>{{ getFormattedFullDateTime(solution.submitTimeUTC) }}</td>
       <td>{{ getVerdictName(solution.verdict) }}{{ additionalVerdictInfo(solution) }}</td>
       <td>{{ solution.points }}</td>
       <td>{{ maxSpentTime(solution.testResults) }}</td>
@@ -52,7 +52,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['getUserSolutionsInContest', 'getVerdictName']),
+    ...mapActions(['getUserSolutionsInContest', 'getVerdictName', 'getFormattedFullDateTime']),
     ...mapMutations(['setCurrentContestSolutionsForCurrentUser']),
     async updateList() {
       let solutions = await this.getUserSolutionsInContest({

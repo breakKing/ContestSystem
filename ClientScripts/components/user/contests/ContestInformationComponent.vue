@@ -26,7 +26,7 @@
   <div class="row" v-if="!currentUserIsOwnerOfCurrentContest">
     <div class="col">
       <template v-if="!currentUserIsParticipantOfCurrentContest">
-        <button v-if="!wants_participate">
+        <button v-if="!wants_participate" @click.prevent="wants_participate=true">
           Хочу учавствовать
         </button>
         <template v-else>
@@ -44,15 +44,15 @@
         <router-link class="btn btn-info" v-if="currentContestIsRunning"
                      :to="{name: 'ContestParticipatingPage', params: {contest_id: currentContest?.id}}">Начать
         </router-link>
-        <span v-else-if="currentContestIsInTheFuture">Соревнование начинается в {{
-            currentContest?.startDateTimeUTC
+        <span v-else-if="currentContestIsInTheFuture">Соревнование начнётся {{
+            formatted_start_date
           }}</span>
         <span v-else>Соревнование окончено</span>
 
         <router-link v-if="!currentContestIsInTheFuture" class="btn btn-success"
                      :to="{name: 'ContestMySolutionsPage', params: {contest_id: currentContest?.id }}">Мои отправки
         </router-link>
-        <button class="btn btn-danger" v-else @click="removeFromParticipants">Не учавствовать</button>
+        <button class="btn btn-danger" v-else @click.prevent="removeFromParticipants">Не учавствовать</button>
       </template>
     </div>
   </div>
@@ -103,10 +103,13 @@ export default {
     },
     bread_crumb_routes() {
       return ContestPageBreads(this.contest_id)
+    },
+    formatted_start_date() {
+      return this.getFormattedFullDateTime(this.currentContest?.startDateTimeUTC)
     }
   },
   methods: {
-    ...mapActions(['addUserToContest', 'changeCurrentContest', 'removeUserFromContest', 'getContestParticipants']),
+    ...mapActions(['addUserToContest', 'changeCurrentContest', 'removeUserFromContest', 'getContestParticipants', 'getFormattedFullDateTime']),
     ...mapMutations(['setCurrentContestParticipants']),
     resetParticipateTry() {
       this.wants_participate = false

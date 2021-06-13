@@ -34,7 +34,7 @@
     </div>
     <div class="col-12 col-md-3">
       <template v-if="currentRole === 'user'">
-        <router-link v-if="currentUserIsOwner" :to="{name: 'WorkSpaceEditTaskPage', params: {task_id: this.task?.id}}"
+        <router-link v-if="currentUserIsOwner" :to="{name: 'WorkSpaceEditTaskPage', params: {task_id: task?.id}}"
                      class="btn btn-info">Редактировать
         </router-link>
       </template>
@@ -73,7 +73,7 @@ export default {
         }
       })
     }
-  }
+  },
 }
 </script>
 

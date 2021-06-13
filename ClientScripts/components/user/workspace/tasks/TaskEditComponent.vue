@@ -111,10 +111,13 @@ export default {
   computed: {
     ...mapGetters(['availableCheckers', 'currentUser']),
     sortedTests() {
-      return this.tests.sort((a, b) => a.number - b.number)
+      return _.sortBy((this.tests || []), (t) => t.number)
     },
     sortedExamples() {
-      return this.examples.sort((a, b) => a.number - b.number)
+      return _.sortBy((this.examples || []), (t) => t.number)
+    },
+    testsPointsSumIsValid() {
+      return _.reduce((this.tests || []), (sum, t) => +t.availablePoints + sum, 0) === 100
     }
   },
   methods: {
@@ -134,6 +137,11 @@ export default {
       this.examples = (data?.examples || [])
     },
     async saveTask() {
+      if (!this.testsPointsSumIsValid) {
+        this.error_msg = 'Общая сумма очков за все задачи должна составлять 100'
+
+        return
+      }
       let url;
       let method;
       if (this.task_id) {
@@ -181,7 +189,12 @@ export default {
     },
     testsUpdated(changes) {
       if (changes.type === 'delete') {
-        this.tests.splice(this.tests.indexOf(this.sortedTests[changes.index]), 1)
+        let deleted = this.sortedTests[changes.index]
+        let deleted_index = this.tests.indexOf(deleted)
+        _.forEach(_.filter(this.tests, (t) => +t.number > +deleted.number), (t) => {
+          t.number--
+        })
+        this.tests.splice(deleted_index, 1)
       } else if (changes.type === 'up-order') {
         let changed_test = this.sortedTests[changes.index]
         if (changed_test.number <= 1) {
@@ -211,7 +224,12 @@ export default {
     },
     examplesUpdated(changes) {
       if (changes.type === 'delete') {
-        this.examples.splice(this.examples.indexOf(this.sortedExamples[changes.index]), 1)
+        let deleted = this.sortedExamples[changes.index]
+        let deleted_index = this.examples.indexOf(deleted)
+        _.forEach(_.filter(this.examples, (t) => +t.number > +deleted.number), (t) => {
+          t.number--
+        })
+        this.examples.splice(deleted_index, 1)
       } else if (changes.type === 'up-order') {
         let changed_example = this.sortedExamples[changes.index]
         if (changed_example.number <= 1) {
@@ -250,8 +268,8 @@ export default {
 
 <style lang="scss" scoped>
 div * {
-    margin: 5px;
-    color: #04295E;
+  margin: 5px;
+  color: #04295E;
 }
 
 span[role=alert] {

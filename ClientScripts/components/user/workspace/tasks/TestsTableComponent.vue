@@ -5,7 +5,7 @@
     <tr class="d-flex justify-content-between w-100">
       <th class="fs-4 fw-normal">Тесты</th>
       <th>
-        <button class="btn btn-success" @click="$emit('update:tests', {type: 'add'})">Добавить</button>
+        <button class="btn btn-success" @click.prevent="$emit('update:tests', {type: 'add'})">Добавить</button>
       </th>
     </tr>
     </thead>
@@ -41,7 +41,7 @@
         </div>
         <div>
           <label class="w-50 fs-5">Количество очков</label>
-          <input type="number" :value="test.availablePoints" @change="$emit('update:tests',{
+          <input type="number" :value="test.availablePoints" @change.prevent="$emit('update:tests',{
             type: 'change',
             index: test_idx,
             value:{
@@ -53,20 +53,20 @@
       </td>
       <td class="col d-flex flex-column align-items-center justify-content-around">
         <div>
-            <button class="btn btn-info me-2" style="width: 100px" @click="$emit('update:tests', {
+            <button class="btn btn-info me-2" style="width: 100px" @click.prevent="$emit('update:tests', {
             type: 'up-order',
             index: test_idx
           })">
                 🠉
             </button>
-            <button class="btn btn-info" style="width: 100px" @click="$emit('update:tests', {
+            <button class="btn btn-info" style="width: 100px" @click.prevent="$emit('update:tests', {
             type: 'down-order',
             index: test_idx
           })">
                 🠋
             </button>
         </div>
-        <button class="btn btn-danger w-25" @click="$emit('update:tests', {
+        <button class="btn btn-danger w-25" @click.prevent="$emit('update:tests', {
           type: 'delete',
           index: test_idx
         })">Удалить

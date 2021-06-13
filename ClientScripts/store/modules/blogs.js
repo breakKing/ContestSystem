@@ -2,6 +2,7 @@
 import * as _ from 'lodash'
 import $ from "jquery";
 import ApproveTypes from "../../dictionaries/ApproveTypes";
+import moment from "moment";
 
 export default {
     state: () => ({
@@ -33,10 +34,7 @@ export default {
             return _.filter(getters.currentUserPostsList, (el) => +el.approvalStatus === ApproveTypes.Accepted)
         },
         latestPosts(state, getters) {
-            return getters.postsList.sort((a, b) => {
-                // todo format
-                return b.publicationDateTimeUTC - a.publicationDateTimeUTC
-            })
+            return _.orderBy((getters.postsList || []), [(p)=> +moment(p.publicationDateTimeUTC).format('x')],['desc'] )
         },
     },
     actions: {
