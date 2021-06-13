@@ -5,7 +5,6 @@ using ContestSystem.Models.Attributes;
 using ContestSystem.Models.DbContexts;
 using ContestSystem.Models.ExternalModels;
 using ContestSystem.Models.FormModels;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -23,12 +22,10 @@ namespace ContestSystem.Controllers
     public class PostsController : Controller
     {
         private readonly MainDbContext _dbContext;
-        private readonly UserManager<User> _userManager;
 
-        public PostsController(MainDbContext dbContext, UserManager<User> userManager)
+        public PostsController(MainDbContext dbContext)
         {
             _dbContext = dbContext;
-            _userManager = userManager;
         }
 
         [HttpGet("{culture}")]
@@ -191,7 +188,7 @@ namespace ContestSystem.Controllers
             {
                 return Json(new
                 {
-                    success = false,
+                    status = false,
                     errors = new List<string> {"Id в запросе не совпадает с Id в форме"}
                 });
             }
@@ -234,7 +231,23 @@ namespace ContestSystem.Controllers
                         post.PreviewImage = Convert.ToBase64String(imageData);
                     }
 
-                    post.PublicationDateTimeUTC = DateTime.UtcNow;
+                    if (post.ApprovalStatus == ApproveType.Rejected)
+                    {
+                        post.ApprovalStatus = ApproveType.NotModeratedYet;
+                    }
+                    else if (post.ApprovalStatus == ApproveType.Accepted)
+                    {
+                        post.PublicationDateTimeUTC = DateTime.UtcNow;
+                    }
+                    else
+                    {
+                        return Json(new
+                        {
+                            status = false,
+                            errors = new List<string> { "Нельзя изменить пост, ожидающий модерации" }
+                        });
+                    }
+
                     _dbContext.Posts.Update(post);
                     for (int i = 0; i < postForm.Localizers.Count; i++)
                     {
