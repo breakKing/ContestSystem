@@ -78,7 +78,7 @@ namespace ContestSystem.Controllers
         }
 
         [HttpGet("constructed/{id}")]
-        [AuthorizeByJwt(Roles = RolesContainer.User)]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
         public async Task<IActionResult> GetConstructedChecker(long id)
         {
             var checker = await _dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == id);
@@ -193,7 +193,7 @@ namespace ContestSystem.Controllers
             });
         }
 
-        [AuthorizeByJwt(Roles = RolesContainer.User)]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
         [HttpDelete("delete-checker/{id}")]
         public async Task<IActionResult> DeleteChecker(long id)
         {
