@@ -21,7 +21,7 @@
 
 <script>
 import PostEditComponent from "./PostEditComponent";
-import {mapGetters} from "vuex";
+import {mapActions, mapGetters} from "vuex";
 
 export default {
   name: "PostPreviewComponent",
@@ -35,16 +35,25 @@ export default {
   },
   methods: {
     async previewClick() {
-      await this.$router.push({
-        name: 'ViewPost',
-        params: {
-          post_id: Number(this.post.id)
-        }
-      })
+      if (this.currentRole === 'moderator') {
+        await this.$router.push({
+          name: 'ModeratorPostModerationPage',
+          params: {
+            post_id: +this.post.id
+          }
+        })
+      } else {
+        await this.$router.push({
+          name: 'ViewPost',
+          params: {
+            post_id: +this.post.id
+          }
+        })
+      }
     }
   },
   computed: {
-    ...mapGetters(['currentUser']),
+    ...mapGetters(['currentUser', 'currentRole']),
     dataUrl() {
       if (!this.post || !this.post?.previewImage) {
         return '';
@@ -57,7 +66,7 @@ export default {
       }
       let result = false
       try {
-        result = Number(this.post.author.id) === Number(this.currentUser.id)
+        result = +this.post.author.id === +this.currentUser.id
       } catch (e) {
         console.error(e)
       }

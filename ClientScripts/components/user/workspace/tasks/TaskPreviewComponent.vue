@@ -33,9 +33,14 @@
       </div>
     </div>
     <div class="col-12 col-md-3">
-      <router-link v-if="currentUserIsOwner" :to="{name: 'WorkSpaceEditTaskPage', params: {task_id: this.task?.id}}"
-                   class="btn btn-info">Редактировать
-      </router-link>
+      <template v-if="currentRole === 'user'">
+        <router-link v-if="currentUserIsOwner" :to="{name: 'WorkSpaceEditTaskPage', params: {task_id: this.task?.id}}"
+                     class="btn btn-info">Редактировать
+        </router-link>
+      </template>
+      <template v-else-if="currentRole === 'moderator'">
+        <button @click.prevent="moderateTask" class="btn btn-primary">Подробнее</button>
+      </template>
     </div>
   </div>
 </template>
@@ -51,12 +56,22 @@ export default {
     task: Object,
   },
   computed: {
-    ...mapGetters(['currentUser']),
+    ...mapGetters(['currentUser', 'currentRole']),
     currentUserIsOwner() {
       if (!this.currentUser || !this.task?.creator) {
         return false
       }
       return +this.task.creator.id === +this.currentUser.id
+    }
+  },
+  methods: {
+    async moderateTask() {
+      await this.$router.push({
+        name: 'ModeratorProblemModerationPage',
+        params: {
+          problem_id: +this.task.id
+        }
+      })
     }
   }
 }

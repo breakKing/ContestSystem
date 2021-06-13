@@ -84,10 +84,11 @@ export default {
         async moderateProblem({commit, state, dispatch, getters}, {problem_id, request_body}) {
             try {
                 let {data} = await axios.put(`/api/problems/moderate/${problem_id}`, request_body)
-                commit('setCurrentModeratingProblem', data)
+                return data
             } catch (e) {
                 console.error(e)
             }
+            return {}
         },
     }
 }

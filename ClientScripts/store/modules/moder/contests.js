@@ -84,10 +84,11 @@ export default {
         async moderateContest({commit, state, dispatch, getters}, {contest_id, request_body}) {
             try {
                 let {data} = await axios.put(`/api/contests/moderate/${contest_id}`, request_body)
-                commit('setCurrentModeratingContest', data)
+                return data
             } catch (e) {
                 console.error(e)
             }
+            return {}
         },
     }
 }

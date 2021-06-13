@@ -84,10 +84,11 @@ export default {
         async moderateChecker({commit, state, dispatch, getters}, {checker_id, request_body}) {
             try {
                 let {data} = await axios.put(`/api/checkers/moderate/${checker_id}`, request_body)
-                commit('setCurrentModeratingChecker', data)
+                return data
             } catch (e) {
                 console.error(e)
             }
+            return {}
         },
     }
 }
