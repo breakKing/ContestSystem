@@ -99,7 +99,7 @@ export default {
       if (result.status) {
         await this.fetchCurrentUserCheckers(true)
         await this.fetchAvailableCheckers(true)
-        await this.$router.push({name: 'WorkSpaceMyApprovedCheckersPage'})
+        await this.$router.push({name: 'WorkSpaceMyPendingCheckersPage'})
       } else if (result.errors) {
         this.errors = result.errors.join(', ')
       }

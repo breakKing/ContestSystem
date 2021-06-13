@@ -172,7 +172,7 @@ export default {
         await this.fetchAvailableContests(true)
         await this.fetchParticipatingContests(true)
         await this.fetchCurrentUserContestsList(true)
-        await this.$router.push({name: 'WorkSpaceMyContestsPage'})
+        await this.$router.push({name: 'WorkSpaceMyPendingContestsPage'})
 
       } else {
         this.error_msg = (result.errors || []).join(', ')
