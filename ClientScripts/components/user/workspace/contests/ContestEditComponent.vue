@@ -102,7 +102,8 @@ export default {
       this.areVirtualContestsAvailable = post?.areVirtualContestsAvailable
       this.isPublic = +post?.isPublic === 1
       this.rulesSetId = post?.rulesSetId || null
-      this.image = post?.image || null
+    this.image = post?.image || null
+    this.tasks = post?.problems || []
     },
     updateEvent(data) {
       if (data.type === 'add') {
@@ -136,7 +137,7 @@ export default {
       tmp_form.append($('<input type="hidden"/>').attr('name', 'isPublic').val(this.isPublic))
       tmp_form.append($('<input type="hidden"/>').attr('name', 'startDateTimeUTC').val(this.startDateTimeUTC))
       tmp_form.append($('<input type="hidden"/>').attr('name', 'durationInMinutes').val(this.durationInMinutes))
-      tmp_form.append($('<input type="hidden"/>').attr('name', 'areVirtualContestsAvailable').val(this.areVirtualContestsAvailable))
+      tmp_form.append($('<input type="hidden"/>').attr('name', 'areVirtualContestsAvailable').val(+this.areVirtualContestsAvailable === 1))
       tmp_form.append($('<input type="hidden"/>').attr('name', 'rulesSetId').val(this.rulesSetId))
       tmp_form.append($('<input type="hidden"/>').attr('name', 'localizers[0][culture]').val('ru'))
       tmp_form.append($('<input type="hidden"/>').attr('name', 'localizers[0][description]').val(this.description))
