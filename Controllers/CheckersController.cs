@@ -237,5 +237,105 @@ namespace ContestSystem.Controllers
                 errors = new List<string>()
             });
         }
+
+
+        [HttpGet("get-requests")]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
+        public async Task<IActionResult> GetCheckersRequests()
+        {
+            var checkers = await _dbContext.Checkers.Where(p => p.ApprovalStatus == ApproveType.NotModeratedYet).ToListAsync();
+            var requests = checkers.ConvertAll(c =>
+            {
+                ConstructedChecker cr = ConstructedChecker.GetFromModel(c);
+                return cr;
+            });
+            return Json(requests);
+        }
+
+        [HttpGet("get-approved")]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
+        public async Task<IActionResult> GetApprovedCheckers()
+        {
+            var checkers = await _dbContext.Checkers.Where(p => p.ApprovalStatus == ApproveType.Accepted).ToListAsync();
+            var requests = checkers.ConvertAll(c =>
+            {
+                ConstructedChecker cr = ConstructedChecker.GetFromModel(c);
+                return cr;
+            });
+            return Json(requests);
+        }
+
+        [HttpGet("get-rejected")]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
+        public async Task<IActionResult> GetRejectedCheckers()
+        {
+            var checkers = await _dbContext.Checkers.Where(p => p.ApprovalStatus == ApproveType.Rejected).ToListAsync();
+            var requests = checkers.ConvertAll(c =>
+            {
+                ConstructedChecker cr = ConstructedChecker.GetFromModel(c);
+                return cr;
+            });
+            return Json(requests);
+        }
+
+        [HttpPut("moderate/{id}")]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
+        public async Task<IActionResult> ApproveOrRejectChecker([FromBody] CheckerRequestForm checkerRequestForm, long id)
+        {
+            if (checkerRequestForm.CheckerId != id || id < 0)
+            {
+                return Json(new
+                {
+                    success = false,
+                    errors = new List<string> { "Id в запросе не совпадает с Id в форме" }
+                });
+            }
+
+            if (ModelState.IsValid)
+            {
+                var checker = await _dbContext.Checkers.FirstOrDefaultAsync(c => c.Id == id);
+                if (checker == null)
+                {
+                    return Json(new
+                    {
+                        status = false,
+                        errors = new List<string> { "Попытка модерировать несуществующий пост" }
+                    });
+                }
+                else
+                {
+                    checker.ApprovalStatus = checkerRequestForm.ApprovalStatus;
+                    checker.ApprovingModeratorId = checkerRequestForm.ApprovingModeratorId;
+                    checker.ModerationMessage = checkerRequestForm.ModerationMessage;
+                    _dbContext.Checkers.Update(checker);
+                    try
+                    {
+                        await _dbContext.SaveChangesAsync();
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        return Json(new
+                        {
+                            status = false,
+                            errors = new List<string> { "Ошибка параллельного сохранения" }
+                        });
+                    }
+
+                    return Json(new
+                    {
+                        status = true,
+                        errors = new List<string>()
+                    });
+                }
+            }
+
+            return Json(new
+            {
+                status = false,
+                errors = ModelState.Values
+                    .SelectMany(x => x.Errors)
+                    .Select(x => x.ErrorMessage).ToList()
+            });
+        }
     }
 }
