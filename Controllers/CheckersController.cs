@@ -151,6 +151,14 @@ namespace ContestSystem.Controllers
             if (ModelState.IsValid)
             {
                 var checker = await _dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == id);
+                if (checker == null)
+                {
+                    return Json(new
+                    {
+                        status = false,
+                        errors = new List<string> { "Такого чекера не существует" }
+                    });
+                }
                 bool needToRecompile = (checker.Code != checkerForm.Code);
                 checker.AuthorId = checkerForm.AuthorId;
                 checker.Code = checkerForm.Code;
