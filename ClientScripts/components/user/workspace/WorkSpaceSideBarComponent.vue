@@ -144,7 +144,7 @@
           </ul>
         </div>
       </li>
-      <li class="mb-1">
+      <li style="margin-bottom: 135px">
         <button class="btn btn-toggle align-items-center rounded collapsed text-light" data-bs-toggle="collapse"
                 data-bs-target="#rule-sets-collapse" aria-expanded="false">
           Наборы правил
