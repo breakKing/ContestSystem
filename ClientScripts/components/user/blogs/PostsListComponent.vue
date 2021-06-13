@@ -12,7 +12,7 @@ import * as _ from 'lodash'
 
 export default {
   name: "PostsListComponent",
-  components: {PostPreviewComponent, BreadCrumbsComponent},
+  components: {PostPreviewComponent},
   props: {
     maxPosts: {
       type: Number,
