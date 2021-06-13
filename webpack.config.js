@@ -44,7 +44,7 @@ module.exports = {
                 // ./public directory is being served
                 // host: 'localhost',
                 // port: 3000,
-                proxy: 'http://localhost:5001',
+                proxy: 'http://localhost:5000',
                 notify: false,
                 // server: {baseDir: [bundleExportPath]}
             },
