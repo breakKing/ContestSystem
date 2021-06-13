@@ -239,14 +239,6 @@ namespace ContestSystem.Controllers
                     {
                         post.PublicationDateTimeUTC = DateTime.UtcNow;
                     }
-                    else
-                    {
-                        return Json(new
-                        {
-                            status = false,
-                            errors = new List<string> { "Нельзя изменить пост, ожидающий модерации" }
-                        });
-                    }
 
                     _dbContext.Posts.Update(post);
                     for (int i = 0; i < postForm.Localizers.Count; i++)
