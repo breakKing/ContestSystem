@@ -103,6 +103,7 @@ export default {
       this.isPublic = +post?.isPublic === 1
       this.rulesSetId = post?.rulesSetId || null
       this.image = post?.image || null
+      this.tasks = post?.problems || []
     },
     updateEvent(data) {
       if (data.type === 'add') {
