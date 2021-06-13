@@ -120,7 +120,7 @@ export default {
     }
 
 span[role=alert] {
-  color: white;
+  color: red;
 }
 
 form {
