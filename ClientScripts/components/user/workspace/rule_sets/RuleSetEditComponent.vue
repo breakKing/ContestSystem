@@ -6,17 +6,17 @@
       </div>
       <v-form @submit="saveRule" :validation-schema="schema">
         <div>
-          <label class="font-weight-bold">Название</label>
+          <label class="fs-4">Название</label>
           <v-field v-model="name" class="form-control" name="name"/>
           <error-message name="name"></error-message>
         </div>
         <div>
-          <label class="font-weight-bold">Описание</label>
+          <label class="fs-4">Описание</label>
           <v-field v-model="description" class="form-control" as="textarea" name="description"/>
           <error-message name="description"></error-message>
         </div>
         <div>
-          <label class="font-weight-bold">Режим подсчёта</label>
+          <label class="fs-4">Режим подсчёта</label>
           <v-field v-model="countMode" class="form-control" as="select" name="countMode">
             <option value="1">Считать очки за тесты</option>
             <option value="2">Считать штраф</option>
@@ -25,58 +25,59 @@
           <error-message name="countMode"></error-message>
         </div>
         <div>
-          <label class="font-weight-bold">Наказывать за ошибку компиляции</label>
+          <label class="fs-4">Наказывать за ошибку компиляции</label>
           <v-field v-model="penaltyForCompilationError" type="checkbox" value="1"
                    name="penaltyForCompilationError"/>
           <error-message name="penaltyForCompilationError"></error-message>
         </div>
         <div>
-          <label class="font-weight-bold">Размер наказания за одну попытку</label>
+          <label class="fs-4">Размер наказания за одну попытку</label>
           <v-field v-model="penaltyForOneTry" type="number" class="form-control"
                    name="penaltyForOneTry"/>
           <error-message name="penaltyForOneTry"></error-message>
         </div>
         <div>
-          <label class="font-weight-bold">Размер наказания за одну минуту</label>
+          <label class="fs-4">Размер наказания за одну минуту</label>
           <v-field v-model="penaltyForOneMinute" type="number" class="form-control"
                    name="penaltyForOneMinute"/>
           <error-message name="penaltyForOneMinute"></error-message>
         </div>
         <div>
-          <label class="font-weight-bold">Прибавка к очкам за лучшее решение</label>
-          <v-field v-model="pointsForBestSolution" type="checkbox" value="1"
+          <label class="fs-4">Прибавка к очкам за лучшее решение</label>
+          <v-field v-model="pointsForBestSolution" class="custom-checkbox" type="checkbox" value="1"
                    name="pointsForBestSolution"/>
           <error-message name="pointsForBestSolution"></error-message>
         </div>
         <div>
-          <label class="font-weight-bold">Максимальное количество попыток на задачу</label>
+          <label class="fs-4">Максимальное количество попыток на задачу</label>
           <v-field v-model="maxTriesForOneProblem" type="number" class="form-control"
                    name="maxTriesForOneProblem"/>
           <error-message name="maxTriesForOneProblem"></error-message>
         </div>
         <div>
-          <label class="font-weight-bold">Сделать монитор публичным</label>
-          <v-field v-model="publicMonitor" type="checkbox" value="1"
-                   name="publicMonitor"/>
-          <error-message name="publicMonitor"></error-message>
+
+            <v-field v-model="publicMonitor" class="custom-checkbox" type="checkbox" value="1"
+                     name="publicMonitor" />
+            <label class="fs-4">Сделать монитор публичным</label>
+            <error-message name="publicMonitor"></error-message>
         </div>
         <div>
-          <label class="font-weight-bold">Замораживать монитора за ... минут до конца</label>
+          <label class="fs-4">Замораживать монитор за ... минут до конца</label>
           <v-field v-model="monitorFreezeTimeBeforeFinishInMinutes" type="number" class="form-control"
                    name="monitorFreezeTimeBeforeFinishInMinutes"/>
           <error-message name="monitorFreezeTimeBeforeFinishInMinutes"></error-message>
         </div>
         <div>
-          <label class="font-weight-bold">Показывать полный отчёт о попытке</label>
-          <v-field v-model="showFullTestsResults" type="checkbox" value="1"
-                   name="showFullTestsResults"/>
-          <error-message name="showFullTestsResults"></error-message>
+            <v-field v-model="showFullTestsResults" class="custom-checkbox" type="checkbox" value="1"
+                     name="showFullTestsResults" />
+            <error-message name="showFullTestsResults"></error-message>
+            <label class="fs-4">Показывать полный отчёт о попытке</label>
         </div>
         <div>
-          <label class="font-weight-bold">Сделать публичным</label>
-          <v-field v-model="isPublic" type="checkbox" value="1"
-                   name="isPublic"/>
-          <error-message name="isPublic"></error-message>
+            <v-field v-model="isPublic" class="custom-checkbox" type="checkbox" value="1"
+                     name="isPublic" />
+            <label class="fs-4">Сделать набор правил публичным</label>
+            <error-message name="isPublic"></error-message>
         </div>
         <button type="submit" class="btn btn-primary">Сохранить</button>
       </v-form>
@@ -121,8 +122,8 @@ export default {
       isPublic: null,
 
       schema: Yup.object({
-        name: Yup.string().required(),
-        description: Yup.string().required(),
+        name: Yup.string().required().nullable(),
+        description: Yup.string().required().nullable(),
       })
     }
   },
@@ -194,5 +195,102 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+    div * {
+        margin: 5px;
+        color: #04295E;
+    }
 
+    span[role=alert] {
+        color: red;
+    }
+
+    form {
+        padding: 10px;
+    }
+    .custom-checkbox {
+        position: absolute;
+        z-index: -1;
+        opacity: 0;
+    }
+    .custom-checkbox + label {
+        display: inline-flex;
+        align-items: center;
+        user-select: none;
+    }
+
+    .custom-checkbox + label::before {
+        content: '';
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+        flex-shrink: 0;
+        flex-grow: 0;
+        border: 1px solid #adb5bd;
+        border-radius: 0.25em;
+        margin-right: 0.5em;
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-size: 50% 50%;
+    }
+
+    .custom-checkbox:checked + label::before {
+        background-color: #0b76ef;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23fff' d='M6.564.75l-3.59 3.612-1.538-1.55L0 4.26 2.974 7.25 8 2.193z'/%3e%3c/svg%3e");
+    }
+
+    .form-control {
+        border-radius: 16px;
+    }
+
+    button {
+        padding: 5px 10px;
+        background-color: #fff;
+        border-radius: 16px;
+        border: 1px solid blue;
+
+        &:hover {
+            background-color: #0b76ef;
+            color: white;
+        }
+    }
+
+    .form-control::-webkit-input-placeholder {
+        opacity: 1;
+        transition: opacity 0.3s ease;
+    }
+
+    .form-control::-moz-placeholder {
+        opacity: 1;
+        transition: opacity 0.3s ease;
+    }
+
+    .form-control:-moz-placeholder {
+        opacity: 1;
+        transition: opacity 0.3s ease;
+    }
+
+    .form-control:-ms-input-placeholder {
+        opacity: 1;
+        transition: opacity 0.3s ease;
+    }
+
+    .form-control:focus::-webkit-input-placeholder {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .form-control:focus::-moz-placeholder {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .form-control:focus:-moz-placeholder {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .form-control:focus:-ms-input-placeholder {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
 </style>
