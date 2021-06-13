@@ -115,6 +115,9 @@ export default {
     },
     sortedExamples() {
       return _.sortBy((this.examples || []), (t) => t.number)
+    },
+    testsPointsSumIsValid() {
+      return _.reduce((this.tests || []), (sum, t) => +t.availablePoints + sum, 0) === 100
     }
   },
   methods: {
@@ -134,6 +137,11 @@ export default {
       this.examples = (data?.examples || [])
     },
     async saveTask() {
+      if (!this.testsPointsSumIsValid) {
+        this.error_msg = 'Общая сумма очков за все задачи должна составлять 100'
+
+        return
+      }
       let url;
       let method;
       if (this.task_id) {
