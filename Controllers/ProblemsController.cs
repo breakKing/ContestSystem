@@ -85,7 +85,7 @@ namespace ContestSystem.Controllers
         }
 
         [HttpGet("constructed/{id}")]
-        [AuthorizeByJwt(Roles = RolesContainer.User)]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
         public async Task<IActionResult> GetConstructedProblem(long id)
         {
             var problem = await _dbContext.Problems.FirstOrDefaultAsync(p => p.Id == id);
@@ -123,12 +123,18 @@ namespace ContestSystem.Controllers
                     TimeLimitInMilliseconds = problemForm.TimeLimitInMilliseconds,
                     CheckerId = problemForm.CheckerId
                 };
-
-                /*
-                var user = await HttpContext.GetCurrentUser(_userManager);
-                if (user.IsLimitedInContests)
+                var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == problemForm.CreatorId);
+                if (user == null)
                 {
-                    if (await _dbContext.Contests.AnyAsync(c => c.CreatorId == user.Id))
+                    return Json(new
+                    {
+                        status = false,
+                        errors = new List<string> { "Автор является несуществующим пользователем" }
+                    });
+                }
+                if (user.IsLimitedInProblems)
+                {
+                    if (await _dbContext.Problems.CountAsync(c => c.CreatorId == user.Id) == 1)
                     {
                         return Json(new
                         {
@@ -136,12 +142,12 @@ namespace ContestSystem.Controllers
                             errors = new List<string> { "Превышено ограничение недоверенного пользователя по созданию контестов" }
                         });
                     }
-                    contest.ApprovalStatus = ApproveType.NotModeratedYet;
+                    problem.ApprovalStatus = ApproveType.NotModeratedYet;
                 }
                 else
                 {
-                    contest.ApprovalStatus = ApproveType.Accepted;
-                }*/
+                    problem.ApprovalStatus = ApproveType.Accepted;
+                }
                 problem.ApprovalStatus = ApproveType.Accepted;
                 await _dbContext.Problems.AddAsync(problem);
                 await _dbContext.SaveChangesAsync();
@@ -236,6 +242,10 @@ namespace ContestSystem.Controllers
                     problem.TimeLimitInMilliseconds = problemForm.TimeLimitInMilliseconds;
                     problem.IsPublic = problemForm.IsPublic;
                     problem.CheckerId = problemForm.CheckerId;
+                    if (problem.ApprovalStatus == ApproveType.Rejected)
+                    {
+                        problem.ApprovalStatus = ApproveType.NotModeratedYet;
+                    }
                     _dbContext.Problems.Update(problem);
                     for (int i = 0; i < problemForm.Localizers.Count; i++)
                     {
@@ -337,7 +347,7 @@ namespace ContestSystem.Controllers
                     .Select(x => x.ErrorMessage).ToList()
             });
         }
-        [AuthorizeByJwt(Roles = RolesContainer.User)]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
         [HttpDelete("delete-problem/{id}")]
         public async Task<IActionResult> DeletePost(long id)
         {
