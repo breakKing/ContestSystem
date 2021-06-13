@@ -10,7 +10,7 @@ export default [
         component: ModeratorNotModeratedPostsPage,
         props: true,
         meta: {
-            authorize: ['manager'],
+            authorize: ['moderator'],
             hide_sidebar: false
         },
     },
@@ -20,7 +20,7 @@ export default [
         component: ModeratorApprovedPostsPage,
         props: true,
         meta: {
-            authorize: ['manager'],
+            authorize: ['moderator'],
             hide_sidebar: false
         },
     },
@@ -30,7 +30,7 @@ export default [
         component: ModeratorRejectedPostsPage,
         props: true,
         meta: {
-            authorize: ['manager'],
+            authorize: ['moderator'],
             hide_sidebar: false
         },
     },
@@ -40,7 +40,7 @@ export default [
         component: ModeratorPostModerationPage,
         props: true,
         meta: {
-            authorize: ['manager'],
+            authorize: ['moderator'],
             hide_sidebar: true
         },
     },

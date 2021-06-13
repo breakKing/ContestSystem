@@ -1,28 +1,19 @@
 <template>
   <ul class="nav nav-pills mb-3" role="tablist">
     <li class="nav-item" role="presentation">
-      <button class="nav-link" :class="{active: $route.name === 'ParticipatingContestsPage'}"
-              type="button" role="tab" :aria-selected="$route.name === 'ParticipatingContestsPage'">Учавствую
-      </button>
+      <router-link class="nav-link" :to="{name: 'ParticipatingContestsPage'}">Учавствую</router-link>
     </li>
     <li class="nav-item" role="presentation">
-      <button class="nav-link" :class="{active: $route.name === 'AvailableContestsPage'}"
-              type="button" role="tab" :aria-selected="$route.name === 'AvailableContestsPage'">Доступные мне
-      </button>
+      <router-link class="nav-link" :to="{name: 'AvailableContestsPage'}">Доступные мне</router-link>
     </li>
     <li class="nav-item" role="presentation">
-      <button class="nav-link" :class="{active: $route.name === 'CurrentlyRunningContestsComponentPage'}"
-              type="button" role="tab" :aria-selected="$route.name === 'CurrentlyRunningContestsComponentPage'">Идут
-        сейчас
-      </button>
+      <router-link class="nav-link" :to="{name: 'CurrentlyRunningContestsComponentPage'}">Идут сейчас</router-link>
     </li>
   </ul>
   <!-- eslint-disable-next-line -->
   <div class="tab-content">
     <div class="tab-pane fade show active" role="tabpanel">
-      <transition name="fade">
-        <router-view></router-view>
-      </transition>
+      <router-view></router-view>
     </div>
   </div>
 </template>
