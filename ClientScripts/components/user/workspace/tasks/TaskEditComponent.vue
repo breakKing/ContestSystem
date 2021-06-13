@@ -165,7 +165,7 @@ export default {
           }
         ],
         memoryLimitInBytes: this.memoryLimitInBytes,
-        TimeLimitInMilliseconds: this.TimeLimitInMilliseconds,
+        timeLimitInMilliseconds: this.timeLimitInMilliseconds,
         isPublic: +this.isPublic === 1,
         checkerId: this.checker,
         tests: this.tests,
