@@ -232,6 +232,7 @@ namespace ContestSystem.Controllers
                     if (post.ApprovalStatus == ApproveType.Rejected)
                     {
                         post.ApprovalStatus = ApproveType.NotModeratedYet;
+                        post.ApprovingModeratorId = null;
                     }
                     else if (post.ApprovalStatus == ApproveType.Accepted)
                     {

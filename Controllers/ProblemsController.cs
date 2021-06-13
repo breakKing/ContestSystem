@@ -245,6 +245,7 @@ namespace ContestSystem.Controllers
                     if (problem.ApprovalStatus == ApproveType.Rejected)
                     {
                         problem.ApprovalStatus = ApproveType.NotModeratedYet;
+                        problem.ApprovingModeratorId = null;
                     }
                     _dbContext.Problems.Update(problem);
                     for (int i = 0; i < problemForm.Localizers.Count; i++)
