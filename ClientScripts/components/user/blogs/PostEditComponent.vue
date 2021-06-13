@@ -112,12 +112,10 @@ export default {
     async updateFields() {
       if (this.post_id) {
         let post_data = await this.getPostInfo(this.post_id)
-        if (post_data) {
-          this.postName = post_data.localizedName
-          this.previewImage = post_data.previewImage
-          this.postPreview = post_data.previewText
-          this.postText = post_data.htmlLocalizedText
-        }
+        this.postName = post_data.localizedName || null
+        this.previewImage = post_data.previewImage || null
+        this.postPreview = post_data.previewText || null
+        this.postText = post_data.htmlLocalizedText || null
       }
     },
     hideModal() {

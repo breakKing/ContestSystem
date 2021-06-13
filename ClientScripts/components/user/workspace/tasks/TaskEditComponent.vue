@@ -101,10 +101,10 @@ export default {
         timeLimitInMilliseconds: Yup.number('Лимит времени выполнения это число').nullable().required('Лимит времени выполнения это обязательное поле'),
         checker: Yup.number('Механизм проверки это число').required('Механизм проверки обязательно должен быть выбран'),
 
-        name: Yup.string('Название это строка').required('Название это обязательное поле'),
-        description: Yup.string('Описание это строка').required('Описание это обязательное поле'),
-        inputBlock: Yup.string('Входные данные это строка').required('Входные данные это обязательное поле'),
-        outputBlock: Yup.string('Выходные данные это строка').required('Выходные данные это обязательное поле'),
+        name: Yup.string('Название это строка').nullable().required('Название это обязательное поле'),
+        description: Yup.string('Описание это строка').nullable().required('Описание это обязательное поле'),
+        inputBlock: Yup.string('Входные данные это строка').nullable().required('Входные данные это обязательное поле'),
+        outputBlock: Yup.string('Выходные данные это строка').nullable().required('Выходные данные это обязательное поле'),
       })
     }
   },
@@ -125,14 +125,14 @@ export default {
     async updateFields() {
       await this.fetchAvailableCheckers();
       let data = await this.getTask(this.task_id)
-      this.memoryLimitInBytes = data?.memoryLimitInBytes
-      this.timeLimitInMilliseconds = data?.timeLimitInMilliseconds
-      this.isPublic = data?.isPublic
-      this.checker = data?.checker.id
-      this.name = data?.localizers[0]?.name
-      this.description = data?.localizers[0]?.description
-      this.inputBlock = data?.localizers[0]?.inputBlock
-      this.outputBlock = data?.localizers[0]?.outputBlock
+      this.memoryLimitInBytes = data?.memoryLimitInBytes || null
+      this.timeLimitInMilliseconds = data?.timeLimitInMilliseconds || null
+      this.isPublic = data?.isPublic || null
+      this.checker = data?.checker?.id || null
+      this.name = (data?.localizers || [])[0]?.name || null
+      this.description = (data?.localizers || [])[0]?.description || null
+      this.inputBlock = (data?.localizers || [])[0]?.inputBlock || null
+      this.outputBlock = (data?.localizers || [])[0]?.outputBlock || null
       this.tests = (data?.tests || [])
       this.examples = (data?.examples || [])
     },
@@ -153,7 +153,7 @@ export default {
         method = 'post'
       }
       let data = {
-        id: (!!this.task_id ? this.task_id : null),
+        id: this.task_id,
         creatorId: this.currentUser.id,
         localizers: [
           {
