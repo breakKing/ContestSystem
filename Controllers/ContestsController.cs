@@ -137,7 +137,7 @@ namespace ContestSystem.Controllers
         }
 
         [HttpGet("constructed/{id}")]
-        [AuthorizeByJwt(Roles = RolesContainer.User)]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
         public async Task<IActionResult> GetConstructedContest(long id)
         {
             var contest = await _dbContext.Contests.FirstOrDefaultAsync(p => p.Id == id);
@@ -193,12 +193,19 @@ namespace ContestSystem.Controllers
                     ContestLocalizers = new List<ContestLocalizer>(),
                     RulesSetId = contestForm.RulesSetId
                 };
-                /*
-                TODO: нормальная проверка на лимиты
-                var user = await HttpContext.GetCurrentUser(_userManager);
+
+                var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == contestForm.CreatorUserId);
+                if (user == null)
+                {
+                    return Json(new
+                    {
+                        status = false,
+                        errors = new List<string> { "Автор является несуществующим пользователем" }
+                    });
+                }
                 if (user.IsLimitedInContests)
                 {
-                    if (await _dbContext.Contests.AnyAsync(c => c.CreatorId == user.Id))
+                    if (await _dbContext.Contests.CountAsync(c => c.CreatorId == user.Id) == 1)
                     {
                         return Json(new
                         {
@@ -211,8 +218,8 @@ namespace ContestSystem.Controllers
                 else
                 {
                     contest.ApprovalStatus = ApproveType.Accepted;
-                }*/
-                contest.ApprovalStatus = ApproveType.Accepted;
+                }
+
                 await _dbContext.Contests.AddAsync(contest);
                 await _dbContext.SaveChangesAsync();
                 var localModerator = new ContestLocalModerator
@@ -290,6 +297,7 @@ namespace ContestSystem.Controllers
                 }
                 else
                 {
+                    bool needToRemoderate = (contestForm.StartDateTimeUTC != contest.StartDateTimeUTC);
                     if (HttpContext.GetCurrentUser().GetAwaiter().GetResult().Id != contest.CreatorId)
                     {
                         return Json(new
@@ -312,6 +320,11 @@ namespace ContestSystem.Controllers
                     contest.AreVirtualContestsAvailable = contestForm.AreVirtualContestsAvailable;
                     contest.IsPublic = contestForm.IsPublic;
                     contest.RulesSetId = contestForm.RulesSetId;
+                    if (needToRemoderate || contest.ApprovalStatus == ApproveType.Rejected)
+                    {
+                        contest.ApprovalStatus = ApproveType.NotModeratedYet;
+                        contest.ApprovingModeratorId = null;
+                    }
                     _dbContext.Contests.Update(contest);
                     for (int i = 0; i < contestForm.Localizers.Count; i++)
                     {
@@ -389,7 +402,7 @@ namespace ContestSystem.Controllers
             });
         }
 
-        [AuthorizeByJwt(Roles = RolesContainer.User)]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
         [HttpDelete("delete-contest/{id}")]
         public async Task<IActionResult> DeleteContest(long id)
         {
