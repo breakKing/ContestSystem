@@ -33,6 +33,7 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> GetAvailableContests(string culture)
         {
+            DateTime now = DateTime.UtcNow;
             var currentUser = await HttpContext.GetCurrentUser();
             var participatingContests = await _dbContext.ContestsParticipants
                 .Where(cp => cp.ParticipantId == currentUser.Id)
@@ -43,7 +44,7 @@ namespace ContestSystem.Controllers
                 .Select(cp => cp.Contest)
                 .ToListAsync();
             var contests = await _dbContext.Contests.Where(c => c.ApprovalStatus == ApproveType.Accepted
-                                                                && c.StartDateTimeUTC > DateTime.UtcNow
+                                                                && c.StartDateTimeUTC > now
                                                                 && c.IsPublic
                                                                 && participatingContests.All(pc => pc.Id != c.Id)
                                                                 && moderatedContests.All(mc => mc.Id != c.Id)
@@ -65,9 +66,10 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> GetRunningContests(string culture)
         {
+            DateTime now = DateTime.UtcNow;
             var contests = await _dbContext.Contests.Where(c => c.ApprovalStatus == ApproveType.Accepted
-                                                                && c.StartDateTimeUTC <= DateTime.UtcNow
-                                                                && c.EndDateTimeUTC > DateTime.UtcNow
+                                                                && c.StartDateTimeUTC <= now
+                                                                && c.EndDateTimeUTC > now
                                                                 && c.RulesSet.PublicMonitor)
                 .ToListAsync();
             var localizers = contests.ConvertAll(c => c.ContestLocalizers.FirstOrDefault(cl => cl.Culture == culture));
@@ -86,11 +88,12 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt]
         public async Task<IActionResult> GetParticipatingContests(string culture)
         {
+            DateTime now = DateTime.UtcNow;
             var currentUser = await HttpContext.GetCurrentUser(_userManager);
             var userContests = await _dbContext.ContestsParticipants.Where(cp => cp.ParticipantId == currentUser.Id)
                 .ToListAsync();
             var contests = await _dbContext.Contests.Where(c => c.ApprovalStatus == ApproveType.Accepted
-                                                                && c.EndDateTimeUTC >= DateTime.UtcNow
+                                                                && c.EndDateTimeUTC >= now
                                                                 && userContests.Any(uc => uc.ContestId == c.Id))
                 .OrderBy(c => c.StartDateTimeUTC)
                 .ToListAsync();
@@ -557,10 +560,11 @@ namespace ContestSystem.Controllers
             {
                 return NotFound("Такого контеста не существует");
             }
+            DateTime now = DateTime.UtcNow;
             var contestParticipants = await _dbContext.ContestsParticipants.Where(cp => cp.ContestId == contestId).ToListAsync();
             var solutions = await _dbContext.Solutions.Where(s => s.ContestId == contestId
                                                                     && (s.SubmitTimeUTC < contest.EndDateTimeUTC.AddMinutes(-contest.RulesSet.MonitorFreezeTimeBeforeFinishInMinutes)
-                                                                        || contest.EndDateTimeUTC <= DateTime.UtcNow))
+                                                                        || contest.EndDateTimeUTC <= now))
                                                         .ToListAsync();
             var monitorEntries = new List<MonitorEntry>();
             var problems = contest.ContestProblems.OrderBy(cp => cp.Letter).ToList();
