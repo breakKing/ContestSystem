@@ -7,7 +7,7 @@
       {{ checker.description }}
     </div>
     <div class="col-12 col-md">
-      <button v-if="currentRole === 'user'" class="btn btn-primary"
+      <button v-if="currentRole === 'user' && +currentUser?.id === +checker.author.id" class="btn btn-primary"
               @click.prevent="$router.push({name: 'WorkSpaceEditCheckersPage', params: {id: +checker.id }})">
         Редактировать
       </button>

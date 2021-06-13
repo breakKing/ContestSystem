@@ -102,12 +102,6 @@ export default {
       })
     }
   },
-  mounted() {
-    CodeMirror.fromTextArea(document.querySelector('.code-input'), {
-      lineNumbers: true,
-      readOnly: true,
-    })
-  },
   beforeRouteEnter(to, from, next) {
     next(async vm => {
       await vm.changeCurrentChecker({force: false, checker_id: vm.checker_id})
@@ -120,6 +114,12 @@ export default {
     VForm: Form,
     VField: Field,
     ErrorMessage,
+  },
+  mounted() {
+    CodeMirror.fromTextArea(document.querySelector('.code-input'), {
+      lineNumbers: true,
+      readOnly: true,
+    })
   },
 }
 </script>

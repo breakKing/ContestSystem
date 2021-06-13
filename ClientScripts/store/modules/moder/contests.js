@@ -28,6 +28,9 @@ export default {
         currentModeratingContest(state, getters) {
             return state.moderating_contest
         },
+        currentModeratingContestLocalizer(state, getters) {
+            return _.find((getters.currentModeratingContest?.localizers || []), (l) => l.culture === 'ru')
+        },
         contestsToModerate(state, getters) {
             return state.contests_to_moderate
         },
