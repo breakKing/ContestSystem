@@ -221,7 +221,7 @@ export default {
         _.forEach(_.filter(this.examples, (t) => +t.number > +deleted.number), (t) => {
           t.number--
         })
-        this.examples.splice(this.examples.indexOf(this.sortedExamples[changes.index]), 1)
+        this.examples.splice(deleted_index, 1)
       } else if (changes.type === 'up-order') {
         let changed_example = this.sortedExamples[changes.index]
         if (changed_example.number <= 1) {
