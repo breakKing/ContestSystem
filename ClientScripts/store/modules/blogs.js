@@ -1,6 +1,7 @@
 ﻿import axios from 'axios'
 import * as _ from 'lodash'
 import $ from "jquery";
+import ApproveTypes from "../../dictionaries/ApproveTypes";
 
 export default {
     state: () => ({
@@ -23,13 +24,13 @@ export default {
             return state.current_user_posts_list
         },
         currentUserPendingPostsList(state, getters) {
-            return _.filter(getters.currentUserPostsList, (el) => Number(el.approvalStatus) === 0)
+            return _.filter(getters.currentUserPostsList, (el) => +el.approvalStatus === ApproveTypes.NotModeratedYet)
         },
         currentUserRejectedPostsList(state, getters) {
-            return _.filter(getters.currentUserPostsList, (el) => Number(el.approvalStatus) === 1)
+            return _.filter(getters.currentUserPostsList, (el) => +el.approvalStatus === ApproveTypes.Rejected)
         },
         currentUserApprovedPostsList(state, getters) {
-            return _.filter(getters.currentUserPostsList, (el) => Number(el.approvalStatus) === 2)
+            return _.filter(getters.currentUserPostsList, (el) => +el.approvalStatus === ApproveTypes.Accepted)
         },
         latestPosts(state, getters) {
             return getters.postsList.sort((a, b) => {
@@ -107,6 +108,7 @@ export default {
             } catch (e) {
                 console.error(e)
             }
+            return {}
         },
     }
 }

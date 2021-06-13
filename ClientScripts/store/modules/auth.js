@@ -89,7 +89,7 @@ export default {
             axios.defaults.headers.common = getters.getHeaders
 
             $.ajaxSetup({
-                beforeSend: function(xhr) {
+                beforeSend: function (xhr) {
                     xhr.setRequestHeader('Authorization', getters.getHeaders['Authorization']);
                 }
             });
@@ -172,6 +172,7 @@ export default {
             commit('setParticipatingContests', [], {root: true})
             commit('setCurrentUserCheckers', [], {root: true})
             commit('setAvailableCheckers', [], {root: true})
+            await dispatch('changeCurrentContest', {force: true, contest_id: null}, {root: true})
         },
         async fetchAllRoles({commit, state, dispatch, getters}, force = false) {
             if (!force && state.all_roles && state.all_roles.length > 0) {

@@ -167,7 +167,7 @@ namespace ContestSystem.Controllers
                 return Json(new
                 {
                     status = true,
-                    message = ""
+                    errors = new List<string>()
                 });
             }
 
@@ -291,7 +291,7 @@ namespace ContestSystem.Controllers
                     return Json(new
                     {
                         status = true,
-                        message = ""
+                        errors = new List<string>()
                     });
                 }
             }
@@ -335,7 +335,7 @@ namespace ContestSystem.Controllers
             return Json(new
             {
                 status = true,
-                message = ""
+                errors = new List<string>()
             });
         }
 
@@ -425,7 +425,7 @@ namespace ContestSystem.Controllers
                     return Json(new
                     {
                         status = true,
-                        message = ""
+                        errors = new List<string>()
                     });
                 }
             }
