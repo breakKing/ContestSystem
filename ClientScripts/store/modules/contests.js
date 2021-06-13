@@ -172,8 +172,11 @@ export default {
                 return []
             }
         },
-        async fetchRunningContests({commit, state, dispatch, getters}, force = false) {
+        async fetchRunningContests({commit, state, dispatch, getters, rootGetters}, force = false) {
             if (!force && state.currently_running_contests && state.currently_running_contests.length > 0) {
+                return
+            }
+            if (!rootGetters.currentUser){
                 return
             }
             try {
@@ -183,8 +186,11 @@ export default {
                 console.error(e)
             }
         },
-        async fetchAvailableContests({commit, state, dispatch, getters}, force = false) {
+        async fetchAvailableContests({commit, state, dispatch, getters, rootGetters}, force = false) {
             if (!force && state.available_for_user_contests && state.available_for_user_contests.length > 0) {
+                return
+            }
+            if (!rootGetters.currentUser){
                 return
             }
             try {
@@ -194,8 +200,11 @@ export default {
                 console.error(e)
             }
         },
-        async fetchParticipatingContests({commit, state, dispatch, getters}, force = false) {
+        async fetchParticipatingContests({commit, state, dispatch, getters, rootGetters}, force = false) {
             if (!force && state.participating_contests && state.participating_contests.length > 0) {
+                return
+            }
+            if (!rootGetters.currentUser){
                 return
             }
             try {
