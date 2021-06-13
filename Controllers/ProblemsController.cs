@@ -370,5 +370,104 @@ namespace ContestSystem.Controllers
                 errors = new List<string>()
             });
         }
+
+        [HttpGet("get-requests")]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
+        public async Task<IActionResult> GetProblemsRequests()
+        {
+            var problems = await _dbContext.Problems.Where(p => p.ApprovalStatus == ApproveType.NotModeratedYet).ToListAsync();
+            var requests = problems.ConvertAll(p =>
+            {
+                var pr = ConstructedProblem.GetFromModel(p);
+                return pr;
+            });
+            return Json(requests);
+        }
+
+        [HttpGet("get-approved")]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
+        public async Task<IActionResult> GetApprovedProblems()
+        {
+            var problems = await _dbContext.Problems.Where(p => p.ApprovalStatus == ApproveType.Accepted).ToListAsync();
+            var requests = problems.ConvertAll(p =>
+            {
+                var pr = ConstructedProblem.GetFromModel(p);
+                return pr;
+            });
+            return Json(requests);
+        }
+
+        [HttpGet("get-rejected")]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
+        public async Task<IActionResult> GetRejectedProblems()
+        {
+            var problems = await _dbContext.Problems.Where(p => p.ApprovalStatus == ApproveType.Rejected).ToListAsync();
+            var requests = problems.ConvertAll(p =>
+            {
+                var pr = ConstructedProblem.GetFromModel(p);
+                return pr;
+            });
+            return Json(requests);
+        }
+
+        [HttpPut("moderate/{id}")]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
+        public async Task<IActionResult> ApproveOrRejectProblem([FromBody] ProblemRequestForm problemRequestForm, long id)
+        {
+            if (problemRequestForm.ProblemId != id || id < 0)
+            {
+                return Json(new
+                {
+                    success = false,
+                    errors = new List<string> { "Id в запросе не совпадает с Id в форме" }
+                });
+            }
+
+            if (ModelState.IsValid)
+            {
+                var problem = await _dbContext.Problems.FirstOrDefaultAsync(c => c.Id == id);
+                if (problem == null)
+                {
+                    return Json(new
+                    {
+                        status = false,
+                        errors = new List<string> { "Попытка модерировать несуществующий пост" }
+                    });
+                }
+                else
+                {
+                    problem.ApprovalStatus = problemRequestForm.ApprovalStatus;
+                    problem.ApprovingModeratorId = problemRequestForm.ApprovingModeratorId;
+                    problem.ModerationMessage = problemRequestForm.ModerationMessage;
+                    _dbContext.Problems.Update(problem);
+                    try
+                    {
+                        await _dbContext.SaveChangesAsync();
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        return Json(new
+                        {
+                            status = false,
+                            errors = new List<string> { "Ошибка параллельного сохранения" }
+                        });
+                    }
+
+                    return Json(new
+                    {
+                        status = true,
+                        errors = new List<string>()
+                    });
+                }
+            }
+
+            return Json(new
+            {
+                status = false,
+                errors = ModelState.Values
+                    .SelectMany(x => x.Errors)
+                    .Select(x => x.ErrorMessage).ToList()
+            });
+        }
     }
 }
