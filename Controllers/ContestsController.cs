@@ -35,19 +35,11 @@ namespace ContestSystem.Controllers
         {
             DateTime now = DateTime.UtcNow;
             var currentUser = await HttpContext.GetCurrentUser();
-            var participatingContests = await _dbContext.ContestsParticipants
-                .Where(cp => cp.ParticipantId == currentUser.Id)
-                .Select(cp => cp.Contest)
-                .ToListAsync();
-            var moderatedContests = await _dbContext.ContestsLocalModerators
-                .Where(clm => clm.LocalModeratorId == currentUser.Id)
-                .Select(cp => cp.Contest)
-                .ToListAsync();
             var contests = await _dbContext.Contests.Where(c => c.ApprovalStatus == ApproveType.Accepted
                                                                 && c.StartDateTimeUTC > now
                                                                 && c.IsPublic
-                                                                && participatingContests.All(pc => pc.Id != c.Id)
-                                                                && moderatedContests.All(mc => mc.Id != c.Id)
+                                                                && !c.ContestParticipants.Any(cp => cp.ParticipantId == currentUser.Id)
+                                                                && !c.ContestLocalModerators.Any(cp => cp.LocalModeratorId == currentUser.Id)
                 )
                 .ToListAsync();
             var localizers = contests.ConvertAll(c => c.ContestLocalizers.FirstOrDefault(cl => cl.Culture == culture));
@@ -90,13 +82,11 @@ namespace ContestSystem.Controllers
         {
             DateTime now = DateTime.UtcNow;
             var currentUser = await HttpContext.GetCurrentUser(_userManager);
-            var userContests = await _dbContext.ContestsParticipants.Where(cp => cp.ParticipantId == currentUser.Id)
-                .ToListAsync();
             var contests = await _dbContext.Contests.Where(c => c.ApprovalStatus == ApproveType.Accepted
                                                                 && c.EndDateTimeUTC >= now
-                                                                && userContests.Any(uc => uc.ContestId == c.Id))
-                .OrderBy(c => c.StartDateTimeUTC)
-                .ToListAsync();
+                                                                && c.ContestParticipants.Any(cp => cp.ParticipantId == currentUser.Id))
+                                                    .OrderBy(c => c.StartDateTimeUTC)
+                                                    .ToListAsync();
             var localizers = contests.ConvertAll(c => c.ContestLocalizers.FirstOrDefault(cl => cl.Culture == culture));
             var publishedContests = new List<PublishedContest>();
             for (int i = 0; i < contests.Count; i++)
