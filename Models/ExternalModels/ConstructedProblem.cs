@@ -13,7 +13,7 @@ namespace ContestSystem.Models.ExternalModels
         public int TimeLimitInMilliseconds { get; set; }
         public string ModerationMessage { get; set; }
         public bool IsPublic { get; set; }
-        public Checker Checker { get; set; }
+        public ConstructedChecker Checker { get; set; }
         public ApproveType ApprovalStatus { get; set; }
         public object ApprovingModerator { get; set; }
         public List<Test> Tests { get; set; }
@@ -29,8 +29,8 @@ namespace ContestSystem.Models.ExternalModels
                 Creator = problem.Creator?.ResponseStructure,
                 ModerationMessage = problem.ModerationMessage,
                 ApprovalStatus = problem.ApprovalStatus,
-                ApprovingModerator = problem.ApprovingModerator,
-                Checker = problem.Checker,
+                ApprovingModerator = problem.ApprovingModerator?.ResponseStructure,
+                Checker = ConstructedChecker.GetFromModel(problem.Checker),
                 IsPublic = problem.IsPublic,
                 Localizers = problem.ProblemLocalizers,
                 Tests = problem.Tests,

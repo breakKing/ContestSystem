@@ -28,6 +28,9 @@ export default {
         currentModeratingProblem(state, getters) {
             return state.moderating_problem
         },
+        currentModeratingProblemLocalizer(state, getters) {
+            return _.find((getters.currentModeratingProblem?.localizers || []),(l) => l.culture === 'ru')
+        },
         problemsToModerate(state, getters) {
             return state.problems_to_moderate
         },

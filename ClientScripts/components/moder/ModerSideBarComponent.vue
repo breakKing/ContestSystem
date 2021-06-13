@@ -10,16 +10,22 @@
                 data-bs-target="#courses-collapse" aria-expanded="false">
           Курсы
         </button>
-        <div class="collapse" id="courses-collapse">
+        <div class="collapse"
+             :class="{show: ['ModeratorNotModeratedCoursesPage','ModeratorApprovedCoursesPage','ModeratorRejectedCoursesPage'].includes($route.name)}"
+             id="courses-collapse">
           <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
             <li>
-              <a href="#" class="link-light rounded">Ожидающие модерации</a>
+              <router-link class="link-light rounded" :to="{name: 'ModeratorNotModeratedCoursesPage'}">Ожидающие
+                модерации
+              </router-link>
             </li>
             <li>
-              <a href="#" class="link-light rounded">Одобренные</a>
+              <router-link class="link-light rounded" :to="{name: 'ModeratorApprovedCoursesPage'}">Одобренные
+              </router-link>
             </li>
             <li>
-              <a href="#" class="link-light rounded">Отклонённые</a>
+              <router-link class="link-light rounded" :to="{name: 'ModeratorRejectedCoursesPage'}">Отклонённые
+              </router-link>
             </li>
           </ul>
         </div>
@@ -30,19 +36,19 @@
           Посты
         </button>
         <div class="collapse"
-             :class="{show: ['WorkSpaceMyPendingPostsPage','WorkSpaceMyApprovedPostsPage','WorkSpaceMyRejectedPostsPage','WorkSpaceMyPostsPage'].includes($route.name)}"
+             :class="{show: ['ModeratorNotModeratedPostsPage', 'ModeratorApprovedPostsPage','ModeratorRejectedPostsPage'].includes($route.name)}"
              id="posts-collapse">
           <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
             <li>
-              <router-link class="link-light rounded" :to="{name: 'WorkSpaceMyPendingPostsPage'}">Ожидающие модерации
+              <router-link class="link-light rounded" :to="{name: 'ModeratorNotModeratedPostsPage'}">Ожидающие модерации
               </router-link>
             </li>
             <li>
-              <router-link class="link-light rounded" :to="{name: 'WorkSpaceMyApprovedPostsPage'}">Одобренные
+              <router-link class="link-light rounded" :to="{name: 'ModeratorApprovedPostsPage'}">Одобренные
               </router-link>
             </li>
             <li>
-              <router-link class="link-light rounded" :to="{name: 'WorkSpaceMyRejectedPostsPage'}">Отклонённые
+              <router-link class="link-light rounded" :to="{name: 'ModeratorRejectedPostsPage'}">Отклонённые
               </router-link>
             </li>
           </ul>
@@ -54,19 +60,20 @@
           Соревнования
         </button>
         <div class="collapse"
-             :class="{show: ['WorkSpaceMyPendingContestsPage','WorkSpaceMyApprovedContestsPage','WorkSpaceMyRejectedContestsPage','WorkSpaceMyContestsPage'].includes($route.name)}"
+             :class="{show: ['ModeratorNotModeratedContestsPage','ModeratorApprovedContestsPage','ModeratorRejectedContestsPage'].includes($route.name)}"
              id="contests-collapse">
           <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
             <li>
-              <router-link class="link-light rounded" :to="{name: 'WorkSpaceMyPendingContestsPage'}">Ожидающие модерации
+              <router-link class="link-light rounded" :to="{name: 'ModeratorNotModeratedContestsPage'}">Ожидающие
+                модерации
               </router-link>
             </li>
             <li>
-              <router-link class="link-light rounded" :to="{name: 'WorkSpaceMyApprovedContestsPage'}">Одобренные
+              <router-link class="link-light rounded" :to="{name: 'ModeratorApprovedContestsPage'}">Одобренные
               </router-link>
             </li>
             <li>
-              <router-link class="link-light rounded" :to="{name: 'WorkSpaceMyRejectedContestsPage'}">Отклонённые
+              <router-link class="link-light rounded" :to="{name: 'ModeratorRejectedContestsPage'}">Отклонённые
               </router-link>
             </li>
           </ul>
@@ -78,19 +85,20 @@
           Задачи
         </button>
         <div class="collapse"
-             :class="{show: ['WorkSpaceMyPendingTasksPage','WorkSpaceMyApprovedTasksPage','WorkSpaceMyRejectedTasksPage','WorkSpaceAllTasksPage'].includes($route.name)}"
+             :class="{show: ['ModeratorNotModeratedProblemsPage','ModeratorApprovedProblemsPage','ModeratorRejectedProblemsPage'].includes($route.name)}"
              id="tasks-collapse">
           <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
             <li>
-              <router-link class="link-light rounded" :to="{name: 'WorkSpaceMyPendingTasksPage'}">Ожидающие модерации
+              <router-link class="link-light rounded" :to="{name: 'ModeratorNotModeratedProblemsPage'}">Ожидающие
+                модерации
               </router-link>
             </li>
             <li>
-              <router-link class="link-light rounded" :to="{name: 'WorkSpaceMyApprovedTasksPage'}">Одобренные
+              <router-link class="link-light rounded" :to="{name: 'ModeratorApprovedProblemsPage'}">Одобренные
               </router-link>
             </li>
             <li>
-              <router-link class="link-light rounded" :to="{name: 'WorkSpaceMyRejectedTasksPage'}">Отклонённые
+              <router-link class="link-light rounded" :to="{name: 'ModeratorRejectedProblemsPage'}">Отклонённые
               </router-link>
             </li>
           </ul>
@@ -99,42 +107,23 @@
       <li class="mb-1">
         <button class="btn btn-toggle align-items-center rounded collapsed text-light" data-bs-toggle="collapse"
                 data-bs-target="#checkers-collapse" aria-expanded="false">
-          Механизмы проверки
+          Чекеры
         </button>
         <div class="collapse"
-             :class="{show: ['WorkSpaceMyPendingCheckersPage','WorkSpaceMyApprovedCheckersPage','WorkSpaceMyRejectedCheckersPage','WorkSpaceAllCheckersPage'].includes($route.name)}"
+             :class="{show: ['ModeratorNotModeratedCheckersPage','ModeratorApprovedCheckersPage','ModeratorRejectedCheckersPage'].includes($route.name)}"
              id="checkers-collapse">
           <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
             <li>
-              <router-link class="link-light rounded" :to="{name: 'WorkSpaceMyPendingCheckersPage'}">Ожидающие модерации
+              <router-link class="link-light rounded" :to="{name: 'ModeratorNotModeratedCheckersPage'}">Ожидающие
+                модерации
               </router-link>
             </li>
             <li>
-              <router-link class="link-light rounded" :to="{name: 'WorkSpaceMyApprovedCheckersPage'}">Одобренные
+              <router-link class="link-light rounded" :to="{name: 'ModeratorApprovedCheckersPage'}">Одобренные
               </router-link>
             </li>
             <li>
-              <router-link class="link-light rounded" :to="{name: 'WorkSpaceMyRejectedCheckersPage'}">Отклонённые
-              </router-link>
-            </li>
-          </ul>
-        </div>
-      </li>
-      <li class="mb-1">
-        <button class="btn btn-toggle align-items-center rounded collapsed text-light" data-bs-toggle="collapse"
-                data-bs-target="#rule-sets-collapse" aria-expanded="false">
-          Наборы правил
-        </button>
-        <div class="collapse"
-             :class="{show: ['WorkSpaceMyRuleSetsPage','WorkSpaceAllRuleSetsPage'].includes($route.name)}"
-             id="rule-sets-collapse">
-          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-            <li>
-              <router-link class="link-light rounded" :to="{name: 'WorkSpaceMyRuleSetsPage'}">Мои
-              </router-link>
-            </li>
-            <li>
-              <router-link class="link-light rounded" :to="{name: 'WorkSpaceAllRuleSetsPage'}">Каталог
+              <router-link class="link-light rounded" :to="{name: 'ModeratorRejectedCheckersPage'}">Отклонённые
               </router-link>
             </li>
           </ul>

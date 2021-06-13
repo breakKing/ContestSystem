@@ -22,14 +22,11 @@ namespace ContestSystem.Controllers
     public class CheckersController : Controller
     {
         private readonly MainDbContext _dbContext;
-        private readonly UserManager<User> _userManager;
         private readonly CheckerSystemService _checkerSystemService;
 
-        public CheckersController(MainDbContext dbContext, UserManager<User> userManager,
-            CheckerSystemService checkerSystemService)
+        public CheckersController(MainDbContext dbContext, CheckerSystemService checkerSystemService)
         {
             _dbContext = dbContext;
-            _userManager = userManager;
             _checkerSystemService = checkerSystemService;
         }
 
@@ -78,7 +75,7 @@ namespace ContestSystem.Controllers
         }
 
         [HttpGet("constructed/{id}")]
-        [AuthorizeByJwt(Roles = RolesContainer.User)]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
         public async Task<IActionResult> GetConstructedChecker(long id)
         {
             var checker = await _dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == id);
@@ -109,27 +106,18 @@ namespace ContestSystem.Controllers
                     Description = checkerForm.Description,
                     IsPublic = checkerForm.IsPublic
                 };
-                //TODO Сделать норм проверку на лимиты вместо автоматического компила
-                checker.ApprovalStatus = ApproveType.Accepted;
+                var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == checkerForm.AuthorId);
+                if (user == null)
+                {
+                    return Json(new
+                    {
+                        status = false,
+                        errors = new List<string> { "Автор является несуществующим пользователем" }
+                    });
+                }
+                checker.ApprovalStatus = ApproveType.NotModeratedYet;
                 _dbContext.Checkers.Add(checker);
                 await _dbContext.SaveChangesAsync();
-                if (checker.ApprovalStatus == ApproveType.Accepted)
-                {
-                    checker = await _checkerSystemService.SendCheckerForCompilationAsync(checker);
-                    _dbContext.Checkers.Update(checker);
-                    try
-                    {
-                        await _dbContext.SaveChangesAsync();
-                    }
-                    catch (DbUpdateConcurrencyException)
-                    {
-                        return Json(new
-                        {
-                            status = false,
-                            errors = new List<string> {"Ошибка параллельного сохранения"}
-                        });
-                    }
-                }
 
                 return Json(new
                 {
@@ -163,31 +151,37 @@ namespace ContestSystem.Controllers
             if (ModelState.IsValid)
             {
                 var checker = await _dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == id);
+                if (checker == null)
+                {
+                    return Json(new
+                    {
+                        status = false,
+                        errors = new List<string> { "Такого чекера не существует" }
+                    });
+                }
+                bool needToRecompile = (checker.Code != checkerForm.Code);
                 checker.AuthorId = checkerForm.AuthorId;
                 checker.Code = checkerForm.Code;
                 checker.Name = checkerForm.Name;
                 checker.Description = checkerForm.Description;
                 checker.IsPublic = checkerForm.IsPublic;
-                //TODO Сделать норм проверку на лимиты вместо автоматического компила
-                checker.ApprovalStatus = ApproveType.Accepted;
-                if (checker.ApprovalStatus == ApproveType.Accepted)
+                if (needToRecompile || checker.ApprovalStatus == ApproveType.Rejected)
                 {
-                    checker = await _checkerSystemService.SendCheckerForCompilationAsync(checker);
-                    _dbContext.Checkers.Update(checker);
-                    try
-                    {
-                        await _dbContext.SaveChangesAsync();
-                    }
-                    catch (DbUpdateConcurrencyException)
-                    {
-                        return Json(new
-                        {
-                            status = false,
-                            errors = new List<string> {"Ошибка параллельного сохранения"}
-                        });
-                    }
+                    checker.ApprovalStatus = ApproveType.NotModeratedYet;
+                    checker.ApprovingModeratorId = null;
                 }
-
+                try
+                {
+                    await _dbContext.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    return Json(new
+                    {
+                        status = false,
+                        errors = new List<string> { "Ошибка параллельного сохранения" }
+                    });
+                }
                 return Json(new
                 {
                     status = true,
@@ -204,7 +198,7 @@ namespace ContestSystem.Controllers
             });
         }
 
-        [AuthorizeByJwt(Roles = RolesContainer.User)]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
         [HttpDelete("delete-checker/{id}")]
         public async Task<IActionResult> DeleteChecker(long id)
         {
@@ -307,6 +301,15 @@ namespace ContestSystem.Controllers
                     checker.ApprovalStatus = checkerRequestForm.ApprovalStatus;
                     checker.ApprovingModeratorId = checkerRequestForm.ApprovingModeratorId;
                     checker.ModerationMessage = checkerRequestForm.ModerationMessage;
+                    if (checker.ApprovalStatus == ApproveType.Accepted)
+                    {
+                        checker = await _checkerSystemService.SendCheckerForCompilationAsync(checker);
+                        if (checker.CompilationVerdict != VerdictType.CompilationSucceed)
+                        {
+                            checker.ApprovalStatus = ApproveType.Rejected;
+                            checker.ModerationMessage = "Compilation errors:\n" + checker.Errors;
+                        }
+                    }
                     _dbContext.Checkers.Update(checker);
                     try
                     {

@@ -25,7 +25,7 @@ namespace ContestSystem.Models.ExternalModels
                 Author = post.Author?.ResponseStructure,
                 PromotedDateTimeUTC = post.PromotedDateTimeUTC,
                 ApprovalStatus = post.ApprovalStatus,
-                ApprovingModerator = post.ApprovingModerator,
+                ApprovingModerator = post.ApprovingModerator?.ResponseStructure,
                 Localizers = post.PostLocalizers,
                 ModerationMessage = post.ModerationMessage,
                 PublicationDateTimeUTC = post.PublicationDateTimeUTC,
