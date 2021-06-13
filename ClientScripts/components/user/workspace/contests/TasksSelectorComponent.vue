@@ -4,7 +4,7 @@
     <tr>
       <th colspan="2">Задания</th>
       <th>
-        <button class="btn btn-success" @click="$emit('update:tasks', {
+        <button class="btn btn-success" @click.prevent="$emit('update:tasks', {
           type: 'add',
           letter: getNextLetter()
         })">Добавить
@@ -27,7 +27,7 @@
         </select>
       </td>
       <td>
-        <button class="btn btn-danger" @click="selected_ids.splice(sym_idx,1);$emit('update:tasks', {
+        <button class="btn btn-danger" @click.prevent="selected_ids.splice(sym_idx,1);$emit('update:tasks', {
           type: 'delete',
           letter: task.letter
         })">Удалить

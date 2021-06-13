@@ -115,6 +115,7 @@
 import {mapActions, mapGetters} from "vuex";
 import * as Yup from "yup";
 import {ErrorMessage, Field, Form} from "vee-validate";
+import * as _ from 'lodash'
 
 export default {
   name: "ModeratorProblemModerationPage",
@@ -126,10 +127,10 @@ export default {
       'currentModeratingProblemLocalizer',
     ]),
     sortedTests() {
-      return (this.currentModeratingProblem?.tests || []).sort((a, b) => a.number - b.number)
+      return _.orderBy((this.currentModeratingProblem?.tests || []), ['number'], ['asc'])
     },
     sortedExamples() {
-      return (this.currentModeratingProblem?.examples || []).sort((a, b) => a.number - b.number)
+      return _.orderBy((this.currentModeratingProblem?.examples || []), ['number'], ['asc'])
     }
   },
   methods: {

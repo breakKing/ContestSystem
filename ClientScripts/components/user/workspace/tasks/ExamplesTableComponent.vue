@@ -5,7 +5,7 @@
     <tr class="d-flex justify-content-between w-100">
       <th class="fs-4 fw-normal">Примеры</th>
       <th>
-        <button class="btn btn-success" @click="$emit('update:examples', {type: 'add'})">Добавить</button>
+        <button class="btn btn-success" @click.prevent="$emit('update:examples', {type: 'add'})">Добавить</button>
       </th>
     </tr>
     </thead>
@@ -43,20 +43,20 @@
       <td class="col d-flex flex-column align-items-center justify-content-around">
         <div>
           
-            <button class="btn btn-info me-2" style="width: 100px" @click="$emit('update:examples', {
+            <button class="btn btn-info me-2" style="width: 100px" @click.prevent="$emit('update:examples', {
           type: 'up-order',
           index: example_idx
           })">
                 🠉
             </button>
-            <button class="btn btn-info" style="width: 100px" @click="$emit('update:examples', {
+            <button class="btn btn-info" style="width: 100px" @click.prevent="$emit('update:examples', {
             type: 'down-order',
             index: example_idx
           })">
                 🠋
             </button>
         </div>
-        <button class="btn btn-danger w-25" @click="$emit('update:examples', {
+        <button class="btn btn-danger w-25" @click.prevent="$emit('update:examples', {
           type: 'delete',
           index: example_idx
         })">Удалить
