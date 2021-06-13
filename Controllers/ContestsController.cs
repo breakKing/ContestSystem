@@ -38,9 +38,8 @@ namespace ContestSystem.Controllers
             var contests = await _dbContext.Contests.Where(c => c.ApprovalStatus == ApproveType.Accepted
                                                                 && c.StartDateTimeUTC > now
                                                                 && c.IsPublic
-                                                                && !c.ContestParticipants.Any(cp => cp.ParticipantId == currentUser.Id)
-                                                                && !c.ContestLocalModerators.Any(cp => cp.LocalModeratorId == currentUser.Id)
-                )
+                                                                && c.ContestParticipants.All(cp => cp.ParticipantId != currentUser.Id) 
+                                                                && c.ContestLocalModerators.All(cp => cp.LocalModeratorId != currentUser.Id))
                 .ToListAsync();
             var localizers = contests.ConvertAll(c => c.ContestLocalizers.FirstOrDefault(cl => cl.Culture == culture));
             var publishedContests = new List<PublishedContest>();
