@@ -60,7 +60,7 @@ namespace ContestSystem.Controllers
             DateTime now = DateTime.UtcNow;
             var contests = await _dbContext.Contests.Where(c => c.ApprovalStatus == ApproveType.Accepted
                                                                 && c.StartDateTimeUTC <= now
-                                                                && c.EndDateTimeUTC > now
+                                                                && c.StartDateTimeUTC.AddMinutes(c.DurationInMinutes) > now
                                                                 && c.RulesSet.PublicMonitor)
                 .ToListAsync();
             var localizers = contests.ConvertAll(c => c.ContestLocalizers.FirstOrDefault(cl => cl.Culture == culture));
@@ -82,7 +82,7 @@ namespace ContestSystem.Controllers
             DateTime now = DateTime.UtcNow;
             var currentUser = await HttpContext.GetCurrentUser(_userManager);
             var contests = await _dbContext.Contests.Where(c => c.ApprovalStatus == ApproveType.Accepted
-                                                                && c.EndDateTimeUTC >= now
+                                                                && c.StartDateTimeUTC >= now.AddMinutes(-c.DurationInMinutes)
                                                                 && c.ContestParticipants.Any(cp => cp.ParticipantId == currentUser.Id))
                                                     .OrderBy(c => c.StartDateTimeUTC)
                                                     .ToListAsync();
