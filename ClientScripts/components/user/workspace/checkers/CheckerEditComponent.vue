@@ -160,7 +160,7 @@ form {
 }
 
 .form-control {
-  border-radius: 16px 0 16px 0;
+  border-radius: 16px;
 }
 
 button {
