@@ -10,6 +10,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Logging;
+using System.IO;
 
 namespace ContestSystem
 {
@@ -25,7 +27,7 @@ namespace ContestSystem
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddLocalization(options => options.ResourcesPath = "Resources");
+            //services.AddLocalization(options => options.ResourcesPath = "Resources");
 
             var jwtService = new JwtSettingsService();
             Configuration.Bind("JwtConfiguration", jwtService);
@@ -83,8 +85,9 @@ namespace ContestSystem
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
+            loggerFactory.AddFile(Path.Combine(Directory.GetCurrentDirectory(), "logs"));
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
