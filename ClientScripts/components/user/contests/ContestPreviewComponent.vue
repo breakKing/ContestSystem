@@ -74,6 +74,13 @@ export default {
       if (!this.contest || !this.contest?.image) {
         return '';
       }
+      // загружено новое фото
+      if (Array.isArray(this.contest.image)) {
+        const [file] = this.contest.image
+        if (file) {
+          return URL.createObjectURL(file)
+        }
+      }
       return 'data:image/jpeg;base64,' + this.contest.image
 
     },

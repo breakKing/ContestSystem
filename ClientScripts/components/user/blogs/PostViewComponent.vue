@@ -40,6 +40,13 @@ export default {
       if (!this.post_info || !this.post_info?.previewImage) {
         return '';
       }
+      // загружено новое фото
+      if (Array.isArray(this.post_info.previewImage)) {
+        const [file] = this.post_info.previewImage
+        if (file) {
+          return URL.createObjectURL(file)
+        }
+      }
       return 'data:image/jpeg;base64,' + this.post_info.previewImage
     },
     bread_crumb_routes() {

@@ -58,6 +58,13 @@ export default {
       if (!this.post || !this.post?.previewImage) {
         return '';
       }
+      // загружено новое фото
+      if (Array.isArray(this.post.previewImage)) {
+        const [file] = this.post.previewImage
+        if (file) {
+          return URL.createObjectURL(file)
+        }
+      }
       return 'data:image/jpeg;base64,' + this.post.previewImage
     },
     currentUserIsAuthor() {

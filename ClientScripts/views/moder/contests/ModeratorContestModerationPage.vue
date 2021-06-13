@@ -88,6 +88,13 @@ export default {
       if (!this.currentModeratingContest || this.currentModeratingContest.image) {
         return '';
       }
+      // загружено новое фото
+      if (Array.isArray(this.currentModeratingContest.image)) {
+        const [file] = this.currentModeratingContest.image
+        if (file) {
+          return URL.createObjectURL(file)
+        }
+      }
       return 'data:image/jpeg;base64,' + this.currentModeratingContest.image
     },
   },

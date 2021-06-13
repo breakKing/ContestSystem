@@ -188,6 +188,13 @@ export default {
       if (!this.image) {
         return '';
       }
+      // загружено новое фото
+      if (Array.isArray(this.image)) {
+        const [file] = this.image
+        if (file) {
+          return URL.createObjectURL(file)
+        }
+      }
       return 'data:image/jpeg;base64,' + this.image
     },
   },

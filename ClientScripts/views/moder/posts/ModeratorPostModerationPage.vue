@@ -65,6 +65,13 @@ export default {
       if (!this.currentModeratingPost || !this.currentModeratingPost?.previewImage) {
         return '';
       }
+      // загружено новое фото
+      if (Array.isArray(this.currentModeratingPost.previewImage)) {
+        const [file] = this.currentModeratingPost.previewImage
+        if (file) {
+          return URL.createObjectURL(file)
+        }
+      }
       return 'data:image/jpeg;base64,' + this.currentModeratingPost.previewImage
     },
   },

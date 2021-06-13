@@ -99,6 +99,13 @@ export default {
       if (!this.currentContest || !this.currentContest?.image) {
         return '';
       }
+      // загружено новое фото
+      if (Array.isArray(this.currentContest.image)) {
+        const [file] = this.currentContest.image
+        if (file) {
+          return URL.createObjectURL(file)
+        }
+      }
       return 'data:image/jpeg;base64,' + this.currentContest.image
     },
     bread_crumb_routes() {
