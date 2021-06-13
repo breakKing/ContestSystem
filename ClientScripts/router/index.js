@@ -34,7 +34,7 @@ const router = createRouter({
                     case 'admin':
                         route_name = 'AdminHome';
                         break
-                    case 'manager':
+                    case 'moderator':
                         route_name = 'ManagerHome';
                         break
                     default: // user

@@ -10,7 +10,7 @@ export default [
         component: ModeratorNotModeratedProblemsPage,
         props: true,
         meta: {
-            authorize: ['manager'],
+            authorize: ['moderator'],
             hide_sidebar: false
         },
     },
@@ -20,7 +20,7 @@ export default [
         component: ModeratorApprovedProblemsPage,
         props: true,
         meta: {
-            authorize: ['manager'],
+            authorize: ['moderator'],
             hide_sidebar: false
         },
     },
@@ -30,7 +30,7 @@ export default [
         component: ModeratorRejectedProblemsPage,
         props: true,
         meta: {
-            authorize: ['manager'],
+            authorize: ['moderator'],
             hide_sidebar: false
         },
     },
@@ -40,7 +40,7 @@ export default [
         component: ModeratorProblemModerationPage,
         props: true,
         meta: {
-            authorize: ['manager'],
+            authorize: ['moderator'],
             hide_sidebar: true
         },
     },

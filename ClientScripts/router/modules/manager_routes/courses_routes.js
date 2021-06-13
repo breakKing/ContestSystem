@@ -10,7 +10,7 @@ export default [
         component: ModeratorNotModeratedCoursesPage,
         props: true,
         meta: {
-            authorize: ['manager'],
+            authorize: ['moderator'],
             hide_sidebar: false
         },
     },
@@ -20,7 +20,7 @@ export default [
         component: ModeratorApprovedCoursesPage,
         props: true,
         meta: {
-            authorize: ['manager'],
+            authorize: ['moderator'],
             hide_sidebar: false
         },
     },
@@ -30,7 +30,7 @@ export default [
         component: ModeratorRejectedCoursesPage,
         props: true,
         meta: {
-            authorize: ['manager'],
+            authorize: ['moderator'],
             hide_sidebar: false
         },
     },
@@ -40,7 +40,7 @@ export default [
         component: ModeratorCourseModerationPage,
         props: true,
         meta: {
-            authorize: ['manager'],
+            authorize: ['moderator'],
             hide_sidebar: true
         },
     },

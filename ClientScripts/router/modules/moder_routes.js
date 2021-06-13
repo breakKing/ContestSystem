@@ -10,7 +10,7 @@ export default {
     path: '/manager',
     component: ManagerPage,
     meta: {
-        authorize: ['manager'],
+        authorize: ['moderator'],
         hide_sidebar: false
     },
     children: [
@@ -19,7 +19,7 @@ export default {
             name: 'ManagerHome',
             component: ManagerStartPage,
             meta: {
-                authorize: ['manager'],
+                authorize: ['moderator'],
                 hide_sidebar: false
             },
         },

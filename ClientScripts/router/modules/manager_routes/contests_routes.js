@@ -10,7 +10,7 @@ export default [
         component: ModeratorNotModeratedContestsPage,
         props: true,
         meta: {
-            authorize: ['manager'],
+            authorize: ['moderator'],
             hide_sidebar: false
         },
     },
@@ -20,7 +20,7 @@ export default [
         component: ModeratorApprovedContestsPage,
         props: true,
         meta: {
-            authorize: ['manager'],
+            authorize: ['moderator'],
             hide_sidebar: false
         },
     },
@@ -30,7 +30,7 @@ export default [
         component: ModeratorRejectedContestsPage,
         props: true,
         meta: {
-            authorize: ['manager'],
+            authorize: ['moderator'],
             hide_sidebar: false
         },
     },
@@ -40,7 +40,7 @@ export default [
         component: ModeratorContestModerationPage,
         props: true,
         meta: {
-            authorize: ['manager'],
+            authorize: ['moderator'],
             hide_sidebar: true
         },
     },
