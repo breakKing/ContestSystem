@@ -22,14 +22,11 @@ namespace ContestSystem.Controllers
     public class CheckersController : Controller
     {
         private readonly MainDbContext _dbContext;
-        private readonly UserManager<User> _userManager;
         private readonly CheckerSystemService _checkerSystemService;
 
-        public CheckersController(MainDbContext dbContext, UserManager<User> userManager,
-            CheckerSystemService checkerSystemService)
+        public CheckersController(MainDbContext dbContext, CheckerSystemService checkerSystemService)
         {
             _dbContext = dbContext;
-            _userManager = userManager;
             _checkerSystemService = checkerSystemService;
         }
 
