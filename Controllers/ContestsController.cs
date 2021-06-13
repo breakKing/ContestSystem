@@ -618,59 +618,50 @@ namespace ContestSystem.Controllers
             );
         }
 
-        /*[HttpGet("get-contest-requests")]
+        [HttpGet("get-requests")]
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
-        public async Task<IActionResult> GetAllPostsRequests()
+        public async Task<IActionResult> GetContestsRequests()
         {
-            var posts = await _dbContext.Posts.ToListAsync();
-            var requests = posts.ConvertAll(p =>
+            var contests = await _dbContext.Contests.Where(p => p.ApprovalStatus == ApproveType.NotModeratedYet).ToListAsync();
+            var requests = contests.ConvertAll(c =>
             {
-                PostRequest pr = new PostRequest
-                {
-                    Id = p.Id,
-                    Author = p.Author,
-                    PromotedDateTimeUTC = p.PromotedDateTimeUTC,
-                    ApprovalStatus = p.ApprovalStatus,
-                    ApprovingModerator = p.ApprovingModerator,
-                    Localizers = p.PostLocalizers,
-                    ModerationMessage = p.ModerationMessage
-                };
-                return pr;
+                var cr = ConstructedContest.GetFromModel(c, c.ContestProblems);
+                return cr;
             });
             return Json(requests);
         }
 
-        [HttpGet("get-post-requests/{id}")]
+        [HttpGet("get-approved")]
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
-        public async Task<IActionResult> GetPostRequest(long id)
+        public async Task<IActionResult> GetApprovedContests()
         {
-            var post = await _dbContext.Posts.FirstOrDefaultAsync(p => p.Id == id);
-            if (post == null)
+            var contests = await _dbContext.Contests.Where(p => p.ApprovalStatus == ApproveType.Accepted).ToListAsync();
+            var requests = contests.ConvertAll(c =>
             {
-                return Json(new
-                {
-                    success = false,
-                    errors = new List<string> { "Такого поста не существует" }
-                });
-            }
-            var request = new PostRequest
-            {
-                Id = post.Id,
-                Author = post.Author,
-                PromotedDateTimeUTC = post.PromotedDateTimeUTC,
-                ApprovalStatus = post.ApprovalStatus,
-                ApprovingModerator = post.ApprovingModerator,
-                Localizers = post.PostLocalizers,
-                ModerationMessage = post.ModerationMessage
-            };
-            return Json(Request);
+                var cr = ConstructedContest.GetFromModel(c, c.ContestProblems);
+                return cr;
+            });
+            return Json(requests);
         }
 
-        [HttpPut("approve-post/{id}")]
+        [HttpGet("get-rejected")]
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
-        public async Task<IActionResult> ApproveOrRejectPost([FromBody] PostRequestForm postRequestForm, long id)
+        public async Task<IActionResult> GetRejectedContests()
         {
-            if (postRequestForm.Id != id || id < 0)
+            var contests = await _dbContext.Contests.Where(p => p.ApprovalStatus == ApproveType.Rejected).ToListAsync();
+            var requests = contests.ConvertAll(c =>
+            {
+                var cr = ConstructedContest.GetFromModel(c, c.ContestProblems);
+                return cr;
+            });
+            return Json(requests);
+        }
+
+        [HttpPut("moderate/{id}")]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
+        public async Task<IActionResult> ApproveOrRejectContest([FromBody] ContestRequestForm contestRequestForm, long id)
+        {
+            if (contestRequestForm.ContestId != id || id < 0)
             {
                 return Json(new
                 {
@@ -678,10 +669,11 @@ namespace ContestSystem.Controllers
                     errors = new List<string> { "Id в запросе не совпадает с Id в форме" }
                 });
             }
+
             if (ModelState.IsValid)
             {
-                var post = await _dbContext.Posts.FirstOrDefaultAsync(p => p.Id == id);
-                if (post == null)
+                var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == id);
+                if (contest == null)
                 {
                     return Json(new
                     {
@@ -691,10 +683,10 @@ namespace ContestSystem.Controllers
                 }
                 else
                 {
-                    post.ApprovalStatus = postRequestForm.ApprovalStatus;
-                    post.ApprovingModeratorId = postRequestForm.ApprovingModeratorId;
-                    post.ModerationMessage = postRequestForm.ModerationMessage;
-                    _dbContext.Posts.Update(post);
+                    contest.ApprovalStatus = contestRequestForm.ApprovalStatus;
+                    contest.ApprovingModeratorId = contestRequestForm.ApprovingModeratorId;
+                    contest.ModerationMessage = contestRequestForm.ModerationMessage;
+                    _dbContext.Contests.Update(contest);
                     try
                     {
                         await _dbContext.SaveChangesAsync();
@@ -707,21 +699,22 @@ namespace ContestSystem.Controllers
                             errors = new List<string> { "Ошибка параллельного сохранения" }
                         });
                     }
+
                     return Json(new
                     {
                         status = true,
                         errors = new List<string>()
-
                     });
                 }
             }
+
             return Json(new
             {
                 status = false,
                 errors = ModelState.Values
-                                         .SelectMany(x => x.Errors)
-                                         .Select(x => x.ErrorMessage).ToList()
+                    .SelectMany(x => x.Errors)
+                    .Select(x => x.ErrorMessage).ToList()
             });
-        }*/
+        }
     }
 }
