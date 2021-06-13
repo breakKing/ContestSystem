@@ -101,10 +101,10 @@ export default {
         timeLimitInMilliseconds: Yup.number('Лимит времени выполнения это число').nullable().required('Лимит времени выполнения это обязательное поле'),
         checker: Yup.number('Механизм проверки это число').required('Механизм проверки обязательно должен быть выбран'),
 
-        name: Yup.string('Название это строка').required('Название это обязательное поле'),
-        description: Yup.string('Описание это строка').required('Описание это обязательное поле'),
-        inputBlock: Yup.string('Входные данные это строка').required('Входные данные это обязательное поле'),
-        outputBlock: Yup.string('Выходные данные это строка').required('Выходные данные это обязательное поле'),
+        name: Yup.string('Название это строка').nullable().required('Название это обязательное поле'),
+        description: Yup.string('Описание это строка').nullable().required('Описание это обязательное поле'),
+        inputBlock: Yup.string('Входные данные это строка').nullable().required('Входные данные это обязательное поле'),
+        outputBlock: Yup.string('Выходные данные это строка').nullable().required('Выходные данные это обязательное поле'),
       })
     }
   },
