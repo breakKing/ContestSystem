@@ -53,7 +53,6 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['fetchAvailableTasks']),
     getNextLetter() {
       if (!this.tasks) {
         return alphabet.upper[0]
@@ -64,11 +63,8 @@ export default {
   computed: {
     ...mapGetters(['availableTasks']),
   },
-  beforeRouteEnter(to, from, next) {
-    next(async vm => {
-      await vm.fetchAvailableTasks()
-      vm.selected_ids = _.map(vm.tasks, (t) => t?.problemId)
-    })
+  mounted() {
+    this.selected_ids = _.map(this.tasks, (t) => t?.problemId)
   }
 }
 </script>

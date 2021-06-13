@@ -91,7 +91,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['getContestById', 'fetchAvailableRuleSets', 'fetchRunningContests', 'fetchAvailableContests', 'fetchParticipatingContests', 'fetchCurrentUserContestsList']),
+    ...mapActions(['getContestById', 'fetchAvailableRuleSets', 'fetchRunningContests', 'fetchAvailableContests', 'fetchParticipatingContests', 'fetchCurrentUserContestsList', 'fetchAvailableTasks']),
     async updateFields() {
       await this.fetchAvailableRuleSets();
       let post = await this.getContestById(this.contest_id)
@@ -102,8 +102,8 @@ export default {
       this.areVirtualContestsAvailable = post?.areVirtualContestsAvailable
       this.isPublic = +post?.isPublic === 1
       this.rulesSetId = post?.rulesSetId || null
-    this.image = post?.image || null
-    this.tasks = post?.problems || []
+      this.image = post?.image || null
+      this.tasks = post?.problems || []
     },
     updateEvent(data) {
       if (data.type === 'add') {
@@ -201,6 +201,7 @@ export default {
   },
   beforeRouteEnter(to, from, next) {
     next(async vm => {
+      await vm.fetchAvailableTasks()
       await vm.updateFields()
     })
   },
