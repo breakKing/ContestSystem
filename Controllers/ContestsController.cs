@@ -558,7 +558,10 @@ namespace ContestSystem.Controllers
                 return NotFound("Такого контеста не существует");
             }
             var contestParticipants = await _dbContext.ContestsParticipants.Where(cp => cp.ContestId == contestId).ToListAsync();
-            var solutions = await _dbContext.Solutions.Where(s => s.ContestId == contestId).ToListAsync();
+            var solutions = await _dbContext.Solutions.Where(s => s.ContestId == contestId
+                                                                    && (s.SubmitTimeUTC < contest.EndDateTimeUTC.AddMinutes(-contest.RulesSet.MonitorFreezeTimeBeforeFinishInMinutes)
+                                                                        || contest.EndDateTimeUTC <= DateTime.UtcNow))
+                                                        .ToListAsync();
             var monitorEntries = new List<MonitorEntry>();
             var problems = contest.ContestProblems.OrderBy(cp => cp.Letter).ToList();
             foreach (var cp in contestParticipants)
