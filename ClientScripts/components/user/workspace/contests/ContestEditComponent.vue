@@ -5,7 +5,7 @@
   <v-form @submit="saveContest" :validation-schema="schema" class="mb-3">
     <div>
       <label>Название</label>
-      <v-field v-model="name" class="form-control" name="login"/>
+      <v-field v-model="name" class="form-control" name="name"/>
       <error-message name="name"></error-message>
     </div>
     <div>
@@ -99,7 +99,7 @@ export default {
       this.description = (post?.localizers || [])[0]?.description || null
       this.startDateTimeUTC = post?.startDateTimeUTC || null
       this.durationInMinutes = post?.durationInMinutes || null
-      this.areVirtualContestsAvailable = +post?.areVirtualContestsAvailable === 1
+      this.areVirtualContestsAvailable = post?.areVirtualContestsAvailable
       this.isPublic = +post?.isPublic === 1
       this.rulesSetId = post?.rulesSetId || null
       this.image = post?.image || null
