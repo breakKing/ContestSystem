@@ -85,8 +85,8 @@ export default {
       name: '',
 
       schema: Yup.object({
-        name: Yup.string().required(),
-        description: Yup.string().required(),
+        name: Yup.string().required().nullable(),
+        description: Yup.string().required().nullable(),
       })
     }
   },

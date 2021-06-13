@@ -79,9 +79,9 @@ export default {
       postPreview: '',
       postCreationSchema: Yup.object({
         previewImage: Yup.mixed().nullable().required('Изображение поста это обязательное поле').label('Изображение поста'),
-        postName: Yup.string().required('Название поста это обязательное поле').label('Название поста'),
-        postText: Yup.string().required('Текст поста это обязательное поле').label('Текст поста'),
-        postPreview: Yup.string().required('Превью поста это обязательное поле').label('Краткое описание'),
+        postName: Yup.string().nullable().required('Название поста это обязательное поле').label('Название поста'),
+        postText: Yup.string().nullable().required('Текст поста это обязательное поле').label('Текст поста'),
+        postPreview: Yup.string().nullable().required('Превью поста это обязательное поле').label('Краткое описание'),
       })
     }
   },
