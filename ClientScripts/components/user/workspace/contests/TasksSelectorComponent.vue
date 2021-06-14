@@ -13,21 +13,21 @@
     </tr>
     </thead>
     <tbody>
-    <tr v-for="(task, sym_idx) of (tasks||[])">
+    <tr v-for="(task, sym_idx) of (tasks || [])">
       <td>{{ task.letter }}</td>
       <td>
         <select class="form-control" @change="$emit('update:tasks', {
           type: 'changed',
           letter: task.letter,
-          problemId: $event.target.value
+          problemId: +$event.target.value
         })" v-model="selected_ids[sym_idx]">
           <option v-for="available_task of availableTasks"
-                  :value="available_task.id">{{ available_task.localizedName }}
+                  :value="+available_task.id">{{ available_task.localizedName }}
           </option>
         </select>
       </td>
       <td>
-        <button class="btn btn-danger" @click.prevent="selected_ids.splice(sym_idx,1);$emit('update:tasks', {
+        <button class="btn btn-danger" @click.prevent="$emit('update:tasks', {
           type: 'delete',
           letter: task.letter
         })">Удалить
@@ -47,11 +47,6 @@ export default {
   name: "TasksSelectorComponent",
   props: ['tasks'],
   emits: ['update:tasks'],
-  data() {
-    return {
-      selected_ids: []
-    }
-  },
   methods: {
     getNextLetter() {
       if (!this.tasks) {
@@ -62,10 +57,10 @@ export default {
   },
   computed: {
     ...mapGetters(['availableTasks']),
+    selected_ids() {
+      return _.cloneDeep(_.map((this.tasks || []), (t) => +t?.problemId))
+    },
   },
-  mounted() {
-    this.selected_ids = _.map(this.tasks, (t) => t?.problemId)
-  }
 }
 </script>
 
