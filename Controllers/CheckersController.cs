@@ -110,10 +110,19 @@ namespace ContestSystem.Controllers
                     Description = checkerForm.Description,
                     IsPublic = checkerForm.IsPublic
                 };
+                if (currentUser.Id != checkerForm.AuthorId)
+                {
+                    _logger.LogCreationByNonEqualCurrentUserAndCreator("Checker", currentUser.Id, checkerForm.AuthorId);
+                    return Json(new
+                    {
+                        status = false,
+                        errors = new List<string> { "Id автора в форме отличается от Id текущего пользователя" }
+                    });
+                }
                 var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == checkerForm.AuthorId);
                 if (user == null)
                 {
-                    _logger.LogWarning($"Попытка создать механизм проверки от лица несуществующего пользователя с идентификатором {currentUser.Id}");
+                    _logger.LogCreationByNonExistentUser("Checker", user.Id);
                     return Json(new
                     {
                         status = false,
@@ -123,7 +132,7 @@ namespace ContestSystem.Controllers
                 checker.ApprovalStatus = ApproveType.NotModeratedYet;
                 _dbContext.Checkers.Add(checker);
                 await _dbContext.SaveChangesAsync();
-                _logger.LogInformation($"Пользователем с идентификатором {currentUser.Id} создан механизм проверки с идентификатором {checker.Id}");
+                _logger.LogCreationSuccessful("Checker", checker.Id, currentUser.Id);
                 return Json(new
                 {
                     status = true,
@@ -146,7 +155,7 @@ namespace ContestSystem.Controllers
             var currentUser = await HttpContext.GetCurrentUser();
             if (checkerForm.Id == null || checkerForm.Id.Value != id)
             {
-                _logger.LogWarning($"Попытка от пользователя с идентификатором {currentUser.Id} редактировать механизм проверки с идентификатором {id}, когда в переданной форме указан идентификатор {checkerForm.Id.GetValueOrDefault()}");
+                _logger.LogEditingWithNonEqualFormAndRequestId("Checker", checkerForm.Id, id, currentUser.Id);
                 return Json(new
                 {
                     status = false,
@@ -159,15 +168,23 @@ namespace ContestSystem.Controllers
                 var checker = await _dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == id);
                 if (checker == null)
                 {
-                    _logger.LogWarning($"Попытка редактировать несуществующий механизм проверки с идентификатором {id} пользователем с идентификатором {currentUser.Id}");
+                    _logger.LogEditingOfNonExistentEntity("Checker", id, currentUser.Id);
                     return Json(new
                     {
                         status = false,
                         errors = new List<string> { "Такого чекера не существует" }
                     });
                 }
+                if (checker.AuthorId != currentUser.Id)
+                {
+                    _logger.LogEditingByNotAppropriateUser("Checker", id, currentUser.Id);
+                    return Json(new
+                    {
+                        status = false,
+                        errors = new List<string> { "Попытка изменить не свой чекер" }
+                    });
+                }
                 bool needToRecompile = (checker.Code != checkerForm.Code);
-                checker.AuthorId = checkerForm.AuthorId;
                 checker.Code = checkerForm.Code;
                 checker.Name = checkerForm.Name;
                 checker.Description = checkerForm.Description;
@@ -183,7 +200,7 @@ namespace ContestSystem.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    _logger.LogWarning($"При редактировании механизма проверки с идентификатором {id} произошла ошибка, связанная с параллельным редактированием");
+                    _logger.LogParallelSaveError("Checker", id);
                     return Json(new
                     {
                         status = false,
@@ -215,7 +232,7 @@ namespace ContestSystem.Controllers
             var currentUser = await HttpContext.GetCurrentUser();
             if (loadedChecker == null)
             {
-                _logger.LogWarning($"Попытка удалить несуществующий механизм проверки с идентификатором {id} пользователем с идентификатором {currentUser.Id}");
+                _logger.LogDeletingOfNonExistentEnitiy("Checker", id, currentUser.Id);
                 return Json(new
                 {
                     status = false,
@@ -225,17 +242,17 @@ namespace ContestSystem.Controllers
             var moderatorRole = await _dbContext.Roles.FirstOrDefaultAsync(r => r.Name == RolesContainer.Moderator);
             if (currentUser.Id != loadedChecker.AuthorId && !currentUser.Roles.Contains(moderatorRole))
             {
-                _logger.LogWarning($"Попытка удалить механизм проверки с идентификатором {id} пользователем с идентификатором {currentUser.Id}, не являющимся модератором или автором механизма");
+                _logger.LogDeletingByNotAppropriateUser("Checker", id, currentUser.Id);
                 return Json(new
                 {
                     status = false,
-                    errors = new List<string> {"Попытка удалить не свой пост или без модераторских прав"}
+                    errors = new List<string> {"Попытка удалить не свой чекер или без модераторских прав"}
                 });
             }
 
             _dbContext.Checkers.Remove(loadedChecker);
             await _dbContext.SaveChangesAsync();
-            _logger.LogInformation($"Удалён механизм проверки с идентификатором {id} пользователем с идентификатором {currentUser.Id}");
+            _logger.LogDeletingSuccessful("Checker", id, currentUser.Id);
             return Json(new
             {
                 status = true,
@@ -290,7 +307,7 @@ namespace ContestSystem.Controllers
             var currentUser = await HttpContext.GetCurrentUser();
             if (checkerRequestForm.CheckerId != id || id < 0)
             {
-                _logger.LogWarning($"Попытка от модератора с идентификатором {currentUser.Id} модерировать механизм проверки с идентификатором {id}, когда в переданной форме указан идентификатор {checkerRequestForm.CheckerId}");
+                _logger.LogModeratingWithNonEqualFormAndRequestId("Checker", checkerRequestForm.CheckerId, id, currentUser.Id);
                 return Json(new
                 {
                     success = false,
@@ -303,7 +320,7 @@ namespace ContestSystem.Controllers
                 var checker = await _dbContext.Checkers.FirstOrDefaultAsync(c => c.Id == id);
                 if (checker == null)
                 {
-                    _logger.LogWarning($"Попытка модерировать несуществующий механизм проверки с идентификатором {id} модератором с идентификатором {currentUser.Id}");
+                    _logger.LogModeratingOfNonExistentEntity("Checker", id, currentUser.Id);
                     return Json(new
                     {
                         status = false,
@@ -317,11 +334,11 @@ namespace ContestSystem.Controllers
                     checker.ModerationMessage = checkerRequestForm.ModerationMessage;
                     if (checker.ApprovalStatus == ApproveType.Accepted)
                     {
-                        _logger.LogInformation($"Одобрен и отправлен на компиляцию механизм проверки с идентификатором {id} модератором с идентификатором {currentUser.Id}");
+                        _logger.LogInformation($"Отправлена на компиляцию сущность \"Checker\" с идентификатором {id} модератором с идентификатором {currentUser.Id}");
                         checker = await _checkerSystemService.SendCheckerForCompilationAsync(checker);
                         if (checker.CompilationVerdict != VerdictType.CompilationSucceed)
                         {
-                            _logger.LogInformation($"В результате компиляции механизма проверки с идентификатором {id} возникли ошибки");
+                            _logger.LogInformation($"В результате компиляции \"Checker\" с идентификатором {id} возникли ошибки");
                             checker.ApprovalStatus = ApproveType.Rejected;
                             checker.ModerationMessage = "Compilation errors:\n" + checker.Errors;
                         }
@@ -333,14 +350,14 @@ namespace ContestSystem.Controllers
                     }
                     catch (DbUpdateConcurrencyException)
                     {
-                        _logger.LogWarning($"При редактировании механизма проверки с идентификатором {id} произошла ошибка, связанная с параллельным редактированием");
+                        _logger.LogParallelSaveError("Checker", id);
                         return Json(new
                         {
                             status = false,
                             errors = new List<string> { "Ошибка параллельного сохранения" }
                         });
                     }
-
+                    _logger.LogModeratingSuccessful("Checker", id, currentUser.Id, checkerRequestForm.ApprovalStatus);
                     return Json(new
                     {
                         status = true,

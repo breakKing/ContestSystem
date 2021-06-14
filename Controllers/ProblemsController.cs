@@ -6,14 +6,13 @@ using ContestSystem.Models.DbContexts;
 using ContestSystem.Models.ExternalModels;
 using ContestSystem.Models.FormModels;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ContestSystemDbStructure.Models.common;
+using Microsoft.Extensions.Logging;
 
 namespace ContestSystem.Controllers
 {
@@ -22,12 +21,12 @@ namespace ContestSystem.Controllers
     public class ProblemsController : Controller
     {
         private readonly MainDbContext _dbContext;
-        private readonly UserManager<User> _userManager;
+        private readonly ILogger<ProblemsController> _logger;
 
-        public ProblemsController(MainDbContext dbContext, UserManager<User> userManager)
+        public ProblemsController(MainDbContext dbContext, ILogger<ProblemsController> logger)
         {
             _dbContext = dbContext;
-            _userManager = userManager;
+            _logger = logger;
         }
 
         [HttpGet("get-user-problems/{id}/{culture}")]
@@ -113,8 +112,10 @@ namespace ContestSystem.Controllers
             }
             if (ModelState.IsValid)
             {
+                var currentUser = await HttpContext.GetCurrentUser();
                 if (!await _dbContext.Checkers.AnyAsync(ch => ch.Id == problemForm.CheckerId))
                 {
+                    _logger.LogWarning($"Попытка от пользователя с идентификатором {currentUser.Id} создать сущность \"Problem\" с использованием несуществующей сущности \"Checker\" с идентификатором {problemForm.CheckerId}");
                     return Json(new
                     {
                         status = false,
@@ -129,9 +130,19 @@ namespace ContestSystem.Controllers
                     TimeLimitInMilliseconds = problemForm.TimeLimitInMilliseconds,
                     CheckerId = problemForm.CheckerId
                 };
+                if (problemForm.CreatorId != currentUser.Id)
+                {
+                    _logger.LogCreationByNonEqualCurrentUserAndCreator("Problem", currentUser.Id, problemForm.CreatorId);
+                    return Json(new
+                    {
+                        status = false,
+                        errors = new List<string> { "Id автора в форме отличается от Id текущего пользователя" }
+                    });
+                }
                 var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == problemForm.CreatorId);
                 if (user == null)
                 {
+                    _logger.LogCreationByNonExistentUser("Problem", problemForm.CreatorId);
                     return Json(new
                     {
                         status = false,
@@ -142,10 +153,11 @@ namespace ContestSystem.Controllers
                 {
                     if (await _dbContext.Problems.CountAsync(c => c.CreatorId == user.Id) == 1)
                     {
+                        _logger.LogCreationFailedBecauseOfLimits("Problem", currentUser.Id);
                         return Json(new
                         {
                             status = false,
-                            errors = new List<string> { "Превышено ограничение недоверенного пользователя по созданию контестов" }
+                            errors = new List<string> { "Превышено ограничение недоверенного пользователя по созданию задач" }
                         });
                     }
                     problem.ApprovalStatus = ApproveType.NotModeratedYet;
@@ -194,6 +206,14 @@ namespace ContestSystem.Controllers
                     await _dbContext.Examples.AddAsync(problemExample);
                 }
                 await _dbContext.SaveChangesAsync();
+                if (problem.ApprovalStatus == ApproveType.Accepted)
+                {
+                    _logger.LogCreationSuccessfulWithAutoAccept("Problem", problem.Id, currentUser.Id);
+                }
+                else
+                {
+                    _logger.LogCreationSuccessful("Problem", problem.Id, currentUser.Id);
+                }
                 return Json(new
                 {
                     status = true,
@@ -213,8 +233,10 @@ namespace ContestSystem.Controllers
         [HttpPut("edit-problem/{id}")]
         public async Task<IActionResult> EditProblem([FromBody] ProblemForm problemForm, long id)
         {
+            var currentUser = await HttpContext.GetCurrentUser();
             if (problemForm.Id == null || id <= 0 || id != problemForm.Id)
             {
+                _logger.LogEditingWithNonEqualFormAndRequestId("Problem", problemForm.Id, id, currentUser.Id);
                 return Json(new
                 {
                     success = false,
@@ -230,6 +252,7 @@ namespace ContestSystem.Controllers
                 var problem = await _dbContext.Problems.FirstOrDefaultAsync(p => p.Id == id);
                 if (problem == null)
                 {
+                    _logger.LogEditingOfNonExistentEntity("Problem", id, currentUser.Id);
                     return Json(new
                     {
                         status = false,
@@ -238,15 +261,16 @@ namespace ContestSystem.Controllers
                 }
                 else
                 {
-                    if (HttpContext.GetCurrentUser().GetAwaiter().GetResult().Id != problem.CreatorId)
+                    if (currentUser.Id != problem.CreatorId)
                     {
+                        _logger.LogEditingByNotAppropriateUser("Problem", id, currentUser.Id);
                         return Json(new
                         {
                             status = false,
                             errors = new List<string> { "Попытка изменить не свою задачу" }
                         });
                     }
-                    problem.CreatorId = problemForm.CreatorId;
+                    
                     problem.MemoryLimitInBytes = problemForm.MemoryLimitInBytes;
                     problem.TimeLimitInMilliseconds = problemForm.TimeLimitInMilliseconds;
                     problem.IsPublic = problemForm.IsPublic;
@@ -334,13 +358,14 @@ namespace ContestSystem.Controllers
                     }
                     catch (DbUpdateConcurrencyException)
                     {
+                        _logger.LogParallelSaveError("Problem", id);
                         return Json(new
                         {
                             status = false,
                             errors = new List<string> { "Ошибка параллельного сохранения" }
                         });
                     }
-
+                    _logger.LogEditingSuccessful("Problem", id, currentUser.Id);
                     return Json(new
                     {
                         status = true,
@@ -361,9 +386,11 @@ namespace ContestSystem.Controllers
         [HttpDelete("delete-problem/{id}")]
         public async Task<IActionResult> DeletePost(long id)
         {
+            var currentUser = await HttpContext.GetCurrentUser();
             var loadedProblem = await _dbContext.Problems.FindAsync(id);
             if (loadedProblem == null)
             {
+                _logger.LogDeletingOfNonExistentEnitiy("Problem", id, currentUser.Id);
                 return Json(new
                 {
                     status = false,
@@ -371,10 +398,10 @@ namespace ContestSystem.Controllers
                 });
             }
 
-            var currentUser = await HttpContext.GetCurrentUser();
             var moderatorRole = await _dbContext.Roles.FirstOrDefaultAsync(r => r.Name == RolesContainer.Moderator);
             if (currentUser.Id != loadedProblem.CreatorId && !currentUser.Roles.Contains(moderatorRole))
             {
+                _logger.LogDeletingByNotAppropriateUser("Problem", id, currentUser.Id);
                 return Json(new
                 {
                     status = false,
@@ -384,6 +411,7 @@ namespace ContestSystem.Controllers
 
             _dbContext.Problems.Remove(loadedProblem);
             await _dbContext.SaveChangesAsync();
+            _logger.LogDeletingSuccessful("Problem", id, currentUser.Id);
             return Json(new
             {
                 status = true,
@@ -434,8 +462,10 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> ApproveOrRejectProblem([FromBody] ProblemRequestForm problemRequestForm, long id)
         {
+            var currentUser = await HttpContext.GetCurrentUser();
             if (problemRequestForm.ProblemId != id || id < 0)
             {
+                _logger.LogModeratingWithNonEqualFormAndRequestId("Problem", problemRequestForm.ProblemId, id, currentUser.Id);
                 return Json(new
                 {
                     success = false,
@@ -448,6 +478,7 @@ namespace ContestSystem.Controllers
                 var problem = await _dbContext.Problems.FirstOrDefaultAsync(c => c.Id == id);
                 if (problem == null)
                 {
+                    _logger.LogModeratingOfNonExistentEntity("Problem", id, currentUser.Id);
                     return Json(new
                     {
                         status = false,
@@ -466,13 +497,14 @@ namespace ContestSystem.Controllers
                     }
                     catch (DbUpdateConcurrencyException)
                     {
+                        _logger.LogParallelSaveError("Problem", id);
                         return Json(new
                         {
                             status = false,
                             errors = new List<string> { "Ошибка параллельного сохранения" }
                         });
                     }
-
+                    _logger.LogModeratingSuccessful("Problem", id, currentUser.Id, problemRequestForm.ApprovalStatus);
                     return Json(new
                     {
                         status = true,

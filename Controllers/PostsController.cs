@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace ContestSystem.Controllers
 {
@@ -20,10 +21,12 @@ namespace ContestSystem.Controllers
     public class PostsController : Controller
     {
         private readonly MainDbContext _dbContext;
+        private readonly ILogger<PostsController> _logger;
 
-        public PostsController(MainDbContext dbContext)
+        public PostsController(MainDbContext dbContext, ILogger<PostsController> logger)
         {
             _dbContext = dbContext;
+            _logger = logger;
         }
 
         [HttpGet("{culture}")]
@@ -105,6 +108,7 @@ namespace ContestSystem.Controllers
         {
             if (ModelState.IsValid)
             {
+                var currentUser = await HttpContext.GetCurrentUser();
                 byte[] imageData = null;
                 if (postForm.PreviewImage != null)
                 {
@@ -122,9 +126,19 @@ namespace ContestSystem.Controllers
                     PreviewImage = imageData == null ? null : Convert.ToBase64String(imageData),
                     PostLocalizers = new List<PostLocalizer>()
                 };
+                if (currentUser.Id != postForm.AuthorUserId)
+                {
+                    _logger.LogCreationByNonEqualCurrentUserAndCreator("Post", currentUser.Id, postForm.AuthorUserId);
+                    return Json(new
+                    {
+                        status = false,
+                        errors = new List<string> { "Id автора в форме отличается от Id текущего пользователя" }
+                    });
+                }
                 var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == postForm.AuthorUserId);
                 if (user == null)
                 {
+                    _logger.LogCreationByNonExistentUser("Post", postForm.AuthorUserId);
                     return Json(new
                     {
                         status = false,
@@ -135,6 +149,7 @@ namespace ContestSystem.Controllers
                 {
                     if (await _dbContext.Posts.CountAsync(p => p.AuthorId == user.Id && p.ApprovalStatus == ApproveType.NotModeratedYet) == 1)
                     {
+                        _logger.LogCreationFailedBecauseOfLimits("Post", currentUser.Id);
                         return Json(new
                         {
                             status = false,
@@ -162,6 +177,14 @@ namespace ContestSystem.Controllers
                     post.PostLocalizers.Add(localizer);
                 }
                 await _dbContext.SaveChangesAsync();
+                if (post.ApprovalStatus == ApproveType.Accepted)
+                {
+                    _logger.LogCreationSuccessfulWithAutoAccept("Post", post.Id, currentUser.Id);
+                }
+                else
+                {
+                    _logger.LogCreationSuccessful("Post", post.Id, currentUser.Id);
+                }
                 return Json(new
                 {
                     status = true,
@@ -182,8 +205,11 @@ namespace ContestSystem.Controllers
         [HttpPut("edit-post/{id}")]
         public async Task<IActionResult> EditPost([FromForm] PostForm postForm, long id)
         {
+            var currentUser = await HttpContext.GetCurrentUser();
+
             if (postForm.Id == null || id <= 0 || id != postForm.Id)
             {
+                _logger.LogEditingWithNonEqualFormAndRequestId("Post", postForm.Id, id, currentUser.Id);
                 return Json(new
                 {
                     status = false,
@@ -196,6 +222,7 @@ namespace ContestSystem.Controllers
                 Post post = await _dbContext.Posts.FirstOrDefaultAsync(p => p.Id == id);
                 if (post == null)
                 {
+                    _logger.LogEditingOfNonExistentEntity("Post", id, currentUser.Id);
                     return Json(new
                     {
                         status = false,
@@ -204,8 +231,9 @@ namespace ContestSystem.Controllers
                 }
                 else
                 {
-                    if (HttpContext.GetCurrentUser().GetAwaiter().GetResult().Id != post.AuthorId)
+                    if (currentUser.Id != post.AuthorId)
                     {
+                        _logger.LogEditingByNotAppropriateUser("Post", id, currentUser.Id);
                         return Json(new
                         {
                             status = false,
@@ -223,7 +251,6 @@ namespace ContestSystem.Controllers
                         }
                     }
 
-                    post.AuthorId = postForm.AuthorUserId;
                     if (imageData != null)
                     {
                         post.PreviewImage = Convert.ToBase64String(imageData);
@@ -272,13 +299,14 @@ namespace ContestSystem.Controllers
                     }
                     catch (DbUpdateConcurrencyException)
                     {
+                        _logger.LogParallelSaveError("Post", id);
                         return Json(new
                         {
                             status = false,
                             errors = new List<string> {"Ошибка параллельного сохранения"}
                         });
                     }
-
+                    _logger.LogEditingSuccessful("Post", id, currentUser.Id);
                     return Json(new
                     {
                         status = true,
@@ -300,20 +328,21 @@ namespace ContestSystem.Controllers
         [HttpDelete("delete-post/{id}")]
         public async Task<IActionResult> DeletePost(long id)
         {
+            var currentUser = await HttpContext.GetCurrentUser();
             Post loadedPost = await _dbContext.Posts.FindAsync(id);
             if (loadedPost == null)
             {
+                _logger.LogDeletingOfNonExistentEnitiy("Post", id, currentUser.Id);
                 return Json(new
                 {
                     status = false,
                     errors = new List<string> {"Попытка удалить несуществующий пост"}
                 });
             }
-
-            var currentUser = await HttpContext.GetCurrentUser();
             var moderatorRole = await _dbContext.Roles.FirstOrDefaultAsync(r => r.Name == RolesContainer.Moderator);
             if (currentUser.Id != loadedPost.AuthorId && !currentUser.Roles.Contains(moderatorRole))
             {
+                _logger.LogDeletingByNotAppropriateUser("Post", id, currentUser.Id);
                 return Json(new
                 {
                     status = false,
@@ -323,6 +352,7 @@ namespace ContestSystem.Controllers
 
             _dbContext.Posts.Remove(loadedPost);
             await _dbContext.SaveChangesAsync();
+            _logger.LogDeletingSuccessful("Post", id, currentUser.Id);
             return Json(new
             {
                 status = true,
@@ -373,8 +403,11 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> ApproveOrRejectPost([FromBody] PostRequestForm postRequestForm, long id)
         {
+            var currentUser = await HttpContext.GetCurrentUser();
+
             if (postRequestForm.PostId != id || id < 0)
             {
+                _logger.LogModeratingWithNonEqualFormAndRequestId("Post", postRequestForm.PostId, id, currentUser.Id);
                 return Json(new
                 {
                     success = false,
@@ -387,6 +420,7 @@ namespace ContestSystem.Controllers
                 var post = await _dbContext.Posts.FirstOrDefaultAsync(p => p.Id == id);
                 if (post == null)
                 {
+                    _logger.LogModeratingOfNonExistentEntity("Post", id, currentUser.Id);
                     return Json(new
                     {
                         status = false,
@@ -406,13 +440,14 @@ namespace ContestSystem.Controllers
                     }
                     catch (DbUpdateConcurrencyException)
                     {
+                        _logger.LogParallelSaveError("Post", id);
                         return Json(new
                         {
                             status = false,
                             errors = new List<string> {"Ошибка параллельного сохранения"}
                         });
                     }
-
+                    _logger.LogModeratingSuccessful("Post", id, currentUser.Id, postRequestForm.ApprovalStatus);
                     return Json(new
                     {
                         status = true,
