@@ -20,7 +20,8 @@ namespace ContestSystem.Models.ExternalModels
         public object ApprovingModerator { get; set; }
         public string ModerationMessage { get; set; }
         public List<ProblemEntry> Problems { get; set; }
-        public RulesSet Rules { get; set; }
+        public ConstructedRulesSet Rules { get; set; }
+        public long? RulesSetId { get; set; }
 
         public static ConstructedContest GetFromModel(Contest contest, List<ContestProblem> problems)
         {
@@ -34,7 +35,8 @@ namespace ContestSystem.Models.ExternalModels
                 DurationInMinutes = contest.DurationInMinutes,
                 Creator = contest.Creator?.ResponseStructure,
                 ApprovalStatus = contest.ApprovalStatus,
-                Rules = contest.RulesSet,
+                RulesSetId = contest.RulesSet.Id,
+                Rules = ConstructedRulesSet.GetFromModel(contest.RulesSet),
                 ApprovingModerator = contest.ApprovingModerator?.ResponseStructure,
                 ModerationMessage = contest.ModerationMessage,
                 Problems = problems.ConvertAll(cp =>

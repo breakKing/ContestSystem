@@ -126,15 +126,10 @@ export default {
             commit('setCurrentContestSolutionsForCurrentUser', solutions)
         },
         async getContestById({commit, state, dispatch, getters}, contest_id) {
-            await dispatch('fetchAvailableContests');
             if (!contest_id) {
                 return null;
             }
-            let local = _.find(getters.availableContests, (c) => +c.id === +contest_id)
-            if (!local) {
-                local = await dispatch('getPublishedContest', contest_id)
-            }
-            return local
+            return await dispatch('getConstructedContest', contest_id)
         },
         async getContestParticipants({commit, state, dispatch, getters}, contest_id) {
             if (!contest_id) {
@@ -234,6 +229,18 @@ export default {
             }
             try {
                 let {data} = await axios.get(`/api/contests/${contest_id}/ru`)
+                return data
+            } catch (e) {
+                console.error(e)
+            }
+            return null
+        },  
+        async getConstructedContest({commit, state, dispatch, getters}, contest_id) {
+            if (!contest_id) {
+                return null
+            }
+            try {
+                let {data} = await axios.get(`/api/contests/constructed/${contest_id}`)
                 return data
             } catch (e) {
                 console.error(e)
