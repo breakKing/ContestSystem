@@ -48,7 +48,9 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> GetAvailableProblems(long id, string culture)
         {
-            var problems = await _dbContext.Problems.Where(p => p.CreatorId == id || p.IsPublic).ToListAsync();
+            var problems = await _dbContext.Problems.Where(p => (p.CreatorId == id || p.IsPublic)
+                                                                    && p.ApprovalStatus == ApproveType.Accepted)
+                                                    .ToListAsync();
             var publishedProblems = problems.ConvertAll(p =>
             {
                 var localizer = p.ProblemLocalizers.FirstOrDefault(pl => pl.Culture == culture);
