@@ -48,7 +48,9 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> GetAvailableCheckers(long id)
         {
-            var checkers = await _dbContext.Checkers.Where(c => c.AuthorId == id || c.IsPublic).ToListAsync();
+            var checkers = await _dbContext.Checkers.Where(c => (c.AuthorId == id || c.IsPublic)
+                                                                    && c.ApprovalStatus == ApproveType.Accepted)
+                                                    .ToListAsync();
             var publishedCheckers = checkers.ConvertAll(c =>
             {
                 var pc = PublishedChecker.GetFromModel(c);
