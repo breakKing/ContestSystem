@@ -8,7 +8,7 @@ namespace ContestSystem.Models.ExternalModels
     {
         public long Id { get; set; }
         public object Creator { get; set; }
-        public List<ProblemLocalizer> Localizers { get; set; }
+        public List<ProblemLocalizerExternalModel> Localizers { get; set; } = new List<ProblemLocalizerExternalModel>();
         public long MemoryLimitInBytes { get; set; }
         public int TimeLimitInMilliseconds { get; set; }
         public string ModerationMessage { get; set; }
@@ -32,7 +32,7 @@ namespace ContestSystem.Models.ExternalModels
                 ApprovingModerator = problem.ApprovingModerator?.ResponseStructure,
                 Checker = ConstructedChecker.GetFromModel(problem.Checker),
                 IsPublic = problem.IsPublic,
-                Localizers = problem.ProblemLocalizers,
+                Localizers = problem.ProblemLocalizers?.ConvertAll(pl => ProblemLocalizerExternalModel.GetFromModel(pl)),
                 Tests = problem.Tests,
                 Examples = problem.Examples
             };

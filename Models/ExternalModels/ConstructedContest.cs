@@ -11,7 +11,7 @@ namespace ContestSystem.Models.ExternalModels
     {
         public long Id { get; set; }
         public object Creator { get; set; }
-        public List<ContestLocalizer> Localizers { get; set; }
+        public List<ContestLocalizerExternalModel> Localizers { get; set; } = new List<ContestLocalizerExternalModel>();
         public string Image { get; set; }
         public DateTime StartDateTimeUTC { get; set; }
         public DateTime EndDateTimeUTC { get; set; }
@@ -20,21 +20,21 @@ namespace ContestSystem.Models.ExternalModels
         public object ApprovingModerator { get; set; }
         public string ModerationMessage { get; set; }
         public List<ProblemEntry> Problems { get; set; }
-        public RulesSet Rules { get; set; }
+        public ConstructedRulesSet Rules { get; set; }
 
         public static ConstructedContest GetFromModel(Contest contest, List<ContestProblem> problems)
         {
             return new ConstructedContest
             {
                 Id = contest.Id,
-                Localizers = contest.ContestLocalizers,
+                Localizers = contest.ContestLocalizers?.ConvertAll(cl => ContestLocalizerExternalModel.GetFromModel(cl)),
                 Image = contest.Image,
                 StartDateTimeUTC = contest.StartDateTimeUTC,
                 EndDateTimeUTC = contest.EndDateTimeUTC,
                 DurationInMinutes = contest.DurationInMinutes,
                 Creator = contest.Creator?.ResponseStructure,
                 ApprovalStatus = contest.ApprovalStatus,
-                Rules = contest.RulesSet,
+                Rules = ConstructedRulesSet.GetFromModel(contest.RulesSet),
                 ApprovingModerator = contest.ApprovingModerator?.ResponseStructure,
                 ModerationMessage = contest.ModerationMessage,
                 Problems = problems.ConvertAll(cp =>

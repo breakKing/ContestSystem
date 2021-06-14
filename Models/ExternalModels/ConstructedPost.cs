@@ -9,7 +9,7 @@ namespace ContestSystem.Models.ExternalModels
     {
         public long Id { get; set; }
         public object Author { get; set; }
-        public List<PostLocalizer> Localizers { get; set; } = new List<PostLocalizer>();
+        public List<PostLocalizerExternalModel> Localizers { get; set; } = new List<PostLocalizerExternalModel>();
         public string PreviewImage { get; set; }
         public DateTime PromotedDateTimeUTC { get; set; }
         public DateTime PublicationDateTimeUTC { get; set; }
@@ -26,7 +26,7 @@ namespace ContestSystem.Models.ExternalModels
                 PromotedDateTimeUTC = post.PromotedDateTimeUTC,
                 ApprovalStatus = post.ApprovalStatus,
                 ApprovingModerator = post.ApprovingModerator?.ResponseStructure,
-                Localizers = post.PostLocalizers,
+                Localizers = post.PostLocalizers?.ConvertAll(pl => PostLocalizerExternalModel.GetFromModel(pl)),
                 ModerationMessage = post.ModerationMessage,
                 PublicationDateTimeUTC = post.PublicationDateTimeUTC,
                 PreviewImage = post.PreviewImage

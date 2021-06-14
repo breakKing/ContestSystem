@@ -20,7 +20,7 @@ namespace ContestSystem.Models.ExternalModels
         public short DurationInMinutes { get; set; }
         public string ModerationMessage { get; set; }
         public ApproveType ApprovalStatus { get; set; }
-        public RulesSet Rules { get; set; }
+        public ConstructedRulesSet Rules { get; set; }
         public List<ProblemEntry> Problems { get; set; }
 
         public static PublishedContest GetFromModel(Contest contest, ContestLocalizer localizer, int participantsCount)
@@ -36,7 +36,7 @@ namespace ContestSystem.Models.ExternalModels
                 Image = contest.Image,
                 ParticipantsCount = participantsCount,
                 ApprovalStatus = contest.ApprovalStatus,
-                Rules = contest.RulesSet,
+                Rules = ConstructedRulesSet.GetFromModel(contest.RulesSet),
                 Problems = contest.ContestProblems.ConvertAll(cp =>
                 {
                     return new ProblemEntry
