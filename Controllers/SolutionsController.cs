@@ -12,6 +12,8 @@ using ContestSystem.Models.ExternalModels;
 using ContestSystem.Models.Misc;
 using ContestSystem.Models.FormModels;
 using ContestSystemDbStructure.Enums;
+using Microsoft.Extensions.Logging;
+using ContestSystem.Extensions;
 
 namespace ContestSystem.Controllers
 {
@@ -22,12 +24,14 @@ namespace ContestSystem.Controllers
         private readonly MainDbContext _dbContext;
         private readonly CheckerSystemService _checkerSystemService;
         private readonly VerdicterService _verdicter;
+        private readonly ILogger<SolutionsController> _logger;
 
-        public SolutionsController(MainDbContext dbContext, CheckerSystemService checkerSystemService, VerdicterService verdicter)
+        public SolutionsController(MainDbContext dbContext, CheckerSystemService checkerSystemService, VerdicterService verdicter, ILogger<SolutionsController> logger)
         {
             _dbContext = dbContext;
             _checkerSystemService = checkerSystemService;
             _verdicter = verdicter;
+            _logger = logger;
         }
 
         [HttpGet("{id}")]
@@ -62,6 +66,16 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> CompileSolution([FromBody] SolutionForm solutionForm)
         {
+            var currentUser = await HttpContext.GetCurrentUser();
+            if (currentUser.Id != solutionForm.UserId)
+            {
+                _logger.LogWarning($"Попытка от пользователя с идентификатором {currentUser.Id} отправить решение в рамках соревнования с идентификатором {solutionForm.ContestId}, когда в форме указан пользователь с идентификатором {solutionForm.UserId}");
+                return Json(new
+                {
+                    status = false,
+                    errors = new List<string> { "Id текущего пользователя не совпадает с Id пользователя в форме" }
+                });
+            }
             if (ModelState.IsValid)
             {
                 // находим в БД с тем же кодом
@@ -92,7 +106,7 @@ namespace ContestSystem.Controllers
                     await _dbContext.Solutions.AddAsync(solution);
                     await _dbContext.SaveChangesAsync();
                 }
-
+                _logger.LogInformation($"На проверку отправлено решение с идентификатором {solution.Id} пользователем {currentUser.Id}");
                 // Отправка на компиляцию
                 solution = await _checkerSystemService.CompileSolutionAsync(solution);
                 _dbContext.Solutions.Update(solution);
@@ -102,12 +116,14 @@ namespace ContestSystem.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
+                    _logger.LogParallelSaveError("Solution", solution.Id);
                     return Json(new
                     {
                         status = false,
                         errors = new List<string> { "Ошибка параллельного сохранения" }
                     });
                 }
+                _logger.LogInformation($"Решение с идентификатором {solution.Id} было успешно проверено");
                 return Json(new
                 {
                     status = true,
@@ -130,13 +146,16 @@ namespace ContestSystem.Controllers
         public async Task<IActionResult> RunTests(long solutionId)
         {
             var solution = await _dbContext.Solutions.FirstOrDefaultAsync(s => s.Id == solutionId);
+            var currentUser = await HttpContext.GetCurrentUser();
             if (solution == null)
             {
+                _logger.LogWarning($"Попытка от пользователя с идентификатором {currentUser.Id} запустить тесты несуществующего решения с идентификатором {solutionId}");
                 return NotFound("Такого решения не существует");
             }
 
             bool state = true;
             solution.Verdict = VerdictType.TestInProgress;
+            _logger.LogInformation($"Пользователем с идентификатором {currentUser.Id} запущено тестирование решения с идентификатором {solutionId}");
             _dbContext.Solutions.Update(solution);
             try
             {
@@ -144,6 +163,7 @@ namespace ContestSystem.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
+                _logger.LogParallelSaveError("Solution", solutionId);
                 return Json(new
                 {
                     status = false,
@@ -179,6 +199,7 @@ namespace ContestSystem.Controllers
                     _dbContext.ContestsParticipants.Update(contestParticipant);
                 }
             }
+            _logger.LogInformation($"Решение с идентификатором {solution.Id} успешно протестировано");
             return Json(state);
         }
 

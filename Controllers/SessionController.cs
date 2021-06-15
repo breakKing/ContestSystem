@@ -3,7 +3,6 @@ using ContestSystemDbStructure.Models;
 using ContestSystem.Extensions;
 using ContestSystem.Models;
 using ContestSystem.Models.Attributes;
-using ContestSystem.Models.DbContexts;
 using ContestSystem.Models.FormModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -17,18 +16,14 @@ namespace ContestSystem.Controllers
     public class SessionController : Controller
     {
         private readonly ILogger<SessionController> _logger;
-        private readonly MainDbContext _dbContext;
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<Role> _roleManager;
         private readonly SignInManager<User> _signInManager;
         private readonly JwtSettingsService _jwtSettingsService;
 
-        public SessionController(ILogger<SessionController> logger, MainDbContext dbContext,
-            UserManager<User> userManager, RoleManager<Role> roleManager, SignInManager<User> signInManager,
-            JwtSettingsService jwtSettingsService)
+        public SessionController(ILogger<SessionController> logger, UserManager<User> userManager, RoleManager<Role> roleManager, SignInManager<User> signInManager, JwtSettingsService jwtSettingsService)
         {
             _logger = logger;
-            _dbContext = dbContext;
             _userManager = userManager;
             _roleManager = roleManager;
             _signInManager = signInManager;
@@ -42,15 +37,15 @@ namespace ContestSystem.Controllers
             if (user is not null &&
                 (await _signInManager.CheckPasswordSignInAsync(user, form.password, false)).Succeeded)
             {
+                _logger.LogInformation($"Пользователем с идентификатором {user.Id} был выполнен успешный вход в систему");
                 return Json(new
                 {
                     status = true,
                     user = user.ResponseStructure,
                     roles = await _userManager.GetRolesAsync(user),
-                    token = _jwtSettingsService.GenerateTokenString(user, this._userManager)
+                    token = _jwtSettingsService.GenerateTokenString(user, _userManager)
                 });
             }
-
             return Json(new
             {
                 status = false,
@@ -88,10 +83,11 @@ namespace ContestSystem.Controllers
 
                 if (result.Succeeded)
                 {
+                    _logger.LogInformation($"Успешно создан и зарегистрирован пользователь с идентификатором {user.Id}");
                     // default role
                     await _userManager.AddToRoleAsync(user, RolesContainer.User);
 
-                    var token = _jwtSettingsService.GenerateTokenString(user, this._userManager);
+                    var token = _jwtSettingsService.GenerateTokenString(user, _userManager);
                     if (token is null)
                     {
                         return Json(new
@@ -123,13 +119,13 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt]
         public async Task<IActionResult> VerifyToken()
         {
-            var user = await HttpContext.GetCurrentUser(this._userManager);
+            var user = await HttpContext.GetCurrentUser(_userManager);
             return Json(
                 new
                 {
                     user = user?.ResponseStructure,
                     roles = await _userManager.GetRolesAsync(user),
-                    token = _jwtSettingsService.GenerateTokenString(user, this._userManager)
+                    token = _jwtSettingsService.GenerateTokenString(user, _userManager)
                 });
         }
 

@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 
 namespace ContestSystem.Controllers
 {
@@ -20,27 +21,19 @@ namespace ContestSystem.Controllers
         private readonly ILogger<UsersController> _logger;
         private readonly MainDbContext _dbContext;
         private readonly UserManager<User> _userManager;
-        private readonly RoleManager<Role> _roleManager;
-        private readonly SignInManager<User> _signInManager;
-        private readonly JwtSettingsService _jwtSettingsService;
 
-        public UsersController(ILogger<UsersController> logger, MainDbContext dbContext,
-            UserManager<User> userManager, RoleManager<Role> roleManager, SignInManager<User> signInManager,
-            JwtSettingsService jwtSettingsService)
+        public UsersController(ILogger<UsersController> logger, MainDbContext dbContext, UserManager<User> userManager)
         {
             _logger = logger;
             _dbContext = dbContext;
             _userManager = userManager;
-            _roleManager = roleManager;
-            _signInManager = signInManager;
-            _jwtSettingsService = jwtSettingsService;
         }
 
         [HttpPost("get-all-users")]
         [AuthorizeByJwt(Roles = RolesContainer.Admin)]
         public async Task<IActionResult> GetAllUsers()
         {
-            var user = await HttpContext.GetCurrentUser(this._userManager);
+            var user = await HttpContext.GetCurrentUser(_userManager);
             var users = await _dbContext.Users
                 .Where(u => (user == null || u.Id != user.Id))
                 .Include(u => u.Roles)
@@ -56,6 +49,7 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Admin)]
         public async Task<IActionResult> UpdateUser([FromBody] UserSavingForm userFromBody)
         {
+            var currentUser = await HttpContext.GetCurrentUser();
             if (ModelState.IsValid)
             {
                 if (userFromBody.Id != default)
@@ -80,8 +74,20 @@ namespace ContestSystem.Controllers
                         .Where(r => r != null)
                         .ToList();
                     user.Roles = rolesToAssign;
-
-                    await _dbContext.SaveChangesAsync();
+                    try
+                    {
+                        await _dbContext.SaveChangesAsync();
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        _logger.LogParallelSaveError("User", user.Id);
+                        return Json(new
+                        {
+                            status = false,
+                            errors = new List<string> { "Ошибка параллельного сохранения" }
+                        });
+                    }
+                    _logger.LogEditingSuccessful("User", user.Id, currentUser.Id);
                     return Json(new
                     {
                         success = true

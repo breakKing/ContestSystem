@@ -5,11 +5,6 @@ namespace ContestSystem.Extensions
 {
     public static class LoggerExtensions
     {
-        public static void LogCreationByNonExistentUser(this ILogger logger, string entityName, long userId)
-        {
-            logger.LogWarning($"Попытка создать сущность \"{entityName}\" от лица несуществующего пользователя с идентификатором {userId}");
-        }
-
         public static void LogCreationByNonEqualCurrentUserAndCreator(this ILogger logger, string entityName, long userId, long creatorId)
         {
             logger.LogWarning($"Попытка создать сущность \"{entityName}\" пользователем с идентификатором {userId} при указании в качестве автора пользователя с идентификатором {creatorId}");

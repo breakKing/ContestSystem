@@ -5,13 +5,12 @@ using ContestSystem.Models.DbContexts;
 using ContestSystem.Models.ExternalModels;
 using ContestSystem.Models.FormModels;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace ContestSystem.Controllers
 {
@@ -20,12 +19,12 @@ namespace ContestSystem.Controllers
     public class RulesController : Controller
     {
         private readonly MainDbContext _dbContext;
-        private readonly UserManager<User> _userManager;
+        private readonly ILogger<RulesController> _logger;
 
-        public RulesController(MainDbContext dbContext, UserManager<User> userManager)
+        public RulesController(MainDbContext dbContext, ILogger<RulesController> logger)
         {
             _dbContext = dbContext;
-            _userManager = userManager;
+            _logger = logger;
         }
 
         [HttpGet("get-user-rules/{id}")]
@@ -77,6 +76,16 @@ namespace ContestSystem.Controllers
         {
             if (ModelState.IsValid)
             {
+                var currentUser = await HttpContext.GetCurrentUser();
+                if (currentUser.Id != rulesSetForm.AuthorId)
+                {
+                    _logger.LogCreationByNonEqualCurrentUserAndCreator("RulesSet", currentUser.Id, rulesSetForm.AuthorId);
+                    return Json(new
+                    {
+                        status = false,
+                        errors = new List<string> { "Id автора в форме отличается от Id текущего пользователя" }
+                    });
+                }
                 var rules = new RulesSet
                 {
                     Name = rulesSetForm.Name,
@@ -95,6 +104,7 @@ namespace ContestSystem.Controllers
                 };
                 await _dbContext.RulesSets.AddAsync(rules);
                 await _dbContext.SaveChangesAsync();
+                _logger.LogCreationSuccessful("RulesSet", rules.Id, currentUser.Id);
                 return Json(new
                 {
                     status = true,
@@ -114,8 +124,10 @@ namespace ContestSystem.Controllers
         [HttpPut("edit-rules/{id}")]
         public async Task<IActionResult> EditRules([FromBody] RulesSetForm rulesSetForm, long id)
         {
+            var currentUser = await HttpContext.GetCurrentUser();
             if (rulesSetForm.Id == null || id <= 0 || id != rulesSetForm.Id)
             {
+                _logger.LogEditingWithNonEqualFormAndRequestId("RulesSet", rulesSetForm.Id, id, currentUser.Id);
                 return Json(new
                 {
                     success = false,
@@ -128,6 +140,7 @@ namespace ContestSystem.Controllers
                 var rules = await _dbContext.RulesSets.FirstOrDefaultAsync(rs => rs.Id == id);
                 if (rules == null)
                 {
+                    _logger.LogEditingOfNonExistentEntity("RulesSet", id, currentUser.Id);
                     return Json(new
                     {
                         status = false,
@@ -136,8 +149,9 @@ namespace ContestSystem.Controllers
                 }
                 else
                 {
-                    if (HttpContext.GetCurrentUser().GetAwaiter().GetResult().Id != rules.AuthorId)
+                    if (currentUser.Id != rules.AuthorId)
                     {
+                        _logger.LogEditingByNotAppropriateUser("RulesSet", id, currentUser.Id);
                         return Json(new
                         {
                             status = false,
@@ -155,7 +169,6 @@ namespace ContestSystem.Controllers
                     rules.PenaltyForCompilationError = rulesSetForm.PenaltyForCompilationError;
                     rules.PenaltyForOneTry = rulesSetForm.PenaltyForOneTry;
                     rules.PublicMonitor = rulesSetForm.PublicMonitor;
-                    rules.AuthorId = rulesSetForm.AuthorId;
                     rules.IsPublic = rulesSetForm.IsPublic;
                     _dbContext.RulesSets.Update(rules);
                     try
@@ -164,13 +177,14 @@ namespace ContestSystem.Controllers
                     }
                     catch (DbUpdateConcurrencyException)
                     {
+                        _logger.LogParallelSaveError("RulesSet", id);
                         return Json(new
                         {
                             status = false,
                             errors = new List<string> { "Ошибка параллельного сохранения" }
                         });
                     }
-
+                    _logger.LogEditingSuccessful("RulesSet", id, currentUser.Id);
                     return Json(new
                     {
                         status = true,
@@ -192,29 +206,31 @@ namespace ContestSystem.Controllers
         [HttpDelete("delete-rules/{id}")]
         public async Task<IActionResult> DeleteRules(long id)
         {
+            var currentUser = await HttpContext.GetCurrentUser();
             var loadedRules = await _dbContext.RulesSets.FindAsync(id);
             if (loadedRules == null)
             {
+                _logger.LogDeletingOfNonExistentEnitiy("RulesSet", id, currentUser.Id);
                 return Json(new
                 {
                     status = false,
                     errors = new List<string> { "Попытка удалить несуществующий набор правил" }
                 });
             }
-
-            var currentUser = await HttpContext.GetCurrentUser();
             var moderatorRole = await _dbContext.Roles.FirstOrDefaultAsync(r => r.Name == RolesContainer.Moderator);
             if (currentUser.Id != loadedRules.AuthorId && !currentUser.Roles.Contains(moderatorRole))
             {
+                _logger.LogDeletingByNotAppropriateUser("RulesSet", id, currentUser.Id);
                 return Json(new
                 {
                     status = false,
-                    errors = new List<string> { "Попытка удалить не свою задачу или без модераторских прав" }
+                    errors = new List<string> { "Попытка удалить не свой набор правил" }
                 });
             }
 
             _dbContext.RulesSets.Remove(loadedRules);
             await _dbContext.SaveChangesAsync();
+            _logger.LogDeletingSuccessful("RulesSet", id, currentUser.Id);
             return Json(new
             {
                 status = true,
