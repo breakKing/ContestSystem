@@ -67,22 +67,14 @@ namespace ContestSystem.Controllers
                 var localizer = post.PostLocalizers.FirstOrDefault(pl => pl.Culture == culture);
                 if (localizer == null)
                 {
-                    return Json(new
-                    {
-                        status = false,
-                        errors = new List<string> { "Такой локализации под данный пост не существует" }
-                    });
+                    return NotFound("Такой локализации под пост не существует");
                 }
 
                 var publishedPost = PublishedPost.GetFromModel(post, localizer);
                 return Json(publishedPost);
             }
 
-            return Json(new
-            {
-                status = false,
-                errors = new List<string> { "Поста с таким идентификатором не существует" }
-            });
+            return NotFound("Такого поста не существует");
         }
 
         [HttpGet("constructed/{id}")]
@@ -95,11 +87,7 @@ namespace ContestSystem.Controllers
                 var constructedPost = ConstructedPost.GetFromModel(post);
                 return Json(constructedPost);
             }
-            return Json(new
-            {
-                status = false,
-                errors = new List<string> { "Поста с таким идентификатором не существует" }
-            });
+            return NotFound("Такого поста не существует");
         }
 
         [AuthorizeByJwt(Roles = RolesContainer.User)]
@@ -178,6 +166,7 @@ namespace ContestSystem.Controllers
                 return Json(new
                 {
                     status = true,
+                    data = post.Id,
                     errors = new List<string>()
                 });
             }

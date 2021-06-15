@@ -41,11 +41,7 @@ namespace ContestSystem.Controllers
             var solution = await _dbContext.Solutions.FirstOrDefaultAsync(s => s.Id == id);
             if (solution == null)
             {
-                return Json(new
-                {
-                    status = false,
-                    errors = new List<string> {"Нет решения с таким идентификатором"}
-                });
+                return NotFound("Такого решения не существует");
             }
 
             var problemsInContest = await _dbContext.ContestsProblems.Where(cp => cp.ContestId == solution.ContestId)

@@ -67,11 +67,7 @@ namespace ContestSystem.Controllers
             var checker = await _dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == id && !ch.IsArchieved);
             if (checker == null)
             {
-                return Json(new
-                {
-                    status = false,
-                    errors = new List<string> {"Такого чекера не существует"}
-                });
+                return NotFound("Такого чекера не существует");
             }
 
             var publishedChecker = PublishedChecker.GetFromModel(checker);
@@ -85,11 +81,7 @@ namespace ContestSystem.Controllers
             var checker = await _dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == id && !ch.IsArchieved);
             if (checker == null)
             {
-                return Json(new
-                {
-                    status = false,
-                    errors = new List<string> {"Такого чекера не существует"}
-                });
+                return NotFound("Такого чекера не существует");
             }
 
             var constructedChecker = ConstructedChecker.GetFromModel(checker);
@@ -128,6 +120,7 @@ namespace ContestSystem.Controllers
                 return Json(new
                 {
                     status = true,
+                    data = checker.Id,
                     errors = new List<string>()
                 });
             }

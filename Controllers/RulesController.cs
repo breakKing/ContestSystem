@@ -64,11 +64,7 @@ namespace ContestSystem.Controllers
                 var publishedRules = ConstructedRulesSet.GetFromModel(rules);
                 return Json(publishedRules);
             }
-            return Json(new
-            {
-                status = false,
-                errors = new List<string> { "Набора правил с таким идентификатором не существует" }
-            });
+            return NotFound("Такого набора правил не существует");
         }
 
         [HttpPost("add-rules")]
@@ -110,6 +106,7 @@ namespace ContestSystem.Controllers
                 return Json(new
                 {
                     status = true,
+                    data = rules.Id,
                     errors = new List<string>()
                 });
             }

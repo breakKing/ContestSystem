@@ -70,20 +70,12 @@ namespace ContestSystem.Controllers
                 var localizer = problem.ProblemLocalizers.FirstOrDefault(pl => pl.Culture == culture);
                 if (localizer == null)
                 {
-                    return Json(new
-                    {
-                        status = false,
-                        errors = new List<string> { "Такой локализации под данную задачу не существует" }
-                    });
+                    return NotFound("Такой локализации под задачу не существует");
                 }
                 var publishedProblem = PublishedProblem.GetFromModel(problem, localizer);
                 return Json(publishedProblem);
             }
-            return Json(new
-            {
-                status = false,
-                errors = new List<string> { "Задачи с таким идентификатором не существует" }
-            });
+            return NotFound("Такой задачи не существует");
         }
 
         [HttpGet("constructed/{id}")]
@@ -96,11 +88,7 @@ namespace ContestSystem.Controllers
                 var constructedProblem = ConstructedProblem.GetFromModel(problem);
                 return Json(constructedProblem);
             }
-            return Json(new
-            {
-                status = false,
-                errors = new List<string> { "Задачи с таким идентификатором не существует" }
-            });
+            return NotFound("Такой задачи не существует");
         }
 
         [HttpPost("add-problem")]
@@ -209,6 +197,7 @@ namespace ContestSystem.Controllers
                 return Json(new
                 {
                     status = true,
+                    data = problem.Id,
                     errors = new List<string>()
                 });
             }

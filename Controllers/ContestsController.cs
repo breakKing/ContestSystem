@@ -111,11 +111,7 @@ namespace ContestSystem.Controllers
                 var localizer = contest.ContestLocalizers.FirstOrDefault(pl => pl.Culture == culture);
                 if (localizer == null)
                 {
-                    return Json(new
-                    {
-                        status = false,
-                        errors = new List<string> {"Такой локализации под данный контест не существует"}
-                    });
+                    return NotFound("Такой локализации под контест не существует");
                 }
 
                 int participantsCount =
@@ -124,11 +120,7 @@ namespace ContestSystem.Controllers
                 return Json(publishedContest);
             }
 
-            return Json(new
-            {
-                status = false,
-                errors = new List<string> {"Контеста с таким идентификатором не существует"}
-            });
+            return NotFound("Такого контеста не существует");
         }
 
         [HttpGet("constructed/{id}")]
@@ -143,11 +135,7 @@ namespace ContestSystem.Controllers
                 return Json(constructedContest);
             }
 
-            return Json(new
-            {
-                status = false,
-                errors = new List<string> {"Контеста с таким идентификатором не существует"}
-            });
+            return NotFound("Такого контеста не существует");
         }
 
         [HttpGet("get-user-created-contests/{id}/{culture}")]
@@ -261,6 +249,7 @@ namespace ContestSystem.Controllers
                 return Json(new
                 {
                     status = true,
+                    data = contest.Id,
                     errors = new List<string>()
                 });
             }
