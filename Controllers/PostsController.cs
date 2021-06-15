@@ -135,19 +135,9 @@ namespace ContestSystem.Controllers
                         errors = new List<string> { "Id автора в форме отличается от Id текущего пользователя" }
                     });
                 }
-                var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == postForm.AuthorUserId);
-                if (user == null)
+                if (currentUser.IsLimitedInPosts)
                 {
-                    _logger.LogCreationByNonExistentUser("Post", postForm.AuthorUserId);
-                    return Json(new
-                    {
-                        status = false,
-                        errors = new List<string> { "Автор является несуществующим пользователем" }
-                    });
-                }
-                if (user.IsLimitedInPosts)
-                {
-                    if (await _dbContext.Posts.CountAsync(p => p.AuthorId == user.Id && p.ApprovalStatus == ApproveType.NotModeratedYet) == 1)
+                    if (await _dbContext.Posts.CountAsync(p => p.AuthorId == currentUser.Id && p.ApprovalStatus == ApproveType.NotModeratedYet) == 1)
                     {
                         _logger.LogCreationFailedBecauseOfLimits("Post", currentUser.Id);
                         return Json(new

@@ -119,16 +119,6 @@ namespace ContestSystem.Controllers
                         errors = new List<string> { "Id автора в форме отличается от Id текущего пользователя" }
                     });
                 }
-                var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == checkerForm.AuthorId);
-                if (user == null)
-                {
-                    _logger.LogCreationByNonExistentUser("Checker", user.Id);
-                    return Json(new
-                    {
-                        status = false,
-                        errors = new List<string> { "Автор является несуществующим пользователем" }
-                    });
-                }
                 checker.ApprovalStatus = ApproveType.NotModeratedYet;
                 _dbContext.Checkers.Add(checker);
                 await _dbContext.SaveChangesAsync();
