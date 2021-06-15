@@ -23,7 +23,6 @@ namespace ContestSystem.Models.DbContexts
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Post> Posts { get; set; }
         public DbSet<Notification> Notifications { get; set; }
-        public DbSet<Log> Logs { get; set; }
         public DbSet<ContestProblem> ContestsProblems { get; set; }
         public DbSet<ContestParticipant> ContestsParticipants { get; set; }
         public DbSet<ContestLocalModerator> ContestsLocalModerators { get; set; }
