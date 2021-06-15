@@ -60,6 +60,11 @@ namespace ContestSystem.Extensions
             logger.LogInformation($"Удалена сущность \"{entityName}\" с идентификатором {entityId} пользователем с идентификатором {userId}");
         }
 
+        public static void LogDeletingByArchieving(this ILogger logger, string entityName, long entityId, long userId)
+        {
+            logger.LogInformation($"Архивирована сущность \"{entityName}\" с идентификатором {entityId} пользователем с идентификатором {userId}");
+        }
+
         public static void LogModeratingWithNonEqualFormAndRequestId(this ILogger logger, string entityName, long? formEntityId, long requestEntityId, long userId)
         {
             logger.LogWarning($"Попытка от модератора с идентификатором {userId} модерировать сущность \"{entityName}\" с идентификатором {requestEntityId}, когда в переданной форме указан идентификатор {formEntityId}");

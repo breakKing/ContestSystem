@@ -33,7 +33,7 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> GetUserProblems(long id, string culture)
         {
-            var problems = await _dbContext.Problems.Where(p => p.CreatorId == id).ToListAsync();
+            var problems = await _dbContext.Problems.Where(p => p.CreatorId == id && !p.IsArchieved).ToListAsync();
             var publishedProblems = problems.ConvertAll(p =>
             {
                 var localizer = p.ProblemLocalizers.FirstOrDefault(pl => pl.Culture == culture);
@@ -48,7 +48,8 @@ namespace ContestSystem.Controllers
         public async Task<IActionResult> GetAvailableProblems(long id, string culture)
         {
             var problems = await _dbContext.Problems.Where(p => (p.CreatorId == id || p.IsPublic)
-                                                                    && p.ApprovalStatus == ApproveType.Accepted)
+                                                                    && p.ApprovalStatus == ApproveType.Accepted
+                                                                    && !p.IsArchieved)
                                                     .ToListAsync();
             var publishedProblems = problems.ConvertAll(p =>
             {
@@ -63,7 +64,7 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> GetPublishedProblem(long id, string culture)
         {
-            var problem = await _dbContext.Problems.FirstOrDefaultAsync(p => p.Id == id);
+            var problem = await _dbContext.Problems.FirstOrDefaultAsync(p => p.Id == id && !p.IsArchieved);
             if (problem != null)
             {
                 var localizer = problem.ProblemLocalizers.FirstOrDefault(pl => pl.Culture == culture);
@@ -89,7 +90,7 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
         public async Task<IActionResult> GetConstructedProblem(long id)
         {
-            var problem = await _dbContext.Problems.FirstOrDefaultAsync(p => p.Id == id);
+            var problem = await _dbContext.Problems.FirstOrDefaultAsync(p => p.Id == id && !p.IsArchieved);
             if (problem != null)
             {
                 var constructedProblem = ConstructedProblem.GetFromModel(problem);
@@ -113,7 +114,7 @@ namespace ContestSystem.Controllers
             if (ModelState.IsValid)
             {
                 var currentUser = await HttpContext.GetCurrentUser();
-                if (!await _dbContext.Checkers.AnyAsync(ch => ch.Id == problemForm.CheckerId))
+                if (!await _dbContext.Checkers.AnyAsync(ch => ch.Id == problemForm.CheckerId && !ch.IsArchieved))
                 {
                     _logger.LogWarning($"Попытка от пользователя с идентификатором {currentUser.Id} создать сущность \"Problem\" с использованием несуществующей сущности \"Checker\" с идентификатором {problemForm.CheckerId}");
                     return Json(new
@@ -128,7 +129,8 @@ namespace ContestSystem.Controllers
                     IsPublic = problemForm.IsPublic,
                     MemoryLimitInBytes = problemForm.MemoryLimitInBytes,
                     TimeLimitInMilliseconds = problemForm.TimeLimitInMilliseconds,
-                    CheckerId = problemForm.CheckerId
+                    CheckerId = problemForm.CheckerId,
+                    IsArchieved = false
                 };
                 if (problemForm.CreatorId != currentUser.Id)
                 {
@@ -239,7 +241,7 @@ namespace ContestSystem.Controllers
             }
             if (ModelState.IsValid)
             {
-                var problem = await _dbContext.Problems.FirstOrDefaultAsync(p => p.Id == id);
+                var problem = await _dbContext.Problems.FirstOrDefaultAsync(p => p.Id == id && !p.IsArchieved);
                 if (problem == null)
                 {
                     _logger.LogEditingOfNonExistentEntity("Problem", id, currentUser.Id);
@@ -377,7 +379,7 @@ namespace ContestSystem.Controllers
         public async Task<IActionResult> DeletePost(long id)
         {
             var currentUser = await HttpContext.GetCurrentUser();
-            var loadedProblem = await _dbContext.Problems.FindAsync(id);
+            var loadedProblem = await _dbContext.Problems.FirstOrDefaultAsync(p => p.Id == id && !p.IsArchieved);
             if (loadedProblem == null)
             {
                 _logger.LogDeletingOfNonExistentEnitiy("Problem", id, currentUser.Id);
@@ -398,10 +400,37 @@ namespace ContestSystem.Controllers
                     errors = new List<string> { "Попытка удалить не свою задачу или без модераторских прав" }
                 });
             }
-
-            _dbContext.Problems.Remove(loadedProblem);
-            await _dbContext.SaveChangesAsync();
-            _logger.LogDeletingSuccessful("Problem", id, currentUser.Id);
+            if (await _dbContext.ContestsProblems.AnyAsync(cp => cp.ProblemId == id) || await _dbContext.CoursesProblems.AnyAsync(cp => cp.ProblemId == id))
+            {
+                loadedProblem.IsArchieved = true;
+                _dbContext.Problems.Update(loadedProblem);
+                bool saved = false;
+                while (!saved)
+                {
+                    try
+                    {
+                        await _dbContext.SaveChangesAsync();
+                        saved = true;
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        loadedProblem = await _dbContext.Problems.FirstOrDefaultAsync(p => p.Id == id && !p.IsArchieved);
+                        if (loadedProblem == null)
+                        {
+                            break;
+                        }
+                        loadedProblem.IsArchieved = true;
+                        _dbContext.Problems.Update(loadedProblem);
+                    }
+                    _logger.LogDeletingByArchieving("Problem", id, currentUser.Id);
+                }
+            }
+            else
+            {
+                _dbContext.Problems.Remove(loadedProblem);
+                await _dbContext.SaveChangesAsync();
+                _logger.LogDeletingSuccessful("Problem", id, currentUser.Id);
+            }
             return Json(new
             {
                 status = true,
@@ -413,7 +442,7 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetProblemsRequests()
         {
-            var problems = await _dbContext.Problems.Where(p => p.ApprovalStatus == ApproveType.NotModeratedYet).ToListAsync();
+            var problems = await _dbContext.Problems.Where(p => p.ApprovalStatus == ApproveType.NotModeratedYet && !p.IsArchieved).ToListAsync();
             var requests = problems.ConvertAll(p =>
             {
                 var pr = ConstructedProblem.GetFromModel(p);
@@ -426,7 +455,7 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetApprovedProblems()
         {
-            var problems = await _dbContext.Problems.Where(p => p.ApprovalStatus == ApproveType.Accepted).ToListAsync();
+            var problems = await _dbContext.Problems.Where(p => p.ApprovalStatus == ApproveType.Accepted && !p.IsArchieved).ToListAsync();
             var requests = problems.ConvertAll(p =>
             {
                 var pr = ConstructedProblem.GetFromModel(p);
@@ -439,7 +468,7 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetRejectedProblems()
         {
-            var problems = await _dbContext.Problems.Where(p => p.ApprovalStatus == ApproveType.Rejected).ToListAsync();
+            var problems = await _dbContext.Problems.Where(p => p.ApprovalStatus == ApproveType.Rejected && !p.IsArchieved).ToListAsync();
             var requests = problems.ConvertAll(p =>
             {
                 var pr = ConstructedProblem.GetFromModel(p);
@@ -465,7 +494,7 @@ namespace ContestSystem.Controllers
 
             if (ModelState.IsValid)
             {
-                var problem = await _dbContext.Problems.FirstOrDefaultAsync(c => c.Id == id);
+                var problem = await _dbContext.Problems.FirstOrDefaultAsync(p => p.Id == id && !p.IsArchieved);
                 if (problem == null)
                 {
                     _logger.LogModeratingOfNonExistentEntity("Problem", id, currentUser.Id);

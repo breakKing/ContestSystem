@@ -31,7 +31,7 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> GetUserRules(long id)
         {
-            var rules = await _dbContext.RulesSets.Where(r => r.AuthorId == id).ToListAsync();
+            var rules = await _dbContext.RulesSets.Where(r => r.AuthorId == id && !r.IsArchieved).ToListAsync();
             var publishedRules = rules.ConvertAll(r =>
             {
                 var pr = ConstructedRulesSet.GetFromModel(r);
@@ -44,7 +44,8 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> GetAvailableRules(long id)
         {
-            var rules = await _dbContext.RulesSets.Where(rs => rs.AuthorId == id || rs.IsPublic).ToListAsync();
+            var rules = await _dbContext.RulesSets.Where(rs => (rs.AuthorId == id || rs.IsPublic)
+                                                                && !rs.IsArchieved).ToListAsync();
             var publishedRules = rules.ConvertAll(r =>
             {
                 var pr = ConstructedRulesSet.GetFromModel(r);
@@ -57,7 +58,7 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> GetConstructedRules(long id)
         {
-            var rules = await _dbContext.RulesSets.FirstOrDefaultAsync(r => r.Id == id);
+            var rules = await _dbContext.RulesSets.FirstOrDefaultAsync(r => r.Id == id && !r.IsArchieved);
             if (rules != null)
             {
                 var publishedRules = ConstructedRulesSet.GetFromModel(rules);
@@ -100,7 +101,8 @@ namespace ContestSystem.Controllers
                     PenaltyForOneTry = rulesSetForm.PenaltyForOneTry,
                     PublicMonitor = rulesSetForm.PublicMonitor,
                     AuthorId = rulesSetForm.AuthorId,
-                    IsPublic = rulesSetForm.IsPublic
+                    IsPublic = rulesSetForm.IsPublic,
+                    IsArchieved = false
                 };
                 await _dbContext.RulesSets.AddAsync(rules);
                 await _dbContext.SaveChangesAsync();
@@ -137,7 +139,7 @@ namespace ContestSystem.Controllers
 
             if (ModelState.IsValid)
             {
-                var rules = await _dbContext.RulesSets.FirstOrDefaultAsync(rs => rs.Id == id);
+                var rules = await _dbContext.RulesSets.FirstOrDefaultAsync(rs => rs.Id == id && !rs.IsArchieved);
                 if (rules == null)
                 {
                     _logger.LogEditingOfNonExistentEntity("RulesSet", id, currentUser.Id);
@@ -207,7 +209,7 @@ namespace ContestSystem.Controllers
         public async Task<IActionResult> DeleteRules(long id)
         {
             var currentUser = await HttpContext.GetCurrentUser();
-            var loadedRules = await _dbContext.RulesSets.FindAsync(id);
+            var loadedRules = await _dbContext.RulesSets.FirstOrDefaultAsync(rs => rs.Id == id && !rs.IsArchieved);
             if (loadedRules == null)
             {
                 _logger.LogDeletingOfNonExistentEnitiy("RulesSet", id, currentUser.Id);
@@ -227,10 +229,37 @@ namespace ContestSystem.Controllers
                     errors = new List<string> { "Попытка удалить не свой набор правил" }
                 });
             }
-
-            _dbContext.RulesSets.Remove(loadedRules);
-            await _dbContext.SaveChangesAsync();
-            _logger.LogDeletingSuccessful("RulesSet", id, currentUser.Id);
+            if (await _dbContext.Contests.AnyAsync(c => c.RulesSetId == id))
+            {
+                loadedRules.IsArchieved = true;
+                _dbContext.RulesSets.Update(loadedRules);
+                bool saved = false;
+                while (!saved)
+                {
+                    try
+                    {
+                        await _dbContext.SaveChangesAsync();
+                        saved = true;
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        loadedRules = await _dbContext.RulesSets.FirstOrDefaultAsync(rs => rs.Id == id && !rs.IsArchieved);
+                        if (loadedRules == null)
+                        {
+                            break;
+                        }
+                        loadedRules.IsArchieved = true;
+                        _dbContext.RulesSets.Update(loadedRules);
+                    }
+                    _logger.LogDeletingByArchieving("RulesSet", id, currentUser.Id);
+                }
+            }
+            else
+            {
+                _dbContext.RulesSets.Remove(loadedRules);
+                await _dbContext.SaveChangesAsync();
+                _logger.LogDeletingSuccessful("RulesSet", id, currentUser.Id);
+            }
             return Json(new
             {
                 status = true,

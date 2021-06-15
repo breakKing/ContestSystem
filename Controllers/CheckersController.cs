@@ -35,7 +35,7 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> GetUserCheckers(long id)
         {
-            var checkers = await _dbContext.Checkers.Where(p => p.AuthorId == id).ToListAsync();
+            var checkers = await _dbContext.Checkers.Where(p => p.AuthorId == id && !p.IsArchieved).ToListAsync();
             var publishedCheckers = checkers.ConvertAll(c =>
             {
                 var pc = PublishedChecker.GetFromModel(c);
@@ -49,7 +49,8 @@ namespace ContestSystem.Controllers
         public async Task<IActionResult> GetAvailableCheckers(long id)
         {
             var checkers = await _dbContext.Checkers.Where(c => (c.AuthorId == id || c.IsPublic)
-                                                                    && c.ApprovalStatus == ApproveType.Accepted)
+                                                                    && c.ApprovalStatus == ApproveType.Accepted
+                                                                    && !c.IsArchieved)
                                                     .ToListAsync();
             var publishedCheckers = checkers.ConvertAll(c =>
             {
@@ -63,7 +64,7 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> GetPublishedChecker(long id)
         {
-            var checker = await _dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == id);
+            var checker = await _dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == id && !ch.IsArchieved);
             if (checker == null)
             {
                 return Json(new
@@ -81,7 +82,7 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
         public async Task<IActionResult> GetConstructedChecker(long id)
         {
-            var checker = await _dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == id);
+            var checker = await _dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == id && !ch.IsArchieved);
             if (checker == null)
             {
                 return Json(new
@@ -108,7 +109,8 @@ namespace ContestSystem.Controllers
                     Code = checkerForm.Code,
                     Name = checkerForm.Name,
                     Description = checkerForm.Description,
-                    IsPublic = checkerForm.IsPublic
+                    IsPublic = checkerForm.IsPublic,
+                    IsArchieved = false
                 };
                 if (currentUser.Id != checkerForm.AuthorId)
                 {
@@ -218,7 +220,7 @@ namespace ContestSystem.Controllers
         [HttpDelete("delete-checker/{id}")]
         public async Task<IActionResult> DeleteChecker(long id)
         {
-            Checker loadedChecker = await _dbContext.Checkers.FindAsync(id);
+            Checker loadedChecker = await _dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == id && !ch.IsArchieved);
             var currentUser = await HttpContext.GetCurrentUser();
             if (loadedChecker == null)
             {
@@ -239,10 +241,37 @@ namespace ContestSystem.Controllers
                     errors = new List<string> {"Попытка удалить не свой чекер или без модераторских прав"}
                 });
             }
-
-            _dbContext.Checkers.Remove(loadedChecker);
-            await _dbContext.SaveChangesAsync();
-            _logger.LogDeletingSuccessful("Checker", id, currentUser.Id);
+            if (await _dbContext.Problems.AnyAsync(p => p.CheckerId == id))
+            {
+                loadedChecker.IsArchieved = true;
+                _dbContext.Checkers.Update(loadedChecker);
+                bool saved = false;
+                while (!saved)
+                {
+                    try
+                    {
+                        await _dbContext.SaveChangesAsync();
+                        saved = true;
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        loadedChecker = await _dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == id && !ch.IsArchieved);
+                        if (loadedChecker == null)
+                        {
+                            break;
+                        }
+                        loadedChecker.IsArchieved = true;
+                        _dbContext.Checkers.Update(loadedChecker);
+                    }
+                    _logger.LogDeletingByArchieving("Checker", id, currentUser.Id);
+                }
+            }
+            else
+            {
+                _dbContext.Checkers.Remove(loadedChecker);
+                await _dbContext.SaveChangesAsync();
+                _logger.LogDeletingSuccessful("Checker", id, currentUser.Id);
+            }
             return Json(new
             {
                 status = true,
@@ -255,7 +284,7 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetCheckersRequests()
         {
-            var checkers = await _dbContext.Checkers.Where(p => p.ApprovalStatus == ApproveType.NotModeratedYet).ToListAsync();
+            var checkers = await _dbContext.Checkers.Where(c => c.ApprovalStatus == ApproveType.NotModeratedYet && !c.IsArchieved).ToListAsync();
             var requests = checkers.ConvertAll(c =>
             {
                 ConstructedChecker cr = ConstructedChecker.GetFromModel(c);
@@ -268,7 +297,7 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetApprovedCheckers()
         {
-            var checkers = await _dbContext.Checkers.Where(p => p.ApprovalStatus == ApproveType.Accepted).ToListAsync();
+            var checkers = await _dbContext.Checkers.Where(c => c.ApprovalStatus == ApproveType.Accepted && !c.IsArchieved).ToListAsync();
             var requests = checkers.ConvertAll(c =>
             {
                 ConstructedChecker cr = ConstructedChecker.GetFromModel(c);
@@ -281,7 +310,7 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetRejectedCheckers()
         {
-            var checkers = await _dbContext.Checkers.Where(p => p.ApprovalStatus == ApproveType.Rejected).ToListAsync();
+            var checkers = await _dbContext.Checkers.Where(c => c.ApprovalStatus == ApproveType.Rejected && !c.IsArchieved).ToListAsync();
             var requests = checkers.ConvertAll(c =>
             {
                 ConstructedChecker cr = ConstructedChecker.GetFromModel(c);
@@ -307,7 +336,7 @@ namespace ContestSystem.Controllers
 
             if (ModelState.IsValid)
             {
-                var checker = await _dbContext.Checkers.FirstOrDefaultAsync(c => c.Id == id);
+                var checker = await _dbContext.Checkers.FirstOrDefaultAsync(c => c.Id == id && !c.IsArchieved);
                 if (checker == null)
                 {
                     _logger.LogModeratingOfNonExistentEntity("Checker", id, currentUser.Id);
