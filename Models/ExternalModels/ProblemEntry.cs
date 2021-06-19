@@ -1,6 +1,4 @@
-﻿using ContestSystemDbStructure.Models.common;
-
-namespace ContestSystem.Models.ExternalModels
+﻿namespace ContestSystem.Models.ExternalModels
 {
     public class ProblemEntry
     {

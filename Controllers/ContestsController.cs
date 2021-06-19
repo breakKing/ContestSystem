@@ -647,11 +647,25 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> GetUserSolutions(long contestId, long userId)
         {
-            return Json((await _dbContext.Solutions
-                    .Where(s => s.ContestId == contestId)
-                    .Where(s => s.ParticipantId == userId)
-                    .ToListAsync()).ConvertAll(s => s.ResponseStructure)
-            );
+            var currentUser = await HttpContext.GetCurrentUser();
+            var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == contestId);
+            if (contest == null)
+            {
+                _logger.LogWarning($"Попытка от пользователя с идентификатором {currentUser.Id} получить отправки пользователя с идентификатором {userId} в рамках несуществующего соревнования с идентификатором {contestId}");
+                return BadRequest("Такого соревнования не существует");
+            }
+            if (currentUser.Id != userId || !await _dbContext.ContestsLocalModerators.AnyAsync(clm => clm.ContestId == contestId && clm.LocalModeratorId == currentUser.Id))
+            {
+                _logger.LogWarning($"Попытка от пользователя с идентификатором {currentUser.Id} получить отправки пользователя с идентификатором {userId} в рамках соревнования с идентификатором {contestId} при отсутствии прав на их получение");
+                return BadRequest("Данный пользователь не имеет доступа к этим данным");
+            }
+            if (!await _dbContext.ContestsParticipants.AnyAsync(cp => cp.ContestId == contestId && cp.ParticipantId == userId))
+            {
+                _logger.LogWarning($"Попытка от пользователя с идентификатором {currentUser.Id} получить отправки пользователя с идентификатором {userId} в рамках соревнования с идентификатором {contestId}, когда среди участников такого пользователя нет");
+                return NotFound("Такого участника в соревновании нет");
+            }
+            var solutions = await _dbContext.Solutions.Where(s => s.ContestId == contestId && s.ParticipantId == userId).ToListAsync();
+            return Json(solutions);
         }
 
         [HttpGet("get-requests")]

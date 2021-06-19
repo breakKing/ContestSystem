@@ -46,7 +46,7 @@ namespace ContestSystem.Controllers
 
             var problemsInContest = await _dbContext.ContestsProblems.Where(cp => cp.ContestId == solution.ContestId)
                 .ToListAsync();
-            var constructedSolution = SolutionExternalModel.GetFromModel(solution, problemsInContest);
+            var constructedSolution = ConstructedSolution.GetFromModel(solution, problemsInContest);
             return Json(constructedSolution);
         }
 
