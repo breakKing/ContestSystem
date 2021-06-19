@@ -35,11 +35,33 @@ namespace ContestSystem.Models.DbContexts
             },
             new UserModelForInitialization()
             {
-                UserName = "manager",
-                Email = "manager@manager.ru",
-                Password = "manager",
+                UserName = "moderator",
+                Email = "moderator@moderator.ru",
+                Password = "moderator",
                 Role = RolesContainer.Moderator,
             },
+            new UserModelForInitialization()
+            {
+                UserName = "gooduser",
+                Email = "gooduser@gooduser.ru",
+                Password = "gooduser",
+                Role = RolesContainer.User,
+                IsLimitedInContests = false,
+                IsLimitedInCourses = false,
+                IsLimitedInPosts = false,
+                IsLimitedInProblems = false
+            },
+            new UserModelForInitialization()
+            {
+                UserName = "baduser",
+                Email = "baduser@baduser.ru",
+                Password = "baduser",
+                Role = RolesContainer.User,
+                IsLimitedInContests = true,
+                IsLimitedInCourses = true,
+                IsLimitedInPosts = true,
+                IsLimitedInProblems = true
+            }
         };
 
         public static async Task InitializeAsync(UserManager<User> userManager, RoleManager<Role> roleManager)
@@ -68,6 +90,10 @@ namespace ContestSystem.Models.DbContexts
                     Surname = userModel.UserName,
                     FirstName = userModel.UserName,
                     DateOfBirth = DateTime.Now,
+                    IsLimitedInContests = userModel.IsLimitedInContests,
+                    IsLimitedInCourses = userModel.IsLimitedInCourses,
+                    IsLimitedInPosts = userModel.IsLimitedInPosts,
+                    IsLimitedInProblems = userModel.IsLimitedInProblems
                 };
                 var result = await userManager.CreateAsync(user, userModel.Password);
                 if (result.Succeeded)
