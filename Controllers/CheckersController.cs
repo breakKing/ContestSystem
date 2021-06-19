@@ -133,7 +133,7 @@ namespace ContestSystem.Controllers
             });
         }
 
-        [HttpPost("edit-checker/{id}")]
+        [HttpPut("edit-checker/{id}")]
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> EditChecker([FromBody] CheckerForm checkerForm, long id)
         {
