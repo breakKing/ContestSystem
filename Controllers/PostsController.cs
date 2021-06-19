@@ -244,8 +244,14 @@ namespace ContestSystem.Controllers
                     {
                         post.PublicationDateTimeUTC = DateTime.UtcNow;
                     }
-
                     _dbContext.Posts.Update(post);
+
+                    var localizers = await _dbContext.PostsLocalizers.Where(l => l.PostId == id).ToListAsync();
+                    var localizersExamined = new Dictionary<long, bool>();
+                    foreach (var l in localizers)
+                    {
+                        localizersExamined.Add(l.Id, false);
+                    }
                     for (int i = 0; i < postForm.Localizers.Count; i++)
                     {
                         var localizer = new PostLocalizer
@@ -256,19 +262,26 @@ namespace ContestSystem.Controllers
                             HtmlText = postForm.Localizers[i].HtmlText,
                             PostId = post.Id
                         };
-                        var loadedLocalizer =
-                            await _dbContext.PostsLocalizers.FirstOrDefaultAsync(pl =>
-                                pl.Culture == localizer.Culture && pl.PostId == id);
+                        var loadedLocalizer = localizers.FirstOrDefault(pl => pl.Culture == localizer.Culture);
                         if (loadedLocalizer == null)
                         {
                             await _dbContext.PostsLocalizers.AddAsync(localizer);
                         }
                         else
                         {
+                            localizersExamined[loadedLocalizer.Id] = true;
                             loadedLocalizer.PreviewText = localizer.PreviewText;
                             loadedLocalizer.Name = localizer.Name;
                             loadedLocalizer.HtmlText = localizer.HtmlText;
                             _dbContext.PostsLocalizers.Update(loadedLocalizer);
+                        }
+                    }
+                    foreach (var item in localizersExamined)
+                    {
+                        if (!item.Value)
+                        {
+                            var loadedLocalizer = localizers.FirstOrDefault(l => l.Id == item.Key);
+                            _dbContext.PostsLocalizers.Remove(loadedLocalizer);
                         }
                     }
 
