@@ -93,7 +93,8 @@ namespace ContestSystem.Models.DbContexts
                     IsLimitedInContests = userModel.IsLimitedInContests,
                     IsLimitedInCourses = userModel.IsLimitedInCourses,
                     IsLimitedInPosts = userModel.IsLimitedInPosts,
-                    IsLimitedInProblems = userModel.IsLimitedInProblems
+                    IsLimitedInProblems = userModel.IsLimitedInProblems,
+                    Culture = "ru"
                 };
                 var result = await userManager.CreateAsync(user, userModel.Password);
                 if (result.Succeeded)
