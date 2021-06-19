@@ -27,7 +27,7 @@
         <div>
             <v-field v-model="penaltyForCompilationError" 
                      type="checkbox" class="custom-checkbox"
-                     value="1" id="penaltyForCompilationError"
+                     id="penaltyForCompilationError"
                      name="penaltyForCompilationError" />
             <label class="fs-4" for="penaltyForCompilationError">Наказывать за ошибку компиляции</label>
 
@@ -46,7 +46,7 @@
           <error-message name="penaltyForOneMinute"></error-message>
         </div>
         <div>
-            <v-field v-model="pointsForBestSolution" id="pointsForBestSolution" class="custom-checkbox" type="checkbox" value="1"
+            <v-field v-model="pointsForBestSolution" id="pointsForBestSolution" class="custom-checkbox" type="checkbox"
                      name="pointsForBestSolution" />
             <label class="fs-4" for="pointsForBestSolution">Прибавка к очкам за лучшее решение</label>
             <error-message name="pointsForBestSolution"></error-message>
@@ -59,7 +59,7 @@
         </div>
         <div>
 
-            <v-field v-model="publicMonitor" id="publicMonitor" class="custom-checkbox" type="checkbox" value="1"
+            <v-field v-model="publicMonitor" id="publicMonitor" class="custom-checkbox" type="checkbox"
                      name="publicMonitor" />
             <label class="fs-4" for="publicMonitor">Сделать монитор публичным</label>
             <error-message name="publicMonitor"></error-message>
@@ -71,13 +71,13 @@
           <error-message name="monitorFreezeTimeBeforeFinishInMinutes"></error-message>
         </div>
         <div>
-            <v-field v-model="showFullTestsResults" id="showFullTestsResults" class="custom-checkbox" type="checkbox" value="1"
+            <v-field v-model="showFullTestsResults" id="showFullTestsResults" class="custom-checkbox" type="checkbox"
                      name="showFullTestsResults" />
             <label class="fs-4" for="showFullTestsResults">Показывать полный отчёт о попытке</label>
             <error-message name="showFullTestsResults"></error-message>
         </div>
         <div>
-            <v-field v-model="isPublic" id="isPublic" class="custom-checkbox" type="checkbox" value="1"
+            <v-field v-model="isPublic" id="isPublic" class="custom-checkbox" type="checkbox"
                      name="isPublic" />
             <label class="fs-4" for="isPublic">Сделать набор правил публичным</label>
             <error-message name="isPublic"></error-message>
