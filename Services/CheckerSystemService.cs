@@ -79,9 +79,9 @@ namespace ContestSystem.Services
         public async Task<Checker> SendCheckerForCompilationAsync(Checker checker)
         {
             bool firstCompilationDone = false;
-            Checker resultedChecker = checker;
             HttpContent content;
             HttpResponseMessage response;
+            Checker resultedChecker;
             for (int i = 0; i < _checkerServers.Count; i++)
             {
                 string server = _checkerServers[i];
@@ -98,7 +98,8 @@ namespace ContestSystem.Services
             }
 
             content = JsonContent.Create(checker);
-            await _httpClient.PostAsync($"http://localhost:{_localPort}/api/checker", content);
+            response = await _httpClient.PostAsync($"http://localhost:{_localPort}/api/checker", content);
+            resultedChecker = await response.Content.ReadFromJsonAsync<Checker>();
             return resultedChecker;
         }
 
