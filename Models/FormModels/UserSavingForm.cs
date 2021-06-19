@@ -17,5 +17,6 @@ namespace ContestSystem.Models.FormModels
         public bool IsLimitedInPosts { get; set; }
         public bool IsLimitedInCourses { get; set; }
         public bool IsLimitedInProblems { get; set; }
+        public string Culture { get; set; }
     }
 }

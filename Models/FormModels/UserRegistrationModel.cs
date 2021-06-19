@@ -13,6 +13,6 @@ namespace ContestSystem.Models.FormModels
         public string Surname { get; set; }
         public string Patronymic { get; set; }
         [Required] public DateTime DateOfBirth { get; set; }
-
+        public string Culture { get; set; }
     }
 }

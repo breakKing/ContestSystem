@@ -69,6 +69,7 @@ namespace ContestSystem.Controllers
                     user.IsLimitedInPosts = userFromBody.IsLimitedInPosts;
                     user.IsLimitedInCourses = userFromBody.IsLimitedInCourses;
                     user.IsLimitedInProblems = userFromBody.IsLimitedInProblems;
+                    user.Culture = string.IsNullOrWhiteSpace(userFromBody.Culture) ? "ru" : userFromBody.Culture;
                     var rolesToAssign = userFromBody.Roles
                         .Select(roleName => _dbContext.Roles.FirstOrDefault(r => r.Name == roleName))
                         .Where(r => r != null)

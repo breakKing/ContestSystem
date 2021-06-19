@@ -78,6 +78,11 @@ namespace ContestSystem.Controllers
                     Patronymic = userModel.Patronymic,
                     PhoneNumber = userModel.Phone,
                     DateOfBirth = userModel.DateOfBirth,
+                    IsLimitedInContests = true,
+                    IsLimitedInCourses = true,
+                    IsLimitedInPosts = true,
+                    IsLimitedInProblems = true,
+                    Culture = string.IsNullOrWhiteSpace(userModel.Culture) ? "ru" : userModel.Culture
                 };
                 var result = await _userManager.CreateAsync(user, userModel.Password);
 
