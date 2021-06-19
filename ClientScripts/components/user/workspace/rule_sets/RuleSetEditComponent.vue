@@ -25,10 +25,13 @@
           <error-message name="countMode"></error-message>
         </div>
         <div>
-          <label class="fs-4">Наказывать за ошибку компиляции</label>
-          <v-field v-model="penaltyForCompilationError" type="checkbox" value="1"
-                   name="penaltyForCompilationError"/>
-          <error-message name="penaltyForCompilationError"></error-message>
+            <v-field v-model="penaltyForCompilationError" 
+                     type="checkbox" class="custom-checkbox"
+                     value="1" id="penaltyForCompilationError"
+                     name="penaltyForCompilationError" />
+            <label class="fs-4" for="penaltyForCompilationError">Наказывать за ошибку компиляции</label>
+
+            <error-message name="penaltyForCompilationError"></error-message>
         </div>
         <div>
           <label class="fs-4">Размер наказания за одну попытку</label>
@@ -43,10 +46,10 @@
           <error-message name="penaltyForOneMinute"></error-message>
         </div>
         <div>
-          <label class="fs-4">Прибавка к очкам за лучшее решение</label>
-          <v-field v-model="pointsForBestSolution" class="custom-checkbox" type="checkbox" value="1"
-                   name="pointsForBestSolution"/>
-          <error-message name="pointsForBestSolution"></error-message>
+            <v-field v-model="pointsForBestSolution" id="pointsForBestSolution" class="custom-checkbox" type="checkbox" value="1"
+                     name="pointsForBestSolution" />
+            <label class="fs-4" for="pointsForBestSolution">Прибавка к очкам за лучшее решение</label>
+            <error-message name="pointsForBestSolution"></error-message>
         </div>
         <div>
           <label class="fs-4">Максимальное количество попыток на задачу</label>
@@ -56,9 +59,9 @@
         </div>
         <div>
 
-            <v-field v-model="publicMonitor" class="custom-checkbox" type="checkbox" value="1"
+            <v-field v-model="publicMonitor" id="publicMonitor" class="custom-checkbox" type="checkbox" value="1"
                      name="publicMonitor" />
-            <label class="fs-4">Сделать монитор публичным</label>
+            <label class="fs-4" for="publicMonitor">Сделать монитор публичным</label>
             <error-message name="publicMonitor"></error-message>
         </div>
         <div>
@@ -68,15 +71,15 @@
           <error-message name="monitorFreezeTimeBeforeFinishInMinutes"></error-message>
         </div>
         <div>
-            <v-field v-model="showFullTestsResults" class="custom-checkbox" type="checkbox" value="1"
+            <v-field v-model="showFullTestsResults" id="showFullTestsResults" class="custom-checkbox" type="checkbox" value="1"
                      name="showFullTestsResults" />
+            <label class="fs-4" for="showFullTestsResults">Показывать полный отчёт о попытке</label>
             <error-message name="showFullTestsResults"></error-message>
-            <label class="fs-4">Показывать полный отчёт о попытке</label>
         </div>
         <div>
-            <v-field v-model="isPublic" class="custom-checkbox" type="checkbox" value="1"
+            <v-field v-model="isPublic" id="isPublic" class="custom-checkbox" type="checkbox" value="1"
                      name="isPublic" />
-            <label class="fs-4">Сделать набор правил публичным</label>
+            <label class="fs-4" for="isPublic">Сделать набор правил публичным</label>
             <error-message name="isPublic"></error-message>
         </div>
         <button type="submit" class="btn btn-primary">Сохранить</button>
@@ -195,102 +198,102 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-    div * {
-        margin: 5px;
-        color: #04295E;
-    }
+div * {
+    margin: 5px;
+    color: #04295E;
+}
 
-    span[role=alert] {
-        color: red;
-    }
+span[role=alert] {
+    color: red;
+}
 
-    form {
-        padding: 10px;
-    }
-    .custom-checkbox {
-        position: absolute;
-        z-index: -1;
-        opacity: 0;
-    }
-    .custom-checkbox + label {
-        display: inline-flex;
-        align-items: center;
-        user-select: none;
-    }
+form {
+    padding: 10px;
+}
+.custom-checkbox {
+    position: absolute;
+    z-index: -1;
+    opacity: 0;
+}
+.custom-checkbox + label {
+    display: inline-flex;
+    align-items: center;
+    user-select: none;
+}
 
-    .custom-checkbox + label::before {
-        content: '';
-        display: inline-block;
-        width: 1em;
-        height: 1em;
-        flex-shrink: 0;
-        flex-grow: 0;
-        border: 1px solid #adb5bd;
-        border-radius: 0.25em;
-        margin-right: 0.5em;
-        background-repeat: no-repeat;
-        background-position: center center;
-        background-size: 50% 50%;
-    }
+.custom-checkbox + label::before {
+    content: '';
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    flex-shrink: 0;
+    flex-grow: 0;
+    border: 1px solid #adb5bd;
+    border-radius: 0.25em;
+    margin-right: 0.5em;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 50% 50%;
+}
 
-    .custom-checkbox:checked + label::before {
+.custom-checkbox:checked + label::before {
+    background-color: #0b76ef;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23fff' d='M6.564.75l-3.59 3.612-1.538-1.55L0 4.26 2.974 7.25 8 2.193z'/%3e%3c/svg%3e");
+}
+
+.form-control {
+    border-radius: 16px;
+}
+
+button {
+    padding: 5px 10px;
+    background-color: #fff;
+    border-radius: 16px;
+    border: 1px solid blue;
+
+    &:hover {
         background-color: #0b76ef;
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23fff' d='M6.564.75l-3.59 3.612-1.538-1.55L0 4.26 2.974 7.25 8 2.193z'/%3e%3c/svg%3e");
+        color: white;
     }
+}
 
-    .form-control {
-        border-radius: 16px;
-    }
+.form-control::-webkit-input-placeholder {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
 
-    button {
-        padding: 5px 10px;
-        background-color: #fff;
-        border-radius: 16px;
-        border: 1px solid blue;
+.form-control::-moz-placeholder {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
 
-        &:hover {
-            background-color: #0b76ef;
-            color: white;
-        }
-    }
+.form-control:-moz-placeholder {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
 
-    .form-control::-webkit-input-placeholder {
-        opacity: 1;
-        transition: opacity 0.3s ease;
-    }
+.form-control:-ms-input-placeholder {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
 
-    .form-control::-moz-placeholder {
-        opacity: 1;
-        transition: opacity 0.3s ease;
-    }
+.form-control:focus::-webkit-input-placeholder {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
 
-    .form-control:-moz-placeholder {
-        opacity: 1;
-        transition: opacity 0.3s ease;
-    }
+.form-control:focus::-moz-placeholder {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
 
-    .form-control:-ms-input-placeholder {
-        opacity: 1;
-        transition: opacity 0.3s ease;
-    }
+.form-control:focus:-moz-placeholder {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
 
-    .form-control:focus::-webkit-input-placeholder {
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
-
-    .form-control:focus::-moz-placeholder {
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
-
-    .form-control:focus:-moz-placeholder {
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
-
-    .form-control:focus:-ms-input-placeholder {
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
+.form-control:focus:-ms-input-placeholder {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
 </style>
