@@ -25,7 +25,7 @@
     </div>
     <div>
       <label>Разрешены виртуальные соревнования</label>
-      <v-field v-model="areVirtualContestsAvailable" type="checkbox" value="1" name="areVirtualContestsAvailable"/>
+      <v-field v-model="areVirtualContestsAvailable" type="checkbox" :value="true" :uncheckedValue="false" name="areVirtualContestsAvailable"/>
       <error-message name="areVirtualContestsAvailable"></error-message>
     </div>
     <div>
@@ -94,16 +94,16 @@ export default {
     ...mapActions(['getContestById', 'fetchAvailableRuleSets', 'fetchRunningContests', 'fetchAvailableContests', 'fetchParticipatingContests', 'fetchCurrentUserContestsList', 'fetchAvailableTasks']),
     async updateFields() {
       await this.fetchAvailableRuleSets();
-      let post = await this.getContestById(this.contest_id)
-      this.name = (post?.localizers || [])[0]?.name || null
-      this.description = (post?.localizers || [])[0]?.description || null
-      this.startDateTimeUTC = post?.startDateTimeUTC || null
-      this.durationInMinutes = post?.durationInMinutes || null
-      this.areVirtualContestsAvailable = post?.areVirtualContestsAvailable
-      this.isPublic = +post?.isPublic === 1
-      this.rulesSetId = post?.rulesSetId || null
-      this.image = post?.image || null
-      this.tasks = post?.problems || []
+      let contest = await this.getContestById(this.contest_id)
+      this.name = (contest?.localizers || [])[0]?.name || null
+      this.description = (contest?.localizers || [])[0]?.description || null
+      this.startDateTimeUTC = contest?.startDateTimeUTC || null
+      this.durationInMinutes = contest?.durationInMinutes || null
+      this.areVirtualContestsAvailable = contest?.areVirtualContestsAvailable
+      this.isPublic = contest?.isPublic
+      this.rulesSetId = contest?.rulesSetId || null
+      this.image = contest?.image || null
+      this.tasks = contest?.problems || []
     },
     updateEvent(data) {
       if (data.type === 'add') {
