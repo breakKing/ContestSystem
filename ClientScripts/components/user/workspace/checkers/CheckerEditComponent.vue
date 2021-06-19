@@ -89,6 +89,7 @@ export default {
           let {data} = await axios.put(`/api/checkers/edit-checker/${this.id}`, request)
           result = data
         } else {
+          request.id = null
           let {data} = await axios.post(`/api/checkers/add-checker`, request)
           result = data
         }
