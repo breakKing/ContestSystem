@@ -100,7 +100,7 @@ export default {
       this.startDateTimeUTC = contest?.startDateTimeUTC || null
       this.durationInMinutes = contest?.durationInMinutes || null
       this.areVirtualContestsAvailable = contest?.areVirtualContestsAvailable
-      this.isPublic = contest?.isPublic
+      this.isPublic = contest?.isPublic || null
       this.rulesSetId = contest?.rulesSetId || null
       this.image = contest?.image || null
       this.tasks = contest?.problems || []
@@ -134,14 +134,18 @@ export default {
       let tmp_form = $('<form enctype="multipart/form-data"></form>');
       tmp_form.append($('<input type="hidden"/>').attr('name', 'id').val(this.contest_id))
       tmp_form.append($('<input type="hidden"/>').attr('name', 'creatorUserId').val(this.currentUser.id))
-      tmp_form.append($('<input type="hidden"/>').attr('name', 'isPublic').val(this.isPublic))
+      //tmp_form.append($('<input type="hidden"/>').attr('name', 'isPublic').val(this.isPublic)) TODO: реализовать приватность контестов
+      tmp_form.append($('<input type="hidden"/>').attr('name', 'isPublic').val(true))
       tmp_form.append($('<input type="hidden"/>').attr('name', 'startDateTimeUTC').val(this.startDateTimeUTC))
       tmp_form.append($('<input type="hidden"/>').attr('name', 'durationInMinutes').val(this.durationInMinutes))
-      tmp_form.append($('<input type="hidden"/>').attr('name', 'areVirtualContestsAvailable').val(+this.areVirtualContestsAvailable === 1))
+      tmp_form.append($('<input type="hidden"/>').attr('name', 'areVirtualContestsAvailable').val(this.areVirtualContestsAvailable))
       tmp_form.append($('<input type="hidden"/>').attr('name', 'rulesSetId').val(this.rulesSetId))
       tmp_form.append($('<input type="hidden"/>').attr('name', 'localizers[0][culture]').val('ru'))
       tmp_form.append($('<input type="hidden"/>').attr('name', 'localizers[0][description]').val(this.description))
       tmp_form.append($('<input type="hidden"/>').attr('name', 'localizers[0][name]').val(this.name))
+      if (!this.sortedTasks || this.sortedTasks.length <= 0) {
+        tmp_form.append($('<input type="hidden"/>').attr('name', 'problems').val(null))
+      }
       _.each(this.sortedTasks, (problem, idx) => {
         tmp_form.append($('<input type="hidden"/>').attr('name', `problems[${idx}][problemId]`).val(problem.problemId))
         tmp_form.append($('<input type="hidden"/>').attr('name', `problems[${idx}][letter]`).val(problem.letter))

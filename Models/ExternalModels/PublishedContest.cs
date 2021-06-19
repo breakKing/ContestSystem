@@ -21,6 +21,7 @@ namespace ContestSystem.Models.ExternalModels
         public ApproveType ApprovalStatus { get; set; }
         public ConstructedRulesSet Rules { get; set; }
         public List<ProblemEntry> Problems { get; set; }
+        public bool AreVirtualContestsAvailable { get; set; }
 
         public static PublishedContest GetFromModel(Contest contest, ContestLocalizer localizer, int participantsCount)
         {
@@ -36,6 +37,9 @@ namespace ContestSystem.Models.ExternalModels
                 ParticipantsCount = participantsCount,
                 ApprovalStatus = contest.ApprovalStatus,
                 Rules = ConstructedRulesSet.GetFromModel(contest.RulesSet),
+                AreVirtualContestsAvailable = contest.AreVirtualContestsAvailable,
+                ModerationMessage = contest.ModerationMessage,
+                DurationInMinutes = contest.DurationInMinutes,
                 Problems = contest.ContestProblems.ConvertAll(cp =>
                 {
                     return new ProblemEntry
