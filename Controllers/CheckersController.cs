@@ -347,12 +347,14 @@ namespace ContestSystem.Controllers
                     if (checker.ApprovalStatus == ApproveType.Accepted)
                     {
                         _logger.LogInformation($"Отправлена на компиляцию сущность \"Checker\" с идентификатором {id} модератором с идентификатором {currentUser.Id}");
-                        checker = await _checkerSystemService.SendCheckerForCompilationAsync(checker);
-                        if (checker.CompilationVerdict != VerdictType.CompilationSucceed)
+                        var newChecker = await _checkerSystemService.SendCheckerForCompilationAsync(checker);
+                        checker.CompilationVerdict = newChecker.CompilationVerdict;
+                        checker.Errors = newChecker.Errors;
+                        if (newChecker.CompilationVerdict != VerdictType.CompilationSucceed)
                         {
                             _logger.LogInformation($"В результате компиляции \"Checker\" с идентификатором {id} возникли ошибки");
                             checker.ApprovalStatus = ApproveType.Rejected;
-                            checker.ModerationMessage = "Compilation errors:\n" + checker.Errors;
+                            checker.ModerationMessage = "Compilation errors:\n" + newChecker.Errors;
                         }
                     }
                     _dbContext.Checkers.Update(checker);

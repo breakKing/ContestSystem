@@ -69,8 +69,8 @@ export default {
       let {status, errors} = await this.moderateChecker({
         checker_id: this.checker_id,
         request_body: {
-          checkerId: this.checker_id,
-          approvalStatus: this.current_status,
+          checkerId: +this.checker_id,
+          approvalStatus: +this.current_status,
           approvingModeratorId: this.currentUser.id,
           moderationMessage: this.message,
         }
