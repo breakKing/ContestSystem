@@ -358,7 +358,7 @@ namespace ContestSystem.Controllers
                             OutputText = problemForm.Examples[i].OutputText,
                             ProblemId = problem.Id
                         };
-                        var loadedExample = await _dbContext.Examples.FirstOrDefaultAsync(e => e.Number == example.Number && e.ProblemId == id);
+                        var loadedExample = examples.FirstOrDefault(e => e.Number == example.Number);
                         if (loadedExample == null)
                         {
                             await _dbContext.Examples.AddAsync(example);
