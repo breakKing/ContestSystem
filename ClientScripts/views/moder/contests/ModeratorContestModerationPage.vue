@@ -121,8 +121,8 @@ export default {
       let {status, errors} = await this.moderateContest({
         contest_id: this.contest_id,
         request_body: {
-          contestId: this.contest_id,
-          approvalStatus: this.current_status,
+          contestId: +this.contest_id,
+          approvalStatus: +this.current_status,
           approvingModeratorId: this.currentUser.id,
           moderationMessage: this.message,
         }
