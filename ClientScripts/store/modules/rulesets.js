@@ -60,7 +60,7 @@ export default {
         },
         async deleteRuleSet({getters, dispatch}, ruleset_id) {
             try {
-                let {data} = await axios.get(`/api/rules/delete-rules/${ruleset_id}`)
+                let {data} = await axios.delete(`/api/rules/delete-rules/${ruleset_id}`)
                 return data
             } catch (e) {
                 console.error(e)

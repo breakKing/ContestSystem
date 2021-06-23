@@ -101,7 +101,7 @@ export default {
         },
         async deletePost({commit, state, dispatch, getters}, post_id) {
             try {
-                let {data} = await axios.get(`/api/posts/delete-post/${post_id}`)
+                let {data} = await axios.delete(`/api/posts/delete-post/${post_id}`)
                 return data
             } catch (e) {
                 console.error(e)
