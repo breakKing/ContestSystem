@@ -145,7 +145,6 @@ namespace ContestSystem.Controllers
                 {
                     problem.ApprovalStatus = ApproveType.Accepted;
                 }
-                problem.ApprovalStatus = ApproveType.Accepted;
                 await _dbContext.Problems.AddAsync(problem);
                 await _dbContext.SaveChangesAsync();
                 foreach (var localizer in problemForm.Localizers)
