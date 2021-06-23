@@ -99,8 +99,8 @@ export default {
       this.description = (contest?.localizers || [])[0]?.description || null
       this.startDateTimeUTC = contest?.startDateTimeUTC || null
       this.durationInMinutes = contest?.durationInMinutes || null
-      this.areVirtualContestsAvailable = contest?.areVirtualContestsAvailable
-      this.isPublic = contest?.isPublic || null
+      this.areVirtualContestsAvailable = contest?.areVirtualContestsAvailable || false
+      this.isPublic = contest?.isPublic || false
       this.rulesSetId = contest?.rulesSetId || null
       this.image = contest?.image || null
       this.tasks = contest?.problems || []

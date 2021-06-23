@@ -68,7 +68,7 @@ export default {
       this.name = checker?.name || null
       this.description = checker?.description || null
       this.code = checker?.code || null
-      this.isPublic = checker?.isPublic || null
+      this.isPublic = checker?.isPublic || false
     },
     async onSubmit() {
       if (!this.currentUser) {

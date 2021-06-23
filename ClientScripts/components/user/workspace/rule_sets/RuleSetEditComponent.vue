@@ -143,15 +143,15 @@ export default {
       this.name = this.ruleSet?.name || null
       this.description = this.ruleSet?.description || null
       this.countMode = this.ruleSet?.countMode || null
-      this.penaltyForCompilationError = this.ruleSet?.penaltyForCompilationError || null
+      this.penaltyForCompilationError = this.ruleSet?.penaltyForCompilationError || false
       this.penaltyForOneTry = this.ruleSet?.penaltyForOneTry || null
       this.penaltyForOneMinute = this.ruleSet?.penaltyForOneMinute || null
-      this.pointsForBestSolution = this.ruleSet?.pointsForBestSolution || null
+      this.pointsForBestSolution = this.ruleSet?.pointsForBestSolution || false
       this.maxTriesForOneProblem = this.ruleSet?.maxTriesForOneProblem || null
-      this.publicMonitor = this.ruleSet?.publicMonitor || null
+      this.publicMonitor = this.ruleSet?.publicMonitor || false
       this.monitorFreezeTimeBeforeFinishInMinutes = this.ruleSet?.monitorFreezeTimeBeforeFinishInMinutes || null
-      this.showFullTestsResults = this.ruleSet?.showFullTestsResults || null
-      this.isPublic = this.ruleSet?.isPublic || null
+      this.showFullTestsResults = this.ruleSet?.showFullTestsResults || false
+      this.isPublic = this.ruleSet?.isPublic || false
     },
     async saveRule() {
       let url;
