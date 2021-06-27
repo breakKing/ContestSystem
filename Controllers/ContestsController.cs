@@ -305,12 +305,20 @@ namespace ContestSystem.Controllers
                     }
 
                     byte[] imageData = null;
-                    using (var binaryReader = new BinaryReader(contestForm.Image.OpenReadStream()))
+                    if (contestForm.Image != null)
                     {
-                        imageData = binaryReader.ReadBytes((int) contestForm.Image.Length);
+                        await using (var ms = new MemoryStream())
+                        {
+                            await contestForm.Image.CopyToAsync(ms);
+                            imageData = ms.ToArray();
+                        }
                     }
 
-                    contest.Image = Convert.ToBase64String(imageData);
+                    if (imageData != null)
+                    {
+                        contest.Image = Convert.ToBase64String(imageData);
+                    }
+
                     contest.StartDateTimeUTC = contestForm.StartDateTimeUTC;
                     contest.DurationInMinutes = contestForm.DurationInMinutes;
                     contest.AreVirtualContestsAvailable = contestForm.AreVirtualContestsAvailable;
@@ -322,6 +330,13 @@ namespace ContestSystem.Controllers
                         contest.ApprovingModeratorId = null;
                     }
                     _dbContext.Contests.Update(contest);
+
+                    var localizers = await _dbContext.ContestsLocalizers.Where(l => l.ContestId == id).ToListAsync();
+                    var localizersExamined = new Dictionary<long, bool>();
+                    foreach (var l in localizers)
+                    {
+                        localizersExamined.Add(l.Id, false);
+                    }
                     for (int i = 0; i < contestForm.Localizers.Count; i++)
                     {
                         var localizer = new ContestLocalizer
@@ -331,21 +346,34 @@ namespace ContestSystem.Controllers
                             Name = contestForm.Localizers[i].Name,
                             ContestId = contest.Id
                         };
-                        var loadedLocalizer =
-                            await _dbContext.ContestsLocalizers.FirstOrDefaultAsync(pl =>
-                                pl.Culture == localizer.Culture && pl.ContestId == id);
+                        var loadedLocalizer = localizers.FirstOrDefault(l => l.Culture == localizer.Culture);
                         if (loadedLocalizer == null)
                         {
                             await _dbContext.ContestsLocalizers.AddAsync(localizer);
                         }
                         else
                         {
+                            localizersExamined[loadedLocalizer.Id] = true;
                             loadedLocalizer.Description = localizer.Description;
                             loadedLocalizer.Name = localizer.Name;
                             _dbContext.ContestsLocalizers.Update(loadedLocalizer);
                         }
                     }
+                    foreach (var item in localizersExamined)
+                    {
+                        if (!item.Value)
+                        {
+                            var loadedLocalizer = localizers.FirstOrDefault(l => l.Id == item.Key);
+                            _dbContext.ContestsLocalizers.Remove(loadedLocalizer);
+                        }
+                    }
 
+                    var problems = await _dbContext.ContestsProblems.Where(cp => cp.ContestId == id).ToListAsync();
+                    var problemsExamined = new Dictionary<long, bool>();
+                    foreach (var p in problems)
+                    {
+                        problemsExamined.Add(p.Id, false);
+                    }
                     for (int i = 0; i < contestForm.Problems.Count; i++)
                     {
                         var contestProblem = new ContestProblem
@@ -354,16 +382,24 @@ namespace ContestSystem.Controllers
                             ProblemId = contestForm.Problems[i].ProblemId,
                             Letter = contestForm.Problems[i].Letter
                         };
-                        var loadedContestProblem = await _dbContext.ContestsProblems.FirstOrDefaultAsync(cp =>
-                            cp.ProblemId == contestProblem.ProblemId && cp.ContestId == contestProblem.ContestId);
+                        var loadedContestProblem = problems.FirstOrDefault(cp => cp.ProblemId == contestProblem.ProblemId);
                         if (loadedContestProblem == null)
                         {
                             await _dbContext.ContestsProblems.AddAsync(contestProblem);
                         }
                         else
                         {
+                            problemsExamined[loadedContestProblem.Id] = true;
                             loadedContestProblem.Letter = contestForm.Problems[i].Letter;
                             _dbContext.ContestsProblems.Update(loadedContestProblem);
+                        }
+                    }
+                    foreach (var item in problemsExamined)
+                    {
+                        if (!item.Value)
+                        {
+                            var loadedProblem = problems.FirstOrDefault(p => p.Id == item.Key);
+                            _dbContext.ContestsProblems.Remove(loadedProblem);
                         }
                     }
 

@@ -44,7 +44,7 @@
           <error-message name="checker"></error-message>
         </div>
         <div>
-          <v-field v-model="isPublic" class="custom-checkbox" id="isPublic" name="isPublic" type="checkbox" value="1"/>
+          <v-field v-model="isPublic" class="custom-checkbox" id="isPublic" name="isPublic" type="checkbox" :value="true" :uncheckedValue="false"/>
           <label class="fs-4" for="isPublic">Виден всем</label>
           <error-message name="isPublic"></error-message>
         </div>
@@ -127,7 +127,7 @@ export default {
       let data = await this.getTask(this.task_id)
       this.memoryLimitInBytes = data?.memoryLimitInBytes || null
       this.timeLimitInMilliseconds = data?.timeLimitInMilliseconds || null
-      this.isPublic = data?.isPublic || null
+      this.isPublic = data?.isPublic || false
       this.checker = data?.checker?.id || null
       this.name = (data?.localizers || [])[0]?.name || null
       this.description = (data?.localizers || [])[0]?.description || null
@@ -166,7 +166,7 @@ export default {
         ],
         memoryLimitInBytes: this.memoryLimitInBytes,
         timeLimitInMilliseconds: this.timeLimitInMilliseconds,
-        isPublic: +this.isPublic === 1,
+        isPublic: this.isPublic,
         checkerId: this.checker,
         tests: this.tests,
         examples: this.examples,

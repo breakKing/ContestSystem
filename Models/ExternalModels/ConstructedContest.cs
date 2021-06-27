@@ -21,6 +21,7 @@ namespace ContestSystem.Models.ExternalModels
         public List<ProblemEntry> Problems { get; set; }
         public ConstructedRulesSet Rules { get; set; }
         public long? RulesSetId { get; set; }
+        public bool AreVirtualContestsAvailable { get; set; }
 
         public static ConstructedContest GetFromModel(Contest contest, List<ContestProblem> problems)
         {
@@ -38,6 +39,7 @@ namespace ContestSystem.Models.ExternalModels
                 Rules = ConstructedRulesSet.GetFromModel(contest.RulesSet),
                 ApprovingModerator = contest.ApprovingModerator?.ResponseStructure,
                 ModerationMessage = contest.ModerationMessage,
+                AreVirtualContestsAvailable = contest.AreVirtualContestsAvailable,
                 Problems = problems.ConvertAll(cp =>
                 {
                     return new ProblemEntry

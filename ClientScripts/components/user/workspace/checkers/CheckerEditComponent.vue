@@ -16,7 +16,7 @@
       <error-message name="description"></error-message>
     </div>
     <div>
-      <v-field v-model="isPublic" class="custom-checkbox" id="isPublic" name="isPublic" type="checkbox" value="1"/>
+      <v-field v-model="isPublic" class="custom-checkbox" id="isPublic" name="isPublic" type="checkbox" :value="true" :uncheckedValue="false"/>
       <label class=" fs-4" for="isPublic">Виден всем</label>
       <error-message name="isPublic"></error-message>
     </div>
@@ -68,7 +68,7 @@ export default {
       this.name = checker?.name || null
       this.description = checker?.description || null
       this.code = checker?.code || null
-      this.isPublic = checker?.isPublic || null
+      this.isPublic = checker?.isPublic || false
     },
     async onSubmit() {
       if (!this.currentUser) {
@@ -81,7 +81,7 @@ export default {
         description: this.description,
         code: this.code,
         authorId: this.currentUser.id,
-        isPublic: +this.isPublic === 1,
+        isPublic: this.isPublic,
       }
       let result = {};
       try {

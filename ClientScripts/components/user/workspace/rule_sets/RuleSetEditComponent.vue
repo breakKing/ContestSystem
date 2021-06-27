@@ -27,6 +27,7 @@
         <div>
             <v-field v-model="penaltyForCompilationError" 
                      type="checkbox" class="custom-checkbox"
+                     :value="true" :uncheckedValue="false"
                      id="penaltyForCompilationError"
                      name="penaltyForCompilationError" />
             <label class="fs-4" for="penaltyForCompilationError">Наказывать за ошибку компиляции</label>
@@ -47,6 +48,7 @@
         </div>
         <div>
             <v-field v-model="pointsForBestSolution" id="pointsForBestSolution" class="custom-checkbox" type="checkbox"
+                     :value="true" :uncheckedValue="false"
                      name="pointsForBestSolution" />
             <label class="fs-4" for="pointsForBestSolution">Прибавка к очкам за лучшее решение</label>
             <error-message name="pointsForBestSolution"></error-message>
@@ -60,6 +62,7 @@
         <div>
 
             <v-field v-model="publicMonitor" id="publicMonitor" class="custom-checkbox" type="checkbox"
+                     :value="true" :uncheckedValue="false"
                      name="publicMonitor" />
             <label class="fs-4" for="publicMonitor">Сделать монитор публичным</label>
             <error-message name="publicMonitor"></error-message>
@@ -72,12 +75,14 @@
         </div>
         <div>
             <v-field v-model="showFullTestsResults" id="showFullTestsResults" class="custom-checkbox" type="checkbox"
+                     :value="true" :uncheckedValue="false"
                      name="showFullTestsResults" />
             <label class="fs-4" for="showFullTestsResults">Показывать полный отчёт о попытке</label>
             <error-message name="showFullTestsResults"></error-message>
         </div>
         <div>
             <v-field v-model="isPublic" id="isPublic" class="custom-checkbox" type="checkbox"
+                     :value="true" :uncheckedValue="false"
                      name="isPublic" />
             <label class="fs-4" for="isPublic">Сделать набор правил публичным</label>
             <error-message name="isPublic"></error-message>
@@ -138,15 +143,15 @@ export default {
       this.name = this.ruleSet?.name || null
       this.description = this.ruleSet?.description || null
       this.countMode = this.ruleSet?.countMode || null
-      this.penaltyForCompilationError = this.ruleSet?.penaltyForCompilationError || null
+      this.penaltyForCompilationError = this.ruleSet?.penaltyForCompilationError || false
       this.penaltyForOneTry = this.ruleSet?.penaltyForOneTry || null
       this.penaltyForOneMinute = this.ruleSet?.penaltyForOneMinute || null
-      this.pointsForBestSolution = this.ruleSet?.pointsForBestSolution || null
+      this.pointsForBestSolution = this.ruleSet?.pointsForBestSolution || false
       this.maxTriesForOneProblem = this.ruleSet?.maxTriesForOneProblem || null
-      this.publicMonitor = this.ruleSet?.publicMonitor || null
+      this.publicMonitor = this.ruleSet?.publicMonitor || false
       this.monitorFreezeTimeBeforeFinishInMinutes = this.ruleSet?.monitorFreezeTimeBeforeFinishInMinutes || null
-      this.showFullTestsResults = this.ruleSet?.showFullTestsResults || null
-      this.isPublic = this.ruleSet?.isPublic || null
+      this.showFullTestsResults = this.ruleSet?.showFullTestsResults || false
+      this.isPublic = this.ruleSet?.isPublic || false
     },
     async saveRule() {
       let url;
@@ -162,17 +167,17 @@ export default {
         id: this.ruleSet?.id,
         name: this.name,
         description: this.description,
-        isPublic: +this.isPublic === 1,
+        isPublic: this.isPublic,
         authorId: this.currentUser.id,
         countMode: +this.countMode,
-        penaltyForCompilationError: +this.penaltyForCompilationError === 1,
+        penaltyForCompilationError: this.penaltyForCompilationError,
         penaltyForOneTry: this.penaltyForOneTry,
         penaltyForOneMinute: this.penaltyForOneMinute,
-        pointsForBestSolution: +this.pointsForBestSolution === 1,
+        pointsForBestSolution: this.pointsForBestSolution,
         maxTriesForOneProblem: this.maxTriesForOneProblem,
-        publicMonitor: +this.publicMonitor === 1,
+        publicMonitor: this.publicMonitor,
         monitorFreezeTimeBeforeFinishInMinutes: this.monitorFreezeTimeBeforeFinishInMinutes,
-        showFullTestsResults: +this.showFullTestsResults === 1,
+        showFullTestsResults: this.showFullTestsResults,
       }
       try {
         let {data} = await axios[method](url, request)

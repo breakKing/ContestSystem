@@ -24,7 +24,7 @@
       <error-message name="durationInMinutes"></error-message>
     </div>
     <div>
-        <v-field v-model="areVirtualContestsAvailable" class="custom-checkbox" id="areVirtualContestsAvailable" type="checkbox" value="1" name="areVirtualContestsAvailable" />
+        <v-field v-model="areVirtualContestsAvailable" class="custom-checkbox" id="areVirtualContestsAvailable" type="checkbox" :value="true" :uncheckedValue="false" name="areVirtualContestsAvailable" />
         <label class=" fs-4" for="areVirtualContestsAvailable">Разрешены виртуальные соревнования</label>
         <error-message name="areVirtualContestsAvailable"></error-message>
     </div>
@@ -94,16 +94,16 @@ export default {
     ...mapActions(['getContestById', 'fetchAvailableRuleSets', 'fetchRunningContests', 'fetchAvailableContests', 'fetchParticipatingContests', 'fetchCurrentUserContestsList', 'fetchAvailableTasks']),
     async updateFields() {
       await this.fetchAvailableRuleSets();
-      let post = await this.getContestById(this.contest_id)
-      this.name = (post?.localizers || [])[0]?.name || null
-      this.description = (post?.localizers || [])[0]?.description || null
-      this.startDateTimeUTC = post?.startDateTimeUTC || null
-      this.durationInMinutes = post?.durationInMinutes || null
-      this.areVirtualContestsAvailable = post?.areVirtualContestsAvailable
-      this.isPublic = +post?.isPublic === 1
-      this.rulesSetId = post?.rulesSetId || null
-      this.image = post?.image || null
-      this.tasks = post?.problems || []
+      let contest = await this.getContestById(this.contest_id)
+      this.name = (contest?.localizers || [])[0]?.name || null
+      this.description = (contest?.localizers || [])[0]?.description || null
+      this.startDateTimeUTC = contest?.startDateTimeUTC || null
+      this.durationInMinutes = contest?.durationInMinutes || null
+      this.areVirtualContestsAvailable = contest?.areVirtualContestsAvailable || false
+      this.isPublic = contest?.isPublic || false
+      this.rulesSetId = contest?.rulesSetId || null
+      this.image = contest?.image || null
+      this.tasks = contest?.problems || []
     },
     updateEvent(data) {
       if (data.type === 'add') {
@@ -134,14 +134,18 @@ export default {
       let tmp_form = $('<form enctype="multipart/form-data"></form>');
       tmp_form.append($('<input type="hidden"/>').attr('name', 'id').val(this.contest_id))
       tmp_form.append($('<input type="hidden"/>').attr('name', 'creatorUserId').val(this.currentUser.id))
-      tmp_form.append($('<input type="hidden"/>').attr('name', 'isPublic').val(this.isPublic))
+      //tmp_form.append($('<input type="hidden"/>').attr('name', 'isPublic').val(this.isPublic)) TODO: реализовать приватность контестов
+      tmp_form.append($('<input type="hidden"/>').attr('name', 'isPublic').val(true))
       tmp_form.append($('<input type="hidden"/>').attr('name', 'startDateTimeUTC').val(this.startDateTimeUTC))
       tmp_form.append($('<input type="hidden"/>').attr('name', 'durationInMinutes').val(this.durationInMinutes))
-      tmp_form.append($('<input type="hidden"/>').attr('name', 'areVirtualContestsAvailable').val(+this.areVirtualContestsAvailable === 1))
+      tmp_form.append($('<input type="hidden"/>').attr('name', 'areVirtualContestsAvailable').val(this.areVirtualContestsAvailable))
       tmp_form.append($('<input type="hidden"/>').attr('name', 'rulesSetId').val(this.rulesSetId))
       tmp_form.append($('<input type="hidden"/>').attr('name', 'localizers[0][culture]').val('ru'))
       tmp_form.append($('<input type="hidden"/>').attr('name', 'localizers[0][description]').val(this.description))
       tmp_form.append($('<input type="hidden"/>').attr('name', 'localizers[0][name]').val(this.name))
+      if (!this.sortedTasks || this.sortedTasks.length <= 0) {
+        tmp_form.append($('<input type="hidden"/>').attr('name', 'problems').val(null))
+      }
       _.each(this.sortedTasks, (problem, idx) => {
         tmp_form.append($('<input type="hidden"/>').attr('name', `problems[${idx}][problemId]`).val(problem.problemId))
         tmp_form.append($('<input type="hidden"/>').attr('name', `problems[${idx}][letter]`).val(problem.letter))

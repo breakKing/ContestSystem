@@ -145,7 +145,6 @@ namespace ContestSystem.Controllers
                 {
                     problem.ApprovalStatus = ApproveType.Accepted;
                 }
-                problem.ApprovalStatus = ApproveType.Accepted;
                 await _dbContext.Problems.AddAsync(problem);
                 await _dbContext.SaveChangesAsync();
                 foreach (var localizer in problemForm.Localizers)
@@ -261,6 +260,13 @@ namespace ContestSystem.Controllers
                         problem.ApprovingModeratorId = null;
                     }
                     _dbContext.Problems.Update(problem);
+
+                    var localizers = await _dbContext.ProblemsLocalizers.Where(l => l.ProblemId == id).ToListAsync();
+                    var localizersExamined = new Dictionary<long, bool>();
+                    foreach (var l in localizers)
+                    {
+                        localizersExamined.Add(l.Id, false);
+                    }
                     for (int i = 0; i < problemForm.Localizers.Count; i++)
                     {
                         var localizer = new ProblemLocalizer
@@ -272,19 +278,35 @@ namespace ContestSystem.Controllers
                             Name = problemForm.Localizers[i].Name,
                             ProblemId = problem.Id
                         };
-                        var loadedLocalizer = await _dbContext.ProblemsLocalizers.FirstOrDefaultAsync(pl => pl.Culture == localizer.Culture && pl.ProblemId == id);
+                        var loadedLocalizer = localizers.FirstOrDefault(pl => pl.Culture == localizer.Culture);
                         if (loadedLocalizer == null)
                         {
                             await _dbContext.ProblemsLocalizers.AddAsync(localizer);
                         }
                         else
                         {
+                            localizersExamined[loadedLocalizer.Id] = true;
                             loadedLocalizer.Description = localizer.Description;
                             loadedLocalizer.Name = localizer.Name;
                             loadedLocalizer.InputBlock = localizer.InputBlock;
                             loadedLocalizer.OutputBlock = localizer.OutputBlock;
                             _dbContext.ProblemsLocalizers.Update(loadedLocalizer);
                         }
+                    }
+                    foreach (var item in localizersExamined)
+                    {
+                        if (!item.Value)
+                        {
+                            var loadedLocalizer = localizers.FirstOrDefault(l => l.Id == item.Key);
+                            _dbContext.ProblemsLocalizers.Remove(loadedLocalizer);
+                        }
+                    }
+
+                    var tests = await _dbContext.Tests.Where(t => t.ProblemId == id).ToListAsync();
+                    var testsExamined = new Dictionary<long, bool>();
+                    foreach (var t in tests)
+                    {
+                        testsExamined.Add(t.Id, false);
                     }
                     for (int i = 0; i < problemForm.Tests.Count; i++)
                     {
@@ -296,19 +318,35 @@ namespace ContestSystem.Controllers
                             AvailablePoints = problemForm.Tests[i].AvailablePoints,
                             ProblemId = problem.Id
                         };
-                        var loadedTest = await _dbContext.Tests.FirstOrDefaultAsync(t => t.Number == test.Number && t.ProblemId == id);
+                        var loadedTest = tests.FirstOrDefault(t => t.Number == test.Number);
                         if (loadedTest == null)
                         {
                             await _dbContext.Tests.AddAsync(test);
                         }
                         else
                         {
+                            testsExamined[loadedTest.Id] = true;
                             loadedTest.Number = test.Number;
                             loadedTest.AvailablePoints = test.AvailablePoints;
                             loadedTest.Input = test.Input;
                             loadedTest.Answer = test.Answer;
                             _dbContext.Tests.Update(loadedTest);
                         }
+                    }
+                    foreach (var item in testsExamined)
+                    {
+                        if (!item.Value)
+                        {
+                            var loadedTest = tests.FirstOrDefault(t => t.Id == item.Key);
+                            _dbContext.Tests.Remove(loadedTest);
+                        }
+                    }
+
+                    var examples = await _dbContext.Examples.Where(e => e.ProblemId == id).ToListAsync();
+                    var examplesExamined = new Dictionary<long, bool>();
+                    foreach (var e in examples)
+                    {
+                        examplesExamined.Add(e.Id, false);
                     }
                     for (int i = 0; i < problemForm.Examples.Count; i++)
                     {
@@ -319,19 +357,29 @@ namespace ContestSystem.Controllers
                             OutputText = problemForm.Examples[i].OutputText,
                             ProblemId = problem.Id
                         };
-                        var loadedExample = await _dbContext.Examples.FirstOrDefaultAsync(e => e.Number == example.Number && e.ProblemId == id);
+                        var loadedExample = examples.FirstOrDefault(e => e.Number == example.Number);
                         if (loadedExample == null)
                         {
                             await _dbContext.Examples.AddAsync(example);
                         }
                         else
                         {
+                            examplesExamined[loadedExample.Id] = true;
                             loadedExample.Number = example.Number;
                             loadedExample.InputText = example.InputText;
                             loadedExample.OutputText = example.OutputText;
                             _dbContext.Examples.Update(loadedExample);
                         }
                     }
+                    foreach (var item in examplesExamined)
+                    {
+                        if (!item.Value)
+                        {
+                            var loadedExample = examples.FirstOrDefault(e => e.Id == item.Key);
+                            _dbContext.Examples.Remove(loadedExample);
+                        }
+                    }
+
                     try
                     {
                         await _dbContext.SaveChangesAsync();

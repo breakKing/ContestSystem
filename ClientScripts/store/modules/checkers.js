@@ -74,7 +74,7 @@ export default {
         },
         async deleteChecker({commit, state, dispatch, getters, rootGetters}, checker_id) {
             try {
-                let {data} = await axios.get(`/api/checkers/delete-checker/${checker_id}`)
+                let {data} = await axios.delete(`/api/checkers/delete-checker/${checker_id}`)
                 return data
             } catch (e) {
                 console.error(e)
