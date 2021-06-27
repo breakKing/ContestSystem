@@ -18,9 +18,8 @@ const router = createRouter({
             name: 'Home',
             redirect: (to) => {
                 // redirect синхронный
-                store.dispatch('initAuth') // ensure auth synced with server
                 if (!store.getters.isAuthenticated) {
-                    return {name: 'UserStarterPage'}
+                    return {name: 'Login'}
                 }
                 let current_role = store.getters.currentRole
                 if (!current_role) {
@@ -97,8 +96,8 @@ router.beforeEach(async (to, from, next) => {
         if (!isAuthenticated) {
             return next({name: 'UserStarterPage', query: {returnUrl: to.path}})
         }
-
-        if (authorize.length && !authorize.includes(store.getters.currentRole)) {
+        let current_role = store.getters.currentRole
+        if (authorize.length && !authorize.includes(current_role)) {
             // нет нужной роли
             await store.dispatch('globalAlert', {message: 'Вы куда это?)'})
             return next(false)

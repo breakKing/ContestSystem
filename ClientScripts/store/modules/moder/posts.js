@@ -28,10 +28,10 @@ export default {
         currentModeratingPost(state, getters) {
             return state.moderating_post
         },
-        currentModeratingPostLocalizer() {
+        currentModeratingPostLocalizer(state, getters) {
             return _.find((getters.currentModeratingPost?.localizers || []), (l) => l.culture === 'ru')
         },
-        currentModeratingPostApprovalStatusName() {
+        currentModeratingPostApprovalStatusName(state, getters) {
             if (!getters.currentModeratingPost) {
                 return ''
             }
