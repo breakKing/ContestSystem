@@ -1,7 +1,8 @@
 ﻿<template>
-<!--eslint-disable -->
-  <checker-preview-component v-for="checker of currentUserApprovedCheckers" :checker="checker">
-  </checker-preview-component>
+    <!--eslint-disable -->
+    <div class="row mt-3">
+        <checker-preview-component v-for="checker of currentUserApprovedCheckers" :checker="checker"></checker-preview-component>
+    </div>
 </template>
 
 <script>

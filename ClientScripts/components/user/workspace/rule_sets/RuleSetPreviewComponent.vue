@@ -38,7 +38,7 @@ export default {
 
 <style lang="scss" scoped>
     .card {
-        height: 210px;
+        min-height: 210px;
         text-align: center;
         border: 1px solid blue;
     }
