@@ -5,10 +5,16 @@
                 <h5 class="card-title">{{ ruleSet.name }}</h5>
                 <p class="card-text">{{ ruleSet.description }}</p>
                 <p> Автор: {{ruleSet.author.fullName}}</p>
-                <button v-if="+currentUser?.id === +ruleSet.author.id" class="workspace-btn align-self-center"
-                        @click.prevent="$router.push({name: 'WorkSpaceEditRuleSetPage', params: { set_id: ruleSet.id }})">
-                    Редактировать
-                </button>
+                <div class="row">
+                    <button v-if="+currentUser?.id === +ruleSet.author.id" class="workspace-btn me-2"
+                            @click.prevent="$router.push({name: 'WorkSpaceEditRuleSetPage', params: { set_id: ruleSet.id }})">
+                        Редактировать
+                    </button>
+                    <button v-if="+currentUser?.id === +ruleSet.author.id" class="workspace-btn workspace-btn-del"
+                            @click.prevent="shittyDeleteFunction">
+                        Удалить
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -38,16 +44,25 @@ export default {
     }
 
     .workspace-btn {
-        padding: 5px 10px;
+        padding: 5px 5px;
         background-color: #fff;
         border-radius: 16px;
         border: 1px solid blue;
         text-decoration: none;
         color: blue;
-        width: 60%;
+        width: 48%;
 
         &:hover {
             background-color: #0b76ef;
+            color: white;
+        }
+    }
+    .workspace-btn-del {
+        border: 1px solid red;
+        color: red;
+
+        &:hover {
+            background-color: red;
             color: white;
         }
     }
