@@ -93,7 +93,7 @@ export default {
             margin-bottom: 10px;
         }
 
-        textarea {
+        textarea, input {
             color: black;
             border-radius: 16px;
         }
