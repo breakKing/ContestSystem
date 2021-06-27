@@ -20,28 +20,28 @@
             </div>
             <v-form @submit="savePost" :validation-schema="postCreationSchema">
               <div>
-                <label>Изображение поста</label>
+                <label class="fs-4">Изображение поста</label>
                 <v-field v-model="previewImage" class="form-control" name="previewImage" type="file"/>
                 <error-message name="previewImage"></error-message>
               </div>
               <div>
-                <label>Название поста</label>
+                <label class="fs-4">Название поста</label>
                 <v-field v-model="postName" class="form-control" name="postName"/>
                 <error-message name="postName"></error-message>
               </div>
               <div>
-                <label>Текст поста</label>
+                <label class="fs-4">Текст поста</label>
                 <ckeditor :editor="editor" v-model="postText" class="form-control" :config="editorConfig"
                           name="postText"></ckeditor>
                 <error-message name="postText"></error-message>
               </div>
               <div>
-                <label>Краткое описание</label>
+                <label class="fs-4">Краткое описание</label>
                 <v-field v-model="postPreview" class="form-control" name="postPreview" as="textarea"/>
                 <error-message name="postPreview"></error-message>
               </div>
               <div class="form-group mt-2">
-                <button class="btn btn-primary" type="submit">Сохранить</button>
+                <button type="submit">Сохранить</button>
               </div>
             </v-form>
           </div>
@@ -79,8 +79,8 @@ export default {
       postPreview: '',
       postCreationSchema: Yup.object({
         previewImage: Yup.mixed().nullable().required('Изображение поста это обязательное поле').label('Изображение поста'),
-        postName: Yup.string().nullable().required('Название поста это обязательное поле').label('Название поста'),
-        postPreview: Yup.string().nullable().required('Превью поста это обязательное поле').label('Краткое описание'),
+        postName: Yup.string('Название поста должно быть строкой').nullable().required('Название поста это обязательное поле').label('Название поста'),
+        postPreview: Yup.string('Превью поста должно быть строкой').nullable().required('Превью поста это обязательное поле').label('Краткое описание'),
       })
     }
   },
@@ -156,5 +156,71 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+    form div * {
+        margin: 5px;
+        color: #04295E;
+    }
 
+    span[role=alert] {
+        color: red;
+    }
+
+    form {
+        padding: 10px;
+    }
+    .form-control {
+        border-radius: 16px;
+    }
+
+    button[type="submit"] {
+        padding: 5px 10px;
+        background-color: #fff;
+        border-radius: 16px;
+        border: 1px solid blue;
+
+        &:hover {
+            background-color: #0b76ef;
+            color: white;
+        }
+    }
+
+    .form-control::-webkit-input-placeholder {
+        opacity: 1;
+        transition: opacity 0.3s ease;
+    }
+
+    .form-control::-moz-placeholder {
+        opacity: 1;
+        transition: opacity 0.3s ease;
+    }
+
+    .form-control:-moz-placeholder {
+        opacity: 1;
+        transition: opacity 0.3s ease;
+    }
+
+    .form-control:-ms-input-placeholder {
+        opacity: 1;
+        transition: opacity 0.3s ease;
+    }
+
+    .form-control:focus::-webkit-input-placeholder {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .form-control:focus::-moz-placeholder {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .form-control:focus:-moz-placeholder {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .form-control:focus:-ms-input-placeholder {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
 </style>
