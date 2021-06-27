@@ -24,7 +24,8 @@ namespace ContestSystem.Controllers
         private readonly CheckerSystemService _checkerSystemService;
         private readonly ILogger<CheckersController> _logger;
 
-        public CheckersController(MainDbContext dbContext, CheckerSystemService checkerSystemService, ILogger<CheckersController> logger)
+        public CheckersController(MainDbContext dbContext, CheckerSystemService checkerSystemService,
+            ILogger<CheckersController> logger)
         {
             _dbContext = dbContext;
             _checkerSystemService = checkerSystemService;
@@ -48,10 +49,11 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> GetAvailableCheckers(long id)
         {
-            var checkers = await _dbContext.Checkers.Where(c => (c.AuthorId == id || c.IsPublic)
-                                                                    && c.ApprovalStatus == ApproveType.Accepted
-                                                                    && !c.IsArchieved)
-                                                    .ToListAsync();
+            var checkers = await _dbContext.Checkers.Where(c => (c.AuthorId == id ||
+                                                                 (c.IsPublic && c.ApprovalStatus ==
+                                                                     ApproveType.Accepted))
+                                                                && !c.IsArchieved)
+                .ToListAsync();
             var publishedCheckers = checkers.ConvertAll(c =>
             {
                 var pc = PublishedChecker.GetFromModel(c);
@@ -110,9 +112,10 @@ namespace ContestSystem.Controllers
                     return Json(new
                     {
                         status = false,
-                        errors = new List<string> { "Id автора в форме отличается от Id текущего пользователя" }
+                        errors = new List<string> {"Id автора в форме отличается от Id текущего пользователя"}
                     });
                 }
+
                 checker.ApprovalStatus = ApproveType.NotModeratedYet;
                 _dbContext.Checkers.Add(checker);
                 await _dbContext.SaveChangesAsync();
@@ -124,6 +127,7 @@ namespace ContestSystem.Controllers
                     errors = new List<string>()
                 });
             }
+
             return Json(new
             {
                 status = false,
@@ -157,18 +161,20 @@ namespace ContestSystem.Controllers
                     return Json(new
                     {
                         status = false,
-                        errors = new List<string> { "Такого чекера не существует" }
+                        errors = new List<string> {"Такого чекера не существует"}
                     });
                 }
+
                 if (checker.AuthorId != currentUser.Id)
                 {
                     _logger.LogEditingByNotAppropriateUser("Checker", id, currentUser.Id);
                     return Json(new
                     {
                         status = false,
-                        errors = new List<string> { "Попытка изменить не свой чекер" }
+                        errors = new List<string> {"Попытка изменить не свой чекер"}
                     });
                 }
+
                 bool needToRecompile = (checker.Code != checkerForm.Code);
                 checker.Code = checkerForm.Code;
                 checker.Name = checkerForm.Name;
@@ -179,6 +185,7 @@ namespace ContestSystem.Controllers
                     checker.ApprovalStatus = ApproveType.NotModeratedYet;
                     checker.ApprovingModeratorId = null;
                 }
+
                 try
                 {
                     await _dbContext.SaveChangesAsync();
@@ -189,10 +196,12 @@ namespace ContestSystem.Controllers
                     return Json(new
                     {
                         status = false,
-                        errors = new List<string> { "Ошибка параллельного сохранения" }
+                        errors = new List<string> {"Ошибка параллельного сохранения"}
                     });
                 }
-                _logger.LogInformation($"Механизм проверки с идентификатором {id} успешно изменён и {(needToRecompile ? "" : "не ")}нуждается в модерации и компиляции");
+
+                _logger.LogInformation(
+                    $"Механизм проверки с идентификатором {id} успешно изменён и {(needToRecompile ? "" : "не ")}нуждается в модерации и компиляции");
                 return Json(new
                 {
                     status = true,
@@ -224,6 +233,7 @@ namespace ContestSystem.Controllers
                     errors = new List<string> {"Попытка удалить несуществующий чекер"}
                 });
             }
+
             var moderatorRole = await _dbContext.Roles.FirstOrDefaultAsync(r => r.Name == RolesContainer.Moderator);
             if (currentUser.Id != loadedChecker.AuthorId && !currentUser.Roles.Contains(moderatorRole))
             {
@@ -234,6 +244,7 @@ namespace ContestSystem.Controllers
                     errors = new List<string> {"Попытка удалить не свой чекер или без модераторских прав"}
                 });
             }
+
             if (await _dbContext.Problems.AnyAsync(p => p.CheckerId == id))
             {
                 loadedChecker.IsArchieved = true;
@@ -248,14 +259,17 @@ namespace ContestSystem.Controllers
                     }
                     catch (DbUpdateConcurrencyException)
                     {
-                        loadedChecker = await _dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == id && !ch.IsArchieved);
+                        loadedChecker =
+                            await _dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == id && !ch.IsArchieved);
                         if (loadedChecker == null)
                         {
                             break;
                         }
+
                         loadedChecker.IsArchieved = true;
                         _dbContext.Checkers.Update(loadedChecker);
                     }
+
                     _logger.LogDeletingByArchieving("Checker", id, currentUser.Id);
                 }
             }
@@ -265,6 +279,7 @@ namespace ContestSystem.Controllers
                 await _dbContext.SaveChangesAsync();
                 _logger.LogDeletingSuccessful("Checker", id, currentUser.Id);
             }
+
             return Json(new
             {
                 status = true,
@@ -277,7 +292,8 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetCheckersRequests()
         {
-            var checkers = await _dbContext.Checkers.Where(c => c.ApprovalStatus == ApproveType.NotModeratedYet && !c.IsArchieved).ToListAsync();
+            var checkers = await _dbContext.Checkers
+                .Where(c => c.ApprovalStatus == ApproveType.NotModeratedYet && !c.IsArchieved).ToListAsync();
             var requests = checkers.ConvertAll(c =>
             {
                 ConstructedChecker cr = ConstructedChecker.GetFromModel(c);
@@ -290,7 +306,8 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetApprovedCheckers()
         {
-            var checkers = await _dbContext.Checkers.Where(c => c.ApprovalStatus == ApproveType.Accepted && !c.IsArchieved).ToListAsync();
+            var checkers = await _dbContext.Checkers
+                .Where(c => c.ApprovalStatus == ApproveType.Accepted && !c.IsArchieved).ToListAsync();
             var requests = checkers.ConvertAll(c =>
             {
                 ConstructedChecker cr = ConstructedChecker.GetFromModel(c);
@@ -303,7 +320,8 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetRejectedCheckers()
         {
-            var checkers = await _dbContext.Checkers.Where(c => c.ApprovalStatus == ApproveType.Rejected && !c.IsArchieved).ToListAsync();
+            var checkers = await _dbContext.Checkers
+                .Where(c => c.ApprovalStatus == ApproveType.Rejected && !c.IsArchieved).ToListAsync();
             var requests = checkers.ConvertAll(c =>
             {
                 ConstructedChecker cr = ConstructedChecker.GetFromModel(c);
@@ -314,16 +332,18 @@ namespace ContestSystem.Controllers
 
         [HttpPut("moderate/{id}")]
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
-        public async Task<IActionResult> ApproveOrRejectChecker([FromBody] CheckerRequestForm checkerRequestForm, long id)
+        public async Task<IActionResult> ApproveOrRejectChecker([FromBody] CheckerRequestForm checkerRequestForm,
+            long id)
         {
             var currentUser = await HttpContext.GetCurrentUser();
             if (checkerRequestForm.CheckerId != id || id < 0)
             {
-                _logger.LogModeratingWithNonEqualFormAndRequestId("Checker", checkerRequestForm.CheckerId, id, currentUser.Id);
+                _logger.LogModeratingWithNonEqualFormAndRequestId("Checker", checkerRequestForm.CheckerId, id,
+                    currentUser.Id);
                 return Json(new
                 {
                     success = false,
-                    errors = new List<string> { "Id в запросе не совпадает с Id в форме" }
+                    errors = new List<string> {"Id в запросе не совпадает с Id в форме"}
                 });
             }
 
@@ -336,7 +356,7 @@ namespace ContestSystem.Controllers
                     return Json(new
                     {
                         status = false,
-                        errors = new List<string> { "Попытка модерировать несуществующий чекер" }
+                        errors = new List<string> {"Попытка модерировать несуществующий чекер"}
                     });
                 }
                 else
@@ -346,17 +366,20 @@ namespace ContestSystem.Controllers
                     checker.ModerationMessage = checkerRequestForm.ModerationMessage;
                     if (checker.ApprovalStatus == ApproveType.Accepted)
                     {
-                        _logger.LogInformation($"Отправлена на компиляцию сущность \"Checker\" с идентификатором {id} модератором с идентификатором {currentUser.Id}");
+                        _logger.LogInformation(
+                            $"Отправлена на компиляцию сущность \"Checker\" с идентификатором {id} модератором с идентификатором {currentUser.Id}");
                         var newChecker = await _checkerSystemService.SendCheckerForCompilationAsync(checker);
                         checker.CompilationVerdict = newChecker.CompilationVerdict;
                         checker.Errors = newChecker.Errors;
                         if (newChecker.CompilationVerdict != VerdictType.CompilationSucceed)
                         {
-                            _logger.LogInformation($"В результате компиляции \"Checker\" с идентификатором {id} возникли ошибки");
+                            _logger.LogInformation(
+                                $"В результате компиляции \"Checker\" с идентификатором {id} возникли ошибки");
                             checker.ApprovalStatus = ApproveType.Rejected;
                             checker.ModerationMessage = "Compilation errors:\n" + newChecker.Errors;
                         }
                     }
+
                     _dbContext.Checkers.Update(checker);
                     try
                     {
@@ -368,9 +391,10 @@ namespace ContestSystem.Controllers
                         return Json(new
                         {
                             status = false,
-                            errors = new List<string> { "Ошибка параллельного сохранения" }
+                            errors = new List<string> {"Ошибка параллельного сохранения"}
                         });
                     }
+
                     _logger.LogModeratingSuccessful("Checker", id, currentUser.Id, checkerRequestForm.ApprovalStatus);
                     return Json(new
                     {

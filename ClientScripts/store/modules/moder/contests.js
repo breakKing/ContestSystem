@@ -45,7 +45,10 @@ export default {
         }
     },
     actions: {
-        changeCurrentContest({commit, state, dispatch, getters}, {force, contest_id}) {
+        async changeCurrentContest({commit, state, dispatch, getters}, {force, contest_id}) {
+            await dispatch('fetchContestsToModerate', force)
+            await dispatch('fetchApprovedContests', force)
+            await dispatch('fetchRejectedContests', force)
             if (!force && +getters.currentModeratingContest?.id === +contest_id) {
                 return
             }

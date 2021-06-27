@@ -42,7 +42,10 @@ export default {
         }
     },
     actions: {
-        changeCurrentCourse({commit, state, dispatch, getters}, {force, course_id}) {
+        async changeCurrentCourse({commit, state, dispatch, getters}, {force, course_id}) {
+            await dispatch('fetchCoursesToModerate', force)
+            await dispatch('fetchApprovedCourses', force)
+            await dispatch('fetchRejectedCourses', force)
             if (!force && +getters.currentModeratingCourse?.id === +course_id) {
                 return
             }

@@ -10,7 +10,7 @@
           <v-form @submit="submitEntity" :validation-schema="schema" class="mb-3">
             <div>
               <label>Комментарий</label>
-              <v-field v-model="message" aas="textarea" class="form-control" name="message"/>
+              <v-field v-model="message" as="textarea" class="form-control" name="message"/>
               <error-message name="message"></error-message>
             </div>
             <div>
@@ -35,11 +35,21 @@
 import {ErrorMessage, Field, Form} from "vee-validate";
 import * as Yup from "yup";
 import {mapActions, mapGetters} from "vuex";
-import CodeMirror from "codemirror";
 
 export default {
   name: "ModeratorCheckerModerationPage",
   props: ['checker_id'],
+  data() {
+    return {
+      error_msg: '',
+      message: '',
+      current_status: null,
+      schema: Yup.object({
+        message: Yup.string().nullable(),
+        current_status: Yup.number().required().nullable(),
+      })
+    }
+  },
   computed: {
     ...mapGetters(['currentUser', 'approvalStatuses']),
     ...mapGetters('moder_checkers', [
@@ -82,23 +92,9 @@ export default {
       }
     },
     async fetchDataAndGoToList() {
-      await this.fetchCheckersToModerate(true)
-      await this.fetchRejectedCheckers(true)
-      await this.fetchApprovedCheckers(true)
-      await this.changeCurrentChecker({force: false, checker_id: null})
+      await this.changeCurrentChecker({force: true, checker_id: null})
       await this.$router.push({
         name: 'ModeratorNotModeratedCheckersPage'
-      })
-    }
-  },
-  data() {
-    return {
-      error_msg: '',
-      message: '',
-      current_status: null,
-      schema: Yup.object({
-        message: Yup.string(),
-        current_status: Yup.number().required().nullable(),
       })
     }
   },
@@ -116,10 +112,6 @@ export default {
     ErrorMessage,
   },
   mounted() {
-    CodeMirror.fromTextArea(document.querySelector('.code-input'), {
-      lineNumbers: true,
-      readOnly: true,
-    })
   },
 }
 </script>

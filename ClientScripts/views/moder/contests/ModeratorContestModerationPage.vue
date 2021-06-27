@@ -18,15 +18,15 @@
         <p>{{ currentModeratingContestLocalizer?.description }}</p>
       </div>
       <div>
-        <span>Дата начала</span>
+        <span>Дата начала </span>
         <span>{{ formatted_start_date }}</span>
       </div>
       <div>
-        <span>Продолжительность в минутах</span>
+        <span>Продолжительность в минутах </span>
         <span>{{ currentModeratingContest?.durationInMinutes }}</span>
       </div>
       <div>
-        <span>Набор правил</span>
+        <span>Набор правил </span>
         <span>{{ currentModeratingContest?.rules?.name }}</span>
       </div>
       <div class="row" v-for="problem of sortedTasks">
@@ -40,7 +40,7 @@
           <v-form @submit="submitEntity" :validation-schema="schema" class="mb-3">
             <div>
               <span>Комментарий</span>
-              <v-field v-model="message" aas="textarea" class="form-control" name="message"/>
+              <v-field v-model="message" as="textarea" class="form-control" name="message"/>
               <error-message name="message"></error-message>
             </div>
             <div>
@@ -74,6 +74,7 @@ export default {
   props: ['contest_id'],
   computed: {
     ...mapGetters(['currentUser', 'approvalStatuses']),
+    ...mapGetters(['getFormattedFullDateTime']),
     ...mapGetters('moder_contests', [
       'currentModeratingContest',
       'currentModeratingContestLocalizer',
@@ -82,7 +83,7 @@ export default {
       return this.getFormattedFullDateTime(this.currentModeratingContest?.startDateTimeUTC)
     },
     sortedTasks() {
-      return _.sortBy(this.currentModeratingContest.problems, ['letter'])
+      return _.sortBy((this.currentModeratingContest?.problems || []), ['letter'])
     },
     dataUrl() {
       if (!this.currentModeratingContest || this.currentModeratingContest.image) {
@@ -106,7 +107,7 @@ export default {
       'fetchApprovedContests',
       'moderateContest',
     ]),
-    ...mapActions(['deleteContest', 'getFormattedFullDateTime']),
+    ...mapActions(['deleteContest']),
     async deleteEntity() {
       this.error_msg = ''
       let {status, errors} = await this.deleteContest(this.contest_id)
@@ -134,10 +135,7 @@ export default {
       }
     },
     async fetchDataAndGoToList() {
-      await this.fetchContestsToModerate(true)
-      await this.fetchRejectedContests(true)
-      await this.fetchDataAndGoToList(true)
-      await this.changeCurrentContest({force: false, contest_id: null})
+      await this.changeCurrentContest({force: true, contest_id: null})
       await this.$router.push({
         name: 'ModeratorNotModeratedContestsPage'
       })
@@ -149,7 +147,7 @@ export default {
       message: '',
       current_status: null,
       schema: Yup.object({
-        message: Yup.string(),
+        message: Yup.string().nullable(),
         current_status: Yup.number().required().nullable(),
       })
     }

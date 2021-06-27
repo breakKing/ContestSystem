@@ -17,8 +17,7 @@
 </template>
 
 <script>
-import {mapActions} from "vuex";
-import CodeMirror from "codemirror";
+import {mapActions, mapGetters} from "vuex";
 import * as _ from 'lodash'
 import TestResultVerdicts from "../../../../dictionaries/TestResultVerdicts";
 import BreadCrumbsComponent from "../../../BreadCrumbsComponent";
@@ -43,7 +42,7 @@ export default {
     })
   },
   methods: {
-    ...mapActions(['getSolution', 'changeCurrentContest', 'getVerdictName', 'getLastTestNumber', 'getFormattedFullDateTime']),
+    ...mapActions(['getSolution', 'changeCurrentContest', 'getVerdictName', 'getLastTestNumber']),
     getProblemName(problem) {
       return _.find((problem?.localizers || []), (l) => l.culture === 'ru')?.name
     },
@@ -52,6 +51,7 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(['getFormattedFullDateTime']),
     problemName() {
       return _.find((this.solution?.problem?.localizers || []), (l) => l.culture === 'ru')?.name
     },
@@ -69,10 +69,6 @@ export default {
     }
   },
   mounted() {
-    CodeMirror.fromTextArea(document.querySelector('.code-input'), {
-      lineNumbers: true,
-      readOnly: true,
-    })
   },
 }
 </script>

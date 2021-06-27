@@ -90,7 +90,7 @@
           <v-form @submit="submitEntity" :validation-schema="schema" class="mb-3">
             <div>
               <span>Комментарий</span>
-              <v-field v-model="message" aas="textarea" class="form-control" name="message"/>
+              <v-field v-model="message" as="textarea" class="form-control" name="message"/>
               <error-message name="message"></error-message>
             </div>
             <div>
@@ -184,7 +184,7 @@ export default {
       message: '',
       current_status: null,
       schema: Yup.object({
-        message: Yup.string(),
+        message: Yup.string().nullable(),
         current_status: Yup.number().required().nullable(),
       })
     }

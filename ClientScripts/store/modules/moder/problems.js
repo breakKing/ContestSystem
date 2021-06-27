@@ -45,7 +45,10 @@ export default {
         }
     },
     actions: {
-        changeCurrentProblem({commit, state, dispatch, getters}, {force, problem_id}) {
+        async changeCurrentProblem({commit, state, dispatch, getters}, {force, problem_id}) {
+            await dispatch('fetchProblemsToModerate', force)
+            await dispatch('fetchApprovedProblems', force)
+            await dispatch('fetchRejectedProblems', force)
             if (!force && +getters.currentModeratingProblem?.id === +problem_id) {
                 return
             }

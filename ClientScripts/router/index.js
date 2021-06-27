@@ -18,9 +18,7 @@ const router = createRouter({
             name: 'Home',
             redirect: (to) => {
                 // redirect синхронный
-                (async () => {
-                    await store.dispatch('initAuth') // ensure auth synced with server
-                })()
+                store.dispatch('initAuth') // ensure auth synced with server
                 if (!store.getters.isAuthenticated) {
                     return {name: 'UserStarterPage'}
                 }

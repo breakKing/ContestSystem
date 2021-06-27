@@ -36,13 +36,12 @@ export default createStore({
         approvalStatuses(state, getters) {
             return ApproveTypes
         },
+        getFormattedFullDateTime: (state, getters) => (date) => {
+            moment.locale('ru');
+            return moment(date).format('LLLL');
+        }
     },
     actions: {
-        getFormattedFullDateTime({commit, state, dispatch, getters}, date) {
-            moment.locale('ru')
-            return moment(date).format('LLLL')
-
-        },
         globalAlert({commit, state, dispatch, getters}, {message}) {
             if (message) {
                 alert(message)

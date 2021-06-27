@@ -42,7 +42,10 @@ export default {
         }
     },
     actions: {
-        changeCurrentChecker({commit, state, dispatch, getters}, {force, checker_id}) {
+        async changeCurrentChecker({commit, state, dispatch, getters}, {force, checker_id}) {
+            await dispatch('fetchCheckersToModerate', force)
+            await dispatch('fetchApprovedCheckers', force)
+            await dispatch('fetchRejectedCheckers', force)
             if (!force && +getters.currentModeratingChecker?.id === +checker_id) {
                 return
             }

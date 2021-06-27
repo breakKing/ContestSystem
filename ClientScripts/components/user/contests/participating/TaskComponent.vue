@@ -56,7 +56,6 @@ import TasksNavigationComponent from "./TasksNavigationComponent";
 import * as _ from "lodash";
 import {ErrorMessage, Field, Form} from "vee-validate";
 import * as Yup from "yup";
-import CodeMirror from 'codemirror'
 import BreadCrumbsComponent from "../../../BreadCrumbsComponent";
 import ContestParticipatingTaskBreads
   from "../../../../dictionaries/bread_crumbs/contest/ContestParticipatingTaskBreads";
@@ -162,9 +161,6 @@ export default {
     }
   },
   mounted() {
-    CodeMirror.fromTextArea(document.querySelector('.code-input'), {
-      lineNumbers: true,
-    })
   },
   beforeRouteEnter(to, from, next) {
     next(async vm => {

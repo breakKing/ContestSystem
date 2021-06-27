@@ -84,6 +84,7 @@ export default {
   },
   props: ['contest_id'],
   computed: {
+    ...mapGetters(['getFormattedFullDateTime']),
     ...mapGetters([
       'currentContest',
       'currentUser',
@@ -116,7 +117,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['addUserToContest', 'changeCurrentContest', 'removeUserFromContest', 'getContestParticipants', 'getFormattedFullDateTime']),
+    ...mapActions(['addUserToContest', 'changeCurrentContest', 'removeUserFromContest', 'getContestParticipants']),
     ...mapMutations(['setCurrentContestParticipants']),
     resetParticipateTry() {
       this.wants_participate = false

@@ -35,22 +35,22 @@
     </div>
     <div>
       <label class="font-weight-bold">Ограничен в создании соревнований</label>
-      <v-field v-model="isLimitedInContests" type="checkbox" class="form-control" name="isLimitedInContests"/>
+      <v-field v-model="isLimitedInContests" type="checkbox" class="form-control" name="isLimitedInContests" :value="true" :uncheckedValue="false"/>
       <error-message name="isLimitedInContests"></error-message>
     </div>
     <div>
       <label class="font-weight-bold">Ограничен в создании постов</label>
-      <v-field v-model="isLimitedInPosts" type="checkbox" class="form-control" name="isLimitedInPosts"/>
+      <v-field v-model="isLimitedInPosts" type="checkbox" class="form-control" name="isLimitedInPosts" :value="true" :uncheckedValue="false"/>
       <error-message name="isLimitedInPosts"></error-message>
     </div>
     <div>
       <label class="font-weight-bold">Ограничен в создании курсов</label>
-      <v-field v-model="isLimitedInCourses" type="checkbox" class="form-control" name="isLimitedInCourses"/>
+      <v-field v-model="isLimitedInCourses" type="checkbox" class="form-control" name="isLimitedInCourses" :value="true" :uncheckedValue="false"/>
       <error-message name="isLimitedInCourses"></error-message>
     </div>
     <div>
       <label class="font-weight-bold">Ограничен в создании задач</label>
-      <v-field v-model="isLimitedInProblems" type="checkbox" class="form-control" name="isLimitedInProblems"/>
+      <v-field v-model="isLimitedInProblems" type="checkbox" class="form-control" name="isLimitedInProblems" :value="true" :uncheckedValue="false"/>
       <error-message name="isLimitedInProblems"></error-message>
     </div>
     <div>

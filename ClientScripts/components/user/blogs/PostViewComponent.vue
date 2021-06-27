@@ -22,7 +22,7 @@
 
 <script>
 import moment from 'moment'
-import {mapActions} from 'vuex'
+import {mapActions, mapGetters} from 'vuex'
 import BreadCrumbsComponent from "../../BreadCrumbsComponent";
 import PostViewBreadCrumbs from "../../../dictionaries/bread_crumbs/PostViewBreadCrumbs";
 
@@ -36,6 +36,7 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(['getFormattedFullDateTime']),
     dataUrl() {
       if (!this.post_info || !this.post_info?.previewImage) {
         return '';
@@ -57,7 +58,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['getPostInfo', 'getFormattedFullDateTime'])
+    ...mapActions(['getPostInfo']),
   },
   beforeRouteEnter(to, from, next) {
     next(async vm => {

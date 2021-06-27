@@ -58,7 +58,10 @@ export default {
         }
     },
     actions: {
-        changeCurrentPost({commit, state, dispatch, getters}, {force, post_id}) {
+        async changeCurrentPost({commit, state, dispatch, getters}, {force, post_id}) {
+            await dispatch('fetchPostsToModerate', force)
+            await dispatch('fetchApprovedPosts', force)
+            await dispatch('fetchRejectedPosts', force)
             if (!force && +getters.currentModeratingPost?.id === +post_id) {
                 return
             }
