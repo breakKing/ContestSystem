@@ -4,6 +4,7 @@
             <div class="card-body d-flex flex-column justify-content-between">
                 <h5 class="card-title">{{ ruleSet.name }}</h5>
                 <p class="card-text">{{ ruleSet.description }}</p>
+                <p> Автор: {{ruleSet.author.fullName}}</p>
                 <button v-if="+currentUser?.id === +ruleSet.author.id" class="workspace-btn align-self-center"
                         @click.prevent="$router.push({name: 'WorkSpaceEditRuleSetPage', params: { set_id: ruleSet.id }})">
                     Редактировать
@@ -31,7 +32,7 @@ export default {
 
 <style lang="scss" scoped>
     .card {
-        height: 188px;
+        height: 210px;
         text-align: center;
         border: 1px solid blue;
     }
