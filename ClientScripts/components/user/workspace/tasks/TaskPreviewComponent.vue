@@ -1,48 +1,37 @@
 <template>
-  <div class="row">
-    <div class="col">
-      <div class="row">
-        <div class="col">
-          <p>Название</p>
-          <p> {{ task?.name }}</p>
+    <div class="col-md-6 mb-3">
+        <div class="card">
+            <div class="card-body d-flex flex-column justify-content-between">
+                <h5 class="card-title">{{ task?.localizedName }}</h5>
+                <div class="row">
+                    <div class="col w-50">
+                        <p>Ограничение по памяти</p>
+                        <p> {{ task?.memoryLimitInBytes }}</p>
+                    </div>
+                    <div class="col w-50">
+                        <p>Ограничение по времени</p>
+                        <p> {{ task?.timeLimitInMilliseconds }}</p>
+                    </div>
+                </div>
+                <p> Автор: {{task?.сreator?.fullName}}</p>
+                <div class="row d-flex justify-content-center">
+                    <template v-if="currentRole === 'user'">
+                        <router-link v-if="currentUserIsOwner" :to="{name: 'WorkSpaceEditTaskPage', params: {task_id: task?.id}}"
+                                     class="workspace-btn me-2">
+                            Редактировать
+                        </router-link>
+                    </template>
+                    <template v-else-if="currentRole === 'moderator'">
+                        <button @click.prevent="moderateTask" class="workspace-btn">Подробнее</button>
+                    </template>
+                    <button v-if="currentUserIsOwner" class="workspace-btn workspace-btn-del"
+                            @click.prevent="shittyDeleteFunction">
+                        Удалить
+                    </button>
+                </div>
+            </div>
         </div>
-        <div class="col">
-          <p>Описание</p>
-          <p> {{ task?.localizedDescription }}</p>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col">
-          <p>Входные данные</p>
-          <p> {{ task?.localizedInputBlock }}</p>
-        </div>
-        <div class="col">
-          <p>Выходные данные</p>
-          <p> {{ task?.localizedOutputBlock }}</p>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col">
-          <p>Ограничение по памяти</p>
-          <p> {{ task?.memoryLimitInBytes }}</p>
-        </div>
-        <div class="col">
-          <p>Ограничение по времени</p>
-          <p> {{ task?.timeLimitInMilliseconds }}</p>
-        </div>
-      </div>
     </div>
-    <div class="col-12 col-md-3">
-      <template v-if="currentRole === 'user'">
-        <router-link v-if="currentUserIsOwner" :to="{name: 'WorkSpaceEditTaskPage', params: {task_id: task?.id}}"
-                     class="btn btn-info">Редактировать
-        </router-link>
-      </template>
-      <template v-else-if="currentRole === 'moderator'">
-        <button @click.prevent="moderateTask" class="btn btn-primary">Подробнее</button>
-      </template>
-    </div>
-  </div>
 </template>
 
 <script>
@@ -78,5 +67,33 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+    .card {
+        min-height: 230px;
+        text-align: center;
+        border: 1px solid blue;
+    }
 
+    .workspace-btn {
+        padding: 5px 5px;
+        background-color: #fff;
+        border-radius: 16px;
+        border: 1px solid blue;
+        text-decoration: none;
+        color: blue;
+        width: 48%;
+
+        &:hover {
+            background-color: #0b76ef;
+            color: white;
+        }
+    }
+
+    .workspace-btn-del {
+        border: 1px solid red;
+        color: red;
+
+        &:hover {
+            background-color: red;
+        }
+    }
 </style>
