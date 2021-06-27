@@ -125,8 +125,8 @@ export default {
       isPublic: null,
 
       schema: Yup.object({
-        name: Yup.string().required().nullable(),
-        description: Yup.string().required().nullable(),
+          name: Yup.string('Название должно быть строкой').required('Название это обязательное поле').nullable(),
+          description: Yup.string('Описание должно быть строкой').required('Описание это обязательное поле').nullable(),
       })
     }
   },

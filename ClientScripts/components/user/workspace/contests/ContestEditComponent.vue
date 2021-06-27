@@ -4,32 +4,32 @@
   </div>
   <v-form @submit="saveContest" :validation-schema="schema" class="mb-3">
     <div>
-      <label>Название</label>
+      <label class=" fs-4">Название</label>
       <v-field v-model="name" class="form-control" name="name"/>
       <error-message name="name"></error-message>
     </div>
     <div>
-      <label>Описание</label>
+      <label class=" fs-4">Описание</label>
       <v-field v-model="description" as="textarea" class="form-control" name="description"/>
       <error-message name="description"></error-message>
     </div>
     <div>
-      <label>Дата начала</label>
+      <label class=" fs-4">Дата начала</label>
       <v-field v-model="startDateTimeUTC" class="form-control" type="datetime-local" name="startDateTimeUTC"/>
       <error-message name="startDateTimeUTC"></error-message>
     </div>
     <div>
-      <label>Продолжительность в минутах</label>
+      <label class="fs-4">Продолжительность в минутах</label>
       <v-field v-model="durationInMinutes" class="form-control" type="number" name="durationInMinutes"/>
       <error-message name="durationInMinutes"></error-message>
     </div>
     <div>
-      <label>Разрешены виртуальные соревнования</label>
-      <v-field v-model="areVirtualContestsAvailable" type="checkbox" value="1" name="areVirtualContestsAvailable"/>
-      <error-message name="areVirtualContestsAvailable"></error-message>
+        <v-field v-model="areVirtualContestsAvailable" class="custom-checkbox" id="areVirtualContestsAvailable" type="checkbox" value="1" name="areVirtualContestsAvailable" />
+        <label class=" fs-4" for="areVirtualContestsAvailable">Разрешены виртуальные соревнования</label>
+        <error-message name="areVirtualContestsAvailable"></error-message>
     </div>
     <div>
-      <label>Набор правил</label>
+      <label class=" fs-4">Набор правил</label>
       <v-field class="form-control" v-model="rulesSetId" as="select" name="rulesSetId">
         <option :value="set.id" v-for="set of availableRuleSets">{{ set.name }}</option>
       </v-field>
@@ -38,7 +38,7 @@
     <div class="row">
       <div class="col">
         <div>
-          <label>Изображение</label>
+          <label class=" fs-4">Изображение</label>
           <v-field v-model="image" class="form-control" name="image" type="file"/>
           <error-message name="image"></error-message>
         </div>
@@ -85,8 +85,8 @@ export default {
       name: '',
 
       schema: Yup.object({
-        name: Yup.string().required().nullable(),
-        description: Yup.string().required().nullable(),
+        name: Yup.string('Название должно быть строкой').nullable().required('Название это обязательное поле'),
+        description: Yup.string('Описание должно быть строкой').nullable().required('Описание это обязательное поле')
       })
     }
   },
@@ -209,5 +209,106 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+    div * {
+        margin: 5px;
+        color: #04295E;
+    }
 
+    span[role=alert] {
+        color: red;
+    }
+    form {
+        padding: 10px;
+    }
+    .row, .col{
+        margin: 0;
+        padding: 0;
+    }
+    .custom-checkbox {
+        position: absolute;
+        z-index: -1;
+        opacity: 0;
+    }
+
+    .custom-checkbox + label {
+        display: inline-flex;
+        align-items: center;
+        user-select: none;
+    }
+
+    .custom-checkbox + label::before {
+        content: '';
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+        flex-shrink: 0;
+        flex-grow: 0;
+        border: 1px solid #adb5bd;
+        border-radius: 0.25em;
+        margin-right: 0.5em;
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-size: 50% 50%;
+    }
+
+    .custom-checkbox:checked + label::before {
+        background-color: #0b76ef;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23fff' d='M6.564.75l-3.59 3.612-1.538-1.55L0 4.26 2.974 7.25 8 2.193z'/%3e%3c/svg%3e");
+    }
+
+    .form-control {
+        border-radius: 16px;
+    }
+
+    button {
+        padding: 5px 10px;
+        background-color: #fff;
+        border-radius: 16px;
+        border: 1px solid blue;
+
+        &:hover {
+            background-color: #0b76ef;
+            color: white;
+        }
+    }
+
+    .form-control::-webkit-input-placeholder {
+        opacity: 1;
+        transition: opacity 0.3s ease;
+    }
+
+    .form-control::-moz-placeholder {
+        opacity: 1;
+        transition: opacity 0.3s ease;
+    }
+
+    .form-control:-moz-placeholder {
+        opacity: 1;
+        transition: opacity 0.3s ease;
+    }
+
+    .form-control:-ms-input-placeholder {
+        opacity: 1;
+        transition: opacity 0.3s ease;
+    }
+
+    .form-control:focus::-webkit-input-placeholder {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .form-control:focus::-moz-placeholder {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .form-control:focus:-moz-placeholder {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .form-control:focus:-ms-input-placeholder {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
 </style>
