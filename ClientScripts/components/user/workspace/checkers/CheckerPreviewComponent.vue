@@ -36,7 +36,9 @@
             ...mapGetters(['currentUser', 'currentRole'])
         },
         methods: {
-            ...mapActions(['deleteChecker', 'fetchAvailableCheckers', 'fetchCurrentUserCheckers']),
+            ...mapActions(['deleteChecker',
+                'fetchAvailableCheckers',
+                'fetchCurrentUserCheckers']),
             async moderateChecker() {
                 await this.$router.push({
                     name: 'ModeratorCheckerModerationPage',
@@ -54,6 +56,10 @@
                     this.error_msg = (errors || []).join(', ')
                 }
             },
+            async fetchData() {
+                await this.fetchAvailableCheckers(true)
+                await this.fetchCurrentUserCheckers(true)
+            }
         }
     }
 </script>

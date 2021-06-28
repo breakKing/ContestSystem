@@ -41,7 +41,9 @@ export default {
     }
   },
     methods: {
-    ...mapActions(['deletePost', 'fetchPostsList', 'fetchUserPostsList']),
+    ...mapActions(['deletePost',
+        'fetchPostsList',
+        'fetchUserPostsList']),
     async deleteEntity() {
         this.error_msg = ''
         let { status, errors } = await this.deletePost(this.post?.id)
@@ -67,6 +69,10 @@ export default {
           }
         })
       }
+    },
+    async fetchData() {
+        await this.fetchPostsList(true)
+        await this.fetchUserPostsList(true)
     }
   },
   computed: {

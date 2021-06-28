@@ -33,7 +33,9 @@ export default {
     ...mapGetters(['currentUser', 'currentRole'])
   },
   methods: {
-      ...mapActions(['deleteRuleSet', 'fetchAvailableRuleSets', 'fetchCurrentUserRuleSets']),
+      ...mapActions(['deleteRuleSet',
+          'fetchAvailableRuleSets',
+          'fetchCurrentUserRuleSets']),
       async deleteEntity() {
           this.error_msg = ''
           let { status, errors } = await this.deleteRuleSet(this.ruleSet?.id)
@@ -43,6 +45,10 @@ export default {
               this.error_msg = (errors || []).join(', ')
           }
       },
+      async fetchData() {
+          await this.fetchCurrentUserRuleSets(true)
+          await this.fetchAvailableRuleSets(true)
+      }
   }
 }
 

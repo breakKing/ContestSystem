@@ -40,8 +40,11 @@ export default {
     contest: Object
   },
   methods: {
-    ...mapActions(['deleteContest', 'fetchCurrentUserContestsList', 'fetchAvailableContests']),
-
+    ...mapActions(['deleteContest',
+        'fetchCurrentUserContestsList',
+        'fetchAvailableContests',
+        'fetchParticipatingContests',
+        'fetchRunningContests']),
     async editContest() {
       await this.$router.push({name: 'WorkSpaceEditContestPage', params: {contest_id: this.contest.id}})
     },
@@ -64,7 +67,13 @@ export default {
       } else {
         this.error_msg = (errors || []).join(', ')
       }
-    },
+      },
+      async fetchData() {
+          await this.fetchCurrentUserContestsList(true)
+          await this.fetchAvailableContests(true)
+          await this.fetchParticipatingContests(true)
+          await this.fetchRunningContests(true)
+      }
   },
   computed: {
     ...mapGetters(['currentUser', 'currentRole']),
