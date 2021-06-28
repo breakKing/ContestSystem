@@ -32,7 +32,7 @@
         </ul>
         <ul>
           <template v-if="isAuthenticated ">
-            <li class="nav-item me-2 fs-5 pt-3">
+            <li class="nav-item me-2 fs-5 mt-3">
               <a class="nav-link text-light " href="#" @click.prevent="logout">Выйти</a>
             </li>
           </template>
