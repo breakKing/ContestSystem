@@ -5,7 +5,7 @@
                 <h5 class="card-title">{{ checker.name }}</h5>
                 <p class="card-text">{{ checker.description }}</p>
                 <p> Автор: {{checker.author.fullName}}</p>
-                <div class="row">
+                <div class="row d-flex justify-content-between">
                     <button v-if="currentRole === 'user' && +currentUser?.id === +checker.author.id" class="workspace-btn me-2"
                             @click.prevent="$router.push({name: 'WorkSpaceEditCheckersPage', params: {id: +checker.id }})">
                         Редактировать

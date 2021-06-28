@@ -5,7 +5,7 @@
                 <h5 class="card-title">{{ ruleSet.name }}</h5>
                 <p class="card-text">{{ ruleSet.description }}</p>
                 <p> Автор: {{ruleSet.author.fullName}}</p>
-                <div class="row">
+                <div class="row d-flex justify-content-between">
                     <button v-if="+currentUser?.id === +ruleSet.author.id" class="workspace-btn me-2"
                             @click.prevent="$router.push({name: 'WorkSpaceEditRuleSetPage', params: { set_id: ruleSet.id }})">
                         Редактировать
