@@ -11,7 +11,7 @@
                         Редактировать
                     </button>
                     <button v-if="+currentUser?.id === +ruleSet.author.id" class="workspace-btn workspace-btn-del"
-                            @click.prevent="shittyDeleteFunction">
+                            @click.prevent="deleteEntity">
                         Удалить
                     </button>
                 </div>
@@ -22,7 +22,7 @@
 
 <script>
 
-import {mapGetters} from "vuex";
+import { mapGetters, mapActions} from "vuex";
 
 export default {
   name: "RuleSetPreviewComponent",
@@ -31,6 +31,18 @@ export default {
   },
   computed: {
     ...mapGetters(['currentUser', 'currentRole'])
+  },
+  methods: {
+      ...mapActions(['deleteRuleSet', 'fetchAvailableRuleSets', 'fetchCurrentUserRuleSets']),
+      async deleteEntity() {
+          this.error_msg = ''
+          let { status, errors } = await this.deleteRuleSet(this.ruleSet?.id)
+          if (status) {
+              await this.fetchData()
+          } else {
+              this.error_msg = (errors || []).join(', ')
+          }
+      },
   }
 }
 

@@ -15,7 +15,7 @@
                         Подробнее
                     </button>
                     <button v-if="+currentUser?.id === +checker.author.id" class="workspace-btn workspace-btn-del"
-                            @click.prevent="shittyDeleteFunction">
+                            @click.prevent="deleteEntity">
                         Удалить
                     </button>
                 </div>
@@ -25,27 +25,37 @@
 </template>
 
 <script>
-import {mapGetters} from "vuex";
+    import { mapGetters, mapActions } from "vuex";
 
-export default {
-  name: "CheckerPreviewComponent",
-  props: {
-    checker: Object
-  },
-  computed: {
-    ...mapGetters(['currentUser', 'currentRole'])
-  },
-  methods: {
-    async moderateChecker() {
-      await this.$router.push({
-        name: 'ModeratorCheckerModerationPage',
-        params: {
-          checker_id: +this.checker.id
+    export default {
+        name: "CheckerPreviewComponent",
+        props: {
+            checker: Object
+        },
+        computed: {
+            ...mapGetters(['currentUser', 'currentRole'])
+        },
+        methods: {
+            ...mapActions(['deleteChecker', 'fetchAvailableCheckers', 'fetchCurrentUserCheckers']),
+            async moderateChecker() {
+                await this.$router.push({
+                    name: 'ModeratorCheckerModerationPage',
+                    params: {
+                        checker_id: +this.checker.id
+                    }
+                })
+            },
+            async deleteEntity() {
+                this.error_msg = ''
+                let { status, errors } = await this.deleteChecker(this.checker?.id)
+                if (status) {
+                    await this.fetchData()
+                } else {
+                    this.error_msg = (errors || []).join(', ')
+                }
+            },
         }
-      })
     }
-  }
-}
 </script>
 
 <style lang="scss" scoped>
