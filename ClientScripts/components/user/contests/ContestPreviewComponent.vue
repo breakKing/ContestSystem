@@ -3,10 +3,10 @@
         <div class="card">
             <img v-if="!!dataUrl" :src="dataUrl" class="card-img-top" alt="...">
             <div class="card-body d-flex flex-column justify-content-between">
-                <h5 class="card-title">{{ contest.localizedName }}</h5>
-                <p>{{ contest.localizedDescription }}</p>
-                <p>{{ contest.participatsCount || 0 }} участников</p>
-                <p> Автор: {{ contest.creator?.fullName }}</p>
+                <h5 class="card-title">{{ contest?.localizedName }}</h5>
+                <p>{{ contest?.localizedDescription }}</p>
+                <p>{{ contest?.participatsCount || 0 }} участников</p>
+                <p> Автор: {{ contest?.creator?.fullName }}</p>
                 <div class="row d-flex justify-content-center">
                     <template v-if="currentRole === 'user'">
                         <button type="button" class="workspace-btn workspace-btn-enter mb-3" @click.prevent="goToContest">
@@ -23,7 +23,7 @@
                         </div>
                     </template>
                     <template v-else-if="currentRole === 'moderator'">
-                        <button @click.prevent="moderateTask" class="workspace-btn">Подробнее</button>
+                        <button @click.prevent="moderateContest" class="workspace-btn">Подробнее</button>
                     </template>
                 </div>
             </div>
@@ -61,7 +61,7 @@ export default {
     },
     async deleteEntity() {
       this.error_msg = ''
-      let { status, errors } = await this.deleteContest(this.contest?.id)
+      let {status, errors} = await this.deleteContest(this.contest?.id)
       if (status) {
         await this.fetchData()
       } else {
