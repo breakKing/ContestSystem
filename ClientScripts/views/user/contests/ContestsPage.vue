@@ -1,7 +1,7 @@
 <template>
   <ul class="nav nav-pills mb-3" role="tablist">
     <li class="nav-item" role="presentation">
-      <router-link class="nav-link" :to="{name: 'ParticipatingContestsPage'}">Учавствую</router-link>
+      <router-link class="nav-link" :to="{name: 'ParticipatingContestsPage'}">Участвую</router-link>
     </li>
     <li class="nav-item" role="presentation">
       <router-link class="nav-link" :to="{name: 'AvailableContestsPage'}">Доступные мне</router-link>
