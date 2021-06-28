@@ -1,6 +1,6 @@
 <template>
   <!--eslint-disable -->
-  <button type="button" class="workspace-btn mt-2 mb-1 me-2" data-bs-toggle="modal"
+  <button type="button" class="workspace-btn mt-2 mb-1" data-bs-toggle="modal"
           :data-bs-target="'#'+modalId">
     {{ btnMessage }}
   </button>
@@ -224,5 +224,10 @@ export default {
     .form-control:focus:-ms-input-placeholder {
         opacity: 0;
         transition: opacity 0.3s ease;
+    }
+
+    button[data-bs-target="#post-modal-new"] {
+        padding: 5px 10px;
+        width: fit-content;
     }
 </style>
