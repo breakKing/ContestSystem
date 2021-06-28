@@ -149,13 +149,13 @@ namespace ContestSystem.Controllers
         public async Task<IActionResult> GetUserCreatedContests(long id, string culture)
         {
             var contests = await _dbContext.Contests.Where(c => c.CreatorId == id).ToListAsync();
-            var publishedContests = await Task.WhenAll(contests.ConvertAll(async c =>
+            var publishedContests = contests.ConvertAll(c =>
             {
                 var localizer = c.ContestLocalizers.FirstOrDefault(pl => pl.Culture == culture);
-                int participantsCount = await _dbContext.ContestsParticipants.CountAsync(cp => cp.ContestId == c.Id);
+                int participantsCount = c.ContestParticipants.Count(cp => cp.ContestId == c.Id);
                 var pc = PublishedContest.GetFromModel(c, localizer, participantsCount);
                 return pc;
-            }));
+            });
             return Json(publishedContests);
         }
 
