@@ -57,7 +57,7 @@ import {Field, Form, ErrorMessage} from "vee-validate";
 import * as Yup from 'yup';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import $ from 'jquery';
-import Base64UploadAdapter from '@ckeditor/ckeditor5-upload/src/adapters/base64uploadadapter';
+//import Base64UploadAdapter from '@ckeditor/ckeditor5-upload/src/adapters/base64uploadadapter';
 
 export default {
   name: "PostEditComponent",
@@ -72,7 +72,7 @@ export default {
       editor: ClassicEditor,
       editorData: '',
       editorConfig: {
-        extraPlugins: [Base64UploadAdapter]
+        //extraPlugins: [Base64UploadAdapter]
       },
       previewImage: null,
       error_msg: '',
