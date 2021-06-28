@@ -17,7 +17,7 @@
                                 Редактировать
                             </button>
                             <button v-if="currentUserIsOwner" class="workspace-btn workspace-btn-del"
-                                    @click.prevent="shittyDeleteFunction">
+                                    @click.prevent="deleteEntity">
                                 Удалить
                             </button>
                         </div>
@@ -40,6 +40,8 @@ export default {
     contest: Object
   },
   methods: {
+    ...mapActions(['deleteContest', 'fetchCurrentUserContestsList', 'fetchAvailableContests']),
+
     async editContest() {
       await this.$router.push({name: 'WorkSpaceEditContestPage', params: {contest_id: this.contest.id}})
     },
@@ -53,7 +55,16 @@ export default {
           contest_id: +this.contest.id
         }
       })
-    }
+    },
+    async deleteEntity() {
+      this.error_msg = ''
+      let { status, errors } = await this.deleteContest(this.contest?.id)
+      if (status) {
+        await this.fetchData()
+      } else {
+        this.error_msg = (errors || []).join(', ')
+      }
+    },
   },
   computed: {
     ...mapGetters(['currentUser', 'currentRole']),

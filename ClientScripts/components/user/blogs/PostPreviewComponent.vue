@@ -8,9 +8,16 @@
             {{ post.previewText }}
           </p>
         </div>
-        <post-edit-component v-if="editAllowed && currentUserIsAuthor"
-                             :post_id="post.id"></post-edit-component>
-        <button @click.prevent="previewClick" class="workspace-btn">Подробнее</button>
+        <div class="d-flex flex-column justify-content-center align-items-center">
+            <post-edit-component  v-if="editAllowed && currentUserIsAuthor"
+                                 :post_id="post.id"></post-edit-component>
+            <button  @click.prevent="previewClick" class="workspace-btn mb-1">Подробнее</button>
+            <button  v-if="currentUserIsAuthor" class="workspace-btn workspace-btn-del mb-1"
+                    @click.prevent="deleteEntity">
+                Удалить
+            </button>
+        </div>
+        
       </div>
       <div class="col-md-5 col-12">
         <img style="max-height: 10rem;" class="img-fluid" :src="dataUrl" :alt="post.Name">
@@ -33,7 +40,17 @@ export default {
       default: false
     }
   },
-  methods: {
+    methods: {
+    ...mapActions(['deletePost', 'fetchPostsList', 'fetchUserPostsList']),
+    async deleteEntity() {
+        this.error_msg = ''
+        let { status, errors } = await this.deletePost(this.post?.id)
+        if (status) {
+            await this.fetchData()
+        } else {
+            this.error_msg = (errors || []).join(', ')
+        }
+    },
     async previewClick() {
       if (this.currentRole === 'moderator') {
         await this.$router.push({
