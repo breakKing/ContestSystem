@@ -117,7 +117,14 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['addUserToContest', 'changeCurrentContest', 'removeUserFromContest', 'getContestParticipants']),
+      ...mapActions(['addUserToContest',
+        'changeCurrentContest',
+        'removeUserFromContest',
+        'getContestParticipants',
+        'fetchRunningContests',
+        'fetchAvailableContests',
+        'fetchParticipatingContests',
+        'fetchCurrentUserContestsList']),
     ...mapMutations(['setCurrentContestParticipants']),
     resetParticipateTry() {
       this.wants_participate = false
@@ -131,6 +138,7 @@ export default {
       })
       if (status) {
         await this.changeCurrentContest({force: true, contest_id: this.currentContest?.id})
+        await this.fetchData()
         await this.$router.push({name: 'ParticipatingContestsPage'})
       }
     },
@@ -143,7 +151,14 @@ export default {
         let participants = await this.getContestParticipants(this.contest_id)
         this.setCurrentContestParticipants(participants)
         this.resetParticipateTry()
+        await this.fetchData()
       }
+    },
+    async fetchData() {
+      await this.fetchRunningContests(true)
+      await this.fetchAvailableContests(true)
+      await this.fetchParticipatingContests(true)
+      await this.fetchCurrentUserContestsList(true)
     }
   },
   beforeRouteEnter(to, from, next) {
