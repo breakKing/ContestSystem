@@ -1,13 +1,16 @@
 <template>
-  <div class="card mb-3">
+  <div class="card mt-3">
     <div class="row g-0">
       <div class="col-md-7 col-12">
-        <div class="card-body">
-          <h5 class="card-title">{{ post.Name }}</h5>
-          <p class="card-text">
-            {{ post.previewText }}
-          </p>
-        </div>
+          <div class="card-body d-flex flex-column justify-content-between align-items-center">
+            <h5 class="card-title m-0">{{ post.localizedName }}</h5>
+            <p class="card-text m-0">
+                {{ post.previewText }}
+            </p>
+            <p class="card-text">
+                Автор: {{ post?.author?.fullName }}
+            </p>
+          </div>
         <div class="d-flex flex-column justify-content-center align-items-center">
             <post-edit-component  v-if="editAllowed && currentUserIsAuthor"
                                  :post_id="post.id"></post-edit-component>
@@ -20,7 +23,7 @@
         
       </div>
       <div class="col-md-5 col-12">
-        <img style="max-height: 10rem;" class="img-fluid" :src="dataUrl" :alt="post.Name">
+        <img class="img-fluid" :src="dataUrl" :alt="post.Name">
       </div>
     </div>
   </div>
@@ -107,7 +110,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.card {
-  cursor: pointer;
-}
+    .card{
+        border: 1px solid blue;
+    }
+    .img-fluid {
+        height: 100%;
+        width: 100%;
+    }  
 </style>
