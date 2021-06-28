@@ -1,17 +1,23 @@
 <template>
-  <div class="row">
-    <div class="col-12 col-md-3">
-      {{ ruleSet.name }}
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-body d-flex flex-column justify-content-between">
+                <h5 class="card-title">{{ ruleSet.name }}</h5>
+                <p class="card-text">{{ ruleSet.description }}</p>
+                <p> Автор: {{ruleSet.author.fullName}}</p>
+                <div class="row d-flex justify-content-between">
+                    <button v-if="+currentUser?.id === +ruleSet.author.id" class="workspace-btn me-2"
+                            @click.prevent="$router.push({name: 'WorkSpaceEditRuleSetPage', params: { set_id: ruleSet.id }})">
+                        Редактировать
+                    </button>
+                    <button v-if="+currentUser?.id === +ruleSet.author.id" class="workspace-btn workspace-btn-del"
+                            @click.prevent="shittyDeleteFunction">
+                        Удалить
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="col-12 col-md-7">
-      {{ ruleSet.description }}
-    </div>
-    <div class="col-12 col-md-2">
-      <button v-if="+currentUser?.id === +ruleSet.author.id" class="btn btn-primary"
-              @click.prevent="$router.push({name: 'WorkSpaceEditRuleSetPage', params: { set_id: ruleSet.id }})">Редактировать
-      </button>
-    </div>
-  </div>
 </template>
 
 <script>
@@ -31,5 +37,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
+    .card {
+        min-height: 210px;
+        text-align: center;
+        border: 1px solid blue;
+    }
 </style>

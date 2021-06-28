@@ -1,6 +1,8 @@
 <template>
-  <router-link class="btn btn-primary" :to="{name: 'WorkSpaceEditRuleSetPage'}">Создать</router-link>
-  <rule-set-preview-component v-for="ruleSet of availableRuleSets" :rule-set="ruleSet"></rule-set-preview-component>
+    <router-link class="workspace-btn" :to="{name: 'WorkSpaceEditRuleSetPage'}">Создать</router-link>
+    <div class="row mt-3">
+        <rule-set-preview-component v-for="ruleSet of availableRuleSets" :rule-set="ruleSet"></rule-set-preview-component>
+    </div>
 </template>
 
 <script>
@@ -26,5 +28,16 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+    .workspace-btn {
+        padding: 5px 10px;
+        background-color: #fff;
+        border-radius: 16px;
+        border: 1px solid blue;
+        text-decoration: none;
 
+        &:hover {
+            background-color: #0b76ef;
+            color: white;
+        }
+    }
 </style>

@@ -1,41 +1,34 @@
 ﻿<template>
-  <div class="row">
-    <div class="col">
-      <div class="row">
-        <div class="col-8">
-          {{ contest.localizedName }}
+    <div class="col-md-6 mb-3">
+        <div class="card">
+            <img v-if="!!dataUrl" :src="dataUrl" class="card-img-top" alt="...">
+            <div class="card-body d-flex flex-column justify-content-between">
+                <h5 class="card-title">{{ contest.localizedName }}</h5>
+                <p>{{ contest.localizedDescription }}</p>
+                <p>{{ contest.participatsCount || 0 }} участников</p>
+                <p> Автор: {{ contest.creator?.fullName }}</p>
+                <div class="row d-flex justify-content-center">
+                    <template v-if="currentRole === 'user'">
+                        <button type="button" class="workspace-btn workspace-btn-enter mb-3" @click.prevent="goToContest">
+                            Войти
+                        </button>
+                        <div class="row d-flex justify-content-between">
+                            <button v-if="currentUserIsOwner" type="button" class="workspace-btn" @click.prevent="editContest">
+                                Редактировать
+                            </button>
+                            <button v-if="currentUserIsOwner" class="workspace-btn workspace-btn-del"
+                                    @click.prevent="shittyDeleteFunction">
+                                Удалить
+                            </button>
+                        </div>
+                    </template>
+                    <template v-else-if="currentRole === 'moderator'">
+                        <button @click.prevent="moderateTask" class="workspace-btn">Подробнее</button>
+                    </template>
+                </div>
+            </div>
         </div>
-        <div class="col">
-          {{ contest.creator?.fullName }}
-        </div>
-      </div>
-      <div class="row">
-        <div class="col">
-          {{ contest.participatsCount || 0 }} участников
-        </div>
-      </div>
-      <div class="row">
-        <div class="col">
-          {{ contest.localizedDescription }}
-        </div>
-      </div>
     </div>
-    <div class="col" v-if="!!dataUrl">
-      <img class="img-fluid" alt="картинка" :src="dataUrl"/>
-    </div>
-    <div class="col-2">
-      <template v-if="currentRole === 'user'">
-        <button v-if="currentUserIsOwner" type="button" class="btn btn-info" @click.prevent="editContest">Редактировать
-        </button>
-        <button type="button" class="btn btn-info" @click.prevent="goToContest">Войти
-        </button>
-      </template>
-      <template v-else-if="currentRole === 'moderator'">
-        <button type="button" class="btn btn-info" @click.prevent="moderateContest">Подробнее
-        </button>
-      </template>
-    </div>
-  </div>
 </template>
 
 <script>
@@ -89,5 +82,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
+    .card {
+        text-align: center;
+        border: 1px solid blue;
+    }
+    
 </style>
