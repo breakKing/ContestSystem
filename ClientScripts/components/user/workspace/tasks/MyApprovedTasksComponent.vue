@@ -1,5 +1,5 @@
 ﻿<template>
-    <div class="row mt-6">
+    <div class="row mt-3">
         <task-preview-component v-for="task of currentUserPendingTasks" :task="task"></task-preview-component>
     </div>
 </template>

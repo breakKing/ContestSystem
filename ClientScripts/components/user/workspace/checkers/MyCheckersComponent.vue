@@ -1,7 +1,7 @@
 ﻿<template>
     <!--eslint-disable -->
     <router-link :to="{name: 'WorkSpaceEditCheckersPage'}" class="workspace-btn">Создать</router-link>
-    <div class="row mt-4">
+    <div class="row mt-3">
         <checker-preview-component v-for="checker of availableCheckers" :checker="checker"></checker-preview-component>
     </div>
 </template>
