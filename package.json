@@ -15,6 +15,7 @@
     "@ckeditor/ckeditor5-link": "^27.1.0",
     "@ckeditor/ckeditor5-paragraph": "^27.1.0",
     "@ckeditor/ckeditor5-theme-lark": "^27.1.0",
+    "@ckeditor/ckeditor5-upload": "^27.1.0",
     "@ckeditor/ckeditor5-vue": "^2.0.1",
     "@hennge/vue3-pagination": "1.0.17",
     "@microsoft/signalr": "5.0.4",
