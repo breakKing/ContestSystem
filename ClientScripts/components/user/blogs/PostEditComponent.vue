@@ -52,12 +52,12 @@
 </template>
 
 <script>
-import {Modal} from 'bootstrap';
 import {mapActions, mapGetters} from 'vuex'
 import {Field, Form, ErrorMessage} from "vee-validate";
 import * as Yup from 'yup';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import $ from 'jquery';
+import Base64UploadAdapter from '@ckeditor/ckeditor5-upload/src/adapters/base64uploadadapter';
 
 export default {
   name: "PostEditComponent",
@@ -71,7 +71,9 @@ export default {
     return {
       editor: ClassicEditor,
       editorData: '',
-      editorConfig: {},
+      editorConfig: {
+        extraPlugins: [Base64UploadAdapter]
+      },
       previewImage: null,
       error_msg: '',
       postName: '',
