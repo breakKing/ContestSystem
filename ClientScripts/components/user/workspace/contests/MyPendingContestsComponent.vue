@@ -1,5 +1,5 @@
 ﻿<template>
-    <div class="row mt-6">
+    <div class="row mt-3">
         <contest-preview-component v-for="contest of currentUserPendingContests"
                                    :contest="contest"></contest-preview-component>
     </div>
