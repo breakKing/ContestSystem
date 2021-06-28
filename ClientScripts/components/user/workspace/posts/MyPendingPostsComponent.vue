@@ -1,6 +1,9 @@
-<template><!--eslint-disable -->
-  <post-preview-component v-for="post of currentUserPendingPostsList" :post="post"
-                          :edit-allowed="true"></post-preview-component>
+<template>
+    <!--eslint-disable -->
+    <div class="row mt-3">
+        <post-preview-component v-for="post of currentUserPendingPostsList" :post="post"
+                                :edit-allowed="true"></post-preview-component>
+    </div>
 </template>
 
 <script>

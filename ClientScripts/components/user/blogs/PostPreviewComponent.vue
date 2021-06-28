@@ -10,7 +10,7 @@
         </div>
         <post-edit-component v-if="editAllowed && currentUserIsAuthor"
                              :post_id="post.id"></post-edit-component>
-        <button @click.prevent="previewClick" class="btn btn-info">Подробнее</button>
+        <button @click.prevent="previewClick" class="workspace-btn">Подробнее</button>
       </div>
       <div class="col-md-5 col-12">
         <img style="max-height: 10rem;" class="img-fluid" :src="dataUrl" :alt="post.Name">

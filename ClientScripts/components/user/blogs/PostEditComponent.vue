@@ -1,6 +1,6 @@
 <template>
   <!--eslint-disable -->
-  <button type="button" class="btn btn-primary ms-5 mt-2" data-bs-toggle="modal"
+  <button type="button" class="workspace-btn mt-2 mb-3 me-2" data-bs-toggle="modal"
           :data-bs-target="'#'+modalId">
     {{ btnMessage }}
   </button>
@@ -94,10 +94,10 @@ export default {
       return `post-modal-${name}`
     },
     btnMessage() {
-      if (!this.post_id) {
-        return 'Создать статью'
+        if (!this.post_id) {
+        return 'Создать'
       }
-      return 'Редактировать статью'
+      return 'Редактировать'
     },
     modalMsg() {
       if (!this.post_id) {
