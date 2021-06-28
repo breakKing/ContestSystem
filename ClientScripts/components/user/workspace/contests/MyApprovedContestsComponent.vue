@@ -1,5 +1,7 @@
 ﻿<template>
-  <contest-preview-component v-for="contest of currentUserApprovedContests" :contest="contest"></contest-preview-component>
+    <div class="row mt-6">
+        <contest-preview-component v-for="contest of currentUserApprovedContests" :contest="contest"></contest-preview-component>
+    </div>
 </template>
 
 <script>

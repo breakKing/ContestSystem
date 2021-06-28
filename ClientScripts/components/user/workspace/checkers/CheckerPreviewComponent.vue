@@ -54,29 +54,4 @@ export default {
         text-align: center;
         border: 1px solid blue;
     }
-
-    .workspace-btn {
-        padding: 5px 5px;
-        background-color: #fff;
-        border-radius: 16px;
-        border: 1px solid blue;
-        text-decoration: none;
-        color: blue;
-        width: 48%;
-
-        &:hover {
-            background-color: #0b76ef;
-            color: white;
-        }
-    }
-
-    .workspace-btn-del {
-        border: 1px solid red;
-        color: red;
-
-        &:hover {
-            background-color: red;
-            color: white;
-        }
-    }
 </style>
