@@ -12,6 +12,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Logging;
 using System.IO;
+using Microsoft.OpenApi.Models;
+using Microsoft.Extensions.Hosting.Internal;
 
 namespace ContestSystem
 {
@@ -81,7 +83,27 @@ namespace ContestSystem
 
             services.AddVerdicter();
 
-            services.AddSwaggerGen();
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v0.1", new OpenApiInfo { Title = "ContestSystem API v0.1 beta", Version = "v0.1" });
+                var securityScheme = new OpenApiSecurityScheme
+                {
+                    Name = "JWT Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "JWT-Auth"
+                    }
+                };                
+                c.AddSecurityDefinition("JWT-Auth", securityScheme);
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    { securityScheme, new[] { "JWT-Auth" } }
+                });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -95,7 +117,7 @@ namespace ContestSystem
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
                 {
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "ContestSystem API v0.1 beta");
+                    c.SwaggerEndpoint("/swagger/v0.1/swagger.json", "ContestSystem API v0.1 beta");
                 });
             }
 
