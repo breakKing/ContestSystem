@@ -13,7 +13,7 @@
                         <p> {{ task?.timeLimitInMilliseconds }}</p>
                     </div>
                 </div>
-                <p> Автор: {{task?.сreator?.fullName}}</p>
+                <p> Автор: {{ task?.creator?.fullName }}</p>
                 <div class="row d-flex justify-content-center">
                     <template v-if="currentRole === 'user'">
                         <router-link v-if="currentUserIsOwner" :to="{name: 'WorkSpaceEditTaskPage', params: {task_id: task?.id}}"
@@ -25,7 +25,7 @@
                         <button @click.prevent="moderateTask" class="workspace-btn">Подробнее</button>
                     </template>
                     <button v-if="currentUserIsOwner" class="workspace-btn workspace-btn-del"
-                            @click.prevent="shittyDeleteFunction">
+                            @click.prevent="deleteEntity">
                         Удалить
                     </button>
                 </div>
@@ -36,7 +36,7 @@
 
 <script>
 import TaskEditComponent from "./TaskEditComponent";
-import {mapGetters} from "vuex";
+import {mapGetters, mapActions} from "vuex";
 
 export default {
   name: "TaskPreviewComponent",
@@ -54,6 +54,18 @@ export default {
     }
   },
   methods: {
+    ...mapActions(['fetchCurrentUserTasks',
+      'fetchAvailableTasks',
+      'deleteTask']),
+    async deleteEntity() {
+      this.error_msg = ''
+      let {status, errors} = await this.deleteTask(this.task?.id)
+      if (status) {
+        await this.fetchData()
+      } else {
+        this.error_msg = (errors || []).join(', ')
+      }
+    },
     async moderateTask() {
       await this.$router.push({
         name: 'ModeratorProblemModerationPage',
@@ -61,6 +73,10 @@ export default {
           problem_id: +this.task.id
         }
       })
+    },
+    async fetchData() {
+      await this.fetchCurrentUserTasks(true)
+      await this.fetchAvailableTasks(true)
     }
   },
 }

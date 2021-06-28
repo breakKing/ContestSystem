@@ -1,6 +1,6 @@
 ﻿<template>
     <div class="row mt-3">
-        <task-preview-component v-for="task of currentUserPendingTasks" :task="task"></task-preview-component>
+        <task-preview-component v-for="task of currentUserApprovedTasks" :task="task"></task-preview-component>
     </div>
 </template>
 
