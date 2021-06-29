@@ -38,7 +38,7 @@ export default createStore({
         },
         getFormattedFullDateTime: (state, getters) => (date) => {
             moment.locale('ru');
-            return moment(date).format('LLLL');
+            return moment.utc(date).local().format('LLLL');
         }
     },
     actions: {
