@@ -16,7 +16,7 @@ namespace ContestSystem.Models.ExternalModels
         public string ModerationMessage { get; set; }
         public ApproveType ApprovalStatus { get; set; }
         
-        public static PublishedPost GetFromModel(Post post, PostLocalizer localizer)
+        public static PublishedPost GetFromModel(Post post, PostLocalizer localizer, string imageInBase64)
         {
             return new PublishedPost
             {
@@ -25,7 +25,7 @@ namespace ContestSystem.Models.ExternalModels
                 HtmlLocalizedText = localizer?.HtmlText,
                 PublicationDateTimeUTC = post.PublicationDateTimeUTC,
                 Author = post.Author?.ResponseStructure,
-                PreviewImage = post.PreviewImage,
+                PreviewImage = imageInBase64,
                 PreviewText = localizer?.PreviewText,
                 ApprovalStatus = post.ApprovalStatus
             };

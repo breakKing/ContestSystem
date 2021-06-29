@@ -17,7 +17,7 @@ namespace ContestSystem.Models.ExternalModels
         public object ApprovingModerator { get; set; }
         public string ModerationMessage { get; set; }
 
-        public static ConstructedPost GetFromModel(Post post)
+        public static ConstructedPost GetFromModel(Post post, string imageInBase64)
         {
             return new ConstructedPost
             {
@@ -29,7 +29,7 @@ namespace ContestSystem.Models.ExternalModels
                 Localizers = post.PostLocalizers?.ConvertAll(pl => PostLocalizerExternalModel.GetFromModel(pl)),
                 ModerationMessage = post.ModerationMessage,
                 PublicationDateTimeUTC = post.PublicationDateTimeUTC,
-                PreviewImage = post.PreviewImage
+                PreviewImage = imageInBase64
             };
         }
     }

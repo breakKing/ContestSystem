@@ -11,9 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Logging;
-using System.IO;
 using Microsoft.OpenApi.Models;
-using Microsoft.Extensions.Hosting.Internal;
 
 namespace ContestSystem
 {
@@ -82,6 +80,8 @@ namespace ContestSystem
             services.AddCheckerSystemConnector();
 
             services.AddVerdicter();
+
+            services.AddFileStorage();
 
             services.AddSwaggerGen(c =>
             {

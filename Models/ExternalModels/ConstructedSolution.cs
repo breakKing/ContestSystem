@@ -20,13 +20,13 @@ namespace ContestSystem.Models.ExternalModels
         public short Points { get; set; }
         public List<TestResultExternalModel> TestResults { get; set; } = new List<TestResultExternalModel>();
 
-        public static ConstructedSolution GetFromModel(Solution solution, List<ContestProblem> problemsInContest)
+        public static ConstructedSolution GetFromModel(Solution solution, List<ContestProblem> problemsInContest, string contestImageInBase64)
         {
             return new ConstructedSolution
             {
                 Id = solution.Id,
                 Participant = solution.Participant?.ResponseStructure,
-                Contest = ConstructedContest.GetFromModel(solution.Contest, problemsInContest),
+                Contest = ConstructedContest.GetFromModel(solution.Contest, problemsInContest, contestImageInBase64),
                 Problem = ConstructedProblem.GetFromModel(solution.Problem),
                 Code = solution.Code,
                 CompilerGUID = solution.CompilerGUID,

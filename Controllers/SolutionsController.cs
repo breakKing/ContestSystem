@@ -24,13 +24,15 @@ namespace ContestSystem.Controllers
         private readonly MainDbContext _dbContext;
         private readonly CheckerSystemService _checkerSystemService;
         private readonly VerdicterService _verdicter;
+        private readonly FileStorageService _storage;
         private readonly ILogger<SolutionsController> _logger;
 
-        public SolutionsController(MainDbContext dbContext, CheckerSystemService checkerSystemService, VerdicterService verdicter, ILogger<SolutionsController> logger)
+        public SolutionsController(MainDbContext dbContext, CheckerSystemService checkerSystemService, VerdicterService verdicter, ILogger<SolutionsController> logger, FileStorageService storage)
         {
             _dbContext = dbContext;
             _checkerSystemService = checkerSystemService;
             _verdicter = verdicter;
+            _storage = storage;
             _logger = logger;
         }
 
@@ -46,7 +48,7 @@ namespace ContestSystem.Controllers
 
             var problemsInContest = await _dbContext.ContestsProblems.Where(cp => cp.ContestId == solution.ContestId)
                 .ToListAsync();
-            var constructedSolution = ConstructedSolution.GetFromModel(solution, problemsInContest);
+            var constructedSolution = ConstructedSolution.GetFromModel(solution, problemsInContest, _storage.GetContestImageInBase64(solution.ContestId));
             return Json(constructedSolution);
         }
 

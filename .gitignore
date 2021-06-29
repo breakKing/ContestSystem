@@ -7,3 +7,4 @@ node_modules/
 ContestSystem.csproj.user
 appsettings.Development.json
 Logs/*
+Storage/*

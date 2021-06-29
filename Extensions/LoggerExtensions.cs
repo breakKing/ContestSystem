@@ -95,5 +95,10 @@ namespace ContestSystem.Extensions
         {
             logger.LogWarning($"При сохранении сущности \"{entityName}\" с идентификатором {entityId} произошла ошибка, связанная с параллельным редактированием");
         }
+
+        public static void LogFileWritingFailed(this ILogger logger, string filePath)
+        {
+            logger.LogWarning($"При записи файла \"{filePath}\" произошла ошибка");
+        }
     }
 }

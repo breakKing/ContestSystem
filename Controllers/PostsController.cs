@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using ContestSystem.Services;
 
 namespace ContestSystem.Controllers
 {
@@ -22,11 +23,13 @@ namespace ContestSystem.Controllers
     {
         private readonly MainDbContext _dbContext;
         private readonly ILogger<PostsController> _logger;
+        private readonly FileStorageService _storage;
 
-        public PostsController(MainDbContext dbContext, ILogger<PostsController> logger)
+        public PostsController(MainDbContext dbContext, ILogger<PostsController> logger, FileStorageService storage)
         {
             _dbContext = dbContext;
             _logger = logger;
+            _storage = storage;
         }
 
         [HttpGet("{culture}")]
@@ -37,7 +40,7 @@ namespace ContestSystem.Controllers
             var publishedPosts = new List<PublishedPost>();
             for (int i = 0; i < posts.Count; i++)
             {
-                var pp = PublishedPost.GetFromModel(posts[i], localizers[i]);
+                var pp = PublishedPost.GetFromModel(posts[i], localizers[i], _storage.GetPostImageInBase64(posts[i].Id));
                 publishedPosts.Add(pp);
             }
 
@@ -52,7 +55,7 @@ namespace ContestSystem.Controllers
             List<PublishedPost> publishedPosts = posts.ConvertAll(p =>
             {
                 var localizer = p.PostLocalizers.FirstOrDefault(pl => pl.Culture == culture);
-                var pp = PublishedPost.GetFromModel(p, localizer);
+                var pp = PublishedPost.GetFromModel(p, localizer, _storage.GetPostImageInBase64(p.Id));
                 return pp;
             });
             return Json(publishedPosts);
@@ -70,7 +73,7 @@ namespace ContestSystem.Controllers
                     return NotFound("Такой локализации под пост не существует");
                 }
 
-                var publishedPost = PublishedPost.GetFromModel(post, localizer);
+                var publishedPost = PublishedPost.GetFromModel(post, localizer, _storage.GetPostImageInBase64(post.Id));
                 return Json(publishedPost);
             }
 
@@ -84,7 +87,7 @@ namespace ContestSystem.Controllers
             var post = await _dbContext.Posts.FirstOrDefaultAsync(p => p.Id == id);
             if (post != null)
             {
-                var constructedPost = ConstructedPost.GetFromModel(post);
+                var constructedPost = ConstructedPost.GetFromModel(post, _storage.GetPostImageInBase64(post.Id));
                 return Json(constructedPost);
             }
             return NotFound("Такого поста не существует");
@@ -97,21 +100,11 @@ namespace ContestSystem.Controllers
             if (ModelState.IsValid)
             {
                 var currentUser = await HttpContext.GetCurrentUser();
-                byte[] imageData = null;
-                if (postForm.PreviewImage != null)
-                {
-                    await using (var ms = new MemoryStream())
-                    {
-                        await postForm.PreviewImage.CopyToAsync(ms);
-                        imageData = ms.ToArray();
-                    }
-                }
 
                 Post post = new Post
                 {
                     PromotedDateTimeUTC = DateTime.UtcNow,
                     AuthorId = postForm.AuthorUserId,
-                    PreviewImage = imageData == null ? null : Convert.ToBase64String(imageData),
                     PostLocalizers = new List<PostLocalizer>()
                 };
                 if (currentUser.Id != postForm.AuthorUserId)
@@ -142,6 +135,7 @@ namespace ContestSystem.Controllers
                 }
                 _dbContext.Posts.Add(post);
                 await _dbContext.SaveChangesAsync();
+                await _storage.SavePostImageAsync(post.Id, postForm.PreviewImage);
                 for (int i = 0; i < postForm.Localizers.Count; i++)
                 {
                     var localizer = new PostLocalizer
@@ -220,20 +214,7 @@ namespace ContestSystem.Controllers
                         });
                     }
 
-                    byte[] imageData = null;
-                    if (postForm.PreviewImage != null)
-                    {
-                        await using (var ms = new MemoryStream())
-                        {
-                            await postForm.PreviewImage.CopyToAsync(ms);
-                            imageData = ms.ToArray();
-                        }
-                    }
-
-                    if (imageData != null)
-                    {
-                        post.PreviewImage = Convert.ToBase64String(imageData);
-                    }
+                    await _storage.SavePostImageAsync(id, postForm.PreviewImage);
 
                     if (post.ApprovalStatus == ApproveType.Rejected)
                     {
@@ -359,7 +340,7 @@ namespace ContestSystem.Controllers
             var posts = await _dbContext.Posts.Where(p => p.ApprovalStatus == ApproveType.NotModeratedYet).ToListAsync();
             var requests = posts.ConvertAll(p =>
             {
-                ConstructedPost pr = ConstructedPost.GetFromModel(p);
+                ConstructedPost pr = ConstructedPost.GetFromModel(p, _storage.GetPostImageInBase64(p.Id));
                 return pr;
             });
             return Json(requests);
@@ -372,7 +353,7 @@ namespace ContestSystem.Controllers
             var posts = await _dbContext.Posts.Where(p => p.ApprovalStatus == ApproveType.Accepted).ToListAsync();
             var requests = posts.ConvertAll(p =>
             {
-                ConstructedPost pr = ConstructedPost.GetFromModel(p);
+                ConstructedPost pr = ConstructedPost.GetFromModel(p, _storage.GetPostImageInBase64(p.Id));
                 return pr;
             });
             return Json(requests);
@@ -385,7 +366,7 @@ namespace ContestSystem.Controllers
             var posts = await _dbContext.Posts.Where(p => p.ApprovalStatus == ApproveType.Rejected).ToListAsync();
             var requests = posts.ConvertAll(p =>
             {
-                ConstructedPost pr = ConstructedPost.GetFromModel(p);
+                ConstructedPost pr = ConstructedPost.GetFromModel(p, _storage.GetPostImageInBase64(p.Id));
                 return pr;
             });
             return Json(requests);

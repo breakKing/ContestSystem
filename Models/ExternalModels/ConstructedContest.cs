@@ -23,13 +23,13 @@ namespace ContestSystem.Models.ExternalModels
         public long? RulesSetId { get; set; }
         public bool AreVirtualContestsAvailable { get; set; }
 
-        public static ConstructedContest GetFromModel(Contest contest, List<ContestProblem> problems)
+        public static ConstructedContest GetFromModel(Contest contest, List<ContestProblem> problems, string imageInBase64)
         {
             return new ConstructedContest
             {
                 Id = contest.Id,
                 Localizers = contest.ContestLocalizers?.ConvertAll(cl => ContestLocalizerExternalModel.GetFromModel(cl)),
-                Image = contest.Image,
+                Image = imageInBase64,
                 StartDateTimeUTC = contest.StartDateTimeUTC,
                 EndDateTimeUTC = contest.EndDateTimeUTC,
                 DurationInMinutes = contest.DurationInMinutes,

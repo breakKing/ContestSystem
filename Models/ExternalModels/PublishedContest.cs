@@ -23,7 +23,7 @@ namespace ContestSystem.Models.ExternalModels
         public List<ProblemEntry> Problems { get; set; }
         public bool AreVirtualContestsAvailable { get; set; }
 
-        public static PublishedContest GetFromModel(Contest contest, ContestLocalizer localizer, int participantsCount)
+        public static PublishedContest GetFromModel(Contest contest, ContestLocalizer localizer, int participantsCount, string imageInBase64)
         {
             return new PublishedContest
             {
@@ -33,7 +33,7 @@ namespace ContestSystem.Models.ExternalModels
                 LocalizedName = localizer.Name,
                 StartDateTimeUTC = contest.StartDateTimeUTC,
                 EndDateTimeUTC = contest.EndDateTimeUTC,
-                Image = contest.Image,
+                Image = imageInBase64,
                 ParticipantsCount = participantsCount,
                 ApprovalStatus = contest.ApprovalStatus,
                 Rules = ConstructedRulesSet.GetFromModel(contest.RulesSet),
