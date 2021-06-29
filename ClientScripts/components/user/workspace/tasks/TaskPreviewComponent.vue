@@ -2,7 +2,7 @@
     <div class="col-md-6 mb-3">
         <div class="card">
             <div class="card-body d-flex flex-column justify-content-between">
-                <h5 class="card-title">{{ task?.localizedName }}</h5>
+                <h5 class="card-title">{{ taskLocalizedName }}</h5>
                 <div class="row">
                     <div class="col w-50">
                         <p>Ограничение по памяти</p>
@@ -37,6 +37,7 @@
 <script>
 import TaskEditComponent from "./TaskEditComponent";
 import {mapGetters, mapActions} from "vuex";
+import * as _ from 'lodash'
 
 export default {
   name: "TaskPreviewComponent",
@@ -51,6 +52,15 @@ export default {
         return false
       }
       return +this.task.creator.id === +this.currentUser.id
+    },
+    taskLocalizedName() {
+      if (!this.task) {
+        return ''
+      }
+      if (!this.task.localizedName) {
+        return _.filter((this.task.localizers || []), (el) => el.culture === 'ru')[0].name
+      }
+      return this.task.localizedName
     }
   },
   methods: {
