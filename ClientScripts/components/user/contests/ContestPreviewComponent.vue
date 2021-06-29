@@ -9,7 +9,7 @@
                 <p> Автор: {{ contest?.creator?.fullName }}</p>
                 <div class="row d-flex justify-content-center">
                     <template v-if="currentRole === 'user'">
-                        <button type="button" class="workspace-btn workspace-btn-enter mb-3" @click.prevent="goToContest">
+                        <button v-if="!currentUserIsOwner" type="button" class="workspace-btn workspace-btn-enter mb-3" @click.prevent="goToContest">
                             Войти
                         </button>
                         <div class="row d-flex justify-content-between">
