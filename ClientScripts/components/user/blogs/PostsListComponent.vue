@@ -1,7 +1,7 @@
 ﻿<template>
   <h3 class="text-center mt-3" v-if="!limitedLatestPosts || limitedLatestPosts.length === 0">Пока нет записей :)</h3>
   <template v-else>
-    <post-preview-component v-for="post of limitedLatestPosts" :post="post"></post-preview-component>
+    <post-preview-component v-for="post of limitedLatestPosts" :post="post" :is-in-workspace="false"></post-preview-component>
   </template>
 </template>
 

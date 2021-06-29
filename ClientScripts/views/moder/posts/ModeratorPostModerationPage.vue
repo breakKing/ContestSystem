@@ -10,7 +10,7 @@
       </div>
       <div class="col">
         <p>{{ currentModeratingPost?.author?.fullName }}
-          {{ getFormattedFullDateTime(currentModeratingPost?.publicationDateTimeUTC) }}</p>
+          {{ currentModeratingPost?.approvalStatus === 2 ? getFormattedFullDateTime(currentModeratingPost?.publicationDateTimeUTC) : '' }}</p>
       </div>
     </div>
     <div class="row">

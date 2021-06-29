@@ -14,8 +14,8 @@
         <div class="d-flex flex-column justify-content-center align-items-center">
             <post-edit-component  v-if="editAllowed && currentUserIsAuthor"
                                  :post_id="post.id"></post-edit-component>
-            <button  @click.prevent="previewClick" class="workspace-btn mb-1">Подробнее</button>
-            <button  v-if="currentUserIsAuthor" class="workspace-btn workspace-btn-del mb-1"
+            <button v-if="canBeOpenedForModerationOrReading" @click.prevent="previewClick" class="workspace-btn mb-1">Подробнее</button>
+            <button v-if="currentUserIsAuthor && isInWorkspace" class="workspace-btn workspace-btn-del mb-1"
                     @click.prevent="deleteEntity">
                 Удалить
             </button>
@@ -41,6 +41,10 @@ export default {
     editAllowed: {
       type: Boolean,
       default: false
+    },
+    isInWorkspace: {
+      type: Boolean,
+      default: true
     }
   },
     methods: {
@@ -104,6 +108,12 @@ export default {
         console.error(e)
       }
       return result
+    },
+    canBeOpenedForModerationOrReading() {
+      if (this.isInWorkspace) {
+        return this.currentRole === 'moderator' || this.post?.approvalStatus === 2
+      }
+      return true
     }
   },
 }
