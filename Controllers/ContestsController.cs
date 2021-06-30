@@ -459,6 +459,7 @@ namespace ContestSystem.Controllers
                 });
             }
 
+            _storage.DeleteFileAsync(loadedContest.ImagePath);
             _dbContext.Contests.Remove(loadedContest);
             await _dbContext.SaveChangesAsync();
             _logger.LogDeletingSuccessful("Contest", id, currentUser.Id);

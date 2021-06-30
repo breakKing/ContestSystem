@@ -101,6 +101,29 @@ namespace ContestSystem.Services
             return result;
         }
 
+        public bool DeleteFileAsync(string filePath)
+        {
+            bool deleted = false;
+            if (File.Exists(filePath))
+            {
+                try
+                {
+                    File.Delete(filePath);
+                    deleted = true;
+                    _logger.LogFileDeletingSuccessful(filePath);
+                }
+                catch
+                {
+                    _logger.LogFileDeletingFailed(filePath);
+                }
+            }
+            else
+            {
+                deleted = true;
+            }
+            return deleted;
+        }
+
         public string GetImageInBase64(string imagePath)
         {
             string result = "";

@@ -323,7 +323,7 @@ namespace ContestSystem.Controllers
                     errors = new List<string> {"Попытка удалить не свой пост или без админских прав"}
                 });
             }
-
+            _storage.DeleteFileAsync(loadedPost.ImagePath);
             _dbContext.Posts.Remove(loadedPost);
             await _dbContext.SaveChangesAsync();
             _logger.LogDeletingSuccessful("Post", id, currentUser.Id);

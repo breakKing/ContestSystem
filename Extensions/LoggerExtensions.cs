@@ -105,5 +105,15 @@ namespace ContestSystem.Extensions
         {
             logger.LogInformation($"Файл \"{filePath}\" успешно сохранён");
         }
+
+        public static void LogFileDeletingFailed(this ILogger logger, string filePath)
+        {
+            logger.LogWarning($"При удалении файла \"{filePath}\" произошла ошибка");
+        }
+
+        public static void LogFileDeletingSuccessful(this ILogger logger, string filePath)
+        {
+            logger.LogInformation($"Файл \"{filePath}\" успешно удалён");
+        }
     }
 }
