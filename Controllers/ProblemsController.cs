@@ -130,7 +130,7 @@ namespace ContestSystem.Controllers
                 }
                 if (currentUser.IsLimitedInProblems)
                 {
-                    if (await _dbContext.Problems.CountAsync(c => c.CreatorId == currentUser.Id) == 1)
+                    if (await _dbContext.Problems.CountAsync(p => p.CreatorId == currentUser.Id && p.ApprovalStatus == ApproveType.NotModeratedYet) == 1)
                     {
                         _logger.LogCreationFailedBecauseOfLimits("Problem", currentUser.Id);
                         return Json(new

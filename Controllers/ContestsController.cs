@@ -186,7 +186,7 @@ namespace ContestSystem.Controllers
 
                 if (currentUser.IsLimitedInContests)
                 {
-                    if (await _dbContext.Contests.CountAsync(c => c.CreatorId == currentUser.Id) == 1)
+                    if (await _dbContext.Contests.CountAsync(c => c.CreatorId == currentUser.Id && c.ApprovalStatus == ApproveType.NotModeratedYet) == 1)
                     {
                         _logger.LogCreationFailedBecauseOfLimits("Contest", currentUser.Id);
                         return Json(new
