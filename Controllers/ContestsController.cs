@@ -53,7 +53,7 @@ namespace ContestSystem.Controllers
             for (int i = 0; i < contests.Count; i++)
             {
                 int participantsCount = await _dbContext.ContestsParticipants.CountAsync(cp => cp.ContestId == contests[i].Id);
-                publishedContests.Add(PublishedContest.GetFromModel(contests[i], localizers[i], participantsCount, _storage.GetContestImageInBase64(contests[i].Id)));
+                publishedContests.Add(PublishedContest.GetFromModel(contests[i], localizers[i], participantsCount, _storage.GetImageInBase64(contests[i].ImagePath)));
             }
 
             return Json(publishedContests);
@@ -74,7 +74,7 @@ namespace ContestSystem.Controllers
             for (int i = 0; i < contests.Count; i++)
             {
                 int participantsCount = await _dbContext.ContestsParticipants.CountAsync(cp => cp.ContestId == contests[i].Id);
-                publishedContests.Add(PublishedContest.GetFromModel(contests[i], localizers[i], participantsCount, _storage.GetContestImageInBase64(contests[i].Id)));
+                publishedContests.Add(PublishedContest.GetFromModel(contests[i], localizers[i], participantsCount, _storage.GetImageInBase64(contests[i].ImagePath)));
             }
 
             return Json(publishedContests);
@@ -98,7 +98,7 @@ namespace ContestSystem.Controllers
             for (int i = 0; i < contests.Count; i++)
             {
                 int participantsCount = await _dbContext.ContestsParticipants.CountAsync(cp => cp.ContestId == contests[i].Id);
-                publishedContests.Add(PublishedContest.GetFromModel(contests[i], localizers[i], participantsCount, _storage.GetContestImageInBase64(contests[i].Id)));
+                publishedContests.Add(PublishedContest.GetFromModel(contests[i], localizers[i], participantsCount, _storage.GetImageInBase64(contests[i].ImagePath)));
             }
 
             return Json(publishedContests);
@@ -118,7 +118,7 @@ namespace ContestSystem.Controllers
                 }
 
                 int participantsCount = await _dbContext.ContestsParticipants.CountAsync(cp => cp.ContestId == contest.Id);
-                var publishedContest = PublishedContest.GetFromModel(contest, localizer, participantsCount, _storage.GetContestImageInBase64(contest.Id));
+                var publishedContest = PublishedContest.GetFromModel(contest, localizer, participantsCount, _storage.GetImageInBase64(contest.ImagePath));
                 return Json(publishedContest);
             }
 
@@ -133,7 +133,7 @@ namespace ContestSystem.Controllers
             if (contest != null)
             {
                 var problems = await _dbContext.ContestsProblems.Where(cp => cp.ContestId == contest.Id).ToListAsync();
-                var constructedContest = ConstructedContest.GetFromModel(contest, problems, _storage.GetContestImageInBase64(contest.Id));
+                var constructedContest = ConstructedContest.GetFromModel(contest, problems, _storage.GetImageInBase64(contest.ImagePath));
                 return Json(constructedContest);
             }
 
@@ -149,7 +149,7 @@ namespace ContestSystem.Controllers
             {
                 var localizer = c.ContestLocalizers.FirstOrDefault(pl => pl.Culture == culture);
                 int participantsCount = c.ContestParticipants.Count(cp => cp.ContestId == c.Id);
-                var pc = PublishedContest.GetFromModel(c, localizer, participantsCount, _storage.GetContestImageInBase64(c.Id));
+                var pc = PublishedContest.GetFromModel(c, localizer, participantsCount, _storage.GetImageInBase64(c.ImagePath));
                 return pc;
             });
             return Json(publishedContests);
@@ -206,7 +206,8 @@ namespace ContestSystem.Controllers
 
                 await _dbContext.Contests.AddAsync(contest);
                 await _dbContext.SaveChangesAsync();
-                await _storage.SaveContestImageAsync(contest.Id, contestForm.Image);
+                contest.ImagePath = await _storage.SaveContestImageAsync(contest.Id, contestForm.Image);
+                _dbContext.Contests.Update(contest);
 
                 var localModerator = new ContestLocalModerator
                 {
@@ -307,7 +308,7 @@ namespace ContestSystem.Controllers
                             errors = new List<string> {"Попытка изменить не свой контест"}
                         });
                     }
-                    await _storage.SaveContestImageAsync(id, contestForm.Image);
+                    contest.ImagePath = await _storage.SaveContestImageAsync(id, contestForm.Image);
                     contest.StartDateTimeUTC = contestForm.StartDateTimeUTC;
                     contest.DurationInMinutes = contestForm.DurationInMinutes;
                     contest.AreVirtualContestsAvailable = contestForm.AreVirtualContestsAvailable;
@@ -748,7 +749,7 @@ namespace ContestSystem.Controllers
                 .ToListAsync();
             var requests = contests.ConvertAll(c =>
             {
-                var cr = ConstructedContest.GetFromModel(c, c.ContestProblems, _storage.GetContestImageInBase64(c.Id));
+                var cr = ConstructedContest.GetFromModel(c, c.ContestProblems, _storage.GetImageInBase64(c.ImagePath));
                 return cr;
             });
             return Json(requests);
@@ -761,7 +762,7 @@ namespace ContestSystem.Controllers
             var contests = await _dbContext.Contests.Where(p => p.ApprovalStatus == ApproveType.Accepted).ToListAsync();
             var requests = contests.ConvertAll(c =>
             {
-                var cr = ConstructedContest.GetFromModel(c, c.ContestProblems, _storage.GetContestImageInBase64(c.Id));
+                var cr = ConstructedContest.GetFromModel(c, c.ContestProblems, _storage.GetImageInBase64(c.ImagePath));
                 return cr;
             });
             return Json(requests);
@@ -774,7 +775,7 @@ namespace ContestSystem.Controllers
             var contests = await _dbContext.Contests.Where(p => p.ApprovalStatus == ApproveType.Rejected).ToListAsync();
             var requests = contests.ConvertAll(c =>
             {
-                var cr = ConstructedContest.GetFromModel(c, c.ContestProblems, _storage.GetContestImageInBase64(c.Id));
+                var cr = ConstructedContest.GetFromModel(c, c.ContestProblems, _storage.GetImageInBase64(c.ImagePath));
                 return cr;
             });
             return Json(requests);

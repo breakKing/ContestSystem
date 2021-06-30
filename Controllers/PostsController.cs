@@ -40,7 +40,7 @@ namespace ContestSystem.Controllers
             var publishedPosts = new List<PublishedPost>();
             for (int i = 0; i < posts.Count; i++)
             {
-                var pp = PublishedPost.GetFromModel(posts[i], localizers[i], _storage.GetPostImageInBase64(posts[i].Id));
+                var pp = PublishedPost.GetFromModel(posts[i], localizers[i], _storage.GetImageInBase64(posts[i].ImagePath));
                 publishedPosts.Add(pp);
             }
 
@@ -55,7 +55,7 @@ namespace ContestSystem.Controllers
             List<PublishedPost> publishedPosts = posts.ConvertAll(p =>
             {
                 var localizer = p.PostLocalizers.FirstOrDefault(pl => pl.Culture == culture);
-                var pp = PublishedPost.GetFromModel(p, localizer, _storage.GetPostImageInBase64(p.Id));
+                var pp = PublishedPost.GetFromModel(p, localizer, _storage.GetImageInBase64(p.ImagePath));
                 return pp;
             });
             return Json(publishedPosts);
@@ -73,7 +73,7 @@ namespace ContestSystem.Controllers
                     return NotFound("Такой локализации под пост не существует");
                 }
 
-                var publishedPost = PublishedPost.GetFromModel(post, localizer, _storage.GetPostImageInBase64(post.Id));
+                var publishedPost = PublishedPost.GetFromModel(post, localizer, _storage.GetImageInBase64(post.ImagePath));
                 return Json(publishedPost);
             }
 
@@ -87,7 +87,7 @@ namespace ContestSystem.Controllers
             var post = await _dbContext.Posts.FirstOrDefaultAsync(p => p.Id == id);
             if (post != null)
             {
-                var constructedPost = ConstructedPost.GetFromModel(post, _storage.GetPostImageInBase64(post.Id));
+                var constructedPost = ConstructedPost.GetFromModel(post, _storage.GetImageInBase64(post.ImagePath));
                 return Json(constructedPost);
             }
             return NotFound("Такого поста не существует");
@@ -135,7 +135,9 @@ namespace ContestSystem.Controllers
                 }
                 _dbContext.Posts.Add(post);
                 await _dbContext.SaveChangesAsync();
-                await _storage.SavePostImageAsync(post.Id, postForm.PreviewImage);
+                post.ImagePath = await _storage.SavePostImageAsync(post.Id, postForm.PreviewImage);
+                _dbContext.Posts.Update(post);
+                
                 for (int i = 0; i < postForm.Localizers.Count; i++)
                 {
                     var localizer = new PostLocalizer
@@ -214,7 +216,7 @@ namespace ContestSystem.Controllers
                         });
                     }
 
-                    await _storage.SavePostImageAsync(id, postForm.PreviewImage);
+                    post.ImagePath = await _storage.SavePostImageAsync(id, postForm.PreviewImage);
 
                     if (post.ApprovalStatus == ApproveType.Rejected)
                     {
@@ -340,7 +342,7 @@ namespace ContestSystem.Controllers
             var posts = await _dbContext.Posts.Where(p => p.ApprovalStatus == ApproveType.NotModeratedYet).ToListAsync();
             var requests = posts.ConvertAll(p =>
             {
-                ConstructedPost pr = ConstructedPost.GetFromModel(p, _storage.GetPostImageInBase64(p.Id));
+                ConstructedPost pr = ConstructedPost.GetFromModel(p, _storage.GetImageInBase64(p.ImagePath));
                 return pr;
             });
             return Json(requests);
@@ -353,7 +355,7 @@ namespace ContestSystem.Controllers
             var posts = await _dbContext.Posts.Where(p => p.ApprovalStatus == ApproveType.Accepted).ToListAsync();
             var requests = posts.ConvertAll(p =>
             {
-                ConstructedPost pr = ConstructedPost.GetFromModel(p, _storage.GetPostImageInBase64(p.Id));
+                ConstructedPost pr = ConstructedPost.GetFromModel(p, _storage.GetImageInBase64(p.ImagePath));
                 return pr;
             });
             return Json(requests);
@@ -366,7 +368,7 @@ namespace ContestSystem.Controllers
             var posts = await _dbContext.Posts.Where(p => p.ApprovalStatus == ApproveType.Rejected).ToListAsync();
             var requests = posts.ConvertAll(p =>
             {
-                ConstructedPost pr = ConstructedPost.GetFromModel(p, _storage.GetPostImageInBase64(p.Id));
+                ConstructedPost pr = ConstructedPost.GetFromModel(p, _storage.GetImageInBase64(p.ImagePath));
                 return pr;
             });
             return Json(requests);

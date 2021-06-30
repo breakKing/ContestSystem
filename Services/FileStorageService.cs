@@ -10,16 +10,16 @@ namespace ContestSystem.Services
 {
     public class FileStorageService
     {
-        private readonly string _storageDirectory = @"\Storage";
-        private readonly string _imagesDirectory = @"\Images";
-        private readonly string _contestsDirectory = @"\Contests";
-        private readonly string _postsDirectory = @"\Posts";
+        private readonly string _storageDirectory = @"Storage";
+        private readonly string _imagesDirectory = @"Images";
+        private readonly string _contestsDirectory = @"Contests";
+        private readonly string _postsDirectory = @"Posts";
         private readonly ILogger<FileStorageService> _logger;
 
-        private string StorageDirectory => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, _storageDirectory);
-        private string ImagesDirectory => Path.Combine(StorageDirectory, _imagesDirectory);
-        private string ContestsImagesDirectory => Path.Combine(ImagesDirectory, _contestsDirectory);
-        private string PostsImagesDirectory => Path.Combine(ImagesDirectory, _postsDirectory);
+        private string StorageDirectory => Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, _storageDirectory));
+        private string ImagesDirectory => Path.GetFullPath(Path.Combine(StorageDirectory, _imagesDirectory));
+        private string ContestsImagesDirectory => Path.GetFullPath(Path.Combine(ImagesDirectory, _contestsDirectory));
+        private string PostsImagesDirectory => Path.GetFullPath(Path.Combine(ImagesDirectory, _postsDirectory));
 
         private List<string> AllowedImageTypes => new List<string>
         {
@@ -47,9 +47,9 @@ namespace ContestSystem.Services
             }
         }
 
-        public async Task<bool> SaveContestImageAsync(long contestId, IFormFile formFileForImage)
+        public async Task<string> SaveContestImageAsync(long contestId, IFormFile formFileForImage)
         {
-            bool status = false;
+            string result = "";
             if (formFileForImage != null)
             {
                 string imageType = formFileForImage.FileName.Substring(formFileForImage.FileName.LastIndexOf('.') + 1).ToLower();
@@ -62,7 +62,7 @@ namespace ContestSystem.Services
                         {
                             await formFileForImage.CopyToAsync(fileStream);
                         }
-                        status = true;
+                        result = imagePath;
                     }
                     catch
                     {
@@ -70,12 +70,12 @@ namespace ContestSystem.Services
                     }
                 }
             }
-            return status;
+            return result;
         }
 
-        public async Task<bool> SavePostImageAsync(long postId, IFormFile formFileForImage)
+        public async Task<string> SavePostImageAsync(long postId, IFormFile formFileForImage)
         {
-            bool status = false;
+            string result = "";
             if (formFileForImage != null)
             {
                 string imageType = formFileForImage.FileName.Substring(formFileForImage.FileName.LastIndexOf('.') + 1).ToLower();
@@ -88,7 +88,7 @@ namespace ContestSystem.Services
                         {
                             await formFileForImage.CopyToAsync(fileStream);
                         }
-                        status = true;
+                        result = imagePath;
                     }
                     catch
                     {
@@ -96,35 +96,14 @@ namespace ContestSystem.Services
                     }
                 }
             }
-            return status;
-        }
-
-        public string GetContestImageInBase64(long contestId)
-        {
-            string result = "";
-            string[] images = Directory.GetFiles(ContestsImagesDirectory, $"{contestId}.*");
-            if (images.Length > 0)
-            {
-                string imagePath = images[0];
-                byte[] bytes = Array.Empty<byte>();
-                FileStream fileStream = File.Open(imagePath, FileMode.Open);
-                using (var binaryReader = new BinaryReader(fileStream))
-                {
-                    bytes = binaryReader.ReadBytes((int)fileStream.Length); // Выдержит файл до 2 ГБ
-                }
-                fileStream.Close();
-                result = Convert.ToBase64String(bytes);
-            }
             return result;
         }
 
-        public string GetPostImageInBase64(long postId)
+        public string GetImageInBase64(string imagePath)
         {
             string result = "";
-            string[] images = Directory.GetFiles(PostsImagesDirectory, $"{postId}.*");
-            if (images.Length > 0)
+            if (File.Exists(imagePath))
             {
-                string imagePath = images[0];
                 byte[] bytes = Array.Empty<byte>();
                 FileStream fileStream = File.Open(imagePath, FileMode.Open);
                 using (var binaryReader = new BinaryReader(fileStream))
