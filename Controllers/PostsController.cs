@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -133,7 +132,7 @@ namespace ContestSystem.Controllers
                 {
                     post.ApprovalStatus = ApproveType.Accepted;
                 }
-                _dbContext.Posts.Add(post);
+                await _dbContext.Posts.AddAsync(post);
                 await _dbContext.SaveChangesAsync();
                 post.ImagePath = await _storage.SavePostImageAsync(post.Id, postForm.PreviewImage);
                 _dbContext.Posts.Update(post);

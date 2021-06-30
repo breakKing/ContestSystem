@@ -117,7 +117,7 @@ namespace ContestSystem.Controllers
                 }
 
                 checker.ApprovalStatus = ApproveType.NotModeratedYet;
-                _dbContext.Checkers.Add(checker);
+                await _dbContext.Checkers.AddAsync(checker);
                 await _dbContext.SaveChangesAsync();
                 _logger.LogCreationSuccessful("Checker", checker.Id, currentUser.Id);
                 return Json(new
