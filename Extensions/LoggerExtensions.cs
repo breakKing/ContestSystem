@@ -100,5 +100,10 @@ namespace ContestSystem.Extensions
         {
             logger.LogWarning($"При записи файла \"{filePath}\" произошла ошибка");
         }
+
+        public static void LogFileWritingSuccessful(this ILogger logger, string filePath)
+        {
+            logger.LogInformation($"Файл \"{filePath}\" успешно сохранён");
+        }
     }
 }

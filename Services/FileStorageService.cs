@@ -63,6 +63,7 @@ namespace ContestSystem.Services
                             await formFileForImage.CopyToAsync(fileStream);
                         }
                         result = imagePath;
+                        _logger.LogFileWritingSuccessful(imagePath);
                     }
                     catch
                     {
@@ -89,6 +90,7 @@ namespace ContestSystem.Services
                             await formFileForImage.CopyToAsync(fileStream);
                         }
                         result = imagePath;
+                        _logger.LogFileWritingSuccessful(imagePath);
                     }
                     catch
                     {
