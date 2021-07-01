@@ -13,6 +13,7 @@ namespace ContestSystem.Models.ExternalModels
         public int TimeLimitInMilliseconds { get; set; }
         public string ModerationMessage { get; set; }
         public bool IsPublic { get; set; }
+        public bool IsArchieved { get; set; }
         public ConstructedChecker Checker { get; set; }
         public ApproveType ApprovalStatus { get; set; }
         public object ApprovingModerator { get; set; }
@@ -32,6 +33,7 @@ namespace ContestSystem.Models.ExternalModels
                 ApprovingModerator = problem.ApprovingModerator?.ResponseStructure,
                 Checker = ConstructedChecker.GetFromModel(problem.Checker),
                 IsPublic = problem.IsPublic,
+                IsArchieved = problem.IsArchieved,
                 Localizers = problem.ProblemLocalizers?.ConvertAll(pl => ProblemLocalizerExternalModel.GetFromModel(pl)),
                 Tests = problem.Tests,
                 Examples = problem.Examples

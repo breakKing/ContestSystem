@@ -21,8 +21,8 @@
           letter: task.letter,
           problemId: +$event.target.value
         })" v-model="selected_ids[sym_idx]">
-          <option v-for="available_task of availableTasks"
-                  :value="+available_task.id">{{ available_task.localizedName }}
+          <option v-for="available_task of availableTasksForContest"
+                  :value="+available_task.id">{{ available_task.localizedName }} {{ shouldTaskBeRemarked(available_task) ? '*' : ''}}
           </option>
         </select>
       </td>
@@ -36,6 +36,7 @@
     </tr>
     </tbody>
   </table>
+   <p v-if="unavailableTasksInFutureExists">* Данная задача более недоступна. Однако Вы можете использовать её для этого соревнования до тех пор, пока не замените её.</p>
 </template>
 
 <script>
@@ -45,7 +46,7 @@ import * as _ from 'lodash'
 
 export default {
   name: "TasksSelectorComponent",
-  props: ['tasks'],
+  props: ['tasks', 'availableTasksForContest'],
   emits: ['update:tasks'],
   methods: {
     getNextLetter() {
@@ -53,10 +54,22 @@ export default {
         return alphabet.upper[0]
       }
       return alphabet.upper[this.tasks.length]
+    },
+    shouldTaskBeRemarked(task) {
+      let remark = false
+      if (task) {
+        if ((task.author?.id != this.currentUser.id && !task.isPublic) || task.isArchieved) {
+          remark = true
+        }
+      }
+      return remark
     }
   },
   computed: {
-    ...mapGetters(['availableTasks']),
+    ...mapGetters(['currentUser']),
+    unavailableTasksInFutureExists() {
+      return _.reduce(this.availableTasksForContest || [], (count, t) => count += +this.shouldTaskBeRemarked(t), 0) > 0
+    },
     selected_ids() {
       return _.cloneDeep(_.map((this.tasks || []), (t) => +t?.problemId))
     },

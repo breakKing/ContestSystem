@@ -39,9 +39,10 @@
         <div>
           <label class="fs-4">Механизм проверки</label>
           <v-field v-model="checker" class="form-control" name="checker" as="select">
-            <option v-for="checker of availableCheckers" :value="checker.id">{{ checker.name }}</option>
+            <option v-for="checker of availableCheckersForProblem" :value="checker.id">{{ checker.name }} {{ shouldCheckerBeRemarked(checker) ? '*' : '' }}</option>
           </v-field>
           <error-message name="checker"></error-message>
+          <p v-if="unavailableCheckersInFutureExists">* Данный механизм проверки более недоступен. Однако Вы можете использовать его для этой задачи до тех пор, пока не замените его.</p>
         </div>
         <div>
           <v-field v-model="isPublic" class="custom-checkbox" id="isPublic" name="isPublic" type="checkbox" :value="true" :uncheckedValue="false"/>
@@ -95,6 +96,7 @@ export default {
       description: '',
       inputBlock: '',
       outputBlock: '',
+      startedChecker: null,
 
       schema: Yup.object({
         memoryLimitInBytes: Yup.number('Лимит занимаемого RAM это число').nullable().required('Лимит занимаемого RAM это обязательное поле'),
@@ -110,6 +112,15 @@ export default {
   },
   computed: {
     ...mapGetters(['availableCheckers', 'currentUser']),
+    availableCheckersForProblem() {
+      if (!this.startedChecker) {
+        return this.availableCheckers
+      }
+      return _.union(this.availableCheckers || [], [ this.startedChecker ])
+    },
+    unavailableCheckersInFutureExists() {
+      return _.reduce(this.availableCheckersForProblem || [], (count, c) => count += +this.shouldCheckerBeRemarked(c), 0) > 0
+    },
     sortedTests() {
       return _.sortBy((this.tests || []), (t) => t.number)
     },
@@ -129,6 +140,7 @@ export default {
       this.timeLimitInMilliseconds = data?.timeLimitInMilliseconds || null
       this.isPublic = data?.isPublic || false
       this.checker = data?.checker?.id || null
+      this.startedChecker = data?.checker || null
       this.name = (data?.localizers || [])[0]?.name || null
       this.description = (data?.localizers || [])[0]?.description || null
       this.inputBlock = (data?.localizers || [])[0]?.inputBlock || null
@@ -257,6 +269,15 @@ export default {
         })
       }
     },
+    shouldCheckerBeRemarked(checker) {
+      let remark = false
+      if (checker) {
+        if ((checker.author?.id != this.currentUser.id && !checker.isPublic) || checker.isArchieved) {
+          remark = true
+        }
+      }
+      return remark
+    }
   },
   beforeRouteEnter(to, from, next) {
     next(async vm => {

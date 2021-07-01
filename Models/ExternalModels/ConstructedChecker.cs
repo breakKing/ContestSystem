@@ -11,6 +11,7 @@ namespace ContestSystem.Models.ExternalModels
         public object Author { get; set; }
         public string Code { get; set; }
         public bool IsPublic { get; set; }
+        public bool IsArchieved { get; set; }
         public VerdictType CompilationVerdict { get; set; }
         public string Errors { get; set; }
         public ApproveType ApprovalStatus { get; set; }
@@ -27,6 +28,7 @@ namespace ContestSystem.Models.ExternalModels
                 CompilationVerdict = checker.CompilationVerdict,
                 Errors = checker.Errors,
                 IsPublic = checker.IsPublic,
+                IsArchieved = checker.IsArchieved,
                 Author = checker.Author?.ResponseStructure,
                 ModerationMessage = checker.ModerationMessage,
                 ApprovalStatus = checker.ApprovalStatus,

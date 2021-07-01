@@ -31,9 +31,10 @@
     <div>
       <label class=" fs-4">Набор правил</label>
       <v-field class="form-control" v-model="rulesSetId" as="select" name="rulesSetId">
-        <option :value="set.id" v-for="set of availableRuleSets">{{ set.name }}</option>
+          <option :value="set.id" v-for="set of availableRuleSetsForContest">{{ set.name }} {{ shouldRulesSetBeRemarked(set) ? '*' : '' }}</option>
       </v-field>
       <error-message name="rulesSetId"></error-message>
+      <p v-if="unavailableRulesSetsInFutureExists">* Данный набор правил более недоступен. Однако Вы можете использовать его для этого соревнования до тех пор, пока не замените его.</p>
     </div>
     <div class="row">
       <div class="col">
@@ -47,7 +48,7 @@
         <img class="img-fluid" :src="dataUrl"/>
       </div>
     </div>
-    <tasks-selector-component :tasks="sortedTasks" @update:tasks="updateEvent"></tasks-selector-component>
+    <tasks-selector-component :tasks="sortedTasks" :availableTasksForContest="availableTasksForContest" @update:tasks="updateEvent"></tasks-selector-component>
     <button type="submit" class="btn btn-primary">Сохранить</button>
   </v-form>
 </template>
@@ -83,6 +84,8 @@ export default {
       description: '',
       image: '',
       name: '',
+      startedRulesSet: null,
+      startedProblems: [],
 
       schema: Yup.object({
         name: Yup.string('Название должно быть строкой').nullable().required('Название это обязательное поле'),
@@ -91,7 +94,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['getContestById', 'fetchAvailableRuleSets', 'fetchRunningContests', 'fetchAvailableContests', 'fetchParticipatingContests', 'fetchCurrentUserContestsList', 'fetchAvailableTasks']),
+    ...mapActions(['getContestById', 'getRuleSet', 'fetchAvailableRuleSets', 'fetchRunningContests', 'fetchAvailableContests', 'fetchParticipatingContests', 'fetchCurrentUserContestsList', 'fetchAvailableTasks']),
     async updateFields() {
       await this.fetchAvailableRuleSets();
       let contest = await this.getContestById(this.contest_id)
@@ -102,8 +105,10 @@ export default {
       this.areVirtualContestsAvailable = contest?.areVirtualContestsAvailable || false
       this.isPublic = contest?.isPublic || false
       this.rulesSetId = contest?.rulesSetId || null
+      this.startedRulesSet = contest?.rules || null
       this.image = contest?.image || null
       this.tasks = contest?.problems || []
+      this.startedProblems = this.tasks
     },
     updateEvent(data) {
       if (data.type === 'add') {
@@ -182,10 +187,31 @@ export default {
       } else {
         this.error_msg = (result.errors || []).join(', ')
       }
+    },
+    shouldRulesSetBeRemarked(rulesSet) {
+      let remark = false
+      if (rulesSet) {
+        if ((rulesSet.author?.id != this.currentUser.id && !rulesSet.isPublic) || rulesSet.isArchieved) {
+          remark = true
+        }
+      }
+      return remark
     }
   },
   computed: {
-    ...mapGetters(['currentUser', 'availableRuleSets']),
+    ...mapGetters(['currentUser', 'availableRuleSets', 'availableTasks']),
+    availableRuleSetsForContest() {
+      if (!this.startedRulesSet) {
+        return this.availableRuleSets
+      }
+      return _.union(this.availableRuleSets || [], [ this.startedRulesSet ])
+    },
+    availableTasksForContest() {
+      return _.union(this.availableTasks || [], this.startedProblems || [])
+    },
+    unavailableRulesSetsInFutureExists() {
+      return _.reduce(this.availableRuleSetsForContest || [], (count, rs) => count += +this.shouldRulesSetBeRemarked(rs), 0) > 0
+    },
     sortedTasks() {
       return _.sortBy(this.tasks, ['letter'])
     },

@@ -19,6 +19,7 @@ namespace ContestSystem.Models.ExternalModels
         public short MonitorFreezeTimeBeforeFinishInMinutes { get; set; }
         public bool ShowFullTestsResults { get; set; }
         public bool IsPublic { get; set; }
+        public bool IsArchieved { get; set; }
 
         public static ConstructedRulesSet GetFromModel(RulesSet rules)
         {
@@ -37,7 +38,8 @@ namespace ContestSystem.Models.ExternalModels
                 PenaltyForOneTry = rules.PenaltyForOneTry,
                 PublicMonitor = rules.PublicMonitor,
                 Author = rules.Author?.ResponseStructure,
-                IsPublic = rules.IsPublic
+                IsPublic = rules.IsPublic,
+                IsArchieved = rules.IsArchieved
             };
         }
     }

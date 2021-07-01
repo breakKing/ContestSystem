@@ -3,9 +3,6 @@ using ContestSystemDbStructure.Models;
 
 namespace ContestSystem.Models.ExternalModels
 {
-    /**
-     * Пришлось вынести чтобы иметь доступ к пространству имён в основной модели
-     */
     public class PublishedProblem
     {
         public long Id { get; set; }
@@ -18,6 +15,8 @@ namespace ContestSystem.Models.ExternalModels
         public int TimeLimitInMilliseconds { get; set; }
         public string ModerationMessage { get; set; }
         public ApproveType ApprovalStatus { get; set; }
+        public bool IsPublic { get; set; }
+        public bool IsArchieved { get; set; }
 
         public static PublishedProblem GetFromModel(Problem problem, ProblemLocalizer localizer)
         {
@@ -32,7 +31,9 @@ namespace ContestSystem.Models.ExternalModels
                 TimeLimitInMilliseconds = problem.TimeLimitInMilliseconds,
                 Creator = problem.Creator?.ResponseStructure,
                 ModerationMessage = problem.ModerationMessage,
-                ApprovalStatus = problem.ApprovalStatus
+                ApprovalStatus = problem.ApprovalStatus,
+                IsPublic = problem.IsPublic,
+                IsArchieved = problem.IsArchieved
             };
         }
     }
