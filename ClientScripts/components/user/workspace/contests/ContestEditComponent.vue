@@ -96,7 +96,8 @@ export default {
   methods: {
     ...mapActions(['getContestById', 'getRuleSet', 'fetchAvailableRuleSets', 'fetchRunningContests', 'fetchAvailableContests', 'fetchParticipatingContests', 'fetchCurrentUserContestsList', 'fetchAvailableTasks']),
     async updateFields() {
-      await this.fetchAvailableRuleSets();
+      await this.fetchAvailableRuleSets()
+      await this.fetchAvailableTasks()
       let contest = await this.getContestById(this.contest_id)
       this.name = (contest?.localizers || [])[0]?.name || null
       this.description = (contest?.localizers || [])[0]?.description || null
@@ -108,7 +109,7 @@ export default {
       this.startedRulesSet = contest?.rules || null
       this.image = contest?.image || null
       this.tasks = contest?.problems || []
-      this.startedProblems = this.tasks
+      this.startedProblems = contest?.problems || []
     },
     updateEvent(data) {
       if (data.type === 'add') {
@@ -204,10 +205,11 @@ export default {
       if (!this.startedRulesSet) {
         return this.availableRuleSets
       }
-      return _.union(this.availableRuleSets || [], [ this.startedRulesSet ])
+      return _.unionBy(this.availableRuleSets || [], [ this.startedRulesSet ], (rs) => rs.id)
     },
     availableTasksForContest() {
-      return _.union(this.availableTasks || [], this.startedProblems || [])
+      let startedTasks = _.map(this.startedProblems || [], (sp, i) => sp.problem)
+      return _.unionBy(this.availableTasks || [], startedTasks || [], (t) => t.id)
     },
     unavailableRulesSetsInFutureExists() {
       return _.reduce(this.availableRuleSetsForContest || [], (count, rs) => count += +this.shouldRulesSetBeRemarked(rs), 0) > 0

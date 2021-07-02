@@ -58,7 +58,7 @@ export default {
     shouldTaskBeRemarked(task) {
       let remark = false
       if (task) {
-        if ((task.author?.id != this.currentUser.id && !task.isPublic) || task.isArchieved) {
+        if ((task.creator?.id != this.currentUser.id && !task.isPublic) || task.isArchieved) {
           remark = true
         }
       }

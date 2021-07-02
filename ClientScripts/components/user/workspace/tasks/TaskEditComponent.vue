@@ -116,7 +116,7 @@ export default {
       if (!this.startedChecker) {
         return this.availableCheckers
       }
-      return _.union(this.availableCheckers || [], [ this.startedChecker ])
+      return _.unionBy(this.availableCheckers || [], [ this.startedChecker ], (c) => c.id)
     },
     unavailableCheckersInFutureExists() {
       return _.reduce(this.availableCheckersForProblem || [], (count, c) => count += +this.shouldCheckerBeRemarked(c), 0) > 0
