@@ -37,6 +37,7 @@
 import {mapState, mapActions, mapGetters, mapMutations} from 'vuex'
 import * as _ from 'lodash'
 import moment from 'moment'
+import 'moment-timezone';
 import VPagination from "@hennge/vue3-pagination";
 import "@hennge/vue3-pagination/dist/vue3-pagination.css";
 import UserChangeComponent from "./UserChangeComponent";
@@ -77,7 +78,7 @@ export default {
       return _.join(_.map(roles, (role) => role.description), '\n')
     },
     formatDate(date) {
-      return moment(date).format('MMMM DD YYYY')
+      return moment(date).tz('Europe/Moscow').format('MMMM DD YYYY')
     }
   },
   async created() {

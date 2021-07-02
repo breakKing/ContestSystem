@@ -21,7 +21,6 @@
 </template>
 
 <script>
-import moment from 'moment'
 import {mapActions, mapGetters} from 'vuex'
 import BreadCrumbsComponent from "../../BreadCrumbsComponent";
 import PostViewBreadCrumbs from "../../../dictionaries/bread_crumbs/PostViewBreadCrumbs";

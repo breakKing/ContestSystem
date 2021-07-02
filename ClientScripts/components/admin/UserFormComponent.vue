@@ -35,22 +35,26 @@
     </div>
     <div>
       <label class="font-weight-bold">Ограничен в создании соревнований</label>
-      <v-field v-model="isLimitedInContests" type="checkbox" class="form-control" name="isLimitedInContests" :value="true" :uncheckedValue="false"/>
+      <v-field v-model="isLimitedInContests" type="checkbox" class="form-control" name="isLimitedInContests"
+               :value="true" :uncheckedValue="false"/>
       <error-message name="isLimitedInContests"></error-message>
     </div>
     <div>
       <label class="font-weight-bold">Ограничен в создании постов</label>
-      <v-field v-model="isLimitedInPosts" type="checkbox" class="form-control" name="isLimitedInPosts" :value="true" :uncheckedValue="false"/>
+      <v-field v-model="isLimitedInPosts" type="checkbox" class="form-control" name="isLimitedInPosts" :value="true"
+               :uncheckedValue="false"/>
       <error-message name="isLimitedInPosts"></error-message>
     </div>
     <div>
       <label class="font-weight-bold">Ограничен в создании курсов</label>
-      <v-field v-model="isLimitedInCourses" type="checkbox" class="form-control" name="isLimitedInCourses" :value="true" :uncheckedValue="false"/>
+      <v-field v-model="isLimitedInCourses" type="checkbox" class="form-control" name="isLimitedInCourses" :value="true"
+               :uncheckedValue="false"/>
       <error-message name="isLimitedInCourses"></error-message>
     </div>
     <div>
       <label class="font-weight-bold">Ограничен в создании задач</label>
-      <v-field v-model="isLimitedInProblems" type="checkbox" class="form-control" name="isLimitedInProblems" :value="true" :uncheckedValue="false"/>
+      <v-field v-model="isLimitedInProblems" type="checkbox" class="form-control" name="isLimitedInProblems"
+               :value="true" :uncheckedValue="false"/>
       <error-message name="isLimitedInProblems"></error-message>
     </div>
     <div>
@@ -75,6 +79,7 @@ import {Field, Form, ErrorMessage} from "vee-validate"
 import * as Yup from 'yup'
 import * as _ from 'lodash'
 import moment from 'moment'
+import 'moment-timezone'
 
 
 export default {
@@ -134,7 +139,7 @@ export default {
         isLimitedInPosts,
         isLimitedInCourses,
         isLimitedInProblems,
-        dateOfBirth: moment(dateOfBirth).toISOString().substr(0, 10),
+        dateOfBirth: moment(dateOfBirth).tz('Europe/Moscow').toISOString().substr(0, 10),
         roles: _.map(roles, (r) => r.name),
       }
     },

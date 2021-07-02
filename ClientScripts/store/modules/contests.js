@@ -1,5 +1,6 @@
 ﻿import axios from 'axios'
 import moment from 'moment'
+import 'moment-timezone';
 import * as _ from 'lodash'
 
 export default {
@@ -70,13 +71,13 @@ export default {
             if (!getters.currentContest) {
                 return true
             }
-            return moment(getters.currentContest.endDateTimeUTC).isSameOrBefore(moment())
+            return moment(getters.currentContest.endDateTimeUTC).tz('Europe/Moscow').isSameOrBefore(moment().tz('Europe/Moscow'))
         },
         currentContestIsInTheFuture(state, getters) {
             if (!getters.currentContest) {
                 return true
             }
-            return moment(getters.currentContest.startDateTimeUTC).isAfter(moment())
+            return moment(getters.currentContest.startDateTimeUTC).tz('Europe/Moscow').isAfter(moment().tz('Europe/Moscow'))
         },
         currentUserIsParticipantOfCurrentContest(state, getters) {
             if (!getters.currentUser || !getters.currentContest) {
