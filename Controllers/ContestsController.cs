@@ -308,7 +308,12 @@ namespace ContestSystem.Controllers
                             errors = new List<string> {"Попытка изменить не свой контест"}
                         });
                     }
-                    contest.ImagePath = await _storage.SaveContestImageAsync(id, contestForm.Image);
+
+                    if (contestForm.Image != null)
+                    {
+                        contest.ImagePath = await _storage.SaveContestImageAsync(id, contestForm.Image);
+                    }
+              
                     contest.StartDateTimeUTC = contestForm.StartDateTimeUTC;
                     contest.DurationInMinutes = contestForm.DurationInMinutes;
                     contest.AreVirtualContestsAvailable = contestForm.AreVirtualContestsAvailable;

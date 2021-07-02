@@ -215,7 +215,10 @@ namespace ContestSystem.Controllers
                         });
                     }
 
-                    post.ImagePath = await _storage.SavePostImageAsync(id, postForm.PreviewImage);
+                    if (postForm.PreviewImage != null)
+                    {
+                        post.ImagePath = await _storage.SavePostImageAsync(id, postForm.PreviewImage);
+                    }
 
                     if (post.ApprovalStatus == ApproveType.Rejected)
                     {
