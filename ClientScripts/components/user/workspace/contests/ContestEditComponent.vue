@@ -61,6 +61,7 @@ import * as Yup from 'yup';
 import {ErrorMessage, Field, Form} from "vee-validate";
 import alphabet from 'alphabet'
 import $ from "jquery";
+import moment from "moment";
 
 export default {
   name: "ContestEditComponent",
@@ -142,7 +143,7 @@ export default {
       tmp_form.append($('<input type="hidden"/>').attr('name', 'creatorUserId').val(this.currentUser.id))
       //tmp_form.append($('<input type="hidden"/>').attr('name', 'isPublic').val(this.isPublic)) TODO: реализовать приватность контестов
       tmp_form.append($('<input type="hidden"/>').attr('name', 'isPublic').val(true))
-      tmp_form.append($('<input type="hidden"/>').attr('name', 'startDateTimeUTC').val(this.startDateTimeUTC))
+      tmp_form.append($('<input type="hidden"/>').attr('name', 'startDateTimeUTC').val(moment(this.startDateTimeUTC).utc().format()))
       tmp_form.append($('<input type="hidden"/>').attr('name', 'durationInMinutes').val(this.durationInMinutes))
       tmp_form.append($('<input type="hidden"/>').attr('name', 'areVirtualContestsAvailable').val(this.areVirtualContestsAvailable))
       tmp_form.append($('<input type="hidden"/>').attr('name', 'rulesSetId').val(this.rulesSetId))

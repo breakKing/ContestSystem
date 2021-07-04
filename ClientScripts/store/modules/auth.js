@@ -166,12 +166,16 @@ export default {
             commit('setCurrentUser', null)
             commit('setUserRoles', null)
 
-            commit('setCurrentUserPosts', [], {root: true})
             commit('setRunningContests', [], {root: true})
             commit('setAvailableContests', [], {root: true})
             commit('setParticipatingContests', [], {root: true})
-            commit('setCurrentUserCheckers', [], {root: true})
             commit('setAvailableCheckers', [], {root: true})
+
+            commit('setCurrentUserCheckers', [], {root: true})
+            commit('setCurrentUserPosts', [], {root: true})
+            commit('setCurrentUserContests', [], {root: true})
+            commit('setCurrentUserRuleSets', [], {root: true})
+            commit('setCurrentUserTasks', [], {root: true})
             await dispatch('changeCurrentContest', {force: true, contest_id: null}, {root: true})
         },
         async fetchAllRoles({commit, state, dispatch, getters}, force = false) {
