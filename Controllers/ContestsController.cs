@@ -645,7 +645,7 @@ namespace ContestSystem.Controllers
             var problems = contest.ContestProblems.OrderBy(cp => cp.Letter).ToList();
             foreach (var cp in contestParticipants)
             {
-                var participantSolutions = solutions.Where(s => s.ParticipantId == cp.ParticipantId);
+                var participantSolutions = solutions.Where(s => s.ParticipantId == cp.ParticipantId).ToList();
                 var monitorEntry = new MonitorEntry
                 {
                     ContestId = contestId,
@@ -669,24 +669,31 @@ namespace ContestSystem.Controllers
                         ProblemId = problem.ProblemId,
                         Letter = problem.Letter,
                         TriesCount = participantProblemSolutions.Count,
-                        LastTryMinutesAfterStart =
-                            (short) (participantProblemSolutions.Last().SubmitTimeUTC - contest.StartDateTimeUTC)
-                            .TotalMinutes,
-                        Solved = participantProblemSolutions.Any(pps =>
-                            pps.Verdict == VerdictType.Accepted || pps.Verdict == VerdictType.PartialSolution)
                     };
-                    if (problemTriesEntry.Solved)
+                    if (participantProblemSolutions == null || participantProblemSolutions.Count == 0)
                     {
-                        monitorEntry.ProblemsSolvedCount++;
-                    }
-
-                    if (contest.RulesSet.PointsForBestSolution)
-                    {
-                        problemTriesEntry.GotPoints = participantProblemSolutions.Max(pps => pps.Points);
+                        problemTriesEntry.LastTryMinutesAfterStart = 0;
+                        problemTriesEntry.Solved = false;
+                        problemTriesEntry.GotPoints = 0;
                     }
                     else
                     {
-                        problemTriesEntry.GotPoints = participantProblemSolutions.Last().Points;
+                        problemTriesEntry.LastTryMinutesAfterStart = (short)(participantProblemSolutions.Last().SubmitTimeUTC - contest.StartDateTimeUTC).TotalMinutes;
+                        problemTriesEntry.Solved = participantProblemSolutions.Any(pps => pps.Verdict == VerdictType.Accepted || pps.Verdict == VerdictType.PartialSolution);
+
+                        if (problemTriesEntry.Solved)
+                        {
+                            monitorEntry.ProblemsSolvedCount++;
+                        }
+
+                        if (contest.RulesSet.PointsForBestSolution)
+                        {
+                            problemTriesEntry.GotPoints = participantProblemSolutions.Max(pps => pps.Points);
+                        }
+                        else
+                        {
+                            problemTriesEntry.GotPoints = participantProblemSolutions.Last().Points;
+                        }
                     }
 
                     monitorEntry.ProblemTries.Add(problemTriesEntry);
@@ -721,29 +728,20 @@ namespace ContestSystem.Controllers
             var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == contestId);
             if (contest == null)
             {
-                _logger.LogWarning(
-                    $"Попытка от пользователя с идентификатором {currentUser.Id} получить отправки пользователя с идентификатором {userId} в рамках несуществующего соревнования с идентификатором {contestId}");
+                _logger.LogWarning($"Попытка от пользователя с идентификатором {currentUser.Id} получить отправки пользователя с идентификатором {userId} в рамках несуществующего соревнования с идентификатором {contestId}");
                 return BadRequest("Такого соревнования не существует");
             }
-
-            if (currentUser.Id != userId || !await _dbContext.ContestsLocalModerators.AnyAsync(clm =>
-                clm.ContestId == contestId && clm.LocalModeratorId == currentUser.Id))
+            if (currentUser.Id != userId && !await _dbContext.ContestsLocalModerators.AnyAsync(clm => clm.ContestId == contestId && clm.LocalModeratorId == currentUser.Id))
             {
-                _logger.LogWarning(
-                    $"Попытка от пользователя с идентификатором {currentUser.Id} получить отправки пользователя с идентификатором {userId} в рамках соревнования с идентификатором {contestId} при отсутствии прав на их получение");
+                _logger.LogWarning($"Попытка от пользователя с идентификатором {currentUser.Id} получить отправки пользователя с идентификатором {userId} в рамках соревнования с идентификатором {contestId} при отсутствии прав на их получение");
                 return BadRequest("Данный пользователь не имеет доступа к этим данным");
             }
-
-            if (!await _dbContext.ContestsParticipants.AnyAsync(cp =>
-                cp.ContestId == contestId && cp.ParticipantId == userId))
+            if (!await _dbContext.ContestsParticipants.AnyAsync(cp => cp.ContestId == contestId && cp.ParticipantId == userId))
             {
-                _logger.LogWarning(
-                    $"Попытка от пользователя с идентификатором {currentUser.Id} получить отправки пользователя с идентификатором {userId} в рамках соревнования с идентификатором {contestId}, когда среди участников такого пользователя нет");
+                _logger.LogWarning($"Попытка от пользователя с идентификатором {currentUser.Id} получить отправки пользователя с идентификатором {userId} в рамках соревнования с идентификатором {contestId}, когда среди участников такого пользователя нет");
                 return NotFound("Такого участника в соревновании нет");
             }
-
-            var solutions = await _dbContext.Solutions.Where(s => s.ContestId == contestId && s.ParticipantId == userId)
-                .ToListAsync();
+            var solutions = await _dbContext.Solutions.Where(s => s.ContestId == contestId && s.ParticipantId == userId).ToListAsync();
             return Json(solutions);
         }
 

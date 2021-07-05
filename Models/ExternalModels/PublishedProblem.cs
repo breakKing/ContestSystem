@@ -1,5 +1,6 @@
 ﻿using ContestSystemDbStructure.Enums;
 using ContestSystemDbStructure.Models;
+using System.Collections.Generic;
 
 namespace ContestSystem.Models.ExternalModels
 {
@@ -17,6 +18,7 @@ namespace ContestSystem.Models.ExternalModels
         public ApproveType ApprovalStatus { get; set; }
         public bool IsPublic { get; set; }
         public bool IsArchieved { get; set; }
+        public List<Example> Examples { get; set; } = new List<Example>();
 
         public static PublishedProblem GetFromModel(Problem problem, ProblemLocalizer localizer)
         {
@@ -33,7 +35,8 @@ namespace ContestSystem.Models.ExternalModels
                 ModerationMessage = problem.ModerationMessage,
                 ApprovalStatus = problem.ApprovalStatus,
                 IsPublic = problem.IsPublic,
-                IsArchieved = problem.IsArchieved
+                IsArchieved = problem.IsArchieved,
+                Examples = problem.Examples
             };
         }
     }

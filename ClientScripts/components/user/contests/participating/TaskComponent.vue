@@ -96,25 +96,27 @@ export default {
       return _.sortBy((this.currentContest?.problems || []), ['letter'])
     },
     actualTaskId() {
+      let id
       if (this.task_id) {
-        return this.task_id
+        id = +this.task_id
       }
-      return _.first(this.orderedTasks).id
-    },
-    localizer() {
-      return _.find((this.problem?.localizers || []), (l) => l.culture === 'ru')
+      else {
+        id = _.first(this.orderedTasks).problemId
+      }
+      this.problem = _.find(this.orderedTasks || [], (t) => t.problemId == id)?.problem || null
+      return id
     },
     problem_name() {
-      return this.localizer?.name
+      return this.problem?.localizedName
     },
     problem_description() {
-      return this.localizer?.description
+      return this.problem?.localizedDescription
     },
     problem_input() {
-      return this.localizer?.inputBlock
+      return this.problem?.localizedInputBlock
     },
     problem_output() {
-      return this.localizer?.outputBlock
+      return this.problem?.localizedOutputBlock
     },
     sortedExamples() {
       return _.sortBy((this.problem?.examples || []), ['number'])
@@ -168,7 +170,6 @@ export default {
       if (vm.currentContest && vm.currentContestIsInPast) {
         return await vm.$router.replace({name: 'ContestPage', params: {contest_id: vm.currentContest.id}})
       }
-      vm.problem = await vm.getTask(vm.actualTaskId)
       await vm.fetchAvailableCompilers()
       vm.loading = false
     })

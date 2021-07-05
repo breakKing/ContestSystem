@@ -1,7 +1,7 @@
 <template>
   <ul>
     <li v-for="task of tasks" :class="calcClass(+task.id)">
-      <router-link :to="{name: 'ContestParticipatingPage', params: {contest_id: currentContest?.id, task_id: task.id}}">
+      <router-link :to="{name: 'ContestParticipatingPage', params: {contest_id: currentContest?.id, task_id: task.problemId}}">
         {{ task.letter }} {{ task?.problem?.localizedName }}
       </router-link>
     </li>

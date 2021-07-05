@@ -83,7 +83,7 @@ export default {
             if (!getters.currentUser || !getters.currentContest) {
                 return false
             }
-            return !!_.find(getters.currentContestParticipants, (p) => +p.id === +getters.currentUser.id)
+            return !!_.find(getters.currentContestParticipants, (p) => +p.userId === +getters.currentUser.id)
         },
         runningContests(state, getters) {
             return state.currently_running_contests
