@@ -129,14 +129,18 @@ namespace ContestSystem.Services
             string result = "";
             if (File.Exists(imagePath))
             {
-                byte[] bytes = Array.Empty<byte>();
-                FileStream fileStream = File.Open(imagePath, FileMode.Open);
-                using (var binaryReader = new BinaryReader(fileStream))
+                try
                 {
-                    bytes = binaryReader.ReadBytes((int)fileStream.Length); // Выдержит файл до 2 ГБ
+                    byte[] bytes = Array.Empty<byte>();
+                    FileStream fileStream = File.Open(imagePath, FileMode.Open);
+                    using (var binaryReader = new BinaryReader(fileStream))
+                    {
+                        bytes = binaryReader.ReadBytes((int)fileStream.Length); // Выдержит файл до 2 ГБ
+                    }
+                    fileStream.Close();
+                    result = Convert.ToBase64String(bytes);
                 }
-                fileStream.Close();
-                result = Convert.ToBase64String(bytes);
+                catch { }
             }
             return result;
         }
