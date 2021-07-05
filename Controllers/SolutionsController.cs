@@ -106,7 +106,9 @@ namespace ContestSystem.Controllers
                 }
                 _logger.LogInformation($"На проверку отправлено решение с идентификатором {solution.Id} пользователем {currentUser.Id}");
                 // Отправка на компиляцию
-                solution = await _checkerSystemService.CompileSolutionAsync(solution);
+                var newSolution = await _checkerSystemService.CompileSolutionAsync(solution);
+                solution.ErrorsMessage = newSolution.ErrorsMessage;
+                solution.Verdict = newSolution.Verdict;
                 _dbContext.Solutions.Update(solution);
                 try
                 {
@@ -121,7 +123,7 @@ namespace ContestSystem.Controllers
                         errors = new List<string> { "Ошибка параллельного сохранения" }
                     });
                 }
-                _logger.LogInformation($"Решение с идентификатором {solution.Id} было успешно проверено");
+                _logger.LogInformation($"Решение с идентификатором {solution.Id} было успешно скомпилировано");
                 return Json(new
                 {
                     status = true,
@@ -168,7 +170,7 @@ namespace ContestSystem.Controllers
                     errors = new List<string> { "Ошибка параллельного сохранения" }
                 });
             }
-            foreach (var test in solution.Problem.Tests.OrderBy(t => t.Number))
+            foreach (var test in solution.Problem.Tests.OrderBy(t => t.Number).ToList())
             {
                 var result = await RunSingleTest(test, solution);
                 if (result.Verdict != VerdictType.Accepted && solution.Contest.RulesSet.CountMode == RulesCountMode.CountPenalty)
@@ -179,6 +181,7 @@ namespace ContestSystem.Controllers
             }
             solution.Points = _verdicter.SumPointsForAllTests(solution.TestResults);
             solution.Verdict = _verdicter.GetVerdictForSolution(solution);
+            _dbContext.Solutions.Update(solution);
             var contestParticipant = await _dbContext.ContestsParticipants.FirstOrDefaultAsync(cp => cp.ParticipantId == solution.ParticipantId && cp.ContestId == solution.ContestId);
             contestParticipant.Result += _verdicter.GetResultForSolution(solution);
             _dbContext.ContestsParticipants.Update(contestParticipant);
@@ -206,9 +209,10 @@ namespace ContestSystem.Controllers
             var testResult = solution.TestResults.FirstOrDefault(tr => tr.Number == test.Number);
             if (testResult == null)
             {
-                testResult = await _checkerSystemService.RunTestForSolutionAsync(solution, test.Number);
-                await _dbContext.TestsResults.AddAsync(testResult);
+                var newTestResult = await _checkerSystemService.RunTestForSolutionAsync(solution, test.Number);
+                solution.TestResults.Add(newTestResult);
                 await _dbContext.SaveChangesAsync();
+                return newTestResult;
             }
             return testResult;
         }

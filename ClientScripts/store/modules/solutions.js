@@ -15,15 +15,14 @@ export default {
         availableCompilers(state, getters) {
             return state.available_compilers
         },
-    },
-    actions: {
-        getVerdictName({commit, state, dispatch, getters}, verdict) {
+        getVerdictName: (state, getters) => (verdict) => {
             return _.find(_.toPairs(TestResultVerdicts), (p) => +p[1] === +verdict)[0]
         },
-
-        getLastTestNumber({commit, state, dispatch, getters}, solution) {
+        getLastTestNumber: (state, getters) => (solution) => {
             return _.maxBy((solution?.testResults || []), (t) => +t.number)?.number
         },
+    },
+    actions: {
         async getSolution({commit, state, dispatch, getters}, solution_id) {
             if (!solution_id) {
                 return null

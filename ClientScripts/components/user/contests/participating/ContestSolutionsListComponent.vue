@@ -43,7 +43,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['currentUser', 'currentContestSolutionsForCurrentUser']),
+    ...mapGetters(['currentUser', 'currentContestSolutionsForCurrentUser', 'getVerdictName', 'getLastTestNumber']),
     ...mapGetters(['getFormattedFullDateTime']),
     sortedSolutions() {
       return _.sortBy(this.currentContestSolutionsForCurrentUser, (s) => +s.id === +this.solution_id)
@@ -53,7 +53,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['getUserSolutionsInContest', 'getVerdictName']),
+    ...mapActions(['getUserSolutionsInContest']),
     ...mapMutations(['setCurrentContestSolutionsForCurrentUser']),
     async updateList() {
       let solutions = await this.getUserSolutionsInContest({

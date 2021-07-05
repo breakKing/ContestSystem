@@ -125,36 +125,38 @@ namespace ContestSystem.Services
         private async Task<string> GetServerForSolutionAsync(long solutionId)
         {
             int serverIndex;
-            if (_serverForSolution.ContainsKey(solutionId))
+            if (_checkerServers.Count > 0)
             {
-                serverIndex = _serverForSolution[solutionId];
-                int index = serverIndex;
-                do
+                if (_serverForSolution.ContainsKey(solutionId))
                 {
-                    if (await PingServerAsync(_checkerServers[index]))
+                    serverIndex = _serverForSolution[solutionId];
+                    int index = serverIndex;
+                    do
                     {
-                        return _checkerServers[serverIndex];
-                    }
+                        if (await PingServerAsync(_checkerServers[index]))
+                        {
+                            return _checkerServers[serverIndex];
+                        }
 
-                    index = (index + 1) % _checkerServers.Count;
-                } while (index != serverIndex);
-            }
-            else
-            {
-                int index = (_currentServerIndex + 1) % _checkerServers.Count;
-                do
+                        index = (index + 1) % _checkerServers.Count;
+                    } while (index != serverIndex);
+                }
+                else
                 {
-                    if (await PingServerAsync(_checkerServers[index]))
+                    int index = (_currentServerIndex + 1) % _checkerServers.Count;
+                    do
                     {
-                        _currentServerIndex = index;
-                        _serverForSolution.Add(solutionId, _currentServerIndex);
-                        return _checkerServers[_currentServerIndex];
-                    }
+                        if (await PingServerAsync(_checkerServers[index]))
+                        {
+                            _currentServerIndex = index;
+                            _serverForSolution.Add(solutionId, _currentServerIndex);
+                            return _checkerServers[_currentServerIndex];
+                        }
 
-                    index = (index + 1) % _checkerServers.Count;
-                } while (index != _currentServerIndex);
+                        index = (index + 1) % _checkerServers.Count;
+                    } while (index != _currentServerIndex);
+                }
             }
-
             return $"localhost:{_localPort}";
         }
 

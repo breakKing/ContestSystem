@@ -742,7 +742,7 @@ namespace ContestSystem.Controllers
                 return NotFound("Такого участника в соревновании нет");
             }
             var solutions = await _dbContext.Solutions.Where(s => s.ContestId == contestId && s.ParticipantId == userId).ToListAsync();
-            return Json(solutions);
+            return Json(solutions.ConvertAll(s => ConstructedSolution.GetFromModel(s, s.Contest.ContestProblems, _storage.GetImageInBase64(s.Contest.ImagePath))));
         }
 
         [HttpGet("get-requests")]
