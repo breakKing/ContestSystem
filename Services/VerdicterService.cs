@@ -1,6 +1,5 @@
 ﻿using ContestSystemDbStructure.Enums;
 using ContestSystemDbStructure.Models;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -50,13 +49,17 @@ namespace ContestSystem.Services
             {
                 return verdict;
             }
+            if (solution.TestResults == null || solution.TestResults.Count == 0)
+            {
+                return verdict;
+            }
             switch (solution.Contest.RulesSet.CountMode)
             {
                 case RulesCountMode.CountPoints:
                     long points = SumPointsForAllTests(solution.TestResults);
                     if (points == 0)
                     {
-                        verdict = VerdictType.WrongAnswer;
+                        verdict = solution.TestResults.OrderBy(tr => tr.Number).Last().Verdict;
                     }
                     else if (points == 100)
                     {
@@ -74,14 +77,14 @@ namespace ContestSystem.Services
                     }
                     else
                     {
-                        verdict = VerdictType.WrongAnswer;
+                        verdict = solution.TestResults.OrderBy(tr => tr.Number).Last().Verdict;
                     }
                     break;
                 case RulesCountMode.CountPointsMinusPenalty:
                     long pts = SumPointsForAllTests(solution.TestResults);
                     if (pts == 0)
                     {
-                        verdict = VerdictType.WrongAnswer;
+                        verdict = solution.TestResults.OrderBy(tr => tr.Number).Last().Verdict;
                     }
                     else if (pts == 100)
                     {
