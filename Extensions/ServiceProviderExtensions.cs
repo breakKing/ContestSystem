@@ -1,4 +1,6 @@
-﻿using ContestSystem.Services;
+﻿using ContestSystem.Providers;
+using ContestSystem.Services;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ContestSystem.Extensions
@@ -18,6 +20,11 @@ namespace ContestSystem.Extensions
         public static void AddFileStorage(this IServiceCollection services)
         {
             services.AddSingleton<FileStorageService>();
+        }
+
+        public static void AddUserIdProvider(this IServiceCollection services)
+        {
+            services.AddSingleton<IUserIdProvider, UserIdProvider>();
         }
     }
 }

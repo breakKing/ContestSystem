@@ -19,6 +19,7 @@ namespace ContestSystem.Models.ExternalModels
         public VerdictType Verdict { get; set; }
         public short Points { get; set; }
         public List<TestResultExternalModel> TestResults { get; set; } = new List<TestResultExternalModel>();
+        public SolutionActualResultExternalModel ActualResult { get; set; }
 
         public static ConstructedSolution GetFromModel(Solution solution, List<ContestProblem> problemsInContest, string contestImageInBase64)
         {
@@ -35,7 +36,8 @@ namespace ContestSystem.Models.ExternalModels
                 ErrorsMessage = solution.ErrorsMessage,
                 Verdict = solution.Verdict,
                 Points = solution.Points,
-                TestResults = solution.TestResults?.ConvertAll(tr => TestResultExternalModel.GetFromModel(tr))
+                TestResults = solution.TestResults?.ConvertAll(tr => TestResultExternalModel.GetFromModel(tr)),
+                ActualResult = SolutionActualResultExternalModel.GetFromModel(solution)
             };
         }
     }

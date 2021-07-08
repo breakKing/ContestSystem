@@ -59,6 +59,7 @@ import * as Yup from "yup";
 import BreadCrumbsComponent from "../../../BreadCrumbsComponent";
 import ContestParticipatingTaskBreads
   from "../../../../dictionaries/bread_crumbs/contest/ContestParticipatingTaskBreads";
+import TestResultVerdicts from "../../../../dictionaries/TestResultVerdicts";
 
 export default {
   name: "TaskComponent",
@@ -101,7 +102,7 @@ export default {
         id = +this.task_id
       }
       else {
-        id = _.first(this.orderedTasks).problemId
+        id = +_.first(this.orderedTasks)?.problemId || null
       }
       this.problem = _.find(this.orderedTasks || [], (t) => t.problemId == id)?.problem || null
       return id
@@ -130,33 +131,36 @@ export default {
   },
   methods: {
     ...mapMutations(['setCurrentContestSolutionsForCurrentUser']),
-    ...mapActions(['getTask', 'changeCurrentContest', 'fetchAvailableCompilers', 'compileSolution', 'runSolutionTests', 'getUserSolutionsInContest']),
+    ...mapActions(['getTask', 'changeCurrentContest', 'fetchAvailableCompilers', 'sendSolution', 'compileSolution', 'runSolutionTests', 'getUserSolutionsInContest']),
     async onSubmitSolution() {
       this.loading = true
-      let {data: solution_id, status, errors} = await this.compileSolution({
+      let {data, status, errors} = await this.sendSolution({
         code: this.code,
         compilerGUID: this.compiler,
         contestId: this.contest_id,
         userId: this.currentUser.id,
         problemId: this.actualTaskId,
       })
-      if (solution_id) {
+      if (status && data) {
         this.error_msg = ''
-        // запустили и пофиг на результат
-        this.runSolutionTests(solution_id).then(async () => {
+        let solutionId = data
+        this.compileSolution(solutionId).then(async () => {
           let solutions = await this.getUserSolutionsInContest({
             contest_id: this.contest_id,
             user_id: this.currentUser?.id
           })
           this.setCurrentContestSolutionsForCurrentUser(solutions)
+          let thisSolution = _.find(solutions || [], (s) => +s.id == +solutionId)
+          if (thisSolution && +thisSolution.verdict === TestResultVerdicts.CompilationSucceed) {
+            this.runSolutionTests(solutionId)
+          }
         })
-
         await this.$router.push({
           name: 'ContestMySolutionsPage',
-          params: {solution_id: solution_id, contest_id: this.contest_id}
+          params: {contest_id: this.contest_id}
         })
-
-      } else {
+      }
+      else {
         this.error_msg = (errors || []).join(', ')
       }
       this.loading = false
@@ -166,6 +170,7 @@ export default {
   },
   beforeRouteEnter(to, from, next) {
     next(async vm => {
+      vm.loading = true
       await vm.changeCurrentContest({force: false, contest_id: vm.contest_id})
       if (vm.currentContest && vm.currentContestIsInPast) {
         return await vm.$router.replace({name: 'ContestPage', params: {contest_id: vm.currentContest.id}})

@@ -84,8 +84,13 @@ export default {
         },
     },
     actions: {
-        updateTokenAndHeaders({commit, state, dispatch, getters}, token) {
+        async updateTokenAndHeaders({commit, state, dispatch, getters}, token) {
             commit('setToken', token)
+            await dispatch('closeHub')
+            if (token) {
+                await dispatch('initHub', token)
+            }
+
             axios.defaults.headers.common = getters.getHeaders
 
             $.ajaxSetup({

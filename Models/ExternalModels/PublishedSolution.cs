@@ -20,7 +20,8 @@ namespace ContestSystem.Models.ExternalModels
         public string ErrorsMessage { get; set; }
         public VerdictType Verdict { get; set; }
         public short Points { get; set; }
-        public virtual List<TestResultExternalModel> TestResults { get; set; } = new List<TestResultExternalModel>();
+        public List<TestResultExternalModel> TestResults { get; set; } = new List<TestResultExternalModel>();
+        public SolutionActualResultExternalModel ActualResult { get; set; }
 
         public static PublishedSolution GetFromModel(Solution solution, ProblemLocalizer problemLocalizer)
         {
@@ -37,7 +38,8 @@ namespace ContestSystem.Models.ExternalModels
                 ErrorsMessage = solution.ErrorsMessage,
                 Verdict = solution.Verdict,
                 Points = solution.Points,
-                TestResults = solution.TestResults.ConvertAll(tr => TestResultExternalModel.GetFromModel(tr))
+                TestResults = solution.TestResults.ConvertAll(tr => TestResultExternalModel.GetFromModel(tr)),
+                ActualResult = SolutionActualResultExternalModel.GetFromModel(solution)
             };
         }
     }

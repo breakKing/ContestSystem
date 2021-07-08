@@ -27,7 +27,7 @@
     <div class="col">
       <template v-if="!currentUserIsParticipantOfCurrentContest">
         <button v-if="!wants_participate" @click.prevent="wants_participate=true">
-          Хочу учавствовать
+          Хочу участвовать
         </button>
         <template v-else>
           <v-form @submit="joinContest" :validation-schema="schema">
@@ -36,7 +36,7 @@
               <v-field v-model="nickname" class="form-control" name="nickname"/>
               <error-message name="nickname"></error-message>
             </div>
-            <button type="submit" class="btn btn-primary">Учавствовать</button>
+            <button type="submit" class="btn btn-primary">Участвовать</button>
           </v-form>
         </template>
       </template>

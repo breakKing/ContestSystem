@@ -14,6 +14,8 @@ using ContestSystem.Models.FormModels;
 using ContestSystemDbStructure.Enums;
 using Microsoft.Extensions.Logging;
 using ContestSystem.Extensions;
+using ContestSystem.Hubs;
+using Microsoft.AspNetCore.SignalR;
 
 namespace ContestSystem.Controllers
 {
@@ -26,14 +28,17 @@ namespace ContestSystem.Controllers
         private readonly VerdicterService _verdicter;
         private readonly FileStorageService _storage;
         private readonly ILogger<SolutionsController> _logger;
+        private readonly IHubContext<RealTimeHub> _hubContext;
 
-        public SolutionsController(MainDbContext dbContext, CheckerSystemService checkerSystemService, VerdicterService verdicter, ILogger<SolutionsController> logger, FileStorageService storage)
+        public SolutionsController(MainDbContext dbContext, CheckerSystemService checkerSystemService, VerdicterService verdicter,
+            ILogger<SolutionsController> logger, FileStorageService storage, IHubContext<RealTimeHub> hubContext)
         {
             _dbContext = dbContext;
             _checkerSystemService = checkerSystemService;
             _verdicter = verdicter;
             _storage = storage;
             _logger = logger;
+            _hubContext = hubContext;
         }
 
         [HttpGet("{id}")]
@@ -60,9 +65,9 @@ namespace ContestSystem.Controllers
             return Json(compilers);
         }
 
-        [HttpPost("compile-solution")]
+        [HttpPost("send-solution")]
         [AuthorizeByJwt(Roles = RolesContainer.User)]
-        public async Task<IActionResult> CompileSolution([FromBody] SolutionForm solutionForm)
+        public async Task<IActionResult> SendSolution([FromBody] SolutionForm solutionForm)
         {
             var currentUser = await HttpContext.GetCurrentUser();
             if (currentUser.Id != solutionForm.UserId)
@@ -77,13 +82,12 @@ namespace ContestSystem.Controllers
             if (ModelState.IsValid)
             {
                 // находим в БД с тем же кодом
-                var solution = await _dbContext.Solutions
-                    .Where(s => s.ContestId == solutionForm.ContestId)
-                    .Where(s => s.ParticipantId == solutionForm.UserId)
-                    .Where(s => s.ProblemId == solutionForm.ProblemId)
-                    .Where(s => s.CompilerGUID == solutionForm.CompilerGUID)
-                    .Where(s => s.Code == solutionForm.Code)
-                    .FirstOrDefaultAsync();
+                var solution = await _dbContext.Solutions.Where(s => s.ContestId == solutionForm.ContestId
+                                                                        && s.ParticipantId == solutionForm.UserId
+                                                                        && s.ProblemId == solutionForm.ProblemId
+                                                                        && s.CompilerGUID == solutionForm.CompilerGUID
+                                                                        && s.Code == solutionForm.Code)
+                                                            .FirstOrDefaultAsync();
                 if (solution == null)
                 {
                     // добавляем в БД новое
@@ -103,35 +107,21 @@ namespace ContestSystem.Controllers
                     };
                     await _dbContext.Solutions.AddAsync(solution);
                     await _dbContext.SaveChangesAsync();
+                    return Json(new
+                    {
+                        status = true,
+                        data = solution.Id
+                    });
                 }
-                _logger.LogInformation($"На проверку отправлено решение с идентификатором {solution.Id} пользователем {currentUser.Id}");
-                // Отправка на компиляцию
-                var newSolution = await _checkerSystemService.CompileSolutionAsync(solution);
-                solution.ErrorsMessage = newSolution.ErrorsMessage;
-                solution.Verdict = newSolution.Verdict;
-                _dbContext.Solutions.Update(solution);
-                try
+                else
                 {
-                    await _dbContext.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    _logger.LogParallelSaveError("Solution", solution.Id);
                     return Json(new
                     {
                         status = false,
-                        errors = new List<string> { "Ошибка параллельного сохранения" }
+                        errors = new List<string> { "Такое решение уже имеется" }
                     });
                 }
-                _logger.LogInformation($"Решение с идентификатором {solution.Id} было успешно скомпилировано");
-                return Json(new
-                {
-                    status = true,
-                    data = solution.Id,
-                    errors = new List<string>()
-                });
             }
-
             return Json(new
             {
                 status = false,
@@ -141,11 +131,66 @@ namespace ContestSystem.Controllers
             });
         }
 
+        [HttpPost("{solutionId}/compile")]
+        [AuthorizeByJwt(Roles = RolesContainer.User)]
+        public async Task<IActionResult> CompileSolution(long solutionId)
+        {
+            var currentUser = await HttpContext.GetCurrentUser();
+            var solution = await _dbContext.Solutions.FirstOrDefaultAsync(s => s.Id == solutionId);
+            if (solution == null)
+            {
+                _logger.LogWarning($"Попытка от пользователя с идентификатором {currentUser.Id} скомпилировать несуществующее решение с идентификатором {solutionId}");
+                return Json(new
+                {
+                    status = false,
+                    errors = new List<string> { "Такого решения не существует" }
+                });
+            }
+            if (currentUser.Id != solution.ParticipantId)
+            {
+                _logger.LogWarning($"Попытка от пользователя с идентификатором {currentUser.Id} скомпилировать не своё решение с идентификатором {solutionId}");
+                return Json(new
+                {
+                    status = false,
+                    errors = new List<string> { "Попытка скомпилировать не своё решение" }
+                });
+            }
+            _logger.LogInformation($"На компиляцию отправлено решение с идентификатором {solution.Id} пользователем {currentUser.Id}");
+            // Отправка на компиляцию
+            var newSolution = await _checkerSystemService.CompileSolutionAsync(solution);
+            solution.ErrorsMessage = newSolution.ErrorsMessage;
+            solution.Verdict = newSolution.Verdict;
+            _dbContext.Solutions.Update(solution);
+            try
+            {
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                _logger.LogParallelSaveError("Solution", solution.Id);
+                return Json(new
+                {
+                    status = false,
+                    errors = new List<string> { "Ошибка параллельного сохранения" }
+                });
+            }
+            _logger.LogInformation($"Решение с идентификатором {solution.Id} прошло процедуру компиляции");
+            var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == solution.ContestId);
+            await _hubContext.UpdateOnSolutionActualResultAsync(contest, solution);
+            return Json(new
+            {
+                status = true,
+                errors = new List<string>()
+            });
+        }
+
         [HttpPost("{solutionId}/run-tests")]
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> RunTests(long solutionId)
         {
-            var solution = await _dbContext.Solutions.FirstOrDefaultAsync(s => s.Id == solutionId);
+            var solution = await _dbContext.Solutions.Include(s => s.Problem)
+                                                        .ThenInclude(p => p.Checker)
+                                                        .FirstOrDefaultAsync(s => s.Id == solutionId);
             var currentUser = await HttpContext.GetCurrentUser();
             if (solution == null)
             {
@@ -170,6 +215,7 @@ namespace ContestSystem.Controllers
                     errors = new List<string> { "Ошибка параллельного сохранения" }
                 });
             }
+            await _hubContext.UpdateOnSolutionActualResultAsync(solution.Contest, solution);
             foreach (var test in solution.Problem.Tests.OrderBy(t => t.Number).ToList())
             {
                 var result = await RunSingleTest(test, solution);
@@ -179,7 +225,6 @@ namespace ContestSystem.Controllers
                     break;
                 }
             }
-            solution.Points = _verdicter.SumPointsForAllTests(solution.TestResults);
             solution.Verdict = _verdicter.GetVerdictForSolution(solution);
             _dbContext.Solutions.Update(solution);
             var contestParticipant = await _dbContext.ContestsParticipants.FirstOrDefaultAsync(cp => cp.ParticipantId == solution.ParticipantId && cp.ContestId == solution.ContestId);
@@ -200,6 +245,7 @@ namespace ContestSystem.Controllers
                     _dbContext.ContestsParticipants.Update(contestParticipant);
                 }
             }
+            await _hubContext.UpdateOnSolutionActualResultAsync(solution.Contest, solution);
             _logger.LogInformation($"Решение с идентификатором {solution.Id} успешно протестировано");
             return Json(state);
         }
@@ -210,8 +256,11 @@ namespace ContestSystem.Controllers
             if (testResult == null)
             {
                 var newTestResult = await _checkerSystemService.RunTestForSolutionAsync(solution, test.Number);
+                solution.Points += newTestResult.GotPoints;
                 solution.TestResults.Add(newTestResult);
+                _dbContext.Solutions.Update(solution);
                 await _dbContext.SaveChangesAsync();
+                await _hubContext.UpdateOnSolutionActualResultAsync(solution.Contest, solution);
                 return newTestResult;
             }
             return testResult;

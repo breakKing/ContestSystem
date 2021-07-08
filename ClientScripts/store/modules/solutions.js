@@ -46,10 +46,19 @@ export default {
                 console.error(e)
             }
         },
-        async compileSolution({commit, state, dispatch, getters}, request) {
+        async sendSolution({ commit, state, dispatch, getters }, request) {
             try {
-                let {data} = await axios.post(`/api/solutions/compile-solution`, request)
+                let { data } = await axios.post(`/api/solutions/send-solution`, request)
                 return data
+            } catch (e) {
+                console.error(e)
+                return null
+            }
+        },
+        async compileSolution({commit, state, dispatch, getters}, solution_id) {
+            try {
+                let { status, errors } = await axios.post(`/api/solutions/${solution_id}/compile`)
+                return status
             } catch (e) {
                 console.error(e)
                 return null

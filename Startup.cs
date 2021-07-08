@@ -12,6 +12,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using ContestSystem.Hubs;
+using System.Threading.Tasks;
 
 namespace ContestSystem
 {
@@ -74,6 +76,22 @@ namespace ContestSystem
                         IssuerSigningKey = jwtService.GetSymmetricSecurityKey(),
                         ValidateIssuerSigningKey = true,
                     };
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var accessToken = context.Request.Query["access_token"];
+
+                            // If the request is for our hub...
+                            var path = context.HttpContext.Request.Path;
+                            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/api/real_time_hub"))
+                            {
+                                // Read the token out of the query string
+                                context.Token = accessToken;
+                            }
+                            return Task.CompletedTask;
+                        }
+                    };
                 });
             services.AddControllersWithViews();
 
@@ -82,6 +100,10 @@ namespace ContestSystem
             services.AddVerdicter();
 
             services.AddFileStorage();
+
+            services.AddSignalR();
+
+            services.AddUserIdProvider();
 
             services.AddSwaggerGen(c =>
             {
@@ -128,12 +150,13 @@ namespace ContestSystem
                 .AllowAnyHeader()
                 .AllowAnyMethod()
             );
-
+            app.UseWebSockets();
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapHub<RealTimeHub>("/api/real_time_hub");
                 endpoints.MapControllers();
                 endpoints.MapControllerRoute(
                     name: "CatchAll",

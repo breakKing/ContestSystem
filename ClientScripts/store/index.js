@@ -7,6 +7,7 @@ import checkers from './modules/checkers'
 import tasks from './modules/tasks'
 import rulesets from './modules/rulesets'
 import solutions from './modules/solutions'
+import hub from "./modules/hub"
 import moder_posts from './modules/moder/posts'
 import moder_checkers from './modules/moder/checkers'
 import moder_contests from './modules/moder/contests'
@@ -26,6 +27,7 @@ export default createStore({
         tasks,
         rulesets,
         solutions,
+        hub,
         moder_posts,
         moder_checkers,
         moder_contests,
