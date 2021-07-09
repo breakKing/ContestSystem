@@ -225,10 +225,17 @@ namespace ContestSystem.Controllers
                     break;
                 }
             }
-            solution.Verdict = _verdicter.GetVerdictForSolution(solution);
+            solution.Verdict = _verdicter.GetVerdictForSolution(solution, solution.Contest.RulesSet);
             _dbContext.Solutions.Update(solution);
             var contestParticipant = await _dbContext.ContestsParticipants.FirstOrDefaultAsync(cp => cp.ParticipantId == solution.ParticipantId && cp.ContestId == solution.ContestId);
-            contestParticipant.Result += _verdicter.GetResultForSolution(solution);
+            var otherSolutions = await _dbContext.Solutions.Where(s => s.ParticipantId == solution.ParticipantId
+                                                                        && s.ContestId == solution.ContestId
+                                                                        && s.ProblemId == solution.ProblemId
+                                                                        && s.Id != solution.Id)
+                                                            .Include(s => s.Contest)
+                                                            .ThenInclude(c => c.RulesSet)
+                                                            .ToListAsync();
+            contestParticipant.Result += _verdicter.GetAdditionalResultForSolutionSubmit(otherSolutions, solution, solution.Contest.RulesSet);
             _dbContext.ContestsParticipants.Update(contestParticipant);
             bool saved = false;
             while (!saved)
@@ -241,7 +248,14 @@ namespace ContestSystem.Controllers
                 catch (DbUpdateConcurrencyException)
                 {
                     contestParticipant = await _dbContext.ContestsParticipants.FirstOrDefaultAsync(cp => cp.ParticipantId == solution.ParticipantId && cp.ContestId == solution.ContestId);
-                    contestParticipant.Result += _verdicter.GetResultForSolution(solution);
+                    otherSolutions = await _dbContext.Solutions.Where(s => s.ParticipantId == solution.ParticipantId
+                                                                        && s.ContestId == solution.ContestId
+                                                                        && s.ProblemId == solution.ProblemId
+                                                                        && s.Id != solution.Id)
+                                                            .Include(s => s.Contest)
+                                                            .ThenInclude(c => c.RulesSet)
+                                                            .ToListAsync();
+                    contestParticipant.Result += _verdicter.GetAdditionalResultForSolutionSubmit(otherSolutions, solution, solution.Contest.RulesSet);
                     _dbContext.ContestsParticipants.Update(contestParticipant);
                 }
             }

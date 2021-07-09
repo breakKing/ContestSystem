@@ -7,25 +7,25 @@ namespace ContestSystem.Services
 {
     public class VerdicterService
     {
-        public long GetResultForSolution(Solution solution)
+        public long GetResultForSolution(Solution solution, RulesSet rules)
         {
             long result = 0;
-            if (solution == null)
+            if (solution == null || rules == null)
             {
                 return result;
             }
-            switch (solution.Contest.RulesSet.CountMode)
+            switch (rules.CountMode)
             {
                 case RulesCountMode.CountPoints:
-                    result = SumPointsForAllTests(solution.TestResults);
+                    result = solution.Points;
                     break;
                 case RulesCountMode.CountPenalty:
-                    VerdictType verdict = GetVerdictForSolution(solution);
+                    VerdictType verdict = GetVerdictForSolution(solution, rules);
                     if (verdict != VerdictType.Accepted)
                     {
-                        if (!(verdict == VerdictType.CompilationError && !solution.Contest.RulesSet.PenaltyForCompilationError))
+                        if (!(verdict == VerdictType.CompilationError && !rules.PenaltyForCompilationError))
                         {
-                            result += solution.Contest.RulesSet.PenaltyForOneTry;
+                            result += rules.PenaltyForOneTry;
                         }
                     }
                     else
@@ -34,7 +34,7 @@ namespace ContestSystem.Services
                     }
                     break;
                 case RulesCountMode.CountPointsMinusPenalty:
-                    result = SumPointsForAllTests(solution.TestResults) - GetTimePenaltyForSolution(solution);
+                    result = solution.Points - GetTimePenaltyForSolution(solution);
                     break;
                 default:
                     break;
@@ -42,10 +42,10 @@ namespace ContestSystem.Services
             return result;
         }
 
-        public VerdictType GetVerdictForSolution(Solution solution)
+        public VerdictType GetVerdictForSolution(Solution solution, RulesSet rules)
         {
             VerdictType verdict = VerdictType.Undefined;
-            if (solution == null)
+            if (solution == null || rules == null)
             {
                 return verdict;
             }
@@ -53,10 +53,10 @@ namespace ContestSystem.Services
             {
                 return verdict;
             }
-            switch (solution.Contest.RulesSet.CountMode)
+            switch (rules.CountMode)
             {
                 case RulesCountMode.CountPoints:
-                    long points = SumPointsForAllTests(solution.TestResults);
+                    short points = solution.Points;
                     if (points == 0)
                     {
                         verdict = solution.TestResults.OrderBy(tr => tr.Number).Last().Verdict;
@@ -81,12 +81,12 @@ namespace ContestSystem.Services
                     }
                     break;
                 case RulesCountMode.CountPointsMinusPenalty:
-                    long pts = SumPointsForAllTests(solution.TestResults);
-                    if (pts == 0)
+                    points = solution.Points;
+                    if (points == 0)
                     {
                         verdict = solution.TestResults.OrderBy(tr => tr.Number).Last().Verdict;
                     }
-                    else if (pts == 100)
+                    else if (points == 100)
                     {
                         verdict = VerdictType.Accepted;
                     }
@@ -101,106 +101,50 @@ namespace ContestSystem.Services
             return verdict;
         }
 
-        public long GetResultForProblem(List<Solution> solutions)
+        public long GetAdditionalResultForSolutionSubmit(List<Solution> previousSolutions, Solution newSolution, RulesSet rules)
         {
             long result = 0;
-            if (solutions == null || solutions.Count == 0)
+            if (previousSolutions == null || newSolution == null || rules == null)
             {
                 return result;
             }
-            solutions = solutions.OrderBy(s => s.SubmitTimeUTC).ToList();
-            switch (solutions[0].Contest.RulesSet.CountMode)
+            if (previousSolutions.Count == 0)
             {
-                case RulesCountMode.CountPoints:
-                    if (solutions[0].Contest.RulesSet.PointsForBestSolution)
-                    {
-                        result = solutions.Max(s => s.Points);
-                    }
-                    else
-                    {
-                        result = solutions.Last().Points;
-                    }
-                    break;
-                case RulesCountMode.CountPenalty:
-                    if (solutions.Any(s => GetVerdictForSolution(s) == VerdictType.Accepted))
-                    {
-                        result = 100;
-                    }
-                    else
-                    {
-                        result = 0;
-                    }
-                    break;
-                case RulesCountMode.CountPointsMinusPenalty:
-                    result = solutions.Select(s => GetTimePenaltyForSolution(s)).Sum() + solutions.Max(s => SumPointsForAllTests(s.TestResults));
-                    break;
-                default:
-                    break;
+                result = GetResultForSolution(newSolution, rules);
+            }
+            else
+            {
+                previousSolutions = previousSolutions.OrderBy(s => s.SubmitTimeUTC).ToList();
+                switch (rules.CountMode)
+                {
+                    case RulesCountMode.CountPoints:
+                        short newPoints = newSolution.Points;
+                        short oldPoints;
+                        if (rules.PointsForBestSolution)
+                        {
+                            oldPoints = previousSolutions.Max(s => s.Points);
+                            result = newPoints > oldPoints ? newPoints - oldPoints : 0;
+                        }
+                        else
+                        {
+                            oldPoints = previousSolutions.Last().Points;
+                            result = newPoints - oldPoints;
+                        }
+                        break;
+                    case RulesCountMode.CountPenalty:
+                        result = GetResultForSolution(newSolution, rules);
+                        break;
+                    case RulesCountMode.CountPointsMinusPenalty:
+                        newPoints = newSolution.Points;
+                        oldPoints = previousSolutions.Max(s => s.Points);
+                        result = newPoints > oldPoints ? newPoints - oldPoints : 0;
+                        result -= GetTimePenaltyForSolution(newSolution);
+                        break;
+                    default:
+                        break;
+                }
             }
             return result;
-        }
-
-        public VerdictType GetVerdictForProblem(List<Solution> solutions)
-        {
-            VerdictType verdict = VerdictType.Undefined;
-            if (solutions == null || solutions.Count == 0)
-            {
-                return verdict;
-            }
-            solutions = solutions.OrderBy(s => s.SubmitTimeUTC).ToList();
-            switch (solutions[0].Contest.RulesSet.CountMode)
-            {
-                case RulesCountMode.CountPoints:
-                    if (solutions.Any(s => SumPointsForAllTests(s.TestResults) == 100))
-                    {
-                        verdict = VerdictType.Accepted;
-                    }
-                    else if (solutions.Any(s => SumPointsForAllTests(s.TestResults) > 0))
-                    {
-                        verdict = VerdictType.PartialSolution;
-                    }
-                    else
-                    {
-                        verdict = VerdictType.WrongAnswer;
-                    }
-                    break;
-                case RulesCountMode.CountPenalty:
-                    if (solutions.Any(s => AllTestsAreAccepted(s.TestResults)))
-                    {
-                        verdict = VerdictType.Accepted;
-                    }
-                    else
-                    {
-                        verdict = VerdictType.WrongAnswer;
-                    }
-                    break;
-                case RulesCountMode.CountPointsMinusPenalty:
-                    if (solutions.Any(s => SumPointsForAllTests(s.TestResults) == 100))
-                    {
-                        verdict = VerdictType.Accepted;
-                    }
-                    else if (solutions.Any(s => SumPointsForAllTests(s.TestResults) > 0))
-                    {
-                        verdict = VerdictType.PartialSolution;
-                    }
-                    else
-                    {
-                        verdict = VerdictType.WrongAnswer;
-                    }
-                    break;
-                default:
-                    break;
-            }
-            return verdict;
-        }
-
-        public short SumPointsForAllTests(List<TestResult> testResults)
-        {
-            if (testResults == null || testResults.Count == 0)
-            {
-                return 0;
-            }
-            return (short)testResults.Sum(tr => tr.GotPoints);
         }
 
         private static long GetTimePenaltyForSolution(Solution solution)
