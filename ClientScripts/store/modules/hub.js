@@ -49,8 +49,6 @@ export default {
             }
             let solutions = _.cloneDeep(rootGetters.currentContestSolutionsForCurrentUser || [])
             let index = _.findIndex(solutions, (s) => +s.id === +actual_result.solutionId)
-            console.log(solutions)
-            console.log(index)
             if (+index > -1) {
                 solutions[index].actualResult = _.cloneDeep(actual_result)
                 commit('setCurrentContestSolutionsForCurrentUser', solutions)
