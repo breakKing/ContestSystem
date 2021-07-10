@@ -113,7 +113,7 @@ export default {
           verdict = 'Полное решение'
           break
         case TestResultVerdicts.TestInProgress:
-          verdict = 'Выполняется на тесте ' + (+actualResult.lastRunTestNumber + 1)
+              verdict = 'Выполняется на тесте ' + (+actualResult.lastRunTestNumber + 1 - +actualResult.testsAreDone)
           break
       }
       return verdict
