@@ -7,7 +7,7 @@
       <th>Компилятор</th>
       <th>Время отправки</th>
       <th>Статус проверки</th>
-      <th>Очки</th>
+      <th v-if="pointsAreCounted">Очки</th>
       <th>Время</th>
       <th>Память</th>
     </tr>
@@ -18,7 +18,7 @@
       <td>{{ solution.compilerName }}</td>
       <td>{{ getFormattedFullDateTime(solution.submitTimeUTC) }}</td>
       <td>{{ verdictInfo(actualResult(solution)) }}</td>
-      <td>{{ actualResult(solution)?.points || 0 }}</td>
+      <td v-if="pointsAreCounted">{{ actualResult(solution)?.points || 0 }}</td>
       <td>{{ getFormattedTime(actualResult(solution)?.usedTimeInMillis || 0) }}</td>
       <td>{{ getFormattedMemory(actualResult(solution)?.usedMemoryInBytes || 0) }}</td>
     </tr>
@@ -30,6 +30,7 @@
 import {mapActions, mapGetters, mapMutations} from "vuex";
 import * as _ from 'lodash'
 import TestResultVerdicts from "../../../../dictionaries/TestResultVerdicts";
+import CountModes from "../../../../dictionaries/CountModes";
 import BreadCrumbsComponent from "../../../BreadCrumbsComponent";
 import ContestMySolutionsBreads from "../../../../dictionaries/bread_crumbs/contest/ContestMySolutionsBreads";
 
@@ -42,6 +43,9 @@ export default {
     ...mapGetters(['getFormattedFullDateTime', 'getFormattedMemory', 'getFormattedTime']),
     sortedSolutions() {
       return _.sortBy(this.currentContestSolutionsForCurrentUser, (s) => -s.id)
+    },
+    pointsAreCounted() {
+      return +this.currentContest?.rules?.countMode !== +CountModes.CountPenalty
     },
     bread_crumb_routes() {
       return ContestMySolutionsBreads(this.contest_id)
@@ -117,7 +121,7 @@ export default {
           break
       }
       return verdict
-    },
+    }
   },
   beforeRouteEnter(to, from, next) {
     next(async vm => {
