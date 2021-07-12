@@ -6,11 +6,11 @@
                 <div class="row">
                     <div class="col w-50">
                         <p>Ограничение по памяти</p>
-                        <p> {{ task?.memoryLimitInBytes }}</p>
+                        <p> {{ getFormattedMemory(task?.memoryLimitInBytes || 0) }}</p>
                     </div>
                     <div class="col w-50">
                         <p>Ограничение по времени</p>
-                        <p> {{ task?.timeLimitInMilliseconds }}</p>
+                        <p> {{ getFormattedMemory(task?.timeLimitInMilliseconds || 0) }}</p>
                     </div>
                 </div>
                 <p> Автор: {{ task?.creator?.fullName }}</p>
@@ -46,7 +46,7 @@ export default {
     task: Object,
   },
   computed: {
-    ...mapGetters(['currentUser', 'currentRole']),
+    ...mapGetters(['currentUser', 'currentRole', 'getFormattedMemory', 'getFormattedTime']),
     currentUserIsOwner() {
       if (!this.currentUser || !this.task?.creator) {
         return false

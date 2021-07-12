@@ -14,7 +14,7 @@
         {{ error_msg }}
       </div>
       <h2>{{ problem_name }}</h2>
-      <p><i>({{ problem?.timeLimitInMilliseconds }} мсек, {{ problem?.memoryLimitInBytes }} байт)</i></p>
+      <p><i>({{ getFormattedTime(problem?.timeLimitInMilliseconds || 0) }}, {{ getFormattedMemory(problem?.memoryLimitInBytes || 0) }})</i></p>
       <p>{{ problem_description }}</p>
       <p>{{ problem_input }}</p>
       <p>{{ problem_output }}</p>
@@ -92,6 +92,8 @@ export default {
       'currentContestSolutionsForCurrentUser', // тут инфа о попытках каждого таска(для навигатора)
       'availableCompilers',
       'currentContestIsInPast',
+      'getFormattedMemory',
+      'getFormattedTime'
     ]),
     orderedTasks() {
       return _.sortBy((this.currentContest?.problems || []), ['letter'])

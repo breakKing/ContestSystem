@@ -41,6 +41,35 @@ export default createStore({
         getFormattedFullDateTime: (state, getters) => (date) => {
             moment.locale('ru');
             return moment.utc(date).local().format('LLLL');
+        },
+        getFormattedMemory: (state, getters) => (bytes) => {
+            let result = '0 Б'
+            if (bytes) {
+                if (+bytes < 1024) {
+                    result = bytes + ' Б'
+                }
+                else if (+bytes < 1048576) {
+                    result = (+bytes / 1024).toFixed(1) + ' КБ'
+                }
+                else {
+                    result = (+bytes / 1048576).toFixed(1) + ' МБ'
+                }
+                result = result.replace('.0', '')
+            }
+            return result
+        },
+        getFormattedTime: (state, getters) => (millis) => {
+            let result = '0 мс'
+            if (millis) {
+                if (+millis < 1000) {
+                    result = millis + ' мс'
+                }
+                else {
+                    result = (+millis / 1000).toFixed(1) + ' с'
+                }
+                result = result.replace('.0', '')
+            }
+            return result
         }
     },
     actions: {

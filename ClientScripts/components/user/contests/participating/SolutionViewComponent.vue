@@ -1,7 +1,7 @@
 <template>
   <bread-crumbs-component :routes="bread_crumb_routes"></bread-crumbs-component>
   <h2>Решение {{ problemName }}</h2>
-  <p><i>({{ problem?.timeLimitInMilliseconds }} мсек, {{ problem?.memoryLimitInBytes }} байт)</i></p>
+  <p><i>({{ getFormattedTime(problem?.timeLimitInMilliseconds) }}, {{ getFormattedMemory(problem?.memoryLimitInBytes) }})</i></p>
   <p>{{ getFormattedFullDateTime(solution?.submitTimeUTC) }}</p>
   <p>{{ verdictName }}</p>
   <p v-if="!isSuccess">Тест: {{ lastTestNumber }}</p>
@@ -51,7 +51,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['getFormattedFullDateTime']),
+    ...mapGetters(['getFormattedFullDateTime', , 'getFormattedMemory', 'getFormattedTime']),
     problemName() {
       return _.find((this.solution?.problem?.localizers || []), (l) => l.culture === 'ru')?.name
     },

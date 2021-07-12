@@ -19,8 +19,8 @@
       <td>{{ getFormattedFullDateTime(solution.submitTimeUTC) }}</td>
       <td>{{ verdictInfo(actualResult(solution)) }}</td>
       <td>{{ actualResult(solution)?.points || 0 }}</td>
-      <td>{{ actualResult(solution)?.usedTimeInMillis || 0 }}</td>
-      <td>{{ actualResult(solution)?.usedMemoryInBytes || 0 }}</td>
+      <td>{{ getFormattedTime(actualResult(solution)?.usedTimeInMillis || 0) }}</td>
+      <td>{{ getFormattedMemory(actualResult(solution)?.usedMemoryInBytes || 0) }}</td>
     </tr>
     </tbody>
   </table>
@@ -39,7 +39,7 @@ export default {
   props: ['contest_id'],
   computed: {
     ...mapGetters(['currentUser', 'currentContestSolutionsForCurrentUser', 'getVerdictName', 'currentContest']),
-    ...mapGetters(['getFormattedFullDateTime']),
+    ...mapGetters(['getFormattedFullDateTime', 'getFormattedMemory', 'getFormattedTime']),
     sortedSolutions() {
       return _.sortBy(this.currentContestSolutionsForCurrentUser, (s) => -s.id)
     },
