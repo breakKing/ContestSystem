@@ -24,8 +24,9 @@
           <div class="col">Выход</div>
         </div>
         <div class="row" v-for="example of sortedExamples">
-          <div class="col">{{ example.inputText }}</div>
-          <div class="col">{{ example.outputText }}</div>
+          <!--если в строках есть \n, то они заменяются пробелами, но оборачивание в тег pre это фиксит-->
+          <div class="col"><pre>{{ example.inputText }}</pre></div> 
+          <div class="col"><pre>{{ example.outputText }}</pre></div> 
         </div>
       </template>
 
