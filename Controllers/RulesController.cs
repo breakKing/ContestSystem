@@ -45,7 +45,7 @@ namespace ContestSystem.Controllers
         public async Task<IActionResult> GetAvailableRules(long id)
         {
             var rules = await _dbContext.RulesSets.Where(rs => (rs.AuthorId == id || rs.IsPublic)
-                                                                && !rs.IsArchieved).ToListAsync();
+                                                               && !rs.IsArchieved).ToListAsync();
             var publishedRules = rules.ConvertAll(r =>
             {
                 var pr = ConstructedRulesSet.GetFromModel(r);
@@ -64,6 +64,7 @@ namespace ContestSystem.Controllers
                 var publishedRules = ConstructedRulesSet.GetFromModel(rules);
                 return Json(publishedRules);
             }
+
             return NotFound("Такого набора правил не существует");
         }
 
@@ -76,13 +77,15 @@ namespace ContestSystem.Controllers
                 var currentUser = await HttpContext.GetCurrentUser();
                 if (currentUser.Id != rulesSetForm.AuthorId)
                 {
-                    _logger.LogCreationByNonEqualCurrentUserAndCreator("RulesSet", currentUser.Id, rulesSetForm.AuthorId);
+                    _logger.LogCreationByNonEqualCurrentUserAndCreator("RulesSet", currentUser.Id,
+                        rulesSetForm.AuthorId);
                     return Json(new
                     {
                         status = false,
-                        errors = new List<string> { "Id автора в форме отличается от Id текущего пользователя" }
+                        errors = new List<string> {"Id автора в форме отличается от Id текущего пользователя"}
                     });
                 }
+
                 var rules = new RulesSet
                 {
                     Name = rulesSetForm.Name,
@@ -110,12 +113,13 @@ namespace ContestSystem.Controllers
                     errors = new List<string>()
                 });
             }
+
             return Json(new
             {
                 status = false,
                 errors = ModelState.Values
-                                         .SelectMany(x => x.Errors)
-                                         .Select(x => x.ErrorMessage).ToList()
+                    .SelectMany(x => x.Errors)
+                    .Select(x => x.ErrorMessage).ToList()
             });
         }
 
@@ -130,7 +134,7 @@ namespace ContestSystem.Controllers
                 return Json(new
                 {
                     success = false,
-                    errors = new List<string> { "Id в запросе не совпадает с Id в форме" }
+                    errors = new List<string> {"Id в запросе не совпадает с Id в форме"}
                 });
             }
 
@@ -143,7 +147,7 @@ namespace ContestSystem.Controllers
                     return Json(new
                     {
                         status = false,
-                        errors = new List<string> { "Попытка изменить несуществующий набор правил" }
+                        errors = new List<string> {"Попытка изменить несуществующий набор правил"}
                     });
                 }
                 else
@@ -154,9 +158,10 @@ namespace ContestSystem.Controllers
                         return Json(new
                         {
                             status = false,
-                            errors = new List<string> { "Попытка изменить не свой набор правил" }
+                            errors = new List<string> {"Попытка изменить не свой набор правил"}
                         });
                     }
+
                     rules.Name = rulesSetForm.Name;
                     rules.Description = rulesSetForm.Description;
                     rules.ShowFullTestsResults = rulesSetForm.ShowFullTestsResults;
@@ -180,9 +185,10 @@ namespace ContestSystem.Controllers
                         return Json(new
                         {
                             status = false,
-                            errors = new List<string> { "Ошибка параллельного сохранения" }
+                            errors = new List<string> {"Ошибка параллельного сохранения"}
                         });
                     }
+
                     _logger.LogEditingSuccessful("RulesSet", id, currentUser.Id);
                     return Json(new
                     {
@@ -213,9 +219,10 @@ namespace ContestSystem.Controllers
                 return Json(new
                 {
                     status = false,
-                    errors = new List<string> { "Попытка удалить несуществующий набор правил" }
+                    errors = new List<string> {"Попытка удалить несуществующий набор правил"}
                 });
             }
+
             var moderatorRole = await _dbContext.Roles.FirstOrDefaultAsync(r => r.Name == RolesContainer.Moderator);
             if (currentUser.Id != loadedRules.AuthorId && !currentUser.Roles.Contains(moderatorRole))
             {
@@ -223,9 +230,10 @@ namespace ContestSystem.Controllers
                 return Json(new
                 {
                     status = false,
-                    errors = new List<string> { "Попытка удалить не свой набор правил" }
+                    errors = new List<string> {"Попытка удалить не свой набор правил"}
                 });
             }
+
             if (await _dbContext.Contests.AnyAsync(c => c.RulesSetId == id))
             {
                 loadedRules.IsArchieved = true;
@@ -240,15 +248,18 @@ namespace ContestSystem.Controllers
                     }
                     catch (DbUpdateConcurrencyException)
                     {
-                        loadedRules = await _dbContext.RulesSets.FirstOrDefaultAsync(rs => rs.Id == id && !rs.IsArchieved);
+                        loadedRules =
+                            await _dbContext.RulesSets.FirstOrDefaultAsync(rs => rs.Id == id && !rs.IsArchieved);
                         if (loadedRules == null)
                         {
                             break;
                         }
+
                         loadedRules.IsArchieved = true;
                         _dbContext.RulesSets.Update(loadedRules);
                     }
-                    _logger.LogDeletingByArchieving("RulesSet", id, currentUser.Id);
+
+                    _logger.LogDeletingByArchiving("RulesSet", id, currentUser.Id);
                 }
             }
             else
@@ -257,6 +268,7 @@ namespace ContestSystem.Controllers
                 await _dbContext.SaveChangesAsync();
                 _logger.LogDeletingSuccessful("RulesSet", id, currentUser.Id);
             }
+
             return Json(new
             {
                 status = true,

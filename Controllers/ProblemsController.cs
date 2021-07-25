@@ -47,9 +47,9 @@ namespace ContestSystem.Controllers
         public async Task<IActionResult> GetAvailableProblems(long id, string culture)
         {
             var problems = await _dbContext.Problems.Where(p => (p.CreatorId == id || p.IsPublic)
-                                                                    && p.ApprovalStatus == ApproveType.Accepted
-                                                                    && !p.IsArchieved)
-                                                    .ToListAsync();
+                                                                && p.ApprovalStatus == ApproveType.Accepted
+                                                                && !p.IsArchieved)
+                .ToListAsync();
             var publishedProblems = problems.ConvertAll(p =>
             {
                 var localizer = p.ProblemLocalizers.FirstOrDefault(pl => pl.Culture == culture);
@@ -71,9 +71,11 @@ namespace ContestSystem.Controllers
                 {
                     return NotFound("Такой локализации под задачу не существует");
                 }
+
                 var publishedProblem = PublishedProblem.GetFromModel(problem, localizer);
                 return Json(publishedProblem);
             }
+
             return NotFound("Такой задачи не существует");
         }
 
@@ -87,6 +89,7 @@ namespace ContestSystem.Controllers
                 var constructedProblem = ConstructedProblem.GetFromModel(problem);
                 return Json(constructedProblem);
             }
+
             return NotFound("Такой задачи не существует");
         }
 
@@ -98,18 +101,21 @@ namespace ContestSystem.Controllers
             {
                 ModelState.AddModelError("Tests", "Sum of available points for all tests is not equal to 100");
             }
+
             if (ModelState.IsValid)
             {
                 var currentUser = await HttpContext.GetCurrentUser();
                 if (!await _dbContext.Checkers.AnyAsync(ch => ch.Id == problemForm.CheckerId && !ch.IsArchieved))
                 {
-                    _logger.LogWarning($"Попытка от пользователя с идентификатором {currentUser.Id} создать сущность \"Problem\" с использованием несуществующей сущности \"Checker\" с идентификатором {problemForm.CheckerId}");
+                    _logger.LogWarning(
+                        $"Попытка от пользователя с идентификатором {currentUser.Id} создать сущность \"Problem\" с использованием несуществующей сущности \"Checker\" с идентификатором {problemForm.CheckerId}");
                     return Json(new
                     {
                         status = false,
-                        errors = new List<string> { "Нужного чекера не существует" }
+                        errors = new List<string> {"Нужного чекера не существует"}
                     });
                 }
+
                 var problem = new Problem
                 {
                     CreatorId = problemForm.CreatorId,
@@ -121,30 +127,36 @@ namespace ContestSystem.Controllers
                 };
                 if (problemForm.CreatorId != currentUser.Id)
                 {
-                    _logger.LogCreationByNonEqualCurrentUserAndCreator("Problem", currentUser.Id, problemForm.CreatorId);
+                    _logger.LogCreationByNonEqualCurrentUserAndCreator("Problem", currentUser.Id,
+                        problemForm.CreatorId);
                     return Json(new
                     {
                         status = false,
-                        errors = new List<string> { "Id автора в форме отличается от Id текущего пользователя" }
+                        errors = new List<string> {"Id автора в форме отличается от Id текущего пользователя"}
                     });
                 }
+
                 if (currentUser.IsLimitedInProblems)
                 {
-                    if (await _dbContext.Problems.CountAsync(p => p.CreatorId == currentUser.Id && p.ApprovalStatus == ApproveType.NotModeratedYet) == 1)
+                    if (await _dbContext.Problems.CountAsync(p =>
+                        p.CreatorId == currentUser.Id && p.ApprovalStatus == ApproveType.NotModeratedYet) == 1)
                     {
                         _logger.LogCreationFailedBecauseOfLimits("Problem", currentUser.Id);
                         return Json(new
                         {
                             status = false,
-                            errors = new List<string> { "Превышено ограничение недоверенного пользователя по созданию задач" }
+                            errors = new List<string>
+                                {"Превышено ограничение недоверенного пользователя по созданию задач"}
                         });
                     }
+
                     problem.ApprovalStatus = ApproveType.NotModeratedYet;
                 }
                 else
                 {
                     problem.ApprovalStatus = ApproveType.Accepted;
                 }
+
                 await _dbContext.Problems.AddAsync(problem);
                 await _dbContext.SaveChangesAsync();
                 foreach (var localizer in problemForm.Localizers)
@@ -160,6 +172,7 @@ namespace ContestSystem.Controllers
                     };
                     await _dbContext.ProblemsLocalizers.AddAsync(problemLocalizer);
                 }
+
                 foreach (var test in problemForm.Tests)
                 {
                     var problemTest = new Test
@@ -172,6 +185,7 @@ namespace ContestSystem.Controllers
                     };
                     await _dbContext.Tests.AddAsync(problemTest);
                 }
+
                 foreach (var example in problemForm.Examples)
                 {
                     var problemExample = new Example
@@ -183,6 +197,7 @@ namespace ContestSystem.Controllers
                     };
                     await _dbContext.Examples.AddAsync(problemExample);
                 }
+
                 await _dbContext.SaveChangesAsync();
                 if (problem.ApprovalStatus == ApproveType.Accepted)
                 {
@@ -192,6 +207,7 @@ namespace ContestSystem.Controllers
                 {
                     _logger.LogCreationSuccessful("Problem", problem.Id, currentUser.Id);
                 }
+
                 return Json(new
                 {
                     status = true,
@@ -199,12 +215,13 @@ namespace ContestSystem.Controllers
                     errors = new List<string>()
                 });
             }
+
             return Json(new
             {
                 status = false,
                 errors = ModelState.Values
-                                         .SelectMany(x => x.Errors)
-                                         .Select(x => x.ErrorMessage).ToList()
+                    .SelectMany(x => x.Errors)
+                    .Select(x => x.ErrorMessage).ToList()
             });
         }
 
@@ -219,13 +236,15 @@ namespace ContestSystem.Controllers
                 return Json(new
                 {
                     success = false,
-                    errors = new List<string> { "Id в запросе не совпадает с Id в форме" }
+                    errors = new List<string> {"Id в запросе не совпадает с Id в форме"}
                 });
             }
+
             if (problemForm.Tests.Sum(t => t.AvailablePoints) != 100)
             {
                 ModelState.AddModelError("Tests", "Sum of available points for all tests is not equal to 100");
             }
+
             if (ModelState.IsValid)
             {
                 var problem = await _dbContext.Problems.FirstOrDefaultAsync(p => p.Id == id && !p.IsArchieved);
@@ -235,7 +254,7 @@ namespace ContestSystem.Controllers
                     return Json(new
                     {
                         status = false,
-                        errors = new List<string> { "Попытка изменить несуществующую задачу" }
+                        errors = new List<string> {"Попытка изменить несуществующую задачу"}
                     });
                 }
                 else
@@ -246,10 +265,10 @@ namespace ContestSystem.Controllers
                         return Json(new
                         {
                             status = false,
-                            errors = new List<string> { "Попытка изменить не свою задачу" }
+                            errors = new List<string> {"Попытка изменить не свою задачу"}
                         });
                     }
-                    
+
                     problem.MemoryLimitInBytes = problemForm.MemoryLimitInBytes;
                     problem.TimeLimitInMilliseconds = problemForm.TimeLimitInMilliseconds;
                     problem.IsPublic = problemForm.IsPublic;
@@ -259,6 +278,7 @@ namespace ContestSystem.Controllers
                         problem.ApprovalStatus = ApproveType.NotModeratedYet;
                         problem.ApprovingModeratorId = null;
                     }
+
                     _dbContext.Problems.Update(problem);
 
                     var localizers = await _dbContext.ProblemsLocalizers.Where(l => l.ProblemId == id).ToListAsync();
@@ -267,6 +287,7 @@ namespace ContestSystem.Controllers
                     {
                         localizersExamined.Add(l.Id, false);
                     }
+
                     for (int i = 0; i < problemForm.Localizers.Count; i++)
                     {
                         var localizer = new ProblemLocalizer
@@ -293,6 +314,7 @@ namespace ContestSystem.Controllers
                             _dbContext.ProblemsLocalizers.Update(loadedLocalizer);
                         }
                     }
+
                     foreach (var item in localizersExamined)
                     {
                         if (!item.Value)
@@ -308,6 +330,7 @@ namespace ContestSystem.Controllers
                     {
                         testsExamined.Add(t.Id, false);
                     }
+
                     for (int i = 0; i < problemForm.Tests.Count; i++)
                     {
                         var test = new Test
@@ -333,6 +356,7 @@ namespace ContestSystem.Controllers
                             _dbContext.Tests.Update(loadedTest);
                         }
                     }
+
                     foreach (var item in testsExamined)
                     {
                         if (!item.Value)
@@ -348,6 +372,7 @@ namespace ContestSystem.Controllers
                     {
                         examplesExamined.Add(e.Id, false);
                     }
+
                     for (int i = 0; i < problemForm.Examples.Count; i++)
                     {
                         var example = new Example
@@ -371,6 +396,7 @@ namespace ContestSystem.Controllers
                             _dbContext.Examples.Update(loadedExample);
                         }
                     }
+
                     foreach (var item in examplesExamined)
                     {
                         if (!item.Value)
@@ -390,9 +416,10 @@ namespace ContestSystem.Controllers
                         return Json(new
                         {
                             status = false,
-                            errors = new List<string> { "Ошибка параллельного сохранения" }
+                            errors = new List<string> {"Ошибка параллельного сохранения"}
                         });
                     }
+
                     _logger.LogEditingSuccessful("Problem", id, currentUser.Id);
                     return Json(new
                     {
@@ -410,6 +437,7 @@ namespace ContestSystem.Controllers
                     .Select(x => x.ErrorMessage).ToList()
             });
         }
+
         [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
         [HttpDelete("delete-problem/{id}")]
         public async Task<IActionResult> DeletePost(long id)
@@ -422,7 +450,7 @@ namespace ContestSystem.Controllers
                 return Json(new
                 {
                     status = false,
-                    errors = new List<string> { "Попытка удалить несуществующую задачу" }
+                    errors = new List<string> {"Попытка удалить несуществующую задачу"}
                 });
             }
 
@@ -433,10 +461,12 @@ namespace ContestSystem.Controllers
                 return Json(new
                 {
                     status = false,
-                    errors = new List<string> { "Попытка удалить не свою задачу или без модераторских прав" }
+                    errors = new List<string> {"Попытка удалить не свою задачу или без модераторских прав"}
                 });
             }
-            if (await _dbContext.ContestsProblems.AnyAsync(cp => cp.ProblemId == id) || await _dbContext.CoursesProblems.AnyAsync(cp => cp.ProblemId == id))
+
+            if (await _dbContext.ContestsProblems.AnyAsync(cp => cp.ProblemId == id) ||
+                await _dbContext.CoursesProblems.AnyAsync(cp => cp.ProblemId == id))
             {
                 loadedProblem.IsArchieved = true;
                 _dbContext.Problems.Update(loadedProblem);
@@ -450,15 +480,18 @@ namespace ContestSystem.Controllers
                     }
                     catch (DbUpdateConcurrencyException)
                     {
-                        loadedProblem = await _dbContext.Problems.FirstOrDefaultAsync(p => p.Id == id && !p.IsArchieved);
+                        loadedProblem =
+                            await _dbContext.Problems.FirstOrDefaultAsync(p => p.Id == id && !p.IsArchieved);
                         if (loadedProblem == null)
                         {
                             break;
                         }
+
                         loadedProblem.IsArchieved = true;
                         _dbContext.Problems.Update(loadedProblem);
                     }
-                    _logger.LogDeletingByArchieving("Problem", id, currentUser.Id);
+
+                    _logger.LogDeletingByArchiving("Problem", id, currentUser.Id);
                 }
             }
             else
@@ -467,6 +500,7 @@ namespace ContestSystem.Controllers
                 await _dbContext.SaveChangesAsync();
                 _logger.LogDeletingSuccessful("Problem", id, currentUser.Id);
             }
+
             return Json(new
             {
                 status = true,
@@ -478,7 +512,8 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetProblemsRequests()
         {
-            var problems = await _dbContext.Problems.Where(p => p.ApprovalStatus == ApproveType.NotModeratedYet && !p.IsArchieved).ToListAsync();
+            var problems = await _dbContext.Problems
+                .Where(p => p.ApprovalStatus == ApproveType.NotModeratedYet && !p.IsArchieved).ToListAsync();
             var requests = problems.ConvertAll(p =>
             {
                 var pr = ConstructedProblem.GetFromModel(p);
@@ -491,7 +526,8 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetApprovedProblems()
         {
-            var problems = await _dbContext.Problems.Where(p => p.ApprovalStatus == ApproveType.Accepted && !p.IsArchieved).ToListAsync();
+            var problems = await _dbContext.Problems
+                .Where(p => p.ApprovalStatus == ApproveType.Accepted && !p.IsArchieved).ToListAsync();
             var requests = problems.ConvertAll(p =>
             {
                 var pr = ConstructedProblem.GetFromModel(p);
@@ -504,7 +540,8 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetRejectedProblems()
         {
-            var problems = await _dbContext.Problems.Where(p => p.ApprovalStatus == ApproveType.Rejected && !p.IsArchieved).ToListAsync();
+            var problems = await _dbContext.Problems
+                .Where(p => p.ApprovalStatus == ApproveType.Rejected && !p.IsArchieved).ToListAsync();
             var requests = problems.ConvertAll(p =>
             {
                 var pr = ConstructedProblem.GetFromModel(p);
@@ -515,16 +552,18 @@ namespace ContestSystem.Controllers
 
         [HttpPut("moderate/{id}")]
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
-        public async Task<IActionResult> ApproveOrRejectProblem([FromBody] ProblemRequestForm problemRequestForm, long id)
+        public async Task<IActionResult> ApproveOrRejectProblem([FromBody] ProblemRequestForm problemRequestForm,
+            long id)
         {
             var currentUser = await HttpContext.GetCurrentUser();
             if (problemRequestForm.ProblemId != id || id < 0)
             {
-                _logger.LogModeratingWithNonEqualFormAndRequestId("Problem", problemRequestForm.ProblemId, id, currentUser.Id);
+                _logger.LogModeratingWithNonEqualFormAndRequestId("Problem", problemRequestForm.ProblemId, id,
+                    currentUser.Id);
                 return Json(new
                 {
                     success = false,
-                    errors = new List<string> { "Id в запросе не совпадает с Id в форме" }
+                    errors = new List<string> {"Id в запросе не совпадает с Id в форме"}
                 });
             }
 
@@ -537,7 +576,7 @@ namespace ContestSystem.Controllers
                     return Json(new
                     {
                         status = false,
-                        errors = new List<string> { "Попытка модерировать несуществующий пост" }
+                        errors = new List<string> {"Попытка модерировать несуществующий пост"}
                     });
                 }
                 else
@@ -556,9 +595,10 @@ namespace ContestSystem.Controllers
                         return Json(new
                         {
                             status = false,
-                            errors = new List<string> { "Ошибка параллельного сохранения" }
+                            errors = new List<string> {"Ошибка параллельного сохранения"}
                         });
                     }
+
                     _logger.LogModeratingSuccessful("Problem", id, currentUser.Id, problemRequestForm.ApprovalStatus);
                     return Json(new
                     {
