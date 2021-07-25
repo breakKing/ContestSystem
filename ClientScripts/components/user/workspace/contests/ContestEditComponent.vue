@@ -10,7 +10,9 @@
     </div>
     <div>
       <label class=" fs-4">Описание</label>
-      <v-field v-model="description" as="textarea" class="form-control" name="description"/>
+      <v-field v-model="description" name="description" type="hidden"/>
+      <ckeditor :editor="editor" v-model="description" class="form-control"
+                :config="editorConfig"></ckeditor>
       <error-message name="description"></error-message>
     </div>
     <div>
@@ -24,17 +26,21 @@
       <error-message name="durationInMinutes"></error-message>
     </div>
     <div>
-        <v-field v-model="areVirtualContestsAvailable" class="custom-checkbox" id="areVirtualContestsAvailable" type="checkbox" :value="true" :uncheckedValue="false" name="areVirtualContestsAvailable" />
-        <label class=" fs-4" for="areVirtualContestsAvailable">Разрешены виртуальные соревнования</label>
-        <error-message name="areVirtualContestsAvailable"></error-message>
+      <v-field v-model="areVirtualContestsAvailable" class="custom-checkbox" id="areVirtualContestsAvailable"
+               type="checkbox" :value="true" :uncheckedValue="false" name="areVirtualContestsAvailable"/>
+      <label class=" fs-4" for="areVirtualContestsAvailable">Разрешены виртуальные соревнования</label>
+      <error-message name="areVirtualContestsAvailable"></error-message>
     </div>
     <div>
       <label class=" fs-4">Набор правил</label>
       <v-field class="form-control" v-model="rulesSetId" as="select" name="rulesSetId">
-          <option :value="set.id" v-for="set of availableRuleSetsForContest">{{ set.name }} {{ shouldRulesSetBeRemarked(set) ? '*' : '' }}</option>
+        <option :value="set.id" v-for="set of availableRuleSetsForContest">{{ set.name }}
+          {{ shouldRulesSetBeRemarked(set) ? '*' : '' }}
+        </option>
       </v-field>
       <error-message name="rulesSetId"></error-message>
-      <p v-if="unavailableRulesSetsInFutureExists">* Данный набор правил более недоступен. Однако Вы можете использовать его для этого соревнования до тех пор, пока не замените его.</p>
+      <p v-if="unavailableRulesSetsInFutureExists">* Данный набор правил более недоступен. Однако Вы можете использовать
+        его для этого соревнования до тех пор, пока не замените его.</p>
     </div>
     <div class="row">
       <div class="col">
@@ -48,7 +54,8 @@
         <img class="img-fluid" :src="dataUrl"/>
       </div>
     </div>
-    <tasks-selector-component :tasks="sortedTasks" :availableTasksForContest="availableTasksForContest" @update:tasks="updateEvent"></tasks-selector-component>
+    <tasks-selector-component :tasks="sortedTasks" :availableTasksForContest="availableTasksForContest"
+                              @update:tasks="updateEvent"></tasks-selector-component>
     <button type="submit" class="btn btn-primary">Сохранить</button>
   </v-form>
 </template>
@@ -62,9 +69,11 @@ import {ErrorMessage, Field, Form} from "vee-validate";
 import alphabet from 'alphabet'
 import $ from "jquery";
 import moment from "moment";
+import {CkeditorMixin} from "../../../mixins/ckeditor-mixin";
 
 export default {
   name: "ContestEditComponent",
+  mixins: [CkeditorMixin],
   components: {
     TasksSelectorComponent,
     VForm: Form,
@@ -206,7 +215,7 @@ export default {
       if (!this.startedRulesSet) {
         return this.availableRuleSets
       }
-      return _.unionBy(this.availableRuleSets || [], [ this.startedRulesSet ], (rs) => rs.id)
+      return _.unionBy(this.availableRuleSets || [], [this.startedRulesSet], (rs) => rs.id)
     },
     availableTasksForContest() {
       let startedTasks = _.map(this.startedProblems || [], (sp, i) => sp.problem)
@@ -242,106 +251,109 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-    div * {
-        margin: 5px;
-        color: #04295E;
-    }
+div * {
+  margin: 5px;
+  color: #04295E;
+}
 
-    span[role=alert] {
-        color: red;
-    }
-    form {
-        padding: 10px;
-    }
-    .row, .col{
-        margin: 0;
-        padding: 0;
-    }
-    .custom-checkbox {
-        position: absolute;
-        z-index: -1;
-        opacity: 0;
-    }
+span[role=alert] {
+  color: red;
+}
 
-    .custom-checkbox + label {
-        display: inline-flex;
-        align-items: center;
-        user-select: none;
-    }
+form {
+  padding: 10px;
+}
 
-    .custom-checkbox + label::before {
-        content: '';
-        display: inline-block;
-        width: 1em;
-        height: 1em;
-        flex-shrink: 0;
-        flex-grow: 0;
-        border: 1px solid #adb5bd;
-        border-radius: 0.25em;
-        margin-right: 0.5em;
-        background-repeat: no-repeat;
-        background-position: center center;
-        background-size: 50% 50%;
-    }
+.row, .col {
+  margin: 0;
+  padding: 0;
+}
 
-    .custom-checkbox:checked + label::before {
-        background-color: #0b76ef;
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23fff' d='M6.564.75l-3.59 3.612-1.538-1.55L0 4.26 2.974 7.25 8 2.193z'/%3e%3c/svg%3e");
-    }
+.custom-checkbox {
+  position: absolute;
+  z-index: -1;
+  opacity: 0;
+}
 
-    .form-control {
-        border-radius: 16px;
-    }
+.custom-checkbox + label {
+  display: inline-flex;
+  align-items: center;
+  user-select: none;
+}
 
-    button {
-        padding: 5px 10px;
-        background-color: #fff;
-        border-radius: 16px;
-        border: 1px solid blue;
+.custom-checkbox + label::before {
+  content: '';
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+  flex-grow: 0;
+  border: 1px solid #adb5bd;
+  border-radius: 0.25em;
+  margin-right: 0.5em;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: 50% 50%;
+}
 
-        &:hover {
-            background-color: #0b76ef;
-            color: white;
-        }
-    }
+.custom-checkbox:checked + label::before {
+  background-color: #0b76ef;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23fff' d='M6.564.75l-3.59 3.612-1.538-1.55L0 4.26 2.974 7.25 8 2.193z'/%3e%3c/svg%3e");
+}
 
-    .form-control::-webkit-input-placeholder {
-        opacity: 1;
-        transition: opacity 0.3s ease;
-    }
+.form-control {
+  border-radius: 16px;
+}
 
-    .form-control::-moz-placeholder {
-        opacity: 1;
-        transition: opacity 0.3s ease;
-    }
+button {
+  padding: 5px 10px;
+  background-color: #fff;
+  border-radius: 16px;
+  border: 1px solid blue;
 
-    .form-control:-moz-placeholder {
-        opacity: 1;
-        transition: opacity 0.3s ease;
-    }
+  &:hover {
+    background-color: #0b76ef;
+    color: white;
+  }
+}
 
-    .form-control:-ms-input-placeholder {
-        opacity: 1;
-        transition: opacity 0.3s ease;
-    }
+.form-control::-webkit-input-placeholder {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
 
-    .form-control:focus::-webkit-input-placeholder {
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
+.form-control::-moz-placeholder {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
 
-    .form-control:focus::-moz-placeholder {
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
+.form-control:-moz-placeholder {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
 
-    .form-control:focus:-moz-placeholder {
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
+.form-control:-ms-input-placeholder {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
 
-    .form-control:focus:-ms-input-placeholder {
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
+.form-control:focus::-webkit-input-placeholder {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.form-control:focus::-moz-placeholder {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.form-control:focus:-moz-placeholder {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.form-control:focus:-ms-input-placeholder {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
 </style>

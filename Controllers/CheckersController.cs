@@ -49,10 +49,10 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> GetAvailableCheckers(long id)
         {
-            var checkers = await _dbContext.Checkers.Where(c => (c.AuthorId == id ||c.IsPublic)
+            var checkers = await _dbContext.Checkers.Where(c => (c.AuthorId == id || c.IsPublic)
                                                                 && !c.IsArchieved
                                                                 && c.ApprovalStatus == ApproveType.Accepted)
-                                                    .ToListAsync();
+                .ToListAsync();
             var publishedCheckers = checkers.ConvertAll(c =>
             {
                 var pc = PublishedChecker.GetFromModel(c);
@@ -269,7 +269,7 @@ namespace ContestSystem.Controllers
                         _dbContext.Checkers.Update(loadedChecker);
                     }
 
-                    _logger.LogDeletingByArchieving("Checker", id, currentUser.Id);
+                    _logger.LogDeletingByArchiving("Checker", id, currentUser.Id);
                 }
             }
             else

@@ -11,12 +11,14 @@
     </div>
     <div>
       <label class="fs-4">Описание</label>
-      <v-field v-model="description" class="form-control" name="description" as="textarea"
-               placeholder="Краткое описание работы программы-чекера"/>
+      <v-field v-model="description" name="description" type="hidden"/>
+      <ckeditor :editor="editor" v-model="description" class="form-control"
+                :config="editorConfig"></ckeditor>
       <error-message name="description"></error-message>
     </div>
     <div>
-      <v-field v-model="isPublic" class="custom-checkbox" id="isPublic" name="isPublic" type="checkbox" :value="true" :uncheckedValue="false"/>
+      <v-field v-model="isPublic" class="custom-checkbox" id="isPublic" name="isPublic" type="checkbox" :value="true"
+               :uncheckedValue="false"/>
       <label class=" fs-4" for="isPublic">Виден всем</label>
       <error-message name="isPublic"></error-message>
     </div>
@@ -35,9 +37,11 @@ import {Field, Form, ErrorMessage} from "vee-validate";
 import * as Yup from 'yup';
 import {mapActions, mapGetters} from "vuex";
 import axios from "axios";
+import {CkeditorMixin} from "../../../mixins/ckeditor-mixin";
 
 export default {
   name: "CheckerEditComponent",
+  mixins: [CkeditorMixin],
   components: {
     VForm: Form,
     VField: Field,
