@@ -55,8 +55,8 @@ export default {
             }
             else {
                 solutions = await dispatch('getUserSolutionsInContest', {
-                    contest_id: vm.contest_id,
-                    user_id: vm.currentUser?.id
+                    contest_id: rootGetters.currentContest?.id,
+                    user_id: rootGetters.currentUser?.id
                 })
                 commit('setCurrentContestSolutionsForCurrentUser', solutions)
             }

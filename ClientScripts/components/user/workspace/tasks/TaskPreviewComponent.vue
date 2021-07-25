@@ -10,7 +10,7 @@
                     </div>
                     <div class="col w-50">
                         <p>Ограничение по времени</p>
-                        <p> {{ getFormattedMemory(task?.timeLimitInMilliseconds || 0) }}</p>
+                        <p> {{ getFormattedTime(task?.timeLimitInMilliseconds || 0) }}</p>
                     </div>
                 </div>
                 <p> Автор: {{ task?.creator?.fullName }}</p>
