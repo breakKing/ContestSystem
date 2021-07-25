@@ -8,7 +8,6 @@ import VueAxios from 'vue-axios'
 import $ from "jquery";
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import CKEditor from '@ckeditor/ckeditor5-vue';
 import '../../styles/style.scss';
 
 const app = createApp({
@@ -20,6 +19,5 @@ const app = createApp({
 app.use(VueAxios, axios)
 app.use(store)
 app.use(router)
-app.use(CKEditor)
 app.use(Breadcrumb)
 app.mount('#app')

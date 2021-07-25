@@ -1,26 +1,28 @@
 <template>
-  <div class="card mt-3">
+  <div class="card mt-3 post-wrap">
     <div class="row g-0">
       <div class="col-md-7 col-12">
-          <div class="card-body d-flex flex-column justify-content-between align-items-center">
-            <h5 class="card-title m-0">{{ post.localizedName }}</h5>
-            <p class="card-text m-0">
-                {{ post.previewText }}
-            </p>
-            <p class="card-text">
-                Автор: {{ post?.author?.fullName }}
-            </p>
-          </div>
-        <div class="d-flex flex-column justify-content-center align-items-center">
-            <post-edit-component  v-if="editAllowed && currentUserIsAuthor"
-                                 :post_id="post.id"></post-edit-component>
-            <button v-if="canBeOpenedForModerationOrReading" @click.prevent="previewClick" class="workspace-btn mb-1">Подробнее</button>
-            <button v-if="currentUserIsAuthor && isInWorkspace" class="workspace-btn workspace-btn-del mb-1"
-                    @click.prevent="deleteEntity">
-                Удалить
-            </button>
+        <div class="card-body d-flex flex-column justify-content-between align-items-center">
+          <h5 class="card-title m-0">{{ post.localizedName }}</h5>
+          <p class="card-text m-0">
+            {{ post.previewText }}
+          </p>
+          <p class="card-text">
+            Автор: {{ post?.author?.fullName }}
+          </p>
         </div>
-        
+        <div class="d-flex flex-column justify-content-center align-items-center">
+          <post-edit-component v-if="editAllowed && currentUserIsAuthor"
+                               :post_id="post.id"></post-edit-component>
+          <button v-if="canBeOpenedForModerationOrReading" @click.prevent="previewClick" class="workspace-btn mb-1">
+            Подробнее
+          </button>
+          <button v-if="currentUserIsAuthor && isInWorkspace" class="workspace-btn workspace-btn-del mb-1"
+                  @click.prevent="deleteEntity">
+            Удалить
+          </button>
+        </div>
+
       </div>
       <div class="col-md-5 col-12">
         <img class="img-fluid" :src="dataUrl" :alt="post.Name">
@@ -47,18 +49,18 @@ export default {
       default: true
     }
   },
-    methods: {
+  methods: {
     ...mapActions(['deletePost',
-        'fetchPostsList',
-        'fetchUserPostsList']),
+      'fetchPostsList',
+      'fetchUserPostsList']),
     async deleteEntity() {
-        this.error_msg = ''
-        let { status, errors } = await this.deletePost(this.post?.id)
-        if (status) {
-            await this.fetchData()
-        } else {
-            this.error_msg = (errors || []).join(', ')
-        }
+      this.error_msg = ''
+      let {status, errors} = await this.deletePost(this.post?.id)
+      if (status) {
+        await this.fetchData()
+      } else {
+        this.error_msg = (errors || []).join(', ')
+      }
     },
     async previewClick() {
       if (this.currentRole === 'moderator') {
@@ -78,14 +80,14 @@ export default {
       }
     },
     async fetchData() {
-        await this.fetchPostsList(true)
-        await this.fetchUserPostsList(true)
+      await this.fetchPostsList(true)
+      await this.fetchUserPostsList(true)
     }
   },
   computed: {
     ...mapGetters(['currentUser', 'currentRole']),
     dataUrl() {
-      if (!this.post || !this.post?.previewImage) {
+      if (!this.post || !this.post.previewImage) {
         return '';
       }
       // загружено новое фото
@@ -111,7 +113,7 @@ export default {
     },
     canBeOpenedForModerationOrReading() {
       if (this.isInWorkspace) {
-        return this.currentRole === 'moderator' || this.post?.approvalStatus === 2
+        return this.currentRole === 'moderator' || (this.post && +this.post.approvalStatus === 2)
       }
       return true
     }
@@ -120,11 +122,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-    .card{
-        border: 1px solid blue;
-    }
-    .img-fluid {
-        height: 100%;
-        width: 100%;
-    }  
+.card {
+  border: 1px solid blue;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.post-wrap {
+  margin-bottom: 15px;
+}
 </style>

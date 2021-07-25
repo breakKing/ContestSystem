@@ -31,8 +31,9 @@
               </div>
               <div>
                 <label class="fs-4">Текст поста</label>
-                <ckeditor :editor="editor" v-model="postText" class="form-control" :config="editorConfig"
-                          name="postText"></ckeditor>
+                <v-field v-model="postText" name="postText" type="hidden"/>
+                <ckeditor :editor="editor" v-model="postText"
+                          class="form-control" :config="editorConfig"></ckeditor>
                 <error-message name="postText"></error-message>
               </div>
               <div>
@@ -55,12 +56,12 @@
 import {mapActions, mapGetters} from 'vuex'
 import {Field, Form, ErrorMessage} from "vee-validate";
 import * as Yup from 'yup';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import $ from 'jquery';
-//import Base64UploadAdapter from '@ckeditor/ckeditor5-upload/src/adapters/base64uploadadapter';
+import {CkeditorMixin} from "../../mixins/ckeditor-mixin";
 
 export default {
   name: "PostEditComponent",
+  mixins: [CkeditorMixin],
   props: ['post_id'],
   components: {
     VForm: Form,
@@ -69,11 +70,6 @@ export default {
   },
   data() {
     return {
-      editor: ClassicEditor,
-      editorData: '',
-      editorConfig: {
-        //extraPlugins: [Base64UploadAdapter]
-      },
       previewImage: null,
       error_msg: '',
       postName: '',
@@ -82,12 +78,14 @@ export default {
       postCreationSchema: Yup.object({
         previewImage: Yup.mixed().nullable().required('Изображение поста это обязательное поле').label('Изображение поста'),
         postName: Yup.string('Название поста должно быть строкой').nullable().required('Название поста это обязательное поле').label('Название поста'),
+        postText: Yup.string('Описание поста должно быть строкой').nullable().required('Описание поста это обязательное поле').label('Описание поста'),
         postPreview: Yup.string('Превью поста должно быть строкой').nullable().required('Превью поста это обязательное поле').label('Краткое описание'),
       })
     }
   },
   async mounted() {
-    await this.updateFields()
+    await this.updateFields();
+    console.log(this.$refs.form_to_validate)
   },
   computed: {
     ...mapGetters(['currentUser']),
@@ -96,7 +94,7 @@ export default {
       return `post-modal-${name}`
     },
     btnMessage() {
-        if (!this.post_id) {
+      if (!this.post_id) {
         return 'Создать'
       }
       return 'Редактировать'
@@ -158,76 +156,77 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-    form div * {
-        margin: 5px;
-        color: #04295E;
-    }
+form div * {
+  margin: 5px;
+  color: #04295E;
+}
 
-    span[role=alert] {
-        color: red;
-    }
+span[role=alert] {
+  color: red;
+}
 
-    form {
-        padding: 10px;
-    }
-    .form-control {
-        border-radius: 16px;
-    }
+form {
+  padding: 10px;
+}
 
-    button[type="submit"] {
-        padding: 5px 10px;
-        background-color: #fff;
-        border-radius: 16px;
-        border: 1px solid blue;
+.form-control {
+  border-radius: 16px;
+}
 
-        &:hover {
-            background-color: #0b76ef;
-            color: white;
-        }
-    }
+button[type="submit"] {
+  padding: 5px 10px;
+  background-color: #fff;
+  border-radius: 16px;
+  border: 1px solid blue;
 
-    .form-control::-webkit-input-placeholder {
-        opacity: 1;
-        transition: opacity 0.3s ease;
-    }
+  &:hover {
+    background-color: #0b76ef;
+    color: white;
+  }
+}
 
-    .form-control::-moz-placeholder {
-        opacity: 1;
-        transition: opacity 0.3s ease;
-    }
+.form-control::-webkit-input-placeholder {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
 
-    .form-control:-moz-placeholder {
-        opacity: 1;
-        transition: opacity 0.3s ease;
-    }
+.form-control::-moz-placeholder {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
 
-    .form-control:-ms-input-placeholder {
-        opacity: 1;
-        transition: opacity 0.3s ease;
-    }
+.form-control:-moz-placeholder {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
 
-    .form-control:focus::-webkit-input-placeholder {
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
+.form-control:-ms-input-placeholder {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
 
-    .form-control:focus::-moz-placeholder {
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
+.form-control:focus::-webkit-input-placeholder {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
 
-    .form-control:focus:-moz-placeholder {
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
+.form-control:focus::-moz-placeholder {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
 
-    .form-control:focus:-ms-input-placeholder {
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
+.form-control:focus:-moz-placeholder {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
 
-    button[data-bs-target="#post-modal-new"] {
-        padding: 5px 10px;
-        width: fit-content;
-    }
+.form-control:focus:-ms-input-placeholder {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+button[data-bs-target="#post-modal-new"] {
+  padding: 5px 10px;
+  width: fit-content;
+}
 </style>

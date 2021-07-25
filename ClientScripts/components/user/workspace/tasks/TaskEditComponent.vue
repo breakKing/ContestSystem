@@ -13,17 +13,23 @@
         </div>
         <div>
           <label class="fs-4">Описание</label>
-          <v-field v-model="description" class="form-control" name="description"/>
+          <v-field v-model="description" name="description" type="hidden"/>
+          <ckeditor :editor="editor" v-model="description"
+                    class="form-control" :config="editorConfig"></ckeditor>
           <error-message name="description"></error-message>
         </div>
         <div>
           <label class="fs-4">Входные данные</label>
-          <v-field v-model="inputBlock" class="form-control" name="inputBlock"/>
+          <v-field v-model="inputBlock" name="inputBlock" type="hidden"/>
+          <ckeditor :editor="editor" v-model="inputBlock"
+                    class="form-control" :config="editorConfig"></ckeditor>
           <error-message name="inputBlock"></error-message>
         </div>
         <div>
           <label class="fs-4">Выходные данные</label>
-          <v-field v-model="outputBlock" class="form-control" name="outputBlock"/>
+          <v-field v-model="outputBlock" name="outputBlock" type="hidden"/>
+          <ckeditor :editor="editor" v-model="outputBlock"
+                    class="form-control" :config="editorConfig"></ckeditor>
           <error-message name="outputBlock"></error-message>
         </div>
         <div>
@@ -39,13 +45,17 @@
         <div>
           <label class="fs-4">Механизм проверки</label>
           <v-field v-model="checker" class="form-control" name="checker" as="select">
-            <option v-for="checker of availableCheckersForProblem" :value="checker.id">{{ checker.name }} {{ shouldCheckerBeRemarked(checker) ? '*' : '' }}</option>
+            <option v-for="checker of availableCheckersForProblem" :value="checker.id">{{ checker.name }}
+              {{ shouldCheckerBeRemarked(checker) ? '*' : '' }}
+            </option>
           </v-field>
           <error-message name="checker"></error-message>
-          <p v-if="unavailableCheckersInFutureExists">* Данный механизм проверки более недоступен. Однако Вы можете использовать его для этой задачи до тех пор, пока не замените его.</p>
+          <p v-if="unavailableCheckersInFutureExists">* Данный механизм проверки более недоступен. Однако Вы можете
+            использовать его для этой задачи до тех пор, пока не замените его.</p>
         </div>
         <div>
-          <v-field v-model="isPublic" class="custom-checkbox" id="isPublic" name="isPublic" type="checkbox" :value="true" :uncheckedValue="false"/>
+          <v-field v-model="isPublic" class="custom-checkbox" id="isPublic" name="isPublic" type="checkbox"
+                   :value="true" :uncheckedValue="false"/>
           <label class="fs-4" for="isPublic">Виден всем</label>
           <error-message name="isPublic"></error-message>
         </div>
@@ -70,11 +80,13 @@ import {mapActions, mapGetters} from "vuex";
 import TestsTableComponent from "./TestsTableComponent";
 import * as _ from 'lodash'
 import ExamplesTableComponent from "./ExamplesTableComponent";
+import {CkeditorMixin} from "../../../mixins/ckeditor-mixin";
 
 
 export default {
   name: "TaskEditComponent",
   props: ['task_id'],
+  mixins: [CkeditorMixin],
   components: {
     ExamplesTableComponent,
     TestsTableComponent,
@@ -116,7 +128,7 @@ export default {
       if (!this.startedChecker) {
         return this.availableCheckers
       }
-      return _.unionBy(this.availableCheckers || [], [ this.startedChecker ], (c) => c.id)
+      return _.unionBy(this.availableCheckers || [], [this.startedChecker], (c) => c.id)
     },
     unavailableCheckersInFutureExists() {
       return _.reduce(this.availableCheckersForProblem || [], (count, c) => count += +this.shouldCheckerBeRemarked(c), 0) > 0
