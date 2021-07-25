@@ -3,239 +3,322 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using ContestSystemDbStructure.Models;
 using ContestSystem.Models.Misc;
-using Microsoft.Extensions.Configuration;
+using System;
+using Microsoft.Extensions.Logging;
+using ContestSystem.Models.DbContexts;
+using Microsoft.EntityFrameworkCore;
 
 namespace ContestSystem.Services
 {
     public class CheckerSystemService
     {
-        private readonly IConfiguration _configuration;
-        private readonly List<string> _checkerServers = new List<string>();
-        private int _currentServerIndex = -1;
-        private readonly Dictionary<long, int> _serverForSolution = new Dictionary<long, int>();
+        private readonly ILogger<CheckerSystemService> _logger;
         private readonly HttpClient _httpClient = new HttpClient();
+
         private readonly int _localPort = 6500;
+        private readonly short _minutesFromLastCompilersUpdate = 5;
+        private readonly string _protocol = "http";
 
-        public CheckerSystemService(IConfiguration configuration)
+        private bool serversAreInited = false;
+
+        public CheckerSystemService(ILogger<CheckerSystemService> logger)
         {
-            _configuration = configuration;
-            IConfigurationSection checkerServersSection = _configuration.GetSection("CheckerServers");
-            List<string> checkerServersFromConf = checkerServersSection.AsEnumerable()
-                .Select(keyValPair => keyValPair.Value).Skip(1).ToList();
-            foreach (var server in checkerServersFromConf)
-            {
-                if (PingServer(server))
-                {
-                    _checkerServers.Add(server);
-                }
-            }
-
-            if (_checkerServers.Count > 0)
-            {
-                _currentServerIndex = 0;
-            }
-
+            _logger = logger;
             _httpClient.DefaultRequestHeaders.Accept.Clear();
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
-        // Получение списка компиляторов, поддержка которых есть НА ВСЕХ серверах
-        public async Task<IEnumerable<CompilerInfo>> GetAvailableCompilersAsync()
+        // Получение списка компиляторов, поддержка которых есть на серверах
+        public async Task<List<CompilerInfo>> GetAvailableCompilersAsync(MainDbContext dbContext)
         {
+            await InitServersIfNeededAsync(dbContext);
             List<CompilerInfo> finalCompilers = new List<CompilerInfo>();
-            List<List<CompilerInfo>> compilersLists = new List<List<CompilerInfo>>();
-            for (int i = 0; i < _checkerServers.Count; i++)
+            var servers = await dbContext.CheckerServers.ToListAsync();
+            foreach (var server in servers)
             {
-                string server = _checkerServers[i];
-                if (await PingServerAsync(server))
+                await UpdateServerCompilerAsync(dbContext, server);
+            }
+            servers = await dbContext.CheckerServers.ToListAsync();
+            foreach (var server in servers)
+            {
+                var compilers = server.CheckerServerCompilers.ConvertAll(csc => new CompilerInfo
                 {
-                    var response = await _httpClient.GetAsync($"http://{server}/api/compiler");
-                    compilersLists.Add((List<CompilerInfo>)await response.Content.ReadFromJsonAsync<IEnumerable<CompilerInfo>>());
-                }
-            }
-
-            if (compilersLists.Count == 0)
-            {
-                var response = await _httpClient.GetAsync($"http://localhost:{_localPort}/api/compiler");
-                return await response.Content.ReadFromJsonAsync<IEnumerable<CompilerInfo>>();
-            }
-
-            finalCompilers.AddRange(compilersLists[0]);
-            foreach (var list in compilersLists)
-            {
-                finalCompilers = (List<CompilerInfo>)finalCompilers.Intersect(list);
-            }
-
-            return finalCompilers;
-        }
-
-        // Отправка чекера задачи на все сервера для компиляции (после одобрения глобальным модератором)
-        public async Task<Checker> SendCheckerForCompilationAsync(Checker checker)
-        {
-            bool firstCompilationDone = false;
-            HttpContent content;
-            HttpResponseMessage response;
-            Checker resultedChecker;
-            for (int i = 0; i < _checkerServers.Count; i++)
-            {
-                string server = _checkerServers[i];
-                if (await PingServerAsync(server))
+                    GUID = csc.CompilerGUID,
+                    Name = csc.CompilerName
+                });
+                foreach (var cmp in compilers)
                 {
-                    content = JsonContent.Create(checker);
-                    response = await _httpClient.PostAsync($"http://{server}/api/checker", content);
-                    if (!firstCompilationDone)
+                    if (finalCompilers.FirstOrDefault(c => c.GUID == cmp.GUID) == null)
                     {
-                        resultedChecker = await response.Content.ReadFromJsonAsync<Checker>();
-                        firstCompilationDone = true;
+                        finalCompilers.Add(cmp);
                     }
                 }
             }
+            return finalCompilers.Count > 0 ? finalCompilers : null;
+        }
 
-            content = JsonContent.Create(checker);
-            response = await _httpClient.PostAsync($"http://localhost:{_localPort}/api/checker", content);
-            resultedChecker = await response.Content.ReadFromJsonAsync<Checker>();
+        // Отправка чекера задачи на все сервера для компиляции (после одобрения глобальным модератором)
+        public async Task<Checker> SendCheckerForCompilationAsync(MainDbContext dbContext, Checker checker)
+        {
+            await InitServersIfNeededAsync(dbContext);
+            Checker resultedChecker = null;
+            var servers = await dbContext.CheckerServers.ToListAsync();
+            foreach (var server in servers)
+            {
+                if (await CheckServerConnectionAsync(server.Address))
+                {
+                    resultedChecker = await PostRequestAsync<Checker, Checker>(server.Address, "api/checker", checker);
+                    if (resultedChecker == null)
+                    {
+                        _logger.LogWarning($"При компиляции чекера с идентификатором {checker.Id} на сервере проверки {server.Address} не было получено ответа");
+                    }
+                    else
+                    {
+                        _logger.LogInformation($"Запрос на компиляцию чекера с идентификатором {checker.Id} отправлен на сервер проверки {server.Address}, и на него был получен ответ");
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning($"Неудачная попытка отправки чекера с идентификатором {checker.Id} на компиляцию на сервер проверки {server.Address} в связи с недоступностью сервера");
+                }
+            }
             return resultedChecker;
         }
 
         // Отправка решения на компиляцию (ДО прогона по тестам)
-        public async Task<Solution> CompileSolutionAsync(Solution solution)
+        public async Task<Solution> CompileSolutionAsync(MainDbContext dbContext, Solution solution)
         {
-            string server = await GetServerForSolutionAsync(solution.Id);
-            var content = JsonContent.Create(solution);
-            var response = await _httpClient.PostAsync($"http://{server}/api/solution", content);
-            return await response.Content.ReadFromJsonAsync<Solution>();
+            await InitServersIfNeededAsync(dbContext);
+            var server = await GetServerForSolutionAsync(dbContext, solution);
+            if (server == null)
+            {
+                _logger.LogWarning($"Для компиляции решения с идентификатором {solution.Id} не нашлось ни одного доступного сервера проверки");
+                return null;
+            }
+            return await PostRequestAsync<Solution, Solution>(server.Address, "api/solution", solution);
         }
 
         // Отправка решения на проверку
-        public async Task<TestResult> RunTestForSolutionAsync(Solution solution, short testNumber)
+        public async Task<TestResult> RunTestForSolutionAsync(MainDbContext dbContext, Solution solution, short testNumber)
         {
-            string server = await GetServerForSolutionAsync(solution.Id);
-            var content = JsonContent.Create(solution);
-            var response = await _httpClient.PostAsync($"http://{server}/api/test?testNumber={testNumber}", content);
-            return await response.Content.ReadFromJsonAsync<TestResult>();
+            await InitServersIfNeededAsync(dbContext);
+            var server = await GetServerForSolutionAsync(dbContext, solution);
+            if (server == null)
+            {
+                _logger.LogWarning($"Для проверки решения с идентификатором {solution.Id} на тесте {testNumber} не нашлось ни одного доступного сервера проверки");
+                return null;
+            }
+            return await PostRequestAsync<Solution, TestResult>(server.Address, $"api/test?testNumber={testNumber}", solution);
+        }
+
+        // Инициализация всех серверов
+        private async Task InitServersIfNeededAsync(MainDbContext dbContext)
+        {
+            if (serversAreInited)
+            {
+                return;
+            }
+            var servers = await dbContext.CheckerServers.ToListAsync();
+            if (servers == null || servers.Count == 0)
+            {
+                await AddLocalhostCheckerServerAsync(dbContext);
+                servers = await dbContext.CheckerServers.ToListAsync();
+            }
+            else
+            {
+                if (!servers.Any(s => s.Address == $"localhost:{_localPort}"))
+                {
+                    await AddLocalhostCheckerServerAsync(dbContext);
+                    servers = await dbContext.CheckerServers.ToListAsync();
+                }
+                foreach (var server in servers)
+                {
+                    await UpdateServerCompilerAsync(dbContext, server);
+                }
+            }
+            serversAreInited = true;
+        }
+
+        // Добавление локального сервера (используемого в последнюю очередь)
+        private async Task AddLocalhostCheckerServerAsync(MainDbContext dbContext)
+        {
+            var localhostServer = new CheckerServer
+            {
+                Address = $"localhost:{_localPort}",
+                LastTimeUsedForSolutionUTC = DateTime.UtcNow,
+                LastTimeCompilersUpdatedUTC = DateTime.UtcNow.AddMinutes(-_minutesFromLastCompilersUpdate)
+            };
+            await dbContext.CheckerServers.AddAsync(localhostServer);
+            await dbContext.SaveChangesAsync();
+        }
+
+        // Запрос и обновление списка компиляторов на сервере (асинхронно)
+        private async Task UpdateServerCompilerAsync(MainDbContext dbContext, CheckerServer server)
+        {
+            if (server != null)
+            {
+                if (server.LastTimeCompilersUpdatedUTC.AddMinutes(_minutesFromLastCompilersUpdate) <= DateTime.UtcNow)
+                {
+                    if (await CheckServerConnectionAsync(server.Address))
+                    {
+                        var compilersUpToDate = (await GetRequestAsync<IEnumerable<CompilerInfo>>(server.Address, "api/compiler"))?.ToList() ?? new List<CompilerInfo>();
+                        var compilers = await dbContext.CheckerServersCompilers.Where(csc => csc.CheckerServerId == server.Id).ToListAsync();
+                        if (compilersUpToDate == null || compilersUpToDate.Count == 0)
+                        {
+                            if (compilers != null && compilers.Count > 0)
+                            {
+                                dbContext.CheckerServersCompilers.RemoveRange(compilers);
+                            }
+                        }
+                        else
+                        {
+                            if (compilers == null || compilers.Count == 0)
+                            {
+                                await dbContext.CheckerServersCompilers.AddRangeAsync(compilersUpToDate.ConvertAll(c => new CheckerServerCompiler
+                                {
+                                    CheckerServerId = server.Id,
+                                    CompilerGUID = c.GUID,
+                                    CompilerName = c.Name,
+                                }));
+                            }
+                            else
+                            {
+                                foreach (var cmp in compilersUpToDate)
+                                {
+                                    int index = compilers.FindIndex(c => c.CompilerGUID == cmp.GUID);
+                                    if (index == -1)
+                                    {
+                                        await dbContext.CheckerServersCompilers.AddAsync(new CheckerServerCompiler
+                                        {
+                                            CheckerServerId = server.Id,
+                                            CompilerGUID = cmp.GUID,
+                                            CompilerName = cmp.Name
+                                        });
+                                    }
+                                    else
+                                    {
+                                        compilers[index].CompilerName = cmp.Name;
+                                        dbContext.CheckerServersCompilers.Update(compilers[index]);
+                                    }
+                                }
+                            }
+                        }
+                        var serverFromDb = await dbContext.CheckerServers.FirstOrDefaultAsync(s => s.Id == server.Id);
+                        serverFromDb.LastTimeCompilersUpdatedUTC = DateTime.UtcNow;
+                        dbContext.CheckerServers.Update(serverFromDb);
+                        try
+                        {
+                            await dbContext.SaveChangesAsync();
+                        }
+                        catch (DbUpdateConcurrencyException)
+                        {
+                            await UpdateServerCompilerAsync(dbContext, server);
+                        }
+                    }
+                }
+            }
         }
 
         // Выбор сервера проверки по приницпу Round-Robin
-        private async Task<string> GetServerForSolutionAsync(long solutionId)
+        private async Task<CheckerServer> GetServerForSolutionAsync(MainDbContext dbContext, Solution solution)
         {
-            int serverIndex;
-            if (_checkerServers.Count > 0)
+            if (solution == null)
             {
-                if (_serverForSolution.ContainsKey(solutionId))
+                return null;
+            }
+            var servers = await dbContext.CheckerServers.Where(s => s.CheckerServerCompilers.Any(csc => csc.CompilerGUID == solution.CompilerGUID))
+                                                        .OrderBy(s => s.LastTimeUsedForSolutionUTC)
+                                                        .ThenBy(s => s.Address != $"localhost:{_localPort}")
+                                                        .ToListAsync();
+            if (servers == null || servers.Count == 0)
+            {
+                return null;
+            }
+            if (solution.CheckerServerId != null)
+            {
+                var server = servers.FirstOrDefault(s => s.Id == solution.CheckerServerId);
+                if (server != null && await CheckServerConnectionAsync(server.Address))
                 {
-                    serverIndex = _serverForSolution[solutionId];
-                    int index = serverIndex;
-                    do
-                    {
-                        if (await PingServerAsync(_checkerServers[index]))
-                        {
-                            return _checkerServers[serverIndex];
-                        }
-
-                        index = (index + 1) % _checkerServers.Count;
-                    } while (index != serverIndex);
-                }
-                else
-                {
-                    int index = (_currentServerIndex + 1) % _checkerServers.Count;
-                    do
-                    {
-                        if (await PingServerAsync(_checkerServers[index]))
-                        {
-                            _currentServerIndex = index;
-                            _serverForSolution.Add(solutionId, _currentServerIndex);
-                            return _checkerServers[_currentServerIndex];
-                        }
-
-                        index = (index + 1) % _checkerServers.Count;
-                    } while (index != _currentServerIndex);
+                    return server;
                 }
             }
-            return $"localhost:{_localPort}";
-        }
-
-        // Синхронный пинг
-        private bool PingServer(string server)
-        {
-            string hostnameOrAddress = ParseHostnameOrAddressWithoutPort(server);
-            PingOptions pingOptions = new PingOptions(128, true);
-            Ping ping = new Ping();
-            byte[] buffer = new byte[32];
-            for (int i = 0; i < 4; i++)
+            CheckerServer serverForSolution = null;
+            foreach (var server in servers)
+            {
+                if (await CheckServerConnectionAsync(server.Address))
+                {
+                    solution.CheckerServerId = server.Id;
+                    server.LastTimeUsedForSolutionUTC = DateTime.UtcNow;
+                    dbContext.Solutions.Update(solution);
+                    dbContext.CheckerServers.Update(server);
+                    serverForSolution = server;
+                    break;
+                }
+            }
+            if (serverForSolution != null)
             {
                 try
                 {
-                    PingReply pingReply = ping.Send(hostnameOrAddress, 2000, buffer, pingOptions);
-                    if (!(pingReply == null))
-                    {
-                        if (pingReply.Status == IPStatus.Success)
-                        {
-                            return true;
-                        }
-                    }
+                    await dbContext.SaveChangesAsync();
                 }
-                catch (PingException)
+                catch (DbUpdateConcurrencyException)
                 {
-                    return false;
-                }
-                catch (SocketException)
-                {
-                    return false;
+                    return await GetServerForSolutionAsync(dbContext, solution);
                 }
             }
-
-            return false;
+            return serverForSolution;
         }
 
-        // Асинхронный пинг
-        private async Task<bool> PingServerAsync(string server)
+        // Проверка связи с сервером проверки (асинхронно)
+        private async Task<bool> CheckServerConnectionAsync(string server)
         {
-            string hostnameOrAddress = ParseHostnameOrAddressWithoutPort(server);
-            PingOptions pingOptions = new PingOptions(128, true);
-            Ping ping = new Ping();
-            byte[] buffer = new byte[32];
-            for (int i = 0; i < 4; i++)
+            bool result = false;
+            try
             {
-                try
-                {
-                    PingReply pingReply = await ping.SendPingAsync(hostnameOrAddress, 2000, buffer, pingOptions);
-                    if (!(pingReply == null))
-                    {
-                        if (pingReply.Status == IPStatus.Success)
-                        {
-                            return true;
-                        }
-                    }
-                }
-                catch (PingException)
-                {
-                    return false;
-                }
-                catch (SocketException)
-                {
-                    return false;
-                }
+                result = await PostRequestAsync<bool?, bool>(server, "api/connection", null);
             }
-
-            return false;
+            catch { }
+            return result;
         }
 
-        // Получение адреса или FQDN без номера порта(так как сервер может быть задан с портом, например localhost:1337)
-        private string ParseHostnameOrAddressWithoutPort(string server)
+        // GET-запрос
+        private async Task<TResponse> GetRequestAsync<TResponse>(string serverAddress, string requestUri)
         {
-            Regex regexWithPort = new Regex(@"(\w)*\:[0-9]*");
-            if (regexWithPort.IsMatch(server))
+            TResponse result = default;
+            string fullUri = $"{_protocol}://{serverAddress}/{requestUri}";
+            try
             {
-                return server.Substring(0, server.LastIndexOf(':'));
+                var response = await _httpClient.GetAsync(fullUri);
+                result = await response.Content.ReadFromJsonAsync<TResponse>();
             }
+            catch(Exception ex)
+            {
+                _logger.LogWarning($"При GET-запросе \"{fullUri}\" произошла ошибка");
+                _logger.LogTrace(ex.StackTrace);
+            }
+            return result;
+        }
 
-            return server;
+        // POST-запрос
+        private async Task<TResponse> PostRequestAsync<TRequest, TResponse>(string serverAddress, string requestUri, TRequest data)
+        {
+            TResponse result = default;
+            string fullUri = $"{_protocol}://{serverAddress}/{requestUri}";
+            var jsonData = JsonContent.Create(data);
+            try
+            {
+                var response = await _httpClient.PostAsync(fullUri, jsonData);
+                result = await response.Content.ReadFromJsonAsync<TResponse>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"При POST-запросе \"{fullUri}\" произошла ошибка");
+                _logger.LogTrace(ex.StackTrace);
+            }
+            return result;
         }
     }
 }

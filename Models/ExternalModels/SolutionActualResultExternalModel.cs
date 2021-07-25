@@ -23,7 +23,7 @@ namespace ContestSystem.Models.ExternalModels
                 VerdictType.PartialSolution,
                 VerdictType.PresentationError,
                 VerdictType.RuntimeError,
-                VerdictType.ShouldResetSolution,
+                VerdictType.TestlibFail,
                 VerdictType.TimeLimitExceeded,
                 VerdictType.UnexpectedError
         };

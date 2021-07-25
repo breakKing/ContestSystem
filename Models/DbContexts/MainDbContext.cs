@@ -36,6 +36,8 @@ namespace ContestSystem.Models.DbContexts
         public DbSet<PostLocalizer> PostsLocalizers { get; set; }
         public DbSet<ContestFile> ContestsFiles { get; set; }
         public DbSet<CoursePageFile> CoursesPagesFiles { get; set; }
+        public DbSet<CheckerServer> CheckerServers { get; set; }
+        public DbSet<CheckerServerCompiler> CheckerServersCompilers { get; set; }
 
         public MainDbContext(DbContextOptions<MainDbContext> options) : base(options)
         {

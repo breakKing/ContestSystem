@@ -365,15 +365,38 @@ namespace ContestSystem.Controllers
                     checker.ModerationMessage = checkerRequestForm.ModerationMessage;
                     if (checker.ApprovalStatus == ApproveType.Accepted)
                     {
-                        _logger.LogInformation(
-                            $"Отправлена на компиляцию сущность \"Checker\" с идентификатором {id} модератором с идентификатором {currentUser.Id}");
-                        var newChecker = await _checkerSystemService.SendCheckerForCompilationAsync(checker);
+                        _logger.LogInformation($"Отправлена на компиляцию сущность \"Checker\" с идентификатором {id} модератором с идентификатором {currentUser.Id}");
+                        var newChecker = await _checkerSystemService.SendCheckerForCompilationAsync(_dbContext, checker);
+                        if (newChecker == null)
+                        {
+                            checker.CompilationVerdict = VerdictType.CheckerServersUnavailable;
+                            checker.ApprovalStatus = ApproveType.NotModeratedYet;
+                            _dbContext.Checkers.Update(checker);
+                            try
+                            {
+                                await _dbContext.SaveChangesAsync();
+                            }
+                            catch (DbUpdateConcurrencyException)
+                            {
+                                _logger.LogParallelSaveError("Checker", id);
+                                return Json(new
+                                {
+                                    status = false,
+                                    errors = new List<string> { "Ошибка параллельного сохранения" }
+                                });
+                            }
+                            _logger.LogWarning($"Модерациия сущности \"Checker\" с идентификатором {id} модератором с идентификатором {currentUser.Id} не осуществлена из-за недоступности всех серверов проверки");
+                            return Json(new
+                            {
+                                status = false,
+                                errors = new List<string> { "Сервера проверки временно недоступны" }
+                            });
+                        }
                         checker.CompilationVerdict = newChecker.CompilationVerdict;
                         checker.Errors = newChecker.Errors;
                         if (newChecker.CompilationVerdict != VerdictType.CompilationSucceed)
                         {
-                            _logger.LogInformation(
-                                $"В результате компиляции \"Checker\" с идентификатором {id} возникли ошибки");
+                            _logger.LogInformation($"В результате компиляции \"Checker\" с идентификатором {id} возникли ошибки");
                             checker.ApprovalStatus = ApproveType.Rejected;
                             checker.ModerationMessage = "Compilation errors:\n" + newChecker.Errors;
                         }

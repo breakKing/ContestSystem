@@ -10,6 +10,7 @@ export default {
     PartialSolution: 8,
     Accepted: 9,
     TestInProgress: 10,
-    ShouldResetSolution: 11,
-    Undefined: 12
+    CheckerServersUnavailable: 11,
+    TestlibFail: 12, // Ситуация, когда программа-чекер выдаёт вердикт fail (как правило, такое бывает, если участник нашёл решение оптимальнее, чем решение жюри и программа-чекер учитывает такой поворот событий, чтобы вернуть fail)
+    Undefined: 13
 }

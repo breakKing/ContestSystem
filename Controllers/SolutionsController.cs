@@ -61,7 +61,11 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> GetCompilers()
         {
-            List<CompilerInfo> compilers = (await _checkerSystemService.GetAvailableCompilersAsync()).ToList();
+            List<CompilerInfo> compilers = await _checkerSystemService.GetAvailableCompilersAsync(_dbContext);
+            if (compilers == null)
+            {
+                return NotFound("Сервера проверки временно недоступны");
+            }
             return Json(compilers);
         }
 
@@ -90,6 +94,26 @@ namespace ContestSystem.Controllers
                                                             .FirstOrDefaultAsync();
                 if (solution == null)
                 {
+                    var compilers = await _checkerSystemService.GetAvailableCompilersAsync(_dbContext);
+                    if (compilers == null)
+                    {
+                        _logger.LogWarning($"На проверку было отправлено решение с компилятором с идентификатором \"{solutionForm.CompilerGUID}\" в рамках соревнования с идентификатором {solutionForm.ContestId} для задачи {solutionForm.ProblemId}, но сервера проверки недоступны");
+                        return Json(new
+                        {
+                            status = false,
+                            errors = new List<string> { "Сервера проверки временно недоступны" }
+                        });
+                    }
+                    string compilerName = compilers.FirstOrDefault(c => c.GUID == solutionForm.CompilerGUID)?.Name ?? null;
+                    if (compilerName == null)
+                    {
+                        _logger.LogWarning($"На проверку было отправлено решение с компилятором с идентификатором \"{solutionForm.CompilerGUID}\" в рамках соревнования с идентификатором {solutionForm.ContestId} для задачи {solutionForm.ProblemId}, но такого компилятора нет в списке доступных");
+                        return Json(new
+                        {
+                            status = false,
+                            errors = new List<string> { "Такого компилятора не существует" }
+                        });
+                    }
                     // добавляем в БД новое
                     solution = new Solution
                     {
@@ -99,8 +123,7 @@ namespace ContestSystem.Controllers
                         ParticipantId = solutionForm.UserId,
                         ProblemId = solutionForm.ProblemId,
                         SubmitTimeUTC = DateTime.UtcNow,
-                        CompilerName = (await _checkerSystemService.GetAvailableCompilersAsync())
-                            .FirstOrDefault(c => c.GUID == solutionForm.CompilerGUID)?.Name,
+                        CompilerName = compilerName,
                         ErrorsMessage = "",
                         Verdict = VerdictType.Undefined,
                         Points = 0
@@ -157,9 +180,16 @@ namespace ContestSystem.Controllers
             }
             _logger.LogInformation($"На компиляцию отправлено решение с идентификатором {solution.Id} пользователем {currentUser.Id}");
             // Отправка на компиляцию
-            var newSolution = await _checkerSystemService.CompileSolutionAsync(solution);
-            solution.ErrorsMessage = newSolution.ErrorsMessage;
-            solution.Verdict = newSolution.Verdict;
+            var newSolution = await _checkerSystemService.CompileSolutionAsync(_dbContext, solution);
+            if (newSolution == null)
+            {
+                solution.Verdict = VerdictType.CheckerServersUnavailable;
+            }
+            else
+            {
+                solution.ErrorsMessage = newSolution.ErrorsMessage;
+                solution.Verdict = newSolution.Verdict;
+            }
             _dbContext.Solutions.Update(solution);
             try
             {
@@ -174,7 +204,10 @@ namespace ContestSystem.Controllers
                     errors = new List<string> { "Ошибка параллельного сохранения" }
                 });
             }
-            _logger.LogInformation($"Решение с идентификатором {solution.Id} прошло процедуру компиляции");
+            if (solution.Verdict != VerdictType.CheckerServersUnavailable)
+            {
+                _logger.LogInformation($"Решение с идентификатором {solution.Id} прошло процедуру компиляции");
+            }
             var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == solution.ContestId);
             await _hubContext.UpdateOnSolutionActualResultAsync(contest, solution);
             return Json(new
@@ -219,48 +252,56 @@ namespace ContestSystem.Controllers
             foreach (var test in solution.Problem.Tests.OrderBy(t => t.Number).ToList())
             {
                 var result = await RunSingleTest(test, solution);
+                if (result == null)
+                {
+                    state = false;
+                    break;
+                }
                 if (result.Verdict != VerdictType.Accepted && solution.Contest.RulesSet.CountMode == RulesCountMode.CountPenalty)
                 {
                     state = false;
                     break;
                 }
             }
-            solution.Verdict = _verdicter.GetVerdictForSolution(solution, solution.Contest.RulesSet);
-            _dbContext.Solutions.Update(solution);
-            var contestParticipant = await _dbContext.ContestsParticipants.FirstOrDefaultAsync(cp => cp.ParticipantId == solution.ParticipantId && cp.ContestId == solution.ContestId);
-            var otherSolutions = await _dbContext.Solutions.Where(s => s.ParticipantId == solution.ParticipantId
-                                                                        && s.ContestId == solution.ContestId
-                                                                        && s.ProblemId == solution.ProblemId
-                                                                        && s.Id != solution.Id)
-                                                            .Include(s => s.Contest)
-                                                            .ThenInclude(c => c.RulesSet)
-                                                            .ToListAsync();
-            contestParticipant.Result += _verdicter.GetAdditionalResultForSolutionSubmit(otherSolutions, solution, solution.Contest.RulesSet);
-            _dbContext.ContestsParticipants.Update(contestParticipant);
-            bool saved = false;
-            while (!saved)
+            if (state)
             {
-                try
+                solution.Verdict = _verdicter.GetVerdictForSolution(solution, solution.Contest.RulesSet);
+                _dbContext.Solutions.Update(solution);
+                var contestParticipant = await _dbContext.ContestsParticipants.FirstOrDefaultAsync(cp => cp.ParticipantId == solution.ParticipantId && cp.ContestId == solution.ContestId);
+                var otherSolutions = await _dbContext.Solutions.Where(s => s.ParticipantId == solution.ParticipantId
+                                                                            && s.ContestId == solution.ContestId
+                                                                            && s.ProblemId == solution.ProblemId
+                                                                            && s.Id != solution.Id)
+                                                                .Include(s => s.Contest)
+                                                                .ThenInclude(c => c.RulesSet)
+                                                                .ToListAsync();
+                contestParticipant.Result += _verdicter.GetAdditionalResultForSolutionSubmit(otherSolutions, solution, solution.Contest.RulesSet);
+                _dbContext.ContestsParticipants.Update(contestParticipant);
+                bool saved = false;
+                while (!saved)
                 {
-                    await _dbContext.SaveChangesAsync();
-                    saved = true;
+                    try
+                    {
+                        await _dbContext.SaveChangesAsync();
+                        saved = true;
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        contestParticipant = await _dbContext.ContestsParticipants.FirstOrDefaultAsync(cp => cp.ParticipantId == solution.ParticipantId && cp.ContestId == solution.ContestId);
+                        otherSolutions = await _dbContext.Solutions.Where(s => s.ParticipantId == solution.ParticipantId
+                                                                            && s.ContestId == solution.ContestId
+                                                                            && s.ProblemId == solution.ProblemId
+                                                                            && s.Id != solution.Id)
+                                                                .Include(s => s.Contest)
+                                                                .ThenInclude(c => c.RulesSet)
+                                                                .ToListAsync();
+                        contestParticipant.Result += _verdicter.GetAdditionalResultForSolutionSubmit(otherSolutions, solution, solution.Contest.RulesSet);
+                        _dbContext.ContestsParticipants.Update(contestParticipant);
+                    }
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    contestParticipant = await _dbContext.ContestsParticipants.FirstOrDefaultAsync(cp => cp.ParticipantId == solution.ParticipantId && cp.ContestId == solution.ContestId);
-                    otherSolutions = await _dbContext.Solutions.Where(s => s.ParticipantId == solution.ParticipantId
-                                                                        && s.ContestId == solution.ContestId
-                                                                        && s.ProblemId == solution.ProblemId
-                                                                        && s.Id != solution.Id)
-                                                            .Include(s => s.Contest)
-                                                            .ThenInclude(c => c.RulesSet)
-                                                            .ToListAsync();
-                    contestParticipant.Result += _verdicter.GetAdditionalResultForSolutionSubmit(otherSolutions, solution, solution.Contest.RulesSet);
-                    _dbContext.ContestsParticipants.Update(contestParticipant);
-                }
+                await _hubContext.UpdateOnSolutionActualResultAsync(solution.Contest, solution);
+                _logger.LogInformation($"Решение с идентификатором {solution.Id} успешно протестировано");
             }
-            await _hubContext.UpdateOnSolutionActualResultAsync(solution.Contest, solution);
-            _logger.LogInformation($"Решение с идентификатором {solution.Id} успешно протестировано");
             return Json(state);
         }
 
@@ -269,9 +310,16 @@ namespace ContestSystem.Controllers
             var testResult = solution.TestResults.FirstOrDefault(tr => tr.Number == test.Number);
             if (testResult == null)
             {
-                var newTestResult = await _checkerSystemService.RunTestForSolutionAsync(solution, test.Number);
-                solution.Points += newTestResult.GotPoints;
-                solution.TestResults.Add(newTestResult);
+                var newTestResult = await _checkerSystemService.RunTestForSolutionAsync(_dbContext, solution, test.Number);
+                if (newTestResult == null)
+                {
+                    solution.Verdict = VerdictType.CheckerServersUnavailable;
+                }
+                else
+                {
+                    solution.Points += newTestResult.GotPoints;
+                    solution.TestResults.Add(newTestResult);
+                }
                 _dbContext.Solutions.Update(solution);
                 await _dbContext.SaveChangesAsync();
                 await _hubContext.UpdateOnSolutionActualResultAsync(solution.Contest, solution);

@@ -95,11 +95,14 @@ export default {
         case TestResultVerdicts.PresentationError:
           verdict = 'Ошибка представления на тесте ' + actualResult.lastRunTestNumber
           break
-        case TestResultVerdicts.ShouldResetSolution:
-          verdict = 'Неожиданная ошибка на тесте' + actualResult.lastRunTestNumber
+        case TestResultVerdicts.CheckerServersUnavailable:
+          verdict = 'Сервера проверки недоступны' + actualResult.lastRunTestNumber
+          break
+        case TestResultVerdicts.TestlibFail:
+          verdict = 'Ошибка механизма проверки' + actualResult.lastRunTestNumber
           break
         case TestResultVerdicts.UnexpectedError:
-          verdict = 'Неожиданная ошибка на тесте' + actualResult.lastRunTestNumber
+          verdict = 'Непредвиденная ошибка на тесте' + actualResult.lastRunTestNumber
           break
         case TestResultVerdicts.MemoryLimitExceeded:
           verdict = 'Превышение по памяти на тесте ' + actualResult.lastRunTestNumber
@@ -117,7 +120,7 @@ export default {
           verdict = 'Полное решение'
           break
         case TestResultVerdicts.TestInProgress:
-              verdict = 'Выполняется на тесте ' + (+actualResult.lastRunTestNumber + 1 - +actualResult.testsAreDone)
+          verdict = 'Выполняется на тесте ' + (+actualResult.lastRunTestNumber + 1 - +actualResult.testsAreDone)
           break
       }
       return verdict
