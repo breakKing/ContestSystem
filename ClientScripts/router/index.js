@@ -18,11 +18,8 @@ const router = createRouter({
             name: 'Home',
             redirect: (to) => {
                 // redirect синхронный
-                if (!store.getters.isAuthenticated) {
-                    return {name: 'Login'}
-                }
                 let current_role = store.getters.currentRole
-                if (!current_role) {
+                if (store.getters.isAuthenticated && !current_role) {
                     return {name: 'RoleSelector'}
                 }
                 let route_name;
@@ -40,9 +37,6 @@ const router = createRouter({
                 }
                 return {name: route_name}
             },
-            meta: {
-                authorize: true
-            }
         },
         AdminRoutes,
         ManagerRoutes,
@@ -94,7 +88,7 @@ router.beforeEach(async (to, from, next) => {
     const {authorize} = to.meta;
     if (authorize) {
         if (!isAuthenticated) {
-            return next({name: 'UserStarterPage', query: {returnUrl: to.path}})
+            return next({name: 'Login', query: {returnUrl: to.path}})
         }
         let current_role = store.getters.currentRole
         if (authorize.length && !authorize.includes(current_role)) {
