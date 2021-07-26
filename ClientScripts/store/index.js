@@ -43,7 +43,7 @@ export default createStore({
             return moment.utc(date).local().format('LLLL');
         },
         getFormattedMemory: (state, getters) => (bytes) => {
-            let result = '0 Б'
+            let result = ''
             if (bytes) {
                 if (+bytes < 1024) {
                     result = bytes + ' Б'
@@ -59,13 +59,20 @@ export default createStore({
             return result
         },
         getFormattedTime: (state, getters) => (millis) => {
-            let result = '0 мс'
+            let result = ''
             if (millis) {
                 if (+millis < 1000) {
                     result = millis + ' мс'
                 }
-                else {
+                else if (+millis < 60000) {
                     result = (+millis / 1000).toFixed(1) + ' с'
+                }
+                else {
+                    let mls = +millis % 1000
+                    let seconds = ((+millis - mls) % 60000) / 1000
+                    let minutes = ((+millis - mls - seconds * 1000) / 60000) % 60
+                    let hours = (+millis - mls - seconds * 1000 - minutes * 60000) / 3600000
+                    result = (+hours > 9 ? hours.toFixed(0) : '0' + hours.toFixed(0)) + ':' + minutes.toFixed(0)
                 }
                 result = result.replace('.0', '')
             }

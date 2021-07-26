@@ -29,10 +29,11 @@
 </template>
 
 <script>
-import {mapActions, mapGetters} from "vuex";
+import {mapActions, mapGetters, mapMutations} from "vuex";
 import * as _ from 'lodash'
 import BreadCrumbsComponent from "../../../BreadCrumbsComponent";
 import ContestMonitorBreads from "../../../../dictionaries/bread_crumbs/contest/ContestMonitorBreads";
+import CountModes from "../../../../dictionaries/CountModes";
 
 export default {
   name: "ContestMonitoringComponent",
@@ -44,19 +45,20 @@ export default {
       'currentContest',
       'currentContestMonitorEntries',
       'currentUserIsOwnerOfCurrentContest',
-      'currentUserIsParticipantOfCurrentContest'
+      'currentUserIsParticipantOfCurrentContest',
+      'getFormattedTime'
     ]),
     resultsName() {
       if (!this.currentContest) {
         return 'Результат';
-      }
-      if (+this.currentContest.rules.countMode === 1) {
+        }
+      if (+this.currentContest.rules.countMode === CountModes.CountPoints) {
         return 'Очки'
       }
-      if (+this.currentContest.rules.countMode === 2) {
+      if (+this.currentContest.rules.countMode === CountModes.CountPenalty) {
         return 'Штраф'
       }
-      if (+this.currentContest.rules.countMode === 3) {
+      if (+this.currentContest.rules.countMode === CountModes.CountPointsMinusPenalty) {
         return 'Счёт'
       }
     },
@@ -72,22 +74,27 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['changeCurrentContest']),
+    ...mapActions(['changeCurrentContest', 'getContestMonitor']),
+    ...mapMutations(['setCurrentContestMonitor']),
     sortedTries(problemTries) {
       return _.sortBy(problemTries, ['letter'])
     },
     getFirstRow(problem_try) {
-      let ret = (problem_try?.solved ? '+' : '-')
-      if (+this.currentContest.rules.countMode === 2) {
+      let ret = ''
+      if (+problem_try?.triesCount === 0) {
+        return ret
+      }
+      ret = (problem_try?.solved ? '+' : '-')
+      if (+this.currentContest.rules.countMode === CountModes.CountPenalty) {
         ret += (` ${problem_try?.triesCount}`.trimEnd())
       }
       return ret
     },
     getSecondRow(problem_try) {
-      return problem_try?.lastTryMinutesAfterStart
+      return this.getFormattedTime(problem_try?.lastTryMinutesAfterStart * 60000)
     },
     getThirdRow(problem_try) {
-      if (+this.currentContest.rules.countMode !== 2) {
+      if (+this.currentContest.rules.countMode !== CountModes.CountPenalty) {
         return problem_try.gotPoints
       }
       return ''
@@ -99,6 +106,8 @@ export default {
       if (!(vm.currentUserIsOwnerOfCurrentContest || vm.currentUserIsParticipantOfCurrentContest || vm.currentContest?.rules?.publicMonitor)) {
         return await vm.$router.replace({name: 'ContestPage', params: {contest_id: vm.contest_id}})
       }
+      let monitorEntries = await vm.getContestMonitor(vm.contest_id)
+      vm.setCurrentContestMonitor(monitorEntries)
     })
   },
 }
