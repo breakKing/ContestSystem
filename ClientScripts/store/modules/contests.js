@@ -116,15 +116,19 @@ export default {
             let contest = await dispatch('getContestById', contest_id)
             let participants = await dispatch('getContestParticipants', contest_id)
             let monitor = await dispatch('getContestMonitor', contest_id)
-            let solutions = await dispatch('getUserSolutionsInContest', {
-                contest_id,
-                user_id: rootGetters.currentUser?.id
-            })
 
             commit('setCurrentContest', contest)
             commit('setCurrentContestParticipants', participants)
             commit('setCurrentContestMonitor', monitor)
-            commit('setCurrentContestSolutionsForCurrentUser', solutions)
+
+            let currentUserParticipant = _.find(participants, (p) => +p.userId === +rootGetters.currentUser?.id)
+            if (currentUserParticipant) {
+                let solutions = await dispatch('getUserSolutionsInContest', {
+                    contest_id,
+                    user_id: rootGetters.currentUser?.id
+                })
+                commit('setCurrentContestSolutionsForCurrentUser', solutions)
+            }
         },
         async getContestById({commit, state, dispatch, getters}, contest_id) {
             if (!contest_id) {

@@ -4,8 +4,8 @@
             <img v-if="!!dataUrl" :src="dataUrl" class="card-img-top" alt="...">
             <div class="card-body d-flex flex-column justify-content-between">
                 <h5 class="card-title">{{ contest?.localizedName }}</h5>
-                <p>{{ contest?.localizedDescription }}</p>
-                <p>{{ contest?.participatsCount || 0 }} участников</p>
+                <p> {{ contest?.localizedDescription }} </p>
+                <p> Участников: {{ contest?.participantsCount || 0 }}</p>
                 <p> Автор: {{ contest?.creator?.fullName }}</p>
                 <div class="row d-flex justify-content-center">
                     <template v-if="currentRole === 'user'">
