@@ -31,6 +31,7 @@
                    type="checkbox" class="custom-checkbox"
                    :value="true" :uncheckedValue="false"
                    id="penaltyForCompilationError"
+                   :disabled="+countMode !== countModes.CountPenalty"
                    name="penaltyForCompilationError"/>
           <label class="fs-4" for="penaltyForCompilationError">Наказывать за ошибку компиляции</label>
 
@@ -39,17 +40,20 @@
         <div>
           <label class="fs-4">Размер наказания за одну попытку</label>
           <v-field v-model="penaltyForOneTry" type="number" class="form-control"
+                   :disabled="+countMode !== countModes.CountPenalty"
                    name="penaltyForOneTry"/>
           <error-message name="penaltyForOneTry"></error-message>
         </div>
         <div>
           <label class="fs-4">Размер наказания за одну минуту</label>
           <v-field v-model="penaltyForOneMinute" type="number" class="form-control"
+                   :disabled="+countMode === countModes.CountPoints"
                    name="penaltyForOneMinute"/>
           <error-message name="penaltyForOneMinute"></error-message>
         </div>
         <div>
           <v-field v-model="pointsForBestSolution" id="pointsForBestSolution" class="custom-checkbox" type="checkbox"
+                   :disabled="+countMode !== countModes.CountPoints"
                    :value="true" :uncheckedValue="false"
                    name="pointsForBestSolution"/>
           <label class="fs-4" for="pointsForBestSolution">Прибавка к очкам за лучшее решение</label>
@@ -101,6 +105,7 @@ import * as Yup from 'yup';
 import {mapActions, mapGetters} from "vuex";
 import axios from 'axios'
 import {CkeditorMixin} from "../../../mixins/ckeditor-mixin";
+import CountModes from "../../../../dictionaries/CountModes";
 
 export default {
   name: "RuleSetEditComponent",
@@ -112,21 +117,23 @@ export default {
   },
   props: ['set_id'],
   computed: {
-    ...mapGetters(['currentUser'])
+    ...mapGetters(['currentUser']),
+    countModes() {
+      return CountModes
+    }
   },
   data() {
     return {
       error_msg: '',
 
       ruleSet: null,
-
       name: null,
       description: null,
       countMode: null,
-      penaltyForCompilationError: null,
-      penaltyForOneTry: null,
-      penaltyForOneMinute: null,
-      pointsForBestSolution: null,
+      penaltyForCompilationError: 0,
+      penaltyForOneTry: 0,
+      penaltyForOneMinute: 0,
+      pointsForBestSolution: false,
       maxTriesForOneProblem: null,
       publicMonitor: null,
       monitorFreezeTimeBeforeFinishInMinutes: null,
@@ -146,14 +153,14 @@ export default {
       this.ruleSet = await this.getRuleSet(this.set_id)
       this.name = this.ruleSet?.name || null
       this.description = this.ruleSet?.description || null
-      this.countMode = this.ruleSet?.countMode || null
+      this.countMode = this.ruleSet?.countMode || CountModes.CountPenalty
       this.penaltyForCompilationError = this.ruleSet?.penaltyForCompilationError || false
-      this.penaltyForOneTry = this.ruleSet?.penaltyForOneTry || null
-      this.penaltyForOneMinute = this.ruleSet?.penaltyForOneMinute || null
+      this.penaltyForOneTry = this.ruleSet?.penaltyForOneTry || 0
+      this.penaltyForOneMinute = this.ruleSet?.penaltyForOneMinute || 0
       this.pointsForBestSolution = this.ruleSet?.pointsForBestSolution || false
-      this.maxTriesForOneProblem = this.ruleSet?.maxTriesForOneProblem || null
+      this.maxTriesForOneProblem = this.ruleSet?.maxTriesForOneProblem || 999
       this.publicMonitor = this.ruleSet?.publicMonitor || false
-      this.monitorFreezeTimeBeforeFinishInMinutes = this.ruleSet?.monitorFreezeTimeBeforeFinishInMinutes || null
+      this.monitorFreezeTimeBeforeFinishInMinutes = this.ruleSet?.monitorFreezeTimeBeforeFinishInMinutes || 0
       this.showFullTestsResults = this.ruleSet?.showFullTestsResults || false
       this.isPublic = this.ruleSet?.isPublic || false
     },
