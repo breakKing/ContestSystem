@@ -370,7 +370,7 @@ namespace ContestSystem.Controllers
                     var problemsExamined = new Dictionary<long, bool>();
                     foreach (var p in problems)
                     {
-                        problemsExamined.Add(p.Id, false);
+                        problemsExamined.Add(p.ProblemId, false);
                     }
 
                     for (int i = 0; i < contestForm.Problems.Count; i++)
@@ -389,7 +389,7 @@ namespace ContestSystem.Controllers
                         }
                         else
                         {
-                            problemsExamined[loadedContestProblem.Id] = true;
+                            problemsExamined[loadedContestProblem.ProblemId] = true;
                             loadedContestProblem.Letter = contestForm.Problems[i].Letter;
                             _dbContext.ContestsProblems.Update(loadedContestProblem);
                         }
@@ -399,7 +399,7 @@ namespace ContestSystem.Controllers
                     {
                         if (!item.Value)
                         {
-                            var loadedProblem = problems.FirstOrDefault(p => p.Id == item.Key);
+                            var loadedProblem = problems.FirstOrDefault(p => p.ProblemId == item.Key);
                             _dbContext.ContestsProblems.Remove(loadedProblem);
                         }
                     }

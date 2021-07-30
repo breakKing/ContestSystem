@@ -1,5 +1,5 @@
-﻿using ContestSystemDbStructure.Models;
-using Microsoft.AspNetCore.Identity;
+﻿using ContestSystemDbStructure.Configurations;
+using ContestSystemDbStructure.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,7 +22,6 @@ namespace ContestSystem.Models.DbContexts
         public DbSet<Message> Messages { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Post> Posts { get; set; }
-        public DbSet<Notification> Notifications { get; set; }
         public DbSet<ContestProblem> ContestsProblems { get; set; }
         public DbSet<ContestParticipant> ContestsParticipants { get; set; }
         public DbSet<ContestLocalModerator> ContestsLocalModerators { get; set; }
@@ -47,34 +46,19 @@ namespace ContestSystem.Models.DbContexts
         {
             base.OnModelCreating(builder);
 
-            // связь ролей и пользователей
-            builder.Entity<User>()
-                .HasMany(u => u.Roles)
-                .WithMany(r => r.Users)
-                .UsingEntity<IdentityUserRole<long>>(
-                    userRole => userRole.HasOne<Role>().WithMany().HasForeignKey(ur => ur.RoleId).IsRequired(),
-                    userRole => userRole.HasOne<User>().WithMany().HasForeignKey(ur => ur.UserId).IsRequired()
-                );
+            // Конфигурация обычных сущностей через Fluent API
+            builder.ApplyConfiguration(new ExampleConfiguration());
+            builder.ApplyConfiguration(new TestConfiguration());
+            builder.ApplyConfiguration(new TestResultConfiguration());
+            builder.ApplyConfiguration(new UserConfiguration());
 
-
-            // контесты - проблемы
-            builder.Entity<Contest>()
-                .HasMany<Problem>(c => c.Problems)
-                .WithMany(p => p.Contests)
-                .UsingEntity<ContestProblem>(
-                    contestProblem => contestProblem
-                        .HasOne<Problem>(cp => cp.Problem)
-                        .WithMany(c => c.ContestProblems)
-                        .HasForeignKey(cp => cp.ProblemId)
-                        .IsRequired(),
-                    contestProblem => contestProblem
-                        .HasOne<Contest>(cp => cp.Contest)
-                        .WithMany(c => c.ContestProblems)
-                        .HasForeignKey(cp => cp.ContestId)
-                        .IsRequired()
-                );
-            
-            
+            // Конфигурация сущностей Many-to-Many через Fluent API
+            builder.ApplyConfiguration(new ContestLocalModeratorConfiguration());
+            builder.ApplyConfiguration(new ContestParticipantConfiguration());
+            builder.ApplyConfiguration(new ContestProblemConfiguration());
+            builder.ApplyConfiguration(new CourseLocalModeratorConfiguration());
+            builder.ApplyConfiguration(new CourseParticipantConfiguration());
+            builder.ApplyConfiguration(new CourseProblemConfiguration());
         }
     }
 }

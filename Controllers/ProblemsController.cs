@@ -325,10 +325,10 @@ namespace ContestSystem.Controllers
                     }
 
                     var tests = await _dbContext.Tests.Where(t => t.ProblemId == id).ToListAsync();
-                    var testsExamined = new Dictionary<long, bool>();
+                    var testsExamined = new Dictionary<short, bool>();
                     foreach (var t in tests)
                     {
-                        testsExamined.Add(t.Id, false);
+                        testsExamined.Add(t.Number, false);
                     }
 
                     for (int i = 0; i < problemForm.Tests.Count; i++)
@@ -348,7 +348,7 @@ namespace ContestSystem.Controllers
                         }
                         else
                         {
-                            testsExamined[loadedTest.Id] = true;
+                            testsExamined[loadedTest.Number] = true;
                             loadedTest.Number = test.Number;
                             loadedTest.AvailablePoints = test.AvailablePoints;
                             loadedTest.Input = test.Input;
@@ -361,16 +361,16 @@ namespace ContestSystem.Controllers
                     {
                         if (!item.Value)
                         {
-                            var loadedTest = tests.FirstOrDefault(t => t.Id == item.Key);
+                            var loadedTest = tests.FirstOrDefault(t => t.Number == item.Key);
                             _dbContext.Tests.Remove(loadedTest);
                         }
                     }
 
                     var examples = await _dbContext.Examples.Where(e => e.ProblemId == id).ToListAsync();
-                    var examplesExamined = new Dictionary<long, bool>();
+                    var examplesExamined = new Dictionary<short, bool>();
                     foreach (var e in examples)
                     {
-                        examplesExamined.Add(e.Id, false);
+                        examplesExamined.Add(e.Number, false);
                     }
 
                     for (int i = 0; i < problemForm.Examples.Count; i++)
@@ -389,7 +389,7 @@ namespace ContestSystem.Controllers
                         }
                         else
                         {
-                            examplesExamined[loadedExample.Id] = true;
+                            examplesExamined[loadedExample.Number] = true;
                             loadedExample.Number = example.Number;
                             loadedExample.InputText = example.InputText;
                             loadedExample.OutputText = example.OutputText;
@@ -401,7 +401,7 @@ namespace ContestSystem.Controllers
                     {
                         if (!item.Value)
                         {
-                            var loadedExample = examples.FirstOrDefault(e => e.Id == item.Key);
+                            var loadedExample = examples.FirstOrDefault(e => e.Number == item.Key);
                             _dbContext.Examples.Remove(loadedExample);
                         }
                     }
