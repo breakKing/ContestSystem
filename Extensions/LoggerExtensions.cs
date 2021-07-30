@@ -99,6 +99,25 @@ namespace ContestSystem.Extensions
                 $"Попытка модерировать несуществующую сущность \"{entityName}\" с идентификатором {entityId} модератором с идентификатором {userId}");
         }
 
+        public static void LogModeratingByWrongUser(this ILogger logger, string entityName, long entityId, long userId, long approvingModeratorId, ApproveType approvalStatus)
+        {
+            switch (approvalStatus)
+            {
+                case ApproveType.Rejected:
+                    logger.LogInformation($"Попытка модерировать сущность \"{entityName}\" с идентификатором {entityId} модератором с идентификатором {userId}, " +
+                        $"когда данная сущность закреплена за модератором с идентификатором {approvingModeratorId} и отклонена им");
+                    break;
+                case ApproveType.Accepted:
+                    logger.LogInformation($"Попытка модерировать сущность \"{entityName}\" с идентификатором {entityId} модератором с идентификатором {userId}, " +
+                        $"когда данная сущность закреплена за модератором с идентификатором {approvingModeratorId} и одобрена им");
+                    break;
+                default:
+                    logger.LogWarning($"Попытка модерировать сущность \"{entityName}\" с идентификатором {entityId} модератором с идентификатором {userId}, " +
+                        $"когда данная сущность закреплена за модератором с идентификатором {approvingModeratorId}, но при этом имеет статус \"Ещё не отмодерирована\"");
+                    break;
+            }
+        }
+
         public static void LogModeratingSuccessful(this ILogger logger, string entityName, long entityId, long userId,
             ApproveType approvalStatus)
         {

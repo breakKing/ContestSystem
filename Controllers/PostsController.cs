@@ -354,7 +354,10 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetApprovedPosts()
         {
-            var posts = await _dbContext.Posts.Where(p => p.ApprovalStatus == ApproveType.Accepted).ToListAsync();
+            var currentUser = await HttpContext.GetCurrentUser();
+            var posts = await _dbContext.Posts.Where(p => p.ApprovalStatus == ApproveType.Accepted 
+                                                            && p.ApprovingModeratorId.GetValueOrDefault(-1) == currentUser.Id)
+                                                .ToListAsync();
             var requests = posts.ConvertAll(p =>
             {
                 ConstructedPost pr = ConstructedPost.GetFromModel(p, _storage.GetImageInBase64(p.ImagePath));
@@ -367,7 +370,10 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetRejectedPosts()
         {
-            var posts = await _dbContext.Posts.Where(p => p.ApprovalStatus == ApproveType.Rejected).ToListAsync();
+            var currentUser = await HttpContext.GetCurrentUser();
+            var posts = await _dbContext.Posts.Where(p => p.ApprovalStatus == ApproveType.Rejected
+                                                            && p.ApprovingModeratorId.GetValueOrDefault(-1) == currentUser.Id)
+                                                .ToListAsync();
             var requests = posts.ConvertAll(p =>
             {
                 ConstructedPost pr = ConstructedPost.GetFromModel(p, _storage.GetImageInBase64(p.ImagePath));
@@ -387,7 +393,7 @@ namespace ContestSystem.Controllers
                 _logger.LogModeratingWithNonEqualFormAndRequestId("Post", postRequestForm.PostId, id, currentUser.Id);
                 return Json(new
                 {
-                    success = false,
+                    status = false,
                     errors = new List<string> {"Id в запросе не совпадает с Id в форме"}
                 });
             }
@@ -406,6 +412,15 @@ namespace ContestSystem.Controllers
                 }
                 else
                 {
+                    if (post.ApprovingModeratorId.GetValueOrDefault(-1) != currentUser.Id && post.ApprovalStatus != ApproveType.NotModeratedYet)
+                    {
+                        _logger.LogModeratingByWrongUser("Post", id, currentUser.Id, post.ApprovingModeratorId.GetValueOrDefault(-1), post.ApprovalStatus);
+                        return Json(new
+                        {
+                            status = false,
+                            errors = new List<string> { "Данный пост уже закреплён за другим модератором" }
+                        });
+                    }
                     post.ApprovalStatus = postRequestForm.ApprovalStatus;
                     post.ApprovingModeratorId = postRequestForm.ApprovingModeratorId;
                     post.ModerationMessage = postRequestForm.ModerationMessage;

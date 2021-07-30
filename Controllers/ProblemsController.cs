@@ -526,8 +526,11 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetApprovedProblems()
         {
+            var currentUser = await HttpContext.GetCurrentUser();
             var problems = await _dbContext.Problems
-                .Where(p => p.ApprovalStatus == ApproveType.Accepted && !p.IsArchieved).ToListAsync();
+                .Where(p => p.ApprovalStatus == ApproveType.Accepted && !p.IsArchieved 
+                            && p.ApprovingModeratorId.GetValueOrDefault(-1) == currentUser.Id)
+                .ToListAsync();
             var requests = problems.ConvertAll(p =>
             {
                 var pr = ConstructedProblem.GetFromModel(p);
@@ -540,8 +543,11 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetRejectedProblems()
         {
+            var currentUser = await HttpContext.GetCurrentUser();
             var problems = await _dbContext.Problems
-                .Where(p => p.ApprovalStatus == ApproveType.Rejected && !p.IsArchieved).ToListAsync();
+                .Where(p => p.ApprovalStatus == ApproveType.Rejected && !p.IsArchieved
+                            && p.ApprovingModeratorId.GetValueOrDefault(-1) == currentUser.Id)
+                .ToListAsync();
             var requests = problems.ConvertAll(p =>
             {
                 var pr = ConstructedProblem.GetFromModel(p);
@@ -562,7 +568,7 @@ namespace ContestSystem.Controllers
                     currentUser.Id);
                 return Json(new
                 {
-                    success = false,
+                    status = false,
                     errors = new List<string> {"Id в запросе не совпадает с Id в форме"}
                 });
             }
@@ -581,6 +587,15 @@ namespace ContestSystem.Controllers
                 }
                 else
                 {
+                    if (problem.ApprovingModeratorId.GetValueOrDefault(-1) != currentUser.Id && problem.ApprovalStatus != ApproveType.NotModeratedYet)
+                    {
+                        _logger.LogModeratingByWrongUser("Problem", id, currentUser.Id, problem.ApprovingModeratorId.GetValueOrDefault(-1), problem.ApprovalStatus);
+                        return Json(new
+                        {
+                            status = false,
+                            errors = new List<string> { "Данная задача уже закреплена за другим модератором" }
+                        });
+                    }
                     problem.ApprovalStatus = problemRequestForm.ApprovalStatus;
                     problem.ApprovingModeratorId = problemRequestForm.ApprovingModeratorId;
                     problem.ModerationMessage = problemRequestForm.ModerationMessage;

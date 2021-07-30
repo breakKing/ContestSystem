@@ -45,7 +45,7 @@ namespace ContestSystem.Controllers
         }
 
         [HttpGet("{id}")]
-        [AuthorizeByJwt(Roles = RolesContainer.User)]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
         public async Task<IActionResult> GetConstructedSolution(long id)
         {
             var solution = await _dbContext.Solutions.FirstOrDefaultAsync(s => s.Id == id);
@@ -62,7 +62,7 @@ namespace ContestSystem.Controllers
         }
 
         [HttpGet("get-compilers")]
-        [AuthorizeByJwt(Roles = RolesContainer.User)]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
         public async Task<IActionResult> GetCompilers()
         {
             List<CompilerInfo> compilers = await _checkerSystemService.GetAvailableCompilersAsync(_dbContext);

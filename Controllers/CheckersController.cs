@@ -305,8 +305,10 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetApprovedCheckers()
         {
+            var currentUser = await HttpContext.GetCurrentUser();
             var checkers = await _dbContext.Checkers
-                .Where(c => c.ApprovalStatus == ApproveType.Accepted && !c.IsArchieved).ToListAsync();
+                .Where(c => c.ApprovalStatus == ApproveType.Accepted && !c.IsArchieved && c.ApprovingModeratorId.GetValueOrDefault(-1) == currentUser.Id)
+                .ToListAsync();
             var requests = checkers.ConvertAll(c =>
             {
                 ConstructedChecker cr = ConstructedChecker.GetFromModel(c);
@@ -319,8 +321,10 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetRejectedCheckers()
         {
+            var currentUser = await HttpContext.GetCurrentUser();
             var checkers = await _dbContext.Checkers
-                .Where(c => c.ApprovalStatus == ApproveType.Rejected && !c.IsArchieved).ToListAsync();
+                .Where(c => c.ApprovalStatus == ApproveType.Rejected && !c.IsArchieved && c.ApprovingModeratorId.GetValueOrDefault(-1) == currentUser.Id)
+                .ToListAsync();
             var requests = checkers.ConvertAll(c =>
             {
                 ConstructedChecker cr = ConstructedChecker.GetFromModel(c);
@@ -341,7 +345,7 @@ namespace ContestSystem.Controllers
                     currentUser.Id);
                 return Json(new
                 {
-                    success = false,
+                    status = false,
                     errors = new List<string> {"Id в запросе не совпадает с Id в форме"}
                 });
             }
@@ -360,6 +364,15 @@ namespace ContestSystem.Controllers
                 }
                 else
                 {
+                    if (checker.ApprovingModeratorId.GetValueOrDefault(-1) != currentUser.Id && checker.ApprovalStatus != ApproveType.NotModeratedYet)
+                    {
+                        _logger.LogModeratingByWrongUser("Checker", id, currentUser.Id, checker.ApprovingModeratorId.GetValueOrDefault(-1), checker.ApprovalStatus);
+                        return Json(new
+                        {
+                            status = false,
+                            errors = new List<string> { "Данный чекер уже закреплён за другим модератором" }
+                        });
+                    }
                     checker.ApprovalStatus = checkerRequestForm.ApprovalStatus;
                     checker.ApprovingModeratorId = checkerRequestForm.ApprovingModeratorId;
                     checker.ModerationMessage = checkerRequestForm.ModerationMessage;

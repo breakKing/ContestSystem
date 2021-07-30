@@ -105,7 +105,7 @@ namespace ContestSystem.Controllers
         }
 
         [HttpGet("{id}/{culture}")]
-        [AuthorizeByJwt(Roles = RolesContainer.User)]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
         public async Task<IActionResult> GetPublishedContest(long id, string culture)
         {
             var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == id);
@@ -603,7 +603,7 @@ namespace ContestSystem.Controllers
         }
 
         [HttpGet("{contestId}/get-participants")]
-        [AuthorizeByJwt(Roles = RolesContainer.User)]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
         public async Task<IActionResult> GetParticipants(long contestId)
         {
             var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == contestId);
@@ -620,6 +620,13 @@ namespace ContestSystem.Controllers
                 return p;
             });
             return Json(participants);
+        }
+
+        [HttpGet("{contestId}/get-all-solutions")]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
+        public async Task<IActionResult> GetAllSolutions(long contestId)
+        {
+            return null;
         }
 
         [HttpGet("{contestId}/get-monitor")]
@@ -721,7 +728,7 @@ namespace ContestSystem.Controllers
         }
 
         [HttpGet("{contestId}/get-solutions/{userId}")]
-        [AuthorizeByJwt(Roles = RolesContainer.User)]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
         public async Task<IActionResult> GetUserSolutions(long contestId, long userId)
         {
             var currentUser = await HttpContext.GetCurrentUser();
@@ -749,7 +756,7 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetContestsRequests()
         {
-            var contests = await _dbContext.Contests.Where(p => p.ApprovalStatus == ApproveType.NotModeratedYet)
+            var contests = await _dbContext.Contests.Where(c => c.ApprovalStatus == ApproveType.NotModeratedYet)
                 .ToListAsync();
             var requests = contests.ConvertAll(c =>
             {
@@ -763,7 +770,10 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetApprovedContests()
         {
-            var contests = await _dbContext.Contests.Where(p => p.ApprovalStatus == ApproveType.Accepted).ToListAsync();
+            var currentUser = await HttpContext.GetCurrentUser();
+            var contests = await _dbContext.Contests.Where(c => c.ApprovalStatus == ApproveType.Accepted
+                                                                && c.ApprovingModeratorId.GetValueOrDefault(-1) == currentUser.Id)
+                                                    .ToListAsync();
             var requests = contests.ConvertAll(c =>
             {
                 var cr = ConstructedContest.GetFromModel(c, c.ContestProblems, _storage.GetImageInBase64(c.ImagePath));
@@ -776,7 +786,10 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetRejectedContests()
         {
-            var contests = await _dbContext.Contests.Where(p => p.ApprovalStatus == ApproveType.Rejected).ToListAsync();
+            var currentUser = await HttpContext.GetCurrentUser();
+            var contests = await _dbContext.Contests.Where(c => c.ApprovalStatus == ApproveType.Rejected
+                                                                && c.ApprovingModeratorId.GetValueOrDefault(-1) == currentUser.Id)
+                                                    .ToListAsync();
             var requests = contests.ConvertAll(c =>
             {
                 var cr = ConstructedContest.GetFromModel(c, c.ContestProblems, _storage.GetImageInBase64(c.ImagePath));
@@ -797,7 +810,7 @@ namespace ContestSystem.Controllers
                     currentUser.Id);
                 return Json(new
                 {
-                    success = false,
+                    status = false,
                     errors = new List<string> {"Id в запросе не совпадает с Id в форме"}
                 });
             }
@@ -816,6 +829,15 @@ namespace ContestSystem.Controllers
                 }
                 else
                 {
+                    if (contest.ApprovingModeratorId.GetValueOrDefault(-1) != currentUser.Id && contest.ApprovalStatus != ApproveType.NotModeratedYet)
+                    {
+                        _logger.LogModeratingByWrongUser("Contest", id, currentUser.Id, contest.ApprovingModeratorId.GetValueOrDefault(-1), contest.ApprovalStatus);
+                        return Json(new
+                        {
+                            status = false,
+                            errors = new List<string> { "Данный контест уже закреплён за другим модератором" }
+                        });
+                    }
                     contest.ApprovalStatus = contestRequestForm.ApprovalStatus;
                     contest.ApprovingModeratorId = contestRequestForm.ApprovingModeratorId;
                     contest.ModerationMessage = contestRequestForm.ModerationMessage;
