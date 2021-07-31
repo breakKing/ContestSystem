@@ -37,6 +37,9 @@ namespace ContestSystem.Models.DbContexts
         public DbSet<CoursePageFile> CoursesPagesFiles { get; set; }
         public DbSet<CheckerServer> CheckerServers { get; set; }
         public DbSet<CheckerServerCompiler> CheckerServersCompilers { get; set; }
+        public DbSet<Chat> Chats { get; set; }
+        public DbSet<ChatUser> ChatsUsers { get; set; }
+        public DbSet<ChatEvent> ChatsEvents { get; set; }
 
         public MainDbContext(DbContextOptions<MainDbContext> options) : base(options)
         {
@@ -53,6 +56,7 @@ namespace ContestSystem.Models.DbContexts
             builder.ApplyConfiguration(new UserConfiguration());
 
             // Конфигурация сущностей Many-to-Many через Fluent API
+            builder.ApplyConfiguration(new ChatUserConfiguration());
             builder.ApplyConfiguration(new ContestLocalModeratorConfiguration());
             builder.ApplyConfiguration(new ContestParticipantConfiguration());
             builder.ApplyConfiguration(new ContestProblemConfiguration());
