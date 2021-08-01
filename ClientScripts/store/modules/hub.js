@@ -1,4 +1,4 @@
-﻿import { HttpTransportType, HubConnectionBuilder } from "@microsoft/signalr"
+﻿import {HubConnectionBuilder} from "@microsoft/signalr"
 import * as _ from "lodash"
 
 export default {
@@ -7,8 +7,14 @@ export default {
     }),
     mutations: {
         setHubConnection(state, val) {
+            if (state.hub_connection && state.hub_connection !== val) {
+                state.hub_connection.stop()
+            }
             state.hub_connection = val
         },
+        invokeInHubConnection(state, {method, data}) {
+            state.hub_connection.invoke(method, data)
+        }
     },
     getters: {
         hubConnection(state, getters) {
@@ -16,50 +22,50 @@ export default {
         },
     },
     actions: {
-        async initHub({ commit, state, dispatch, getters, rootGetters }, token) {
-            // TODO: понять, почему не работает WebSockets (из-за этого ошибка в консоли, однако коннект к хабу всё же идёт (через Server Side Events))
-            let connection = new HubConnectionBuilder().withUrl('/api/real_time_hub', {
-                                                                accessTokenFactory: () => token
-                                                        }).build()
-            connection.on("UpdateOnSolutionActualResult", async (actualResult) => {
-                await dispatch("addSolutionActualResult", actualResult)
-            })
-            connection.start()
-            commit('setHubConnection', connection)
+        async initHub({commit, state, dispatch, getters, rootGetters}, {token, recreate}) {
+            if (recreate || !getters.hubConnection) {
+                if (recreate) {
+                    await dispatch('closeHub')
+                }
+                if (token) {
+                    let connection = new HubConnectionBuilder().withUrl('/api/real_time_hub', {
+                        accessTokenFactory: () => token
+                    }).build()
+                    connection.on("UpdateOnSolutionActualResult", async (actualResult) => {
+                        await dispatch("addSolutionActualResult", actualResult)
+                    })
+                    await connection.start()
+                    commit('setHubConnection', connection)
+                }
+            }
         },
-        closeHub({ commit, state, dispatch, getters, rootGetters }) {
+        closeHub({commit, state, dispatch, getters, rootGetters}) {
             if (!getters.hubConnection) {
                 return
             }
-            let connection = _.cloneDeep(getters.hubConnection)
-            connection.stop()
             commit('setHubConnection', null)
         },
-        addInvoke({ commit, state, dispatch, getters, rootGetters }, { method, data }) {
+        addInvoke({commit, state, dispatch, getters, rootGetters}, {method, data}) {
             if (!method || !data) {
                 return
             }
-            let connection = _.cloneDeep(getters.hubConnection)
-            connection.invoke(method, data)
-            commit('setHubConnection', connection)
+            commit('invokeInHubConnection', {method, data})
         },
-        async addSolutionActualResult({ commit, state, dispatch, getters, rootGetters }, actual_result) {
+        async addSolutionActualResult({commit, state, dispatch, getters, rootGetters}, actual_result) {
             if (!actual_result || !rootGetters.currentUser) {
                 return
             }
             let solutions = _.cloneDeep(rootGetters.currentContestSolutionsForCurrentUser || [])
             let index = _.findIndex(solutions, (s) => +s.id === +actual_result.solutionId)
             if (+index > -1) {
-                solutions[index].actualResult = _.cloneDeep(actual_result)
-                commit('setCurrentContestSolutionsForCurrentUser', solutions)
-            }
-            else {
+                solutions[index].actualResult = actual_result
+            } else {
                 solutions = await dispatch('getUserSolutionsInContest', {
                     contest_id: rootGetters.currentContest?.id,
                     user_id: rootGetters.currentUser?.id
                 })
-                commit('setCurrentContestSolutionsForCurrentUser', solutions)
             }
+            commit('setCurrentContestSolutionsForCurrentUser', solutions)
         },
     }
 }
