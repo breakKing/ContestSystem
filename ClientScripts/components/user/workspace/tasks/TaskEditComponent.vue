@@ -14,22 +14,22 @@
         <div>
           <label class="fs-4">Описание</label>
           <v-field v-model="description" name="description" type="hidden"/>
-          <ckeditor :editor="editor" v-model="description"
-                    class="form-control" :config="editorConfig"></ckeditor>
+          <quill-editor ref="quill_editor_description" theme="snow" v-model:content="description" contentType="html"
+                        class="form-control"></quill-editor>
           <error-message name="description"></error-message>
         </div>
         <div>
           <label class="fs-4">Входные данные</label>
           <v-field v-model="inputBlock" name="inputBlock" type="hidden"/>
-          <ckeditor :editor="editor" v-model="inputBlock"
-                    class="form-control" :config="editorConfig"></ckeditor>
+          <quill-editor ref="quill_editor_inputBlock" theme="snow" v-model:content="inputBlock" contentType="html"
+                        class="form-control"></quill-editor>
           <error-message name="inputBlock"></error-message>
         </div>
         <div>
           <label class="fs-4">Выходные данные</label>
           <v-field v-model="outputBlock" name="outputBlock" type="hidden"/>
-          <ckeditor :editor="editor" v-model="outputBlock"
-                    class="form-control" :config="editorConfig"></ckeditor>
+          <quill-editor ref="quill_editor_outputBlock" theme="snow" v-model:content="outputBlock" contentType="html"
+                        class="form-control"></quill-editor>
           <error-message name="outputBlock"></error-message>
         </div>
         <div>
@@ -80,19 +80,19 @@ import {mapActions, mapGetters} from "vuex";
 import TestsTableComponent from "./TestsTableComponent";
 import * as _ from 'lodash'
 import ExamplesTableComponent from "./ExamplesTableComponent";
-import {CkeditorMixin} from "../../../mixins/ckeditor-mixin";
+import {QuillEditor} from "@vueup/vue-quill";
 
 
 export default {
   name: "TaskEditComponent",
   props: ['task_id'],
-  mixins: [CkeditorMixin],
   components: {
     ExamplesTableComponent,
     TestsTableComponent,
     VForm: Form,
     VField: Field,
     ErrorMessage,
+    QuillEditor
   },
   data() {
     return {
@@ -131,7 +131,7 @@ export default {
       return _.unionBy(this.availableCheckers || [], [this.startedChecker], (c) => c.id)
     },
     unavailableCheckersInFutureExists() {
-      return _.reduce(this.availableCheckersForProblem || [], (count, c) => count += +this.shouldCheckerBeRemarked(c), 0) > 0
+      return _.reduce(this.availableCheckersForProblem || [], (count, c) => count + +this.shouldCheckerBeRemarked(c), 0) > 0
     },
     sortedTests() {
       return _.sortBy((this.tests || []), (t) => t.number)
@@ -157,6 +157,9 @@ export default {
       this.description = (data?.localizers || [])[0]?.description || null
       this.inputBlock = (data?.localizers || [])[0]?.inputBlock || null
       this.outputBlock = (data?.localizers || [])[0]?.outputBlock || null
+      this.$refs.quill_editor_description.setHTML(this.description)
+      this.$refs.quill_editor_inputBlock.setHTML(this.inputBlock)
+      this.$refs.quill_editor_outputBlock.setHTML(this.outputBlock)
       this.tests = (data?.tests || [])
       this.examples = (data?.examples || [])
     },

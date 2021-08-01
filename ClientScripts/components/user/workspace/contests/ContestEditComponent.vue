@@ -11,8 +11,8 @@
     <div>
       <label class=" fs-4">Описание</label>
       <v-field v-model="description" name="description" type="hidden"/>
-      <ckeditor :editor="editor" v-model="description" class="form-control"
-                :config="editorConfig"></ckeditor>
+      <quill-editor ref="quill_editor_description" theme="snow" v-model:content="description" contentType="html"
+                    class="form-control"></quill-editor>
       <error-message name="description"></error-message>
     </div>
     <div>
@@ -68,17 +68,18 @@ import * as Yup from 'yup';
 import {ErrorMessage, Field, Form} from "vee-validate";
 import alphabet from 'alphabet'
 import $ from "jquery";
-import moment from "moment";
-import {CkeditorMixin} from "../../../mixins/ckeditor-mixin";
+import {QuillEditor} from "@vueup/vue-quill";
+import date_processing from "../../../mixins/date_processing";
 
 export default {
   name: "ContestEditComponent",
-  mixins: [CkeditorMixin],
+  mixins: [date_processing],
   components: {
     TasksSelectorComponent,
     VForm: Form,
     VField: Field,
     ErrorMessage,
+    QuillEditor
   },
   props: ['contest_id'],
   data() {
@@ -111,7 +112,10 @@ export default {
       let contest = await this.getContestById(this.contest_id)
       this.name = (contest?.localizers || [])[0]?.name || null
       this.description = (contest?.localizers || [])[0]?.description || null
-      this.startDateTimeUTC = contest?.startDateTimeUTC || null
+      // у компонента баг. Начальное значение не отрисовывается
+      this.$refs.quill_editor_description.setHTML(this.description)
+
+      this.startDateTimeUTC = contest?.startDateTimeUTC && this.to_local_string(contest.startDateTimeUTC)
       this.durationInMinutes = contest?.durationInMinutes || null
       this.areVirtualContestsAvailable = contest?.areVirtualContestsAvailable || false
       this.isPublic = contest?.isPublic || false
@@ -152,7 +156,7 @@ export default {
       tmp_form.append($('<input type="hidden"/>').attr('name', 'creatorUserId').val(this.currentUser.id))
       //tmp_form.append($('<input type="hidden"/>').attr('name', 'isPublic').val(this.isPublic)) TODO: реализовать приватность контестов
       tmp_form.append($('<input type="hidden"/>').attr('name', 'isPublic').val(true))
-      tmp_form.append($('<input type="hidden"/>').attr('name', 'startDateTimeUTC').val(moment(this.startDateTimeUTC).utc().format()))
+      tmp_form.append($('<input type="hidden"/>').attr('name', 'startDateTimeUTC').val(this.to_utc_string(this.startDateTimeUTC)))
       tmp_form.append($('<input type="hidden"/>').attr('name', 'durationInMinutes').val(this.durationInMinutes))
       tmp_form.append($('<input type="hidden"/>').attr('name', 'areVirtualContestsAvailable').val(this.areVirtualContestsAvailable))
       tmp_form.append($('<input type="hidden"/>').attr('name', 'rulesSetId').val(this.rulesSetId))
@@ -170,13 +174,13 @@ export default {
       let data = new FormData(tmp_form[0]);
 
       let url;
-      let method;
+      let type;
       if (this.contest_id) {
         url = `/api/contests/edit-contest/${this.contest_id}`
-        method = 'PUT'
+        type = 'PUT'
       } else {
         url = `/api/contests/add-contest`
-        method = 'POST'
+        type = 'POST'
       }
 
       let result = await $.ajax({
@@ -184,7 +188,7 @@ export default {
         data,
         processData: false,
         contentType: false,
-        type: method
+        type
       })
       if (result.status) {
         this.error_msg = ''
@@ -202,7 +206,7 @@ export default {
     shouldRulesSetBeRemarked(rulesSet) {
       let remark = false
       if (rulesSet) {
-        if ((rulesSet.author?.id != this.currentUser.id && !rulesSet.isPublic) || rulesSet.isArchieved) {
+        if ((+rulesSet.author?.id !== this.currentUser.id && !rulesSet.isPublic) || rulesSet.isArchieved) {
           remark = true
         }
       }
@@ -222,7 +226,7 @@ export default {
       return _.unionBy(this.availableTasks || [], startedTasks || [], (t) => t.id)
     },
     unavailableRulesSetsInFutureExists() {
-      return _.reduce(this.availableRuleSetsForContest || [], (count, rs) => count += +this.shouldRulesSetBeRemarked(rs), 0) > 0
+      return _.reduce(this.availableRuleSetsForContest || [], (count, rs) => count + +this.shouldRulesSetBeRemarked(rs), 0) > 0
     },
     sortedTasks() {
       return _.sortBy(this.tasks, ['letter'])

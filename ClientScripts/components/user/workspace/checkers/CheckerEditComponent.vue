@@ -12,8 +12,7 @@
     <div>
       <label class="fs-4">Описание</label>
       <v-field v-model="description" name="description" type="hidden"/>
-      <ckeditor :editor="editor" v-model="description" class="form-control"
-                :config="editorConfig"></ckeditor>
+      <quill-editor ref="quill_editor_description" theme="snow" v-model:content="description" contentType="html" class="form-control"></quill-editor>
       <error-message name="description"></error-message>
     </div>
     <div>
@@ -37,15 +36,16 @@ import {Field, Form, ErrorMessage} from "vee-validate";
 import * as Yup from 'yup';
 import {mapActions, mapGetters} from "vuex";
 import axios from "axios";
-import {CkeditorMixin} from "../../../mixins/ckeditor-mixin";
+import {QuillEditor} from '@vueup/vue-quill'
+import '@vueup/vue-quill/dist/vue-quill.snow.css';
 
 export default {
   name: "CheckerEditComponent",
-  mixins: [CkeditorMixin],
   components: {
     VForm: Form,
     VField: Field,
     ErrorMessage,
+    QuillEditor
   },
   props: ['id'],
   data() {
@@ -71,6 +71,9 @@ export default {
       let checker = await this.getChecker(this.id)
       this.name = checker?.name || null
       this.description = checker?.description || null
+      // у компонента баг. Начальное значение не отрисовывается
+      this.$refs.quill_editor_description.setHTML(this.description)
+
       this.code = checker?.code || null
       this.isPublic = checker?.isPublic || false
     },
