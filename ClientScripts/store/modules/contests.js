@@ -71,13 +71,13 @@ export default {
             if (!getters.currentContest) {
                 return true
             }
-            return moment(getters.currentContest.endDateTimeUTC).tz('Europe/Moscow').isSameOrBefore(moment().tz('Europe/Moscow'))
+            return moment.utc(getters.currentContest.endDateTimeUTC).isSameOrBefore(moment.utc())
         },
         currentContestIsInTheFuture(state, getters) {
             if (!getters.currentContest) {
                 return true
             }
-            return moment(getters.currentContest.startDateTimeUTC).tz('Europe/Moscow').isAfter(moment().tz('Europe/Moscow'))
+            return moment.utc(getters.currentContest.startDateTimeUTC).isAfter(moment.utc())
         },
         currentUserIsParticipantOfCurrentContest(state, getters) {
             if (!getters.currentUser || !getters.currentContest) {

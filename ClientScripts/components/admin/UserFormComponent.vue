@@ -80,10 +80,12 @@ import * as Yup from 'yup'
 import * as _ from 'lodash'
 import moment from 'moment'
 import 'moment-timezone'
+import date_processing from "../mixins/date_processing";
 
 
 export default {
   name: "UserFormComponent",
+  mixins: [date_processing],
   props: {
     user_id: {
       type: Number,
@@ -139,7 +141,7 @@ export default {
         isLimitedInPosts,
         isLimitedInCourses,
         isLimitedInProblems,
-        dateOfBirth: moment(dateOfBirth).tz('Europe/Moscow').toISOString().substr(0, 10),
+        dateOfBirth: this.to_local_string(dateOfBirth).substr(0, 10),
         roles: _.map(roles, (r) => r.name),
       }
     },

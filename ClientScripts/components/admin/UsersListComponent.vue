@@ -78,7 +78,7 @@ export default {
       return _.join(_.map(roles, (role) => role.description), '\n')
     },
     formatDate(date) {
-      return moment(date).tz('Europe/Moscow').format('MMMM DD YYYY')
+      return moment(date).format('MMMM DD YYYY')
     }
   },
   async created() {
