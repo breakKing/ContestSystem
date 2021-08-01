@@ -6,7 +6,7 @@
                 <p class="card-text">{{ checker.description }}</p>
                 <p> Автор: {{checker.author.fullName}}</p>
                 <div class="row d-flex justify-content-between">
-                    <button v-if="currentRole === 'user' && +currentUser?.id === +checker.author.id" class="workspace-btn me-2"
+                    <button v-if="currentRole === 'user' && currentUser && +currentUser.id === +checker.author.id" class="workspace-btn me-2"
                             @click.prevent="$router.push({name: 'WorkSpaceEditCheckersPage', params: {id: +checker.id }})">
                         Редактировать
                     </button>
@@ -14,7 +14,7 @@
                             @click.prevent="moderateChecker">
                         Подробнее
                     </button>
-                    <button v-if="+currentUser?.id === +checker.author.id" class="workspace-btn workspace-btn-del"
+                    <button v-if="currentUser && +currentUser.id === +checker.author.id" class="workspace-btn workspace-btn-del"
                             @click.prevent="deleteEntity">
                         Удалить
                     </button>

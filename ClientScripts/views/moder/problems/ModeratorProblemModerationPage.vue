@@ -8,29 +8,29 @@
       <div class="row">
         <div class="col">
           <div>
-            <h2>{{ currentModeratingProblemLocalizer?.name }}</h2>
+            <h2>{{ currentModeratingProblemLocalizer && currentModeratingProblemLocalizer.name }}</h2>
           </div>
           <div>
-            <p>{{ currentModeratingProblemLocalizer?.description }}</p>
+            <p>{{ currentModeratingProblemLocalizer && currentModeratingProblemLocalizer.description }}</p>
           </div>
           <div class="row">
             <div class="col">
               <span class="text-light fs-3">Входные данные</span>
-              <p>{{ currentModeratingProblemLocalizer?.inputBlock }}</p>
+              <p>{{ currentModeratingProblemLocalizer && currentModeratingProblemLocalizer.inputBlock }}</p>
             </div>
             <div class="col">
               <span class="text-light fs-3">Выходные данные</span>
-              <p>{{ currentModeratingProblemLocalizer?.outputBlock }}</p>
+              <p>{{ currentModeratingProblemLocalizer && currentModeratingProblemLocalizer.outputBlock }}</p>
             </div>
           </div>
           <div class="row">
             <div class="col">
               <span class="text-light fs-3">Лимит занимаемого RAM (bytes)</span>
-              <span>{{ currentModeratingProblem?.memoryLimitInBytes }}</span>
+              <span>{{ currentModeratingProblem && currentModeratingProblem.memoryLimitInBytes }}</span>
             </div>
             <div class="col">
               <span class="text-light fs-3">Лимит времени выполнения (мсек)</span>
-              <span>{{ currentModeratingProblem?.timeLimitInMilliseconds }}</span>
+              <span>{{ currentModeratingProblem && currentModeratingProblem.timeLimitInMilliseconds }}</span>
             </div>
           </div>
           <div class="row">
@@ -38,11 +38,15 @@
               <span class="text-light fs-3">Механизм проверки:</span>
               <span
                   class="text-light fs-3">{{
-                  currentModeratingProblem?.checker?.name
-                }} ({{ currentModeratingProblem?.checker?.author?.fullName }})</span>
+                  currentModeratingProblem && currentModeratingProblem.checker && currentModeratingProblem.checker.name
+                }} ({{
+                  currentModeratingProblem && currentModeratingProblem.checker && currentModeratingProblem.checker.author && currentModeratingProblem.checker.author.fullName
+                }})</span>
             </div>
             <div class="col">
-              <span class="text-light fs-5">Виден всем: {{ currentModeratingProblem?.isPublic ? 'Да' : 'Нет' }}</span>
+              <span class="text-light fs-5">Виден всем: {{
+                  currentModeratingProblem && currentModeratingProblem.isPublic ? 'Да' : 'Нет'
+                }}</span>
             </div>
           </div>
           <div>

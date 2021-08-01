@@ -1,34 +1,35 @@
 ﻿<template>
-    <div class="col-md-6 mb-3">
-        <div class="card">
-            <img v-if="!!dataUrl" :src="dataUrl" class="card-img-top" alt="...">
-            <div class="card-body d-flex flex-column justify-content-between">
-                <h5 class="card-title">{{ contest?.localizedName }}</h5>
-                <p> {{ contest?.localizedDescription }} </p>
-                <p> Участников: {{ contest?.participantsCount || 0 }}</p>
-                <p> Автор: {{ contest?.creator?.fullName }}</p>
-                <div class="row d-flex justify-content-center">
-                    <template v-if="currentRole === 'user'">
-                        <button v-if="!currentUserIsOwner" type="button" class="workspace-btn workspace-btn-enter mb-3" @click.prevent="goToContest">
-                            Войти
-                        </button>
-                        <div class="row d-flex justify-content-between">
-                            <button v-if="currentUserIsOwner" type="button" class="workspace-btn" @click.prevent="editContest">
-                                Редактировать
-                            </button>
-                            <button v-if="currentUserIsOwner" class="workspace-btn workspace-btn-del"
-                                    @click.prevent="deleteEntity">
-                                Удалить
-                            </button>
-                        </div>
-                    </template>
-                    <template v-else-if="currentRole === 'moderator'">
-                        <button @click.prevent="moderateContest" class="workspace-btn">Подробнее</button>
-                    </template>
-                </div>
+  <div class="col-md-6 mb-3">
+    <div class="card">
+      <img v-if="!!dataUrl" :src="dataUrl" class="card-img-top" alt="...">
+      <div class="card-body d-flex flex-column justify-content-between">
+        <h5 class="card-title">{{ contest && contest.localizedName }}</h5>
+        <p v-html="contest && contest.localizedDescription"></p>
+        <p> Участников: {{ (contest && contest.participantsCount) || 0 }}</p>
+        <p> Автор: {{ contest && contest.creator && contest.creator.fullName }}</p>
+        <div class="row d-flex justify-content-center">
+          <template v-if="currentRole === 'user'">
+            <button v-if="!currentUserIsOwner" type="button" class="workspace-btn workspace-btn-enter mb-3"
+                    @click.prevent="goToContest">
+              Войти
+            </button>
+            <div class="row d-flex justify-content-between">
+              <button v-if="currentUserIsOwner" type="button" class="workspace-btn" @click.prevent="editContest">
+                Редактировать
+              </button>
+              <button v-if="currentUserIsOwner" class="workspace-btn workspace-btn-del"
+                      @click.prevent="deleteEntity">
+                Удалить
+              </button>
             </div>
+          </template>
+          <template v-else-if="currentRole === 'moderator'">
+            <button @click.prevent="moderateContest" class="workspace-btn">Подробнее</button>
+          </template>
         </div>
+      </div>
     </div>
+  </div>
 </template>
 
 <script>
@@ -41,10 +42,10 @@ export default {
   },
   methods: {
     ...mapActions(['deleteContest',
-        'fetchCurrentUserContestsList',
-        'fetchAvailableContests',
-        'fetchParticipatingContests',
-        'fetchRunningContests']),
+      'fetchCurrentUserContestsList',
+      'fetchAvailableContests',
+      'fetchParticipatingContests',
+      'fetchRunningContests']),
     async editContest() {
       await this.$router.push({name: 'WorkSpaceEditContestPage', params: {contest_id: this.contest.id}})
     },
@@ -67,13 +68,13 @@ export default {
       } else {
         this.error_msg = (errors || []).join(', ')
       }
-      },
-      async fetchData() {
-          await this.fetchCurrentUserContestsList(true)
-          await this.fetchAvailableContests(true)
-          await this.fetchParticipatingContests(true)
-          await this.fetchRunningContests(true)
-      }
+    },
+    async fetchData() {
+      await this.fetchCurrentUserContestsList(true)
+      await this.fetchAvailableContests(true)
+      await this.fetchParticipatingContests(true)
+      await this.fetchRunningContests(true)
+    }
   },
   computed: {
     ...mapGetters(['currentUser', 'currentRole']),
@@ -102,9 +103,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-    .card {
-        text-align: center;
-        border: 1px solid blue;
-    }
-    
+.card {
+  text-align: center;
+  border: 1px solid blue;
+}
+
 </style>
