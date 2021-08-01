@@ -1,6 +1,5 @@
 ﻿import axios from 'axios'
 import * as _ from 'lodash'
-import TestResultVerdicts from "../../dictionaries/TestResultVerdicts";
 
 export default {
     state: () => ({
@@ -15,11 +14,11 @@ export default {
         availableCompilers(state, getters) {
             return state.available_compilers
         },
-        getVerdictName: (state, getters) => (verdict) => {
-            return _.find(_.toPairs(TestResultVerdicts), (p) => +p[1] === +verdict)[0]
-        },
         getLastTestNumber: (state, getters) => (solution) => {
-            return _.maxBy((solution?.testResults || []), (t) => +t.number)?.number
+            if (solution && solution.actualResult && solution.actualResult.lastRunTestNumber) {
+                return +solution.actualResult.lastRunTestNumber
+            }
+            return +_.maxBy((solution?.testResults || []), (t) => +t.number)?.number
         },
     },
     actions: {
@@ -46,9 +45,9 @@ export default {
                 console.error(e)
             }
         },
-        async sendSolution({ commit, state, dispatch, getters }, request) {
+        async sendSolution({commit, state, dispatch, getters}, request) {
             try {
-                let { data } = await axios.post(`/api/solutions/send-solution`, request)
+                let {data} = await axios.post(`/api/solutions/send-solution`, request)
                 return data
             } catch (e) {
                 console.error(e)
@@ -57,7 +56,7 @@ export default {
         },
         async compileSolution({commit, state, dispatch, getters}, solution_id) {
             try {
-                let { status, errors } = await axios.post(`/api/solutions/${solution_id}/compile`)
+                let {status, errors} = await axios.post(`/api/solutions/${solution_id}/compile`)
                 return status
             } catch (e) {
                 console.error(e)
