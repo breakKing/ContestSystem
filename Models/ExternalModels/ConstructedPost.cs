@@ -26,7 +26,7 @@ namespace ContestSystem.Models.ExternalModels
                 PromotedDateTimeUTC = post.PromotedDateTimeUTC,
                 ApprovalStatus = post.ApprovalStatus,
                 ApprovingModerator = post.ApprovingModerator?.ResponseStructure,
-                Localizers = post.PostLocalizers?.ConvertAll(pl => PostLocalizerExternalModel.GetFromModel(pl)),
+                Localizers = post.PostLocalizers?.ConvertAll(PostLocalizerExternalModel.GetFromModel),
                 ModerationMessage = post.ModerationMessage,
                 PublicationDateTimeUTC = post.PublicationDateTimeUTC,
                 PreviewImage = imageInBase64

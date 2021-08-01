@@ -28,7 +28,7 @@ namespace ContestSystem.Models.ExternalModels
             return new ConstructedContest
             {
                 Id = contest.Id,
-                Localizers = contest.ContestLocalizers?.ConvertAll(cl => ContestLocalizerExternalModel.GetFromModel(cl)),
+                Localizers = contest.ContestLocalizers?.ConvertAll(ContestLocalizerExternalModel.GetFromModel),
                 Image = imageInBase64,
                 StartDateTimeUTC = contest.StartDateTimeUTC,
                 EndDateTimeUTC = contest.EndDateTimeUTC,

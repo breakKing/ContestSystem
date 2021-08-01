@@ -514,11 +514,7 @@ namespace ContestSystem.Controllers
         {
             var problems = await _dbContext.Problems
                 .Where(p => p.ApprovalStatus == ApproveType.NotModeratedYet && !p.IsArchieved).ToListAsync();
-            var requests = problems.ConvertAll(p =>
-            {
-                var pr = ConstructedProblem.GetFromModel(p);
-                return pr;
-            });
+            var requests = problems.ConvertAll(ConstructedProblem.GetFromModel);
             return Json(requests);
         }
 
@@ -531,11 +527,7 @@ namespace ContestSystem.Controllers
                 .Where(p => p.ApprovalStatus == ApproveType.Accepted && !p.IsArchieved 
                             && p.ApprovingModeratorId.GetValueOrDefault(-1) == currentUser.Id)
                 .ToListAsync();
-            var requests = problems.ConvertAll(p =>
-            {
-                var pr = ConstructedProblem.GetFromModel(p);
-                return pr;
-            });
+            var requests = problems.ConvertAll(ConstructedProblem.GetFromModel);
             return Json(requests);
         }
 
@@ -548,11 +540,7 @@ namespace ContestSystem.Controllers
                 .Where(p => p.ApprovalStatus == ApproveType.Rejected && !p.IsArchieved
                             && p.ApprovingModeratorId.GetValueOrDefault(-1) == currentUser.Id)
                 .ToListAsync();
-            var requests = problems.ConvertAll(p =>
-            {
-                var pr = ConstructedProblem.GetFromModel(p);
-                return pr;
-            });
+            var requests = problems.ConvertAll(ConstructedProblem.GetFromModel);
             return Json(requests);
         }
 

@@ -16,7 +16,6 @@ namespace ContestSystem.Models.ExternalModels
         public string CompilerName { get; set; }
         public DateTime SubmitTimeUTC { get; set; }
         public string ErrorsMessage { get; set; }
-        public VerdictType Verdict { get; set; }
         public short Points { get; set; }
         public List<TestResultExternalModel> TestResults { get; set; } = new List<TestResultExternalModel>();
         public SolutionActualResultExternalModel ActualResult { get; set; }
@@ -34,9 +33,8 @@ namespace ContestSystem.Models.ExternalModels
                 CompilerName = solution.CompilerName,
                 SubmitTimeUTC = solution.SubmitTimeUTC,
                 ErrorsMessage = solution.ErrorsMessage,
-                Verdict = solution.Verdict,
                 Points = solution.Points,
-                TestResults = solution.TestResults?.ConvertAll(tr => TestResultExternalModel.GetFromModel(tr)),
+                TestResults = solution.TestResults?.ConvertAll(TestResultExternalModel.GetFromModel),
                 ActualResult = SolutionActualResultExternalModel.GetFromModel(solution)
             };
         }
