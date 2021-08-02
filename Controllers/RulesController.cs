@@ -32,11 +32,7 @@ namespace ContestSystem.Controllers
         public async Task<IActionResult> GetUserRules(long id)
         {
             var rules = await _dbContext.RulesSets.Where(r => r.AuthorId == id && !r.IsArchieved).ToListAsync();
-            var publishedRules = rules.ConvertAll(r =>
-            {
-                var pr = ConstructedRulesSet.GetFromModel(r);
-                return pr;
-            });
+            var publishedRules = rules.ConvertAll(ConstructedRulesSet.GetFromModel);
             return Json(publishedRules);
         }
 
@@ -46,11 +42,7 @@ namespace ContestSystem.Controllers
         {
             var rules = await _dbContext.RulesSets.Where(rs => (rs.AuthorId == id || rs.IsPublic)
                                                                && !rs.IsArchieved).ToListAsync();
-            var publishedRules = rules.ConvertAll(r =>
-            {
-                var pr = ConstructedRulesSet.GetFromModel(r);
-                return pr;
-            });
+            var publishedRules = rules.ConvertAll(ConstructedRulesSet.GetFromModel);
             return Json(publishedRules);
         }
 

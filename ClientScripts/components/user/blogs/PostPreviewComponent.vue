@@ -8,7 +8,7 @@
             {{ post.previewText }}
           </p>
           <p class="card-text">
-            Автор: {{ post?.author?.fullName }}
+            Автор: {{ post && post.author && post.author.fullName }}
           </p>
         </div>
         <div class="d-flex flex-column justify-content-center align-items-center">

@@ -3,13 +3,13 @@
   <div class="row">
     <div class="col">
       <div class="row">
-        <div class="col"><h2>{{ currentContest?.localizedName }}</h2></div>
-        <div class="col">{{ currentContest?.creator?.fullName }}</div>
+        <div class="col"><h2>{{ currentContest && currentContest.localizedName }}</h2></div>
+        <div class="col">{{ currentContest && currentContest.creator && currentContest.creator.fullName }}</div>
       </div>
-      <p>{{ currentContest?.localizedDescription }}</p>
+      <p>{{ currentContest && currentContest.localizedDescription }}</p>
 
       <div class="row"
-           v-if="currentUserIsOwnerOfCurrentContest || currentUserIsParticipantOfCurrentContest || currentContest?.rules?.publicMonitor">
+           v-if="currentUserIsOwnerOfCurrentContest || currentUserIsParticipantOfCurrentContest || (currentContest && currentContest.rules && currentContest.rules.publicMonitor)">
         <div class="col">
           <router-link class="btn btn-info" :to="{name: 'ContestMonitorPage', params: {contest_id: currentContest.id}}">
             Монитор
@@ -42,7 +42,7 @@
       </template>
       <template v-else>
         <router-link class="btn btn-info" v-if="currentContestIsRunning"
-                     :to="{name: 'ContestParticipatingPage', params: {contest_id: currentContest?.id}}">Начать
+                     :to="{name: 'ContestParticipatingPage', params: {contest_id: currentContest?.id}}">Задачи
         </router-link>
         <span v-else-if="currentContestIsInTheFuture">Соревнование начнётся {{
             formatted_start_date
@@ -117,14 +117,14 @@ export default {
     }
   },
   methods: {
-      ...mapActions(['addUserToContest',
-        'changeCurrentContest',
-        'removeUserFromContest',
-        'getContestParticipants',
-        'fetchRunningContests',
-        'fetchAvailableContests',
-        'fetchParticipatingContests',
-        'fetchCurrentUserContestsList']),
+    ...mapActions(['addUserToContest',
+      'changeCurrentContest',
+      'removeUserFromContest',
+      'getContestParticipants',
+      'fetchRunningContests',
+      'fetchAvailableContests',
+      'fetchParticipatingContests',
+      'fetchCurrentUserContestsList']),
     ...mapMutations(['setCurrentContestParticipants']),
     resetParticipateTry() {
       this.wants_participate = false

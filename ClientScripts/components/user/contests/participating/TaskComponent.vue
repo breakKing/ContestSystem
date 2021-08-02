@@ -81,7 +81,7 @@ export default {
       code: '',
 
       solutionSchema: Yup.object({
-        compiler: Yup.string().required(),
+        compiler: Yup.string().nullable().required(),
         code: Yup.string().required(),
       })
     }
@@ -153,8 +153,8 @@ export default {
             user_id: this.currentUser?.id
           })
           this.setCurrentContestSolutionsForCurrentUser(solutions)
-          let thisSolution = _.find(solutions || [], (s) => +s.id == +solutionId)
-          if (thisSolution && +thisSolution.verdict === TestResultVerdicts.CompilationSucceed) {
+          let thisSolution = _.find(solutions || [], (s) => +s.id === +solutionId)
+          if (thisSolution && +thisSolution.actualResult?.verdict === TestResultVerdicts.CompilationSucceed) {
             this.runSolutionTests(solutionId)
           }
         })

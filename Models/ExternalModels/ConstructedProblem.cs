@@ -34,7 +34,7 @@ namespace ContestSystem.Models.ExternalModels
                 Checker = ConstructedChecker.GetFromModel(problem.Checker),
                 IsPublic = problem.IsPublic,
                 IsArchieved = problem.IsArchieved,
-                Localizers = problem.ProblemLocalizers?.ConvertAll(pl => ProblemLocalizerExternalModel.GetFromModel(pl)),
+                Localizers = problem.ProblemLocalizers?.ConvertAll(ProblemLocalizerExternalModel.GetFromModel),
                 Tests = problem.Tests,
                 Examples = problem.Examples
             };

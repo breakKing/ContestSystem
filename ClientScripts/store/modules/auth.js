@@ -86,10 +86,7 @@ export default {
     actions: {
         async updateTokenAndHeaders({commit, state, dispatch, getters}, token) {
             commit('setToken', token)
-            await dispatch('closeHub')
-            if (token) {
-                await dispatch('initHub', token)
-            }
+            await dispatch('initHub', {token, recreate: true})
 
             axios.defaults.headers.common = getters.getHeaders
 
@@ -181,6 +178,7 @@ export default {
             commit('setCurrentUserContests', [], {root: true})
             commit('setCurrentUserRuleSets', [], {root: true})
             commit('setCurrentUserTasks', [], {root: true})
+            await dispatch('closeHub', null, {root: true})
             await dispatch('changeCurrentContest', {force: true, contest_id: null}, {root: true})
         },
         async fetchAllRoles({commit, state, dispatch, getters}, force = false) {

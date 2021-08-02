@@ -5,21 +5,21 @@
     </div>
     <div class="row">
       <div class="col-12 col-md-9">
-        <h2>{{ currentModeratingPostLocalizer?.name }}</h2>
+        <h2>{{ currentModeratingPostLocalizer && currentModeratingPostLocalizer.name }}</h2>
         <span>{{ currentModeratingPostApprovalStatusName }}</span>
       </div>
       <div class="col">
-        <p>{{ currentModeratingPost?.author?.fullName }}
-          {{ currentModeratingPost?.approvalStatus === 2 ? getFormattedFullDateTime(currentModeratingPost?.publicationDateTimeUTC) : '' }}</p>
+        <p>{{ currentModeratingPost && currentModeratingPost.author && currentModeratingPost.author.fullName }}
+          {{ currentModeratingPost && currentModeratingPost.approvalStatus === 2 ? getFormattedFullDateTime(currentModeratingPost.publicationDateTimeUTC) : '' }}</p>
       </div>
     </div>
     <div class="row">
       <div class="col">
-        <img class="img-fluid" :src="dataUrl" :alt="currentModeratingPostLocalizer?.name">
+        <img class="img-fluid" :src="dataUrl" :alt="currentModeratingPostLocalizer && currentModeratingPostLocalizer.name">
       </div>
     </div>
     <div class="row">
-      <div class="col" v-html="currentModeratingPostLocalizer?.htmlText"></div>
+      <div class="col" v-html="currentModeratingPostLocalizer && currentModeratingPostLocalizer.htmlText"></div>
     </div>
     <div class="row">
       <div class="col">

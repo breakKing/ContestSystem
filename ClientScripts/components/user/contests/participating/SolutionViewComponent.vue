@@ -1,17 +1,19 @@
 <template>
   <bread-crumbs-component :routes="bread_crumb_routes"></bread-crumbs-component>
   <h2>Решение {{ problemName }}</h2>
-  <p><i>({{ getFormattedTime(problem?.timeLimitInMilliseconds) }}, {{ getFormattedMemory(problem?.memoryLimitInBytes) }})</i></p>
-  <p>{{ getFormattedFullDateTime(solution?.submitTimeUTC) }}</p>
+  <p><i>({{ getFormattedTime(problem && problem.timeLimitInMilliseconds) }}, {{
+      getFormattedMemory(problem && problem.memoryLimitInBytes)
+    }})</i></p>
+  <p>{{ getFormattedFullDateTime(solution && solution.submitTimeUTC) }}</p>
   <p>{{ verdictName }}</p>
   <p v-if="!isSuccess">Тест: {{ lastTestNumber }}</p>
   <div>
     <div>
       <label>Компилятор:</label>
-      <span>{{ solution?.compilerName }}</span>
+      <span>{{ solution && solution.compilerName }}</span>
     </div>
     <div>
-      <textarea class="form-control code-input">{{solution?.code}}</textarea>
+      <textarea class="form-control code-input">{{solution && solution.code}}</textarea>
     </div>
   </div>
 </template>
@@ -22,9 +24,11 @@ import * as _ from 'lodash'
 import TestResultVerdicts from "../../../../dictionaries/TestResultVerdicts";
 import BreadCrumbsComponent from "../../../BreadCrumbsComponent";
 import MySolutionViewBreads from "../../../../dictionaries/bread_crumbs/contest/MySolutionViewBreads";
+import solution_verdict_readable_presentation from "../../../mixins/solution_verdict_readable_presentation";
 
 export default {
   name: "SolutionViewComponent",
+  mixins: [solution_verdict_readable_presentation],
   components: {BreadCrumbsComponent},
   props: ['contest_id', 'solution_id'],
   data() {
@@ -42,24 +46,22 @@ export default {
     })
   },
   methods: {
-    ...mapActions(['getSolution', 'changeCurrentContest', 'getVerdictName', 'getLastTestNumber']),
+    ...mapActions(['getSolution', 'changeCurrentContest']),
     getProblemName(problem) {
       return _.find((problem?.localizers || []), (l) => l.culture === 'ru')?.name
     },
-    isSuccess(verdict) {
-      return +verdict === +TestResultVerdicts.Accepted
-    }
   },
   computed: {
-    ...mapGetters(['getFormattedFullDateTime', , 'getFormattedMemory', 'getFormattedTime']),
+    ...mapGetters(['getFormattedFullDateTime', 'getLastTestNumber',
+      'getFormattedMemory', 'getFormattedTime']),
     problemName() {
       return _.find((this.solution?.problem?.localizers || []), (l) => l.culture === 'ru')?.name
     },
     isSuccess() {
-      return +this.solution?.verdict === +TestResultVerdicts.Accepted
+      return +this.actualResult(this.solution)?.verdict === +TestResultVerdicts.Accepted
     },
     verdictName() {
-      return this.getVerdictName(this.solution?.verdict)
+      return this.verdictInfo(this.actualResult(this.solution))
     },
     lastTestNumber() {
       return this.getLastTestNumber(this.solution)
@@ -67,8 +69,6 @@ export default {
     bread_crumb_routes() {
       return MySolutionViewBreads(this.contest_id, this.solution_id)
     }
-  },
-  mounted() {
   },
 }
 </script>

@@ -1,9 +1,11 @@
 <template>
   <div class="row">
     <div class="col">
-      <h2>{{ currentModeratingChecker?.name }} {{ currentModeratingChecker?.author?.fullName }}</h2>
-      <p>{{ currentModeratingChecker?.description }}</p>
-      <textarea class="form-control code-input">{{currentModeratingChecker?.code}}</textarea>
+      <h2>{{ currentModeratingChecker && currentModeratingChecker.name }} {{
+          currentModeratingChecker && currentModeratingChecker.author && currentModeratingChecker.author.fullName
+        }}</h2>
+      <p>{{ currentModeratingChecker && currentModeratingChecker.description }}</p>
+      <textarea class="form-control code-input">{{currentModeratingChecker && currentModeratingChecker.code}}</textarea>
 
       <div class="row">
         <div class="col">

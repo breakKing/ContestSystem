@@ -37,11 +37,7 @@ namespace ContestSystem.Controllers
         public async Task<IActionResult> GetUserCheckers(long id)
         {
             var checkers = await _dbContext.Checkers.Where(p => p.AuthorId == id && !p.IsArchieved).ToListAsync();
-            var publishedCheckers = checkers.ConvertAll(c =>
-            {
-                var pc = PublishedChecker.GetFromModel(c);
-                return pc;
-            });
+            var publishedCheckers = checkers.ConvertAll(PublishedChecker.GetFromModel);
             return Json(publishedCheckers);
         }
 
@@ -53,11 +49,7 @@ namespace ContestSystem.Controllers
                                                                 && !c.IsArchieved
                                                                 && c.ApprovalStatus == ApproveType.Accepted)
                 .ToListAsync();
-            var publishedCheckers = checkers.ConvertAll(c =>
-            {
-                var pc = PublishedChecker.GetFromModel(c);
-                return pc;
-            });
+            var publishedCheckers = checkers.ConvertAll(PublishedChecker.GetFromModel);
             return Json(publishedCheckers);
         }
 
@@ -293,11 +285,7 @@ namespace ContestSystem.Controllers
         {
             var checkers = await _dbContext.Checkers
                 .Where(c => c.ApprovalStatus == ApproveType.NotModeratedYet && !c.IsArchieved).ToListAsync();
-            var requests = checkers.ConvertAll(c =>
-            {
-                ConstructedChecker cr = ConstructedChecker.GetFromModel(c);
-                return cr;
-            });
+            var requests = checkers.ConvertAll(ConstructedChecker.GetFromModel);
             return Json(requests);
         }
 
@@ -309,11 +297,7 @@ namespace ContestSystem.Controllers
             var checkers = await _dbContext.Checkers
                 .Where(c => c.ApprovalStatus == ApproveType.Accepted && !c.IsArchieved && c.ApprovingModeratorId.GetValueOrDefault(-1) == currentUser.Id)
                 .ToListAsync();
-            var requests = checkers.ConvertAll(c =>
-            {
-                ConstructedChecker cr = ConstructedChecker.GetFromModel(c);
-                return cr;
-            });
+            var requests = checkers.ConvertAll(ConstructedChecker.GetFromModel);
             return Json(requests);
         }
 
@@ -325,11 +309,7 @@ namespace ContestSystem.Controllers
             var checkers = await _dbContext.Checkers
                 .Where(c => c.ApprovalStatus == ApproveType.Rejected && !c.IsArchieved && c.ApprovingModeratorId.GetValueOrDefault(-1) == currentUser.Id)
                 .ToListAsync();
-            var requests = checkers.ConvertAll(c =>
-            {
-                ConstructedChecker cr = ConstructedChecker.GetFromModel(c);
-                return cr;
-            });
+            var requests = checkers.ConvertAll(ConstructedChecker.GetFromModel);
             return Json(requests);
         }
 

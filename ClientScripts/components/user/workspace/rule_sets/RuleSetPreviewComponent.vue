@@ -6,11 +6,11 @@
                 <p class="card-text">{{ ruleSet.description }}</p>
                 <p> Автор: {{ruleSet.author.fullName}}</p>
                 <div class="row d-flex justify-content-between">
-                    <button v-if="+currentUser?.id === +ruleSet.author.id" class="workspace-btn me-2"
+                    <button v-if="currentUser && +currentUser.id === +ruleSet.author.id" class="workspace-btn me-2"
                             @click.prevent="$router.push({name: 'WorkSpaceEditRuleSetPage', params: { set_id: ruleSet.id }})">
                         Редактировать
                     </button>
-                    <button v-if="+currentUser?.id === +ruleSet.author.id" class="workspace-btn workspace-btn-del"
+                    <button v-if="currentUser && +currentUser.id === +ruleSet.author.id" class="workspace-btn workspace-btn-del"
                             @click.prevent="deleteEntity">
                         Удалить
                     </button>

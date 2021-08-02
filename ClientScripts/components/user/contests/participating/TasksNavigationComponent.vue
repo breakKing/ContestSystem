@@ -29,7 +29,7 @@ export default {
       }
     },
     isResolved(task_id) {
-      return _.some(this.mapped_solutions[task_id], (s) => s.verdict === TestResultVerdicts.Accepted)
+      return _.some(this.mapped_solutions[task_id], (s) => +s.actualResult?.verdict === TestResultVerdicts.Accepted)
     },
     triedToResolve(task_id) {
       return (this.mapped_solutions[task_id] && this.mapped_solutions[task_id].length > 0)

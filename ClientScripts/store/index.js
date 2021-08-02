@@ -47,11 +47,9 @@ export default createStore({
             if (bytes) {
                 if (+bytes < 1024) {
                     result = bytes + ' Б'
-                }
-                else if (+bytes < 1048576) {
+                } else if (+bytes < 1048576) {
                     result = (+bytes / 1024).toFixed(1) + ' КБ'
-                }
-                else {
+                } else {
                     result = (+bytes / 1048576).toFixed(1) + ' МБ'
                 }
                 result = result.replace('.0', '')
@@ -63,11 +61,9 @@ export default createStore({
             if (millis) {
                 if (+millis < 1000) {
                     result = millis + ' мс'
-                }
-                else if (+millis < 60000) {
+                } else if (+millis < 60000) {
                     result = (+millis / 1000).toFixed(1) + ' с'
-                }
-                else {
+                } else {
                     let mls = +millis % 1000
                     let seconds = ((+millis - mls) % 60000) / 1000
                     let minutes = ((+millis - mls - seconds * 1000) / 60000) % 60

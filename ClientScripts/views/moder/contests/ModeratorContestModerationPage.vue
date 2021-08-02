@@ -7,7 +7,7 @@
       <div class="row">
         <div class="col">
           <div>
-            <h2>{{ currentModeratingContestLocalizer?.name }}</h2>
+            <h2>{{ currentModeratingContestLocalizer && currentModeratingContestLocalizer.name }}</h2>
           </div>
         </div>
         <div class="col-4" v-if="!!dataUrl">
@@ -15,7 +15,7 @@
         </div>
       </div>
       <div>
-        <p>{{ currentModeratingContestLocalizer?.description }}</p>
+        <p>{{ currentModeratingContestLocalizer && currentModeratingContestLocalizer.description }}</p>
       </div>
       <div>
         <span>Дата начала </span>
@@ -23,11 +23,11 @@
       </div>
       <div>
         <span>Продолжительность в минутах </span>
-        <span>{{ currentModeratingContest?.durationInMinutes }}</span>
+        <span>{{ currentModeratingContest && currentModeratingContest.durationInMinutes }}</span>
       </div>
       <div>
         <span>Набор правил </span>
-        <span>{{ currentModeratingContest?.rules?.name }}</span>
+        <span>{{ currentModeratingContest && currentModeratingContest.rules && currentModeratingContest.rules.name }}</span>
       </div>
       <div class="row" v-for="problem of sortedTasks">
         <div class="col">

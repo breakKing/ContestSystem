@@ -32,8 +32,8 @@
               <div>
                 <label class="fs-4">Текст поста</label>
                 <v-field v-model="postText" name="postText" type="hidden"/>
-                <ckeditor :editor="editor" v-model="postText"
-                          class="form-control" :config="editorConfig"></ckeditor>
+                <quill-editor ref="quill_editor_postText" theme="snow" v-model:content="postText" contentType="html"
+                              class="form-control"></quill-editor>
                 <error-message name="postText"></error-message>
               </div>
               <div>
@@ -57,16 +57,16 @@ import {mapActions, mapGetters} from 'vuex'
 import {Field, Form, ErrorMessage} from "vee-validate";
 import * as Yup from 'yup';
 import $ from 'jquery';
-import {CkeditorMixin} from "../../mixins/ckeditor-mixin";
+import {QuillEditor} from "@vueup/vue-quill";
 
 export default {
   name: "PostEditComponent",
-  mixins: [CkeditorMixin],
   props: ['post_id'],
   components: {
     VForm: Form,
     VField: Field,
     ErrorMessage,
+    QuillEditor
   },
   data() {
     return {
@@ -85,7 +85,6 @@ export default {
   },
   async mounted() {
     await this.updateFields();
-    console.log(this.$refs.form_to_validate)
   },
   computed: {
     ...mapGetters(['currentUser']),
@@ -115,6 +114,7 @@ export default {
         this.previewImage = post_data.previewImage || null
         this.postPreview = post_data.previewText || null
         this.postText = post_data.htmlLocalizedText || null
+        this.$refs.quill_editor_postText.setHTML(this.postText)
       }
     },
     hideModal() {

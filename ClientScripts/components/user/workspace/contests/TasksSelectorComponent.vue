@@ -68,7 +68,7 @@ export default {
   computed: {
     ...mapGetters(['currentUser']),
     unavailableTasksInFutureExists() {
-      return _.reduce(this.availableTasksForContest || [], (count, t) => count += +this.shouldTaskBeRemarked(t), 0) > 0
+      return _.reduce(this.availableTasksForContest || [], (count, t) => count + +this.shouldTaskBeRemarked(t), 0) > 0
     },
     selected_ids() {
       return _.cloneDeep(_.map((this.tasks || []), (t) => +t?.problemId))

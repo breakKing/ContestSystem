@@ -104,16 +104,16 @@ import {Field, Form, ErrorMessage} from "vee-validate";
 import * as Yup from 'yup';
 import {mapActions, mapGetters} from "vuex";
 import axios from 'axios'
-import {CkeditorMixin} from "../../../mixins/ckeditor-mixin";
 import CountModes from "../../../../dictionaries/CountModes";
+import {QuillEditor} from "@vueup/vue-quill";
 
 export default {
   name: "RuleSetEditComponent",
-  mixins: [CkeditorMixin],
   components: {
     VForm: Form,
     VField: Field,
     ErrorMessage,
+    QuillEditor
   },
   props: ['set_id'],
   computed: {
