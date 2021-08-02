@@ -197,8 +197,11 @@ export default {
         await this.fetchAvailableContests(true)
         await this.fetchParticipatingContests(true)
         await this.fetchCurrentUserContestsList(true)
-        await this.$router.push({name: 'WorkSpaceMyPendingContestsPage'})
-
+        if (this.currentUser?.limits?.contests) {
+          await this.$router.push({name: 'WorkSpaceMyPendingContestsPage'})
+        } else {
+          await this.$router.push({name: 'WorkSpaceMyApprovedContestsPage'})
+        }
       } else {
         this.error_msg = (result.errors || []).join(', ')
       }

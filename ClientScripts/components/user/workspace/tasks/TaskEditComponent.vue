@@ -209,7 +209,11 @@ export default {
         this.error_msg = '';
         await this.fetchCurrentUserTasks(true)
         await this.fetchAvailableTasks(true)
-        await this.$router.push({name: 'WorkSpaceMyPendingTasksPage'})
+        if (this.currentUser?.limits?.problems) {
+          await this.$router.push({name: 'WorkSpaceMyPendingTasksPage'})
+        } else {
+          await this.$router.push({name: 'WorkSpaceMyApprovedTasksPage'})
+        }
       } else {
         this.error_msg = (result.errors || []).join(', ')
       }
