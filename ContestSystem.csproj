@@ -9,6 +9,10 @@
       <Content Remove="Logs\**" />
       <EmbeddedResource Remove="Logs\**" />
       <None Remove="Logs\**" />
+      <Compile Remove="wwwroot\bundle\**" />
+      <EmbeddedResource Remove="wwwroot\bundle\**" />
+      <None Remove="wwwroot\bundle\**" />
+      <Content Remove="wwwroot\bundle\**" />
     </ItemGroup>
 
     <ItemGroup>
@@ -30,6 +34,16 @@
 
     <ItemGroup>
       <ProjectReference Include="..\ContestSystemDbStructure\ContestSystemDbStructure.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="wwwroot\bundle\8dc80155b21ec118aa72.woff2" />
+      <_ContentIncludedByDefault Remove="wwwroot\bundle\93b2cec7533131f14f76.woff" />
+      <_ContentIncludedByDefault Remove="wwwroot\bundle\94eeade15e6b7fbed95b18ff32f0c112.woff" />
+      <_ContentIncludedByDefault Remove="wwwroot\bundle\b2ce836f2f89bd4a4237d15f7f93c8d4.png" />
+      <_ContentIncludedByDefault Remove="wwwroot\bundle\dfd0ea122577eb61795f178e0347fa2c.woff2" />
+      <_ContentIncludedByDefault Remove="wwwroot\bundle\Home\index.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\bundle\Home\index.js.map" />
     </ItemGroup>
 
 </Project>
