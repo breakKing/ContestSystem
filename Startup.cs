@@ -105,6 +105,8 @@ namespace ContestSystem
 
             services.AddUserIdProvider();
 
+            services.AddMessenger();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v0.1", new OpenApiInfo { Title = "ContestSystem API v0.1 beta", Version = "v0.1" });

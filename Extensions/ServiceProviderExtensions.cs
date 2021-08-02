@@ -26,5 +26,10 @@ namespace ContestSystem.Extensions
         {
             services.AddSingleton<IUserIdProvider, UserIdProvider>();
         }
+
+        public static void AddMessenger(this IServiceCollection services)
+        {
+            services.AddSingleton<MessengerService>();
+        }
     }
 }
