@@ -81,7 +81,7 @@ export default {
       code: '',
 
       solutionSchema: Yup.object({
-        compiler: Yup.string().required(),
+        compiler: Yup.string().nullable().required(),
         code: Yup.string().required(),
       })
     }

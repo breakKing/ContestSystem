@@ -42,7 +42,7 @@
       </template>
       <template v-else>
         <router-link class="btn btn-info" v-if="currentContestIsRunning"
-                     :to="{name: 'ContestParticipatingPage', params: {contest_id: currentContest?.id}}">Начать
+                     :to="{name: 'ContestParticipatingPage', params: {contest_id: currentContest?.id}}">Задачи
         </router-link>
         <span v-else-if="currentContestIsInTheFuture">Соревнование начнётся {{
             formatted_start_date
