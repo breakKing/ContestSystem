@@ -31,5 +31,10 @@ namespace ContestSystem.Extensions
         {
             services.AddSingleton<MessengerService>();
         }
+
+        public static void AddNotifier(this IServiceCollection services)
+        {
+            services.AddSingleton<NotifierService>();
+        }
     }
 }

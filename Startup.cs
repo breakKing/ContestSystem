@@ -105,6 +105,8 @@ namespace ContestSystem
 
             services.AddUserIdProvider();
 
+            services.AddNotifier();
+
             services.AddMessenger();
 
             services.AddSwaggerGen(c =>

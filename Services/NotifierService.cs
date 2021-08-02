@@ -8,14 +8,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ContestSystem.Extensions
+namespace ContestSystem.Services
 {
-    // Надо делать именно так, потому что:
-    // 1) Это - расширения не самого класса хаба, а IHubContext
-    // 2) Через Dependency Injection в контролерах нельзя внедрить класс самого хаба, а только IHubContext нужного хаба
-    public static class HubContextExtensions
+    public class NotifierService
     {
-        public static async Task UpdateOnSolutionActualResultAsync(this IHubContext<RealTimeHub> hubContext, Contest contest, Solution solution, ILogger logger)
+        private readonly IHubContext<RealTimeHub> _hubContext;
+        private readonly ILogger<NotifierService> _logger;
+
+        public NotifierService(IHubContext<RealTimeHub> hubContext, ILogger<NotifierService> logger)
+        {
+            _hubContext = hubContext;
+            _logger = logger;
+        }
+
+        public async Task UpdateOnSolutionActualResultAsync(Contest contest, Solution solution)
         {
             if (solution == null || contest == null)
             {
@@ -34,11 +40,11 @@ namespace ContestSystem.Extensions
 
             try
             {
-                await hubContext.Clients.Users(usersIds).SendAsync("UpdateOnSolutionActualResult", SolutionActualResultExternalModel.GetFromModel(solution));
+                await _hubContext.Clients.Users(usersIds).SendAsync("UpdateOnSolutionActualResult", SolutionActualResultExternalModel.GetFromModel(solution));
             }
             catch (Exception e)
             {
-                logger.LogError($"Ошибка рассылки UpdateOnSolutionActualResult: {e.Message}");
+                _logger.LogError($"Ошибка рассылки UpdateOnSolutionActualResult: {e.Message}");
             }
         }
     }

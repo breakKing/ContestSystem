@@ -28,20 +28,18 @@ namespace ContestSystem.Controllers
         private readonly VerdicterService _verdicter;
         private readonly FileStorageService _storage;
         private readonly ILogger<SolutionsController> _logger;
-        private readonly ILogger<RealTimeHub> _loggerForHub;
-        private readonly IHubContext<RealTimeHub> _hubContext;
+        private readonly NotifierService _notifier;
 
         public SolutionsController(MainDbContext dbContext, CheckerSystemService checkerSystemService,
             VerdicterService verdicter, ILogger<SolutionsController> logger, FileStorageService storage, 
-            IHubContext<RealTimeHub> hubContext, ILogger<RealTimeHub> loggerForHub)
+            NotifierService notifier)
         {
             _dbContext = dbContext;
             _checkerSystemService = checkerSystemService;
             _verdicter = verdicter;
             _storage = storage;
             _logger = logger;
-            _hubContext = hubContext;
-            _loggerForHub = loggerForHub;
+            _notifier = notifier;
         }
 
         [HttpGet("{id}")]
@@ -221,7 +219,7 @@ namespace ContestSystem.Controllers
                 _logger.LogInformation($"Решение с идентификатором {solution.Id} прошло процедуру компиляции");
             }
             var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == solution.ContestId);
-            await _hubContext.UpdateOnSolutionActualResultAsync(contest, solution, _loggerForHub);
+            await _notifier.UpdateOnSolutionActualResultAsync(contest, solution);
             return Json(new
             {
                 status = true,
@@ -263,7 +261,7 @@ namespace ContestSystem.Controllers
                 });
             }
 
-            await _hubContext.UpdateOnSolutionActualResultAsync(solution.Contest, solution, _loggerForHub);
+            await _notifier.UpdateOnSolutionActualResultAsync(solution.Contest, solution);
             foreach (var test in solution.Problem.Tests.OrderBy(t => t.Number).ToList())
             {
                 var result = await RunSingleTest(test, solution);
@@ -314,7 +312,7 @@ namespace ContestSystem.Controllers
                         _dbContext.ContestsParticipants.Update(contestParticipant);
                     }
                 }
-                await _hubContext.UpdateOnSolutionActualResultAsync(solution.Contest, solution, _loggerForHub);
+                await _notifier.UpdateOnSolutionActualResultAsync(solution.Contest, solution);
                 _logger.LogInformation($"Решение с идентификатором {solution.Id} успешно протестировано");
             }
             return Json(state);
@@ -337,7 +335,7 @@ namespace ContestSystem.Controllers
                 }
                 _dbContext.Solutions.Update(solution);
                 await _dbContext.SaveChangesAsync();
-                await _hubContext.UpdateOnSolutionActualResultAsync(solution.Contest, solution, _loggerForHub);
+                await _notifier.UpdateOnSolutionActualResultAsync(solution.Contest, solution);
                 return newTestResult;
             }
 
