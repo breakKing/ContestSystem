@@ -34,6 +34,7 @@ export default {
   data() {
     return {
       solution: null,
+      problem: null,
     }
   },
   beforeRouteEnter(to, from, next) {
@@ -43,6 +44,7 @@ export default {
         contest_id: vm.contest_id
       })
       vm.solution = await vm.getSolution(vm.solution_id)
+      vm.problem = vm.solution?.problem || null
     })
   },
   methods: {
@@ -58,7 +60,7 @@ export default {
       return _.find((this.solution?.problem?.localizers || []), (l) => l.culture === 'ru')?.name
     },
     isSuccess() {
-      return +this.actualResult(this.solution)?.verdict === +TestResultVerdicts.Accepted
+      return (+this.actualResult(this.solution)?.verdict === +TestResultVerdicts.Accepted) || (+this.actualResult(this.solution)?.verdict === +TestResultVerdicts.PartialSolution)
     },
     verdictName() {
       return this.verdictInfo(this.actualResult(this.solution))
