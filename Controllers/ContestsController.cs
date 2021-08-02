@@ -309,7 +309,7 @@ namespace ContestSystem.Controllers
                     });
                 }
 
-                bool needToRemoderate = (contestForm.StartDateTimeUTC != contest.StartDateTimeUTC);
+                bool needToRemoderate = (contestForm.StartDateTimeUTC != contest.StartDateTimeUTC && contest.Creator.IsLimitedInContests);
                 if (!await _dbContext.ContestsLocalModerators.AnyAsync(clm =>
                     clm.ContestId == id && clm.LocalModeratorId == currentUser.Id))
                 {
