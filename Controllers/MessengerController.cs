@@ -1,5 +1,4 @@
-﻿using ContestSystem.Hubs;
-using ContestSystem.Models.Attributes;
+﻿using ContestSystem.Models.Attributes;
 using ContestSystem.Models.DbContexts;
 using ContestSystem.Models.FormModels;
 using ContestSystem.Services;
@@ -22,17 +21,15 @@ namespace ContestSystem.Controllers
         private readonly FileStorageService _fileStorage;
         private readonly MessengerService _messenger;
         private readonly ILogger<MessengerController> _logger;
-        private readonly ILogger<RealTimeHub> _loggerForHub;
-        private readonly IHubContext<RealTimeHub> _hubContext;
+        private readonly NotifierService _notifier;
 
-        public MessengerController(MainDbContext dbContext, FileStorageService fileStorage, MessengerService messenger, ILogger<MessengerController> logger, ILogger<RealTimeHub> loggerForHub, IHubContext<RealTimeHub> hubContext)
+        public MessengerController(MainDbContext dbContext, FileStorageService fileStorage, MessengerService messenger, ILogger<MessengerController> logger, NotifierService notifier)
         {
             _dbContext = dbContext;
             _fileStorage = fileStorage;
             _messenger = messenger;
             _logger = logger;
-            _loggerForHub = loggerForHub;
-            _hubContext = hubContext;
+            _notifier = notifier;
         }
 
         [HttpGet("chat/{link}")]
@@ -65,14 +62,14 @@ namespace ContestSystem.Controllers
 
         [HttpPost("chat/{link}/send-message")]
         [AuthorizeByJwt]
-        public async Task<IActionResult> SendMessage(string link, ChatMessageForm chatMessageForm)
+        public async Task<IActionResult> SendMessage(string link, [FromBody] ChatMessageForm chatMessageForm)
         {
             return null;
         }
 
         [HttpPost("chat/{link}/mute-for-user/{userId}")]
         [AuthorizeByJwt]
-        public async Task<IActionResult> MuteChat(string link, long userId)
+        public async Task<IActionResult> MuteChat(string link, long userId, bool enable = true)
         {
             return null;
         }
@@ -86,14 +83,21 @@ namespace ContestSystem.Controllers
 
         [HttpPost("chat/{link}/create")]
         [AuthorizeByJwt]
-        public async Task<IActionResult> CreateChat(string link, ChatForm chatForm)
+        public async Task<IActionResult> CreateChat(string link, [FromBody] ChatForm chatForm)
         {
             return null;
         }
 
         [HttpPut("chat/{link}/edit")]
         [AuthorizeByJwt]
-        public async Task<IActionResult> EditChat(string link, ChatForm chatForm)
+        public async Task<IActionResult> EditChat(string link, [FromBody] ChatForm chatForm)
+        {
+            return null;
+        }
+
+        [HttpPut("chat/{link}/edit-message/{messageId}")]
+        [AuthorizeByJwt]
+        public async Task<IActionResult> EditMessage(string link, long messageId, [FromBody] ChatMessageForm chatMessageForm)
         {
             return null;
         }
