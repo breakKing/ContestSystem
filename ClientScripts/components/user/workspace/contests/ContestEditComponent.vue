@@ -114,8 +114,8 @@ export default {
       this.description = (contest?.localizers || [])[0]?.description || null
       // у компонента баг. Начальное значение не отрисовывается
       this.$refs.quill_editor_description.setHTML(this.description)
+      this.startDateTimeUTC = (contest?.startDateTimeUTC && this.to_local_string(contest.startDateTimeUTC)) || null
 
-      this.startDateTimeUTC = contest?.startDateTimeUTC && this.to_local_string(contest.startDateTimeUTC)
       this.durationInMinutes = contest?.durationInMinutes || null
       this.areVirtualContestsAvailable = contest?.areVirtualContestsAvailable || false
       this.isPublic = contest?.isPublic || false
@@ -229,7 +229,7 @@ export default {
       return _.reduce(this.availableRuleSetsForContest || [], (count, rs) => count + +this.shouldRulesSetBeRemarked(rs), 0) > 0
     },
     sortedTasks() {
-      return _.sortBy(this.tasks, ['letter'])
+      return _.sortBy(this.tasks || [], ['letter'])
     },
     dataUrl() {
       if (!this.image) {

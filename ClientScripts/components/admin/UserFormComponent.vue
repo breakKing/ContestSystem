@@ -141,7 +141,7 @@ export default {
         isLimitedInPosts,
         isLimitedInCourses,
         isLimitedInProblems,
-        dateOfBirth: this.to_local_string(dateOfBirth).substr(0, 10),
+        dateOfBirth: (dateOfBirth && this.to_local_string(dateOfBirth).substr(0, 10)) || null,
         roles: _.map(roles, (r) => r.name),
       }
     },
