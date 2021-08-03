@@ -1,0 +1,10 @@
+wwwroot/bundle/*
+.idea/
+bin/*
+obj/*
+node_modules/
+.vs/
+ContestSystem.csproj.user
+appsettings.Development.json
+Logs/*
+Storage/*
