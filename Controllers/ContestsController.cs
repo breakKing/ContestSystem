@@ -14,6 +14,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using ContestSystem.Services;
+using ContestSystem.Models.Misc;
 
 namespace ContestSystem.Controllers
 {
@@ -199,7 +200,7 @@ namespace ContestSystem.Controllers
                 if (currentUser.IsLimitedInContests)
                 {
                     if (await _dbContext.Contests.CountAsync(c =>
-                        c.CreatorId == currentUser.Id && c.ApprovalStatus == ApproveType.NotModeratedYet) == 1)
+                        c.CreatorId == currentUser.Id && c.ApprovalStatus == ApproveType.NotModeratedYet) >= Constants.ContestsLimitForLimitedUsers)
                     {
                         _logger.LogCreationFailedBecauseOfLimits("Contest", currentUser.Id);
                         return Json(new

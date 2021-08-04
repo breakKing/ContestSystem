@@ -13,6 +13,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using ContestSystem.Services;
+using ContestSystem.Models.Misc;
 
 namespace ContestSystem.Controllers
 {
@@ -117,7 +118,7 @@ namespace ContestSystem.Controllers
                 }
                 if (currentUser.IsLimitedInPosts)
                 {
-                    if (await _dbContext.Posts.CountAsync(p => p.AuthorId == currentUser.Id && p.ApprovalStatus == ApproveType.NotModeratedYet) == 1)
+                    if (await _dbContext.Posts.CountAsync(p => p.AuthorId == currentUser.Id && p.ApprovalStatus == ApproveType.NotModeratedYet) >= Constants.PostsLimitForLimitedUsers)
                     {
                         _logger.LogCreationFailedBecauseOfLimits("Post", currentUser.Id);
                         return Json(new

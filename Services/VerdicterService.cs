@@ -1,4 +1,5 @@
-﻿using ContestSystemDbStructure.Enums;
+﻿using ContestSystem.Models.Misc;
+using ContestSystemDbStructure.Enums;
 using ContestSystemDbStructure.Models;
 using System.Collections.Generic;
 using System.Linq;
@@ -61,7 +62,7 @@ namespace ContestSystem.Services
                     {
                         verdict = solution.TestResults.OrderBy(tr => tr.Number).Last().Verdict;
                     }
-                    else if (points == 100)
+                    else if (points == Constants.MaxPointsSumForAllTests)
                     {
                         verdict = VerdictType.Accepted;
                     }
@@ -86,7 +87,7 @@ namespace ContestSystem.Services
                     {
                         verdict = solution.TestResults.OrderBy(tr => tr.Number).Last().Verdict;
                     }
-                    else if (points == 100)
+                    else if (points == Constants.MaxPointsSumForAllTests)
                     {
                         verdict = VerdictType.Accepted;
                     }

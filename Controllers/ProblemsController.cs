@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using ContestSystem.Models.Misc;
 
 namespace ContestSystem.Controllers
 {
@@ -97,9 +98,9 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> AddProblem([FromBody] ProblemForm problemForm)
         {
-            if (problemForm.Tests.Sum(t => t.AvailablePoints) != 100)
+            if (problemForm.Tests.Sum(t => t.AvailablePoints) != Constants.MaxPointsSumForAllTests)
             {
-                ModelState.AddModelError("Tests", "Sum of available points for all tests is not equal to 100");
+                ModelState.AddModelError("Tests", $"Sum of available points for all tests is not equal to {Constants.MaxPointsSumForAllTests}");
             }
 
             if (ModelState.IsValid)
@@ -139,7 +140,7 @@ namespace ContestSystem.Controllers
                 if (currentUser.IsLimitedInProblems)
                 {
                     if (await _dbContext.Problems.CountAsync(p =>
-                        p.CreatorId == currentUser.Id && p.ApprovalStatus == ApproveType.NotModeratedYet) == 1)
+                        p.CreatorId == currentUser.Id && p.ApprovalStatus == ApproveType.NotModeratedYet) >= Constants.ProblemsLimitForLimitedUsers)
                     {
                         _logger.LogCreationFailedBecauseOfLimits("Problem", currentUser.Id);
                         return Json(new
@@ -240,9 +241,9 @@ namespace ContestSystem.Controllers
                 });
             }
 
-            if (problemForm.Tests.Sum(t => t.AvailablePoints) != 100)
+            if (problemForm.Tests.Sum(t => t.AvailablePoints) != Constants.MaxPointsSumForAllTests)
             {
-                ModelState.AddModelError("Tests", "Sum of available points for all tests is not equal to 100");
+                ModelState.AddModelError("Tests", $"Sum of available points for all tests is not equal to {Constants.MaxPointsSumForAllTests}");
             }
 
             if (ModelState.IsValid)
