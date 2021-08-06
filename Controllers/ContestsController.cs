@@ -5,7 +5,6 @@ using ContestSystem.Models.Attributes;
 using ContestSystem.Models.DbContexts;
 using ContestSystem.Models.ExternalModels;
 using ContestSystem.Models.FormModels;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -15,6 +14,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using ContestSystem.Services;
 using ContestSystem.Models.Misc;
+using Microsoft.AspNetCore.Identity;
+using ContestSystem.Models.Dictionaries;
 
 namespace ContestSystem.Controllers
 {
@@ -23,17 +24,22 @@ namespace ContestSystem.Controllers
     public class ContestsController : Controller
     {
         private readonly MainDbContext _dbContext;
-        private readonly UserManager<User> _userManager;
         private readonly ILogger<ContestsController> _logger;
         private readonly FileStorageService _storage;
+        private readonly WorkspaceManagerService _workspace;
+        private readonly UserManager<User> _userManager;
 
-        public ContestsController(MainDbContext dbContext, UserManager<User> userManager,
-            ILogger<ContestsController> logger, FileStorageService storage)
+        private readonly string _entityName = Constants.ContestEntityName;
+        private readonly Dictionary<string, string> _errorCodes;
+
+        public ContestsController(MainDbContext dbContext, ILogger<ContestsController> logger, FileStorageService storage, WorkspaceManagerService workspace, UserManager<User> userManager)
         {
             _dbContext = dbContext;
-            _userManager = userManager;
             _logger = logger;
             _storage = storage;
+            _workspace = workspace;
+            _userManager = userManager;
+            _errorCodes = Constants.ErrorCodes[_entityName];
         }
 
         [HttpGet("get-available-contests/{culture}")]
@@ -92,7 +98,7 @@ namespace ContestSystem.Controllers
         public async Task<IActionResult> GetParticipatingContests(string culture)
         {
             DateTime now = DateTime.UtcNow;
-            var currentUser = await HttpContext.GetCurrentUser(_userManager);
+            var currentUser = await HttpContext.GetCurrentUser();
             var contests = await _dbContext.Contests.Where(c => c.ApprovalStatus == ApproveType.Accepted
                                                                 && c.StartDateTimeUTC >=
                                                                 now.AddMinutes(-c.DurationInMinutes)
@@ -123,7 +129,7 @@ namespace ContestSystem.Controllers
                 var localizer = contest.ContestLocalizers.FirstOrDefault(pl => pl.Culture == culture);
                 if (localizer == null)
                 {
-                    return NotFound("Такой локализации под контест не существует");
+                    return NotFound(_errorCodes[Constants.EntityLocalizerDoesntExistErrorName]);
                 }
 
                 int participantsCount =
@@ -133,7 +139,7 @@ namespace ContestSystem.Controllers
                 return Json(publishedContest);
             }
 
-            return NotFound("Такого контеста не существует");
+            return NotFound(_errorCodes[Constants.EntityDoesntExistErrorName]);
         }
 
         [HttpGet("constructed/{id}")]
@@ -149,7 +155,7 @@ namespace ContestSystem.Controllers
                 return Json(constructedContest);
             }
 
-            return NotFound("Такого контеста не существует");
+            return NotFound(_errorCodes[Constants.EntityDoesntExistErrorName]);
         }
 
         [HttpGet("get-user-created-contests/{id}/{culture}")]
@@ -173,113 +179,26 @@ namespace ContestSystem.Controllers
         public async Task<IActionResult> AddContest([FromForm] ContestForm contestForm)
         {
             var currentUser = await HttpContext.GetCurrentUser();
+            ResponseObject<long> response = new ResponseObject<long>();
             if (ModelState.IsValid)
             {
-                Contest contest = new Contest
-                {
-                    CreatorId = contestForm.CreatorUserId,
-                    StartDateTimeUTC = contestForm.StartDateTimeUTC,
-                    DurationInMinutes = contestForm.DurationInMinutes,
-                    AreVirtualContestsAvailable = contestForm.AreVirtualContestsAvailable,
-                    IsPublic = contestForm.IsPublic,
-                    ContestLocalizers = new List<ContestLocalizer>(),
-                    RulesSetId = contestForm.RulesSetId
-                };
-
                 if (currentUser.Id != contestForm.CreatorUserId)
                 {
-                    _logger.LogCreationByNonEqualCurrentUserAndCreator("Contest", currentUser.Id,
-                        contestForm.CreatorUserId);
-                    return Json(new
-                    {
-                        status = false,
-                        errors = new List<string> {"Id автора в форме отличается от Id текущего пользователя"}
-                    });
-                }
-
-                if (currentUser.IsLimitedInContests)
-                {
-                    if (await _dbContext.Contests.CountAsync(c =>
-                        c.CreatorId == currentUser.Id && c.ApprovalStatus == ApproveType.NotModeratedYet) >= Constants.ContestsLimitForLimitedUsers)
-                    {
-                        _logger.LogCreationFailedBecauseOfLimits("Contest", currentUser.Id);
-                        return Json(new
-                        {
-                            status = false,
-                            errors = new List<string>
-                                {"Превышено ограничение недоверенного пользователя по созданию контестов"}
-                        });
-                    }
-
-                    contest.ApprovalStatus = ApproveType.NotModeratedYet;
+                    _logger.LogCreationByNonEqualCurrentUserAndCreator(_entityName, currentUser.Id, contestForm.CreatorUserId);
+                    response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityIdMismatchErrorName]);
                 }
                 else
                 {
-                    contest.ApprovalStatus = ApproveType.Accepted;
+                    CreationStatusData statusData = await _workspace.CreateContestAsync(_dbContext, contestForm, currentUser.IsLimitedInContests);
+                    _logger.LogCreationStatus(statusData.Status, _entityName, statusData.Id, currentUser.Id);
+                    response = ResponseObject<long>.FormResponseObjectForCreation(statusData.Status, _entityName, statusData.Id);
                 }
-
-                await _dbContext.Contests.AddAsync(contest);
-                await _dbContext.SaveChangesAsync();
-                contest.ImagePath = await _storage.SaveContestImageAsync(contest.Id, contestForm.Image);
-                _dbContext.Contests.Update(contest);
-
-                var localModerator = new ContestLocalModerator
-                {
-                    ContestId = contest.Id,
-                    Alias = contest.Creator.FullName, // TODO: надо получать алиас из формы
-                    LocalModeratorId = contest.CreatorId.GetValueOrDefault()
-                };
-                await _dbContext.ContestsLocalModerators.AddAsync(localModerator);
-                await _dbContext.SaveChangesAsync();
-                for (int i = 0; i < contestForm.Localizers.Count; i++)
-                {
-                    var localizer = new ContestLocalizer
-                    {
-                        Culture = contestForm.Localizers[i].Culture,
-                        Description = contestForm.Localizers[i].Description,
-                        Name = contestForm.Localizers[i].Name,
-                        ContestId = contest.Id
-                    };
-                    contest.ContestLocalizers.Add(localizer);
-                }
-
-                for (int i = 0; i < contestForm.Problems.Count; i++)
-                {
-                    var contestProblems = new ContestProblem
-                    {
-                        ContestId = contest.Id,
-                        ProblemId = contestForm.Problems[i].ProblemId,
-                        Letter = contestForm.Problems[i].Letter
-                    };
-                    await _dbContext.ContestsProblems.AddAsync(contestProblems);
-                }
-
-                await _dbContext.SaveChangesAsync();
-                if (contest.ApprovalStatus == ApproveType.Accepted)
-                {
-                    _logger.LogCreationSuccessfulWithAutoAccept("Contest", contest.Id, currentUser.Id);
-                }
-                else
-                {
-                    _logger.LogCreationSuccessful("Contest", contest.Id, currentUser.Id);
-                }
-
-                return Json(new
-                {
-                    status = true,
-                    data = contest.Id,
-                    errors = new List<string>()
-                });
             }
-
-            return Json(new
+            else
             {
-                status = false,
-                errors = ModelState.Values
-                    .SelectMany(x => x.Errors)
-                    .Select(x => x.ErrorMessage)
-                    .ToList()
-            });
+                response = ResponseObject<long>.Fail(ModelState, _entityName);
+            }
+            return Json(response);
         }
 
         [AuthorizeByJwt(Roles = RolesContainer.User)]
@@ -287,172 +206,43 @@ namespace ContestSystem.Controllers
         public async Task<IActionResult> EditContest([FromForm] ContestForm contestForm, long id)
         {
             var currentUser = await HttpContext.GetCurrentUser();
+            ResponseObject<long> response = new ResponseObject<long>();
             if (contestForm.Id == null || id <= 0 || id != contestForm.Id)
             {
-                _logger.LogEditingWithNonEqualFormAndRequestId("Contest", contestForm.Id, id, currentUser.Id);
-                return Json(new
-                {
-                    success = false,
-                    errors = new List<string> {"Id в запросе не совпадает с Id в форме"}
-                });
+                _logger.LogEditingWithNonEqualFormAndRequestId(_entityName, contestForm.Id, id, currentUser.Id);
+                response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityIdMismatchErrorName]);
             }
-
-            if (ModelState.IsValid)
+            else
             {
-                Contest contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == id);
-                if (contest == null)
+                if (ModelState.IsValid)
                 {
-                    _logger.LogEditingOfNonExistentEntity("Contest", id, currentUser.Id);
-                    return Json(new
+                    Contest contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == id);
+                    if (contest == null)
                     {
-                        status = false,
-                        errors = new List<string> {"Попытка изменить несуществующий контест"}
-                    });
-                }
-
-                bool needToRemoderate = (contestForm.StartDateTimeUTC != contest.StartDateTimeUTC && contest.Creator.IsLimitedInContests);
-                if (!await _dbContext.ContestsLocalModerators.AnyAsync(clm =>
-                    clm.ContestId == id && clm.LocalModeratorId == currentUser.Id))
-                {
-                    _logger.LogEditingByNotAppropriateUser("Contest", id, currentUser.Id);
-                    return Json(new
-                    {
-                        status = false,
-                        errors = new List<string> {"Попытка изменить не свой контест"}
-                    });
-                }
-
-                if (contestForm.Image != null)
-                {
-                    contest.ImagePath = await _storage.SaveContestImageAsync(id, contestForm.Image);
-                }
-
-                contest.StartDateTimeUTC = contestForm.StartDateTimeUTC;
-                contest.DurationInMinutes = contestForm.DurationInMinutes;
-                contest.AreVirtualContestsAvailable = contestForm.AreVirtualContestsAvailable;
-                contest.IsPublic = contestForm.IsPublic;
-                contest.RulesSetId = contestForm.RulesSetId;
-                if (needToRemoderate || contest.ApprovalStatus == ApproveType.Rejected)
-                {
-                    contest.ApprovalStatus = ApproveType.NotModeratedYet;
-                    contest.ApprovingModeratorId = null;
-                }
-
-                _dbContext.Contests.Update(contest);
-
-                var localizers = await _dbContext.ContestsLocalizers.Where(l => l.ContestId == id).ToListAsync();
-                var localizersExamined = new Dictionary<long, bool>();
-                foreach (var l in localizers)
-                {
-                    localizersExamined.Add(l.Id, false);
-                }
-
-                for (int i = 0; i < contestForm.Localizers.Count; i++)
-                {
-                    var localizer = new ContestLocalizer
-                    {
-                        Culture = contestForm.Localizers[i].Culture,
-                        Description = contestForm.Localizers[i].Description,
-                        Name = contestForm.Localizers[i].Name,
-                        ContestId = contest.Id
-                    };
-                    var loadedLocalizer = localizers.FirstOrDefault(l => l.Culture == localizer.Culture);
-                    if (loadedLocalizer == null)
-                    {
-                        await _dbContext.ContestsLocalizers.AddAsync(localizer);
+                        _logger.LogEditingOfNonExistentEntity(_entityName, id, currentUser.Id);
+                        response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityDoesntExistErrorName]);
                     }
                     else
                     {
-                        localizersExamined[loadedLocalizer.Id] = true;
-                        loadedLocalizer.Description = localizer.Description;
-                        loadedLocalizer.Name = localizer.Name;
-                        _dbContext.ContestsLocalizers.Update(loadedLocalizer);
-                    }
-                }
-
-                foreach (var item in localizersExamined)
-                {
-                    if (!item.Value)
-                    {
-                        var loadedLocalizer = localizers.FirstOrDefault(l => l.Id == item.Key);
-                        if (loadedLocalizer != null)
+                        if (!contest.ContestLocalModerators.Any(clm => clm.LocalModeratorId == currentUser.Id))
                         {
-                            _dbContext.ContestsLocalizers.Remove(loadedLocalizer);
+                            _logger.LogEditingByNotAppropriateUser(_entityName, id, currentUser.Id);
+                            response = ResponseObject<long>.Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.UserInsufficientRightsErrorName]);
+                        }
+                        else
+                        {
+                            EditionStatus status = await _workspace.EditContestAsync(_dbContext, contestForm, currentUser.Id, contest);
+                            _logger.LogEditionStatus(status, _entityName, id, currentUser.Id);
+                            response = ResponseObject<long>.FormResponseObjectForEdition(status, _entityName, id);
                         }
                     }
                 }
-
-                var problems = await _dbContext.ContestsProblems.Where(cp => cp.ContestId == id).ToListAsync();
-                var problemsExamined = new Dictionary<long, bool>();
-                foreach (var p in problems)
+                else
                 {
-                    problemsExamined.Add(p.ProblemId, false);
+                    response = ResponseObject<long>.Fail(ModelState, _entityName);
                 }
-
-                for (int i = 0; i < contestForm.Problems.Count; i++)
-                {
-                    var contestProblem = new ContestProblem
-                    {
-                        ContestId = contest.Id,
-                        ProblemId = contestForm.Problems[i].ProblemId,
-                        Letter = contestForm.Problems[i].Letter
-                    };
-                    var loadedContestProblem =
-                        problems.FirstOrDefault(cp => cp.ProblemId == contestProblem.ProblemId);
-                    if (loadedContestProblem == null)
-                    {
-                        await _dbContext.ContestsProblems.AddAsync(contestProblem);
-                    }
-                    else
-                    {
-                        problemsExamined[loadedContestProblem.ProblemId] = true;
-                        loadedContestProblem.Letter = contestForm.Problems[i].Letter;
-                        _dbContext.ContestsProblems.Update(loadedContestProblem);
-                    }
-                }
-
-                foreach (var item in problemsExamined)
-                {
-                    if (!item.Value)
-                    {
-                        var loadedProblem = problems.FirstOrDefault(p => p.ProblemId == item.Key);
-                        if (loadedProblem != null)
-                        {
-                            _dbContext.ContestsProblems.Remove(loadedProblem);
-                        }
-                    }
-                }
-
-                try
-                {
-                    await _dbContext.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    _logger.LogParallelSaveError("Contest", id);
-                    return Json(new
-                    {
-                        status = false,
-                        errors = new List<string> {"Ошибка параллельного сохранения"}
-                    });
-                }
-
-                _logger.LogEditingSuccessful("Contest", id, currentUser.Id);
-                return Json(new
-                {
-                    status = true,
-                    errors = new List<string>()
-                });
             }
-
-            return Json(new
-            {
-                status = false,
-                errors = ModelState.Values
-                    .SelectMany(x => x.Errors)
-                    .Select(x => x.ErrorMessage)
-                    .ToList()
-            });
+            return Json(response);
         }
 
         [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
@@ -460,164 +250,134 @@ namespace ContestSystem.Controllers
         public async Task<IActionResult> DeleteContest(long id)
         {
             var currentUser = await HttpContext.GetCurrentUser();
+            ResponseObject<long> response = new ResponseObject<long>();
             Contest loadedContest = await _dbContext.Contests.FindAsync(id);
             if (loadedContest == null)
             {
-                _logger.LogDeletingOfNonExistentEnitiy("Contest", id, currentUser.Id);
-                return Json(new
-                {
-                    status = false,
-                    errors = new List<string> {"Попытка удалить несуществующий контест"}
-                });
+                _logger.LogDeletingOfNonExistentEnitiy(_entityName, id, currentUser.Id);
+                response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityDoesntExistErrorName]);
             }
-
-            var moderatorRole = await _dbContext.Roles.FirstOrDefaultAsync(r => r.Name == RolesContainer.Moderator);
-            if (currentUser.Id != loadedContest.CreatorId && !currentUser.Roles.Contains(moderatorRole))
+            else
             {
-                _logger.LogDeletingByNotAppropriateUser("Contest", id, currentUser.Id);
-                return Json(new
+                if (currentUser.Id != loadedContest.CreatorId && !await _userManager.IsInRoleAsync(currentUser, RolesContainer.Moderator))
                 {
-                    status = false,
-                    errors = new List<string> {"Попытка удалить не свой контест или без модераторских прав"}
-                });
+                    _logger.LogDeletingByNotAppropriateUser(_entityName, id, currentUser.Id);
+                    response = ResponseObject<long>.Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.UserInsufficientRightsErrorName]);
+                }
+                else
+                {
+                    DeletionStatus status = await _workspace.DeleteContestAsync(_dbContext, loadedContest, currentUser.Id);
+                    _logger.LogDeletionStatus(status, _entityName, id, currentUser.Id);
+                }
             }
-
-            _storage.DeleteFileAsync(loadedContest.ImagePath);
-            _dbContext.Contests.Remove(loadedContest);
-            await _dbContext.SaveChangesAsync();
-            _logger.LogDeletingSuccessful("Contest", id, currentUser.Id);
-            return Json(new
-            {
-                status = true,
-                errors = new List<string>()
-            });
+            return Json(response);
         }
 
         [HttpPost("{contestId}/add-participant")]
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> AddParticipant(long contestId, [FromBody] ParticipantForm participantForm)
         {
+            var response = new ResponseObject<long>();
             var currentUser = await HttpContext.GetCurrentUser();
+
             if (contestId <= 0 || contestId != participantForm.ContestId)
             {
                 _logger.LogWarning(
-                    $"Попытка от пользователя с идентификатором {currentUser.Id} записаться на участие в соревновании с идентификатором {contestId}, когда в переданной форме указано соревнование с идентификатором {participantForm.ContestId}");
-                return Json(new
-                {
-                    success = false,
-                    errors = new List<string> {"Id в запросе не совпадает с Id в форме"}
-                });
+                    $"Попытка от пользователя с идентификатором {currentUser.Id} добавить участника с идентификатором {participantForm.UserId} с идентификатором {contestId}, когда в переданной форме указано соревнование с идентификатором {participantForm.ContestId}");
+                response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityIdMismatchErrorName]);
             }
-
-            if (ModelState.IsValid)
+            else
             {
-                var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == contestId);
-                if (contest == null)
+                if (ModelState.IsValid)
                 {
-                    _logger.LogWarning(
-                        $"Попытка от пользователя с идентификатором {currentUser.Id} принять участие в несуществующем соревновании с идентификатором {contestId}");
-                    return Json(new
+                    var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == contestId);
+                    if (contest == null)
                     {
-                        status = false,
-                        errors = new List<string> {"Попытка добавить участника в несуществующий контест"}
-                    });
-                }
-
-                var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == participantForm.UserId);
-                if (user == null)
-                {
-                    _logger.LogWarning(
-                        $"Попытка от пользователя {currentUser.Id} добавить несуществующего пользователя с идентификатором {participantForm.UserId} в качестве участника для соревнования с идентификатором {contestId}");
-                    return Json(new
+                        _logger.LogWarning(
+                            $"Попытка от пользователя с идентификатором {currentUser.Id} добавить участника с идентификатором {participantForm.UserId} в несуществующее соревнование с идентификатором {contestId}");
+                        response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityDoesntExistErrorName]);
+                    }
+                    else
                     {
-                        status = false,
-                        errors = new List<string> {"Попытка добавить несуществующего пользователя в контест"}
-                    });
+                        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == participantForm.UserId);
+                        if (user == null)
+                        {
+                            _logger.LogWarning(
+                                $"Попытка от пользователя {currentUser.Id} добавить несуществующего пользователя с идентификатором {participantForm.UserId} в качестве участника для соревнования с идентификатором {contestId}");
+                            response = ResponseObject<long>.Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.EntityDoesntExistErrorName]);
+                        }
+                        else
+                        {
+                            if (await _dbContext.ContestsParticipants.AnyAsync(cp =>
+                            cp.ContestId == contestId && cp.ParticipantId == participantForm.UserId))
+                            {
+                                _logger.LogWarning(
+                                    $"Попытка от пользователя {currentUser.Id} добавить пользователя с идентификатором {participantForm.UserId} в качестве участника для соревнования с идентификатором {contestId}, когда данный пользователь уже является участником данного соревнования");
+                                response = ResponseObject<long>.Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.UserAlreadyInContestErrorName]);
+                            }
+                            else
+                            {
+                                var contestParticipant = new ContestParticipant
+                                {
+                                    ParticipantId = participantForm.UserId,
+                                    ContestId = participantForm.ContestId,
+                                    Alias = participantForm.Alias,
+                                    Result = 0,
+                                    ConfirmedByParticipant = true, // TODO: сделать нормальные проверки на инвайты и прочую чепухню
+                                    ConfirmedByLocalModerator = true,
+                                    ConfirmingLocalModeratorId = contest.CreatorId
+                                };
+                                await _dbContext.ContestsParticipants.AddAsync(contestParticipant);
+                                await _dbContext.SaveChangesAsync();
+                                _logger.LogInformation(
+                                    $"В соревнование с идентификатором {contest.Id} успешно добавлен участник с идентификатором {participantForm.UserId} пользователем с идентификатором {currentUser.Id}");
+                                response = ResponseObject<long>.Success(contestId);
+                            }
+                        }
+                    }
                 }
-
-                if (await _dbContext.ContestsParticipants.AnyAsync(cp =>
-                    cp.ContestId == contestId && cp.ParticipantId == participantForm.UserId))
+                else
                 {
-                    _logger.LogWarning(
-                        $"Попытка от пользователя {currentUser.Id} добавить пользователя с идентификатором {participantForm.UserId} в качестве участника для соревнования с идентификатором {contestId}, когда данный пользователь уже является участником данного соревнования");
-                    return Json(new
-                    {
-                        status = false,
-                        errors = new List<string> {"Такой участник в контесте уже есть"}
-                    });
+                    response = ResponseObject<long>.Fail(ModelState, Constants.UserEntityName);
                 }
-
-                var contestParticipant = new ContestParticipant
-                {
-                    ParticipantId = participantForm.UserId,
-                    ContestId = participantForm.ContestId,
-                    Alias = participantForm.Alias,
-                    Result = 0,
-                    ConfirmedByParticipant = true, // TODO: сделать нормальные проверки на инвайты и прочую чепухню
-                    ConfirmedByLocalModerator = true,
-                    ConfirmingLocalModeratorId = contest.CreatorId
-                };
-                await _dbContext.ContestsParticipants.AddAsync(contestParticipant);
-                await _dbContext.SaveChangesAsync();
-                _logger.LogInformation(
-                    $"В соревнование с идентификатором {contest.Id} успешно добавлен участник с идентификатором {participantForm.UserId} пользователем с идентификатором {currentUser.Id}");
-                return Json(new
-                {
-                    status = true,
-                    errors = new List<string>()
-                });
             }
-
-            return Json(new
-            {
-                status = false,
-                errors = ModelState.Values
-                    .SelectMany(x => x.Errors)
-                    .Select(x => x.ErrorMessage)
-                    .ToList()
-            });
+            return Json(response);
         }
 
         [HttpDelete("{contestId}/delete-participant/{userId}")]
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> DeleteParticipant(long contestId, long userId)
         {
+            var response = new ResponseObject<long>();
             var currentUser = await HttpContext.GetCurrentUser();
             var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == contestId);
             if (contest == null)
             {
                 _logger.LogWarning(
                     $"Попытка от пользователя с идентификатором {currentUser.Id} удалить из списка участников несуществующего соревнования с идентификатором {contestId} пользователя с идентификатором {userId}");
-                return Json(new
-                {
-                    status = false,
-                    errors = new List<string> {"Попытка удалить участника из несуществующего контеста"}
-                });
+                response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityDoesntExistErrorName]);
             }
-
-            var contestParticipant =
+            else
+            {
+                var contestParticipant =
                 await _dbContext.ContestsParticipants.FirstOrDefaultAsync(cp =>
                     cp.ContestId == contestId && cp.ParticipantId == userId);
-            if (contestParticipant == null)
-            {
-                _logger.LogWarning(
-                    $"Попытка от пользователя с идентификатором {currentUser.Id} удалить из списка участников соревнования с идентификатором {contestId} несуществующего участника с идентификатором {userId}");
-                return Json(new
+                if (contestParticipant == null)
                 {
-                    status = false,
-                    errors = new List<string> {"Такого участника нет в контесте"}
-                });
+                    _logger.LogWarning(
+                        $"Попытка от пользователя с идентификатором {currentUser.Id} удалить из списка участников соревнования с идентификатором {contestId} несуществующего участника с идентификатором {userId}");
+                    response = ResponseObject<long>.Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.EntityDoesntExistErrorName]);
+                }
+                else
+                {
+                    _dbContext.ContestsParticipants.Remove(contestParticipant);
+                    await _dbContext.SaveChangesAsync();
+                    _logger.LogInformation(
+                        $"Пользователем с идентификатором {currentUser.Id} из списка участников соревнования с идентификатором {contestId} успешно удалён пользователь с идентификатором {userId}");
+                    response = ResponseObject<long>.Success(userId);
+                }
             }
-
-            _dbContext.ContestsParticipants.Remove(contestParticipant);
-            await _dbContext.SaveChangesAsync();
-            _logger.LogInformation(
-                $"Пользователем с идентификатором {currentUser.Id} из списка участников соревнования с идентификатором {contestId} успешно удалён пользователь с идентификатором {userId}");
-            return Json(new
-            {
-                status = true,
-                errors = new List<string>()
-            });
+            return Json(response);
         }
 
         [HttpGet("{contestId}/get-participants")]
@@ -627,7 +387,7 @@ namespace ContestSystem.Controllers
             var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == contestId);
             if (contest == null)
             {
-                return NotFound("Такого контеста не существует");
+                return NotFound(_errorCodes[Constants.EntityDoesntExistErrorName]);
             }
 
             var contestParticipants =
@@ -649,7 +409,7 @@ namespace ContestSystem.Controllers
             var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == contestId);
             if (contest == null)
             {
-                return NotFound("Такого контеста не существует");
+                return NotFound(_errorCodes[Constants.EntityDoesntExistErrorName]);
             }
 
             DateTime now = DateTime.UtcNow;
@@ -700,7 +460,7 @@ namespace ContestSystem.Controllers
                     else
                     {
                         problemTriesEntry.LastTryMinutesAfterStart =
-                            (short) (participantProblemSolutions.Last().SubmitTimeUTC - contest.StartDateTimeUTC)
+                            (short)(participantProblemSolutions.Last().SubmitTimeUTC - contest.StartDateTimeUTC)
                             .TotalMinutes;
                         problemTriesEntry.Solved = participantProblemSolutions.Any(pps =>
                             pps.Verdict == VerdictType.Accepted || pps.Verdict == VerdictType.PartialSolution);
@@ -754,7 +514,7 @@ namespace ContestSystem.Controllers
             {
                 _logger.LogWarning(
                     $"Попытка от пользователя с идентификатором {currentUser.Id} получить отправки пользователя с идентификатором {userId} в рамках несуществующего соревнования с идентификатором {contestId}");
-                return BadRequest("Такого соревнования не существует");
+                return BadRequest(_errorCodes[Constants.EntityDoesntExistErrorName]);
             }
 
             if (currentUser.Id != userId && !await _dbContext.ContestsLocalModerators.AnyAsync(clm =>
@@ -762,7 +522,7 @@ namespace ContestSystem.Controllers
             {
                 _logger.LogWarning(
                     $"Попытка от пользователя с идентификатором {currentUser.Id} получить отправки пользователя с идентификатором {userId} в рамках соревнования с идентификатором {contestId} при отсутствии прав на их получение");
-                return BadRequest("Данный пользователь не имеет доступа к этим данным");
+                return BadRequest(Constants.ErrorCodes[Constants.UserEntityName][Constants.UserInsufficientRightsErrorName]);
             }
 
             if (!await _dbContext.ContestsParticipants.AnyAsync(cp =>
@@ -770,7 +530,7 @@ namespace ContestSystem.Controllers
             {
                 _logger.LogWarning(
                     $"Попытка от пользователя с идентификатором {currentUser.Id} получить отправки пользователя с идентификатором {userId} в рамках соревнования с идентификатором {contestId}, когда среди участников такого пользователя нет");
-                return NotFound("Такого участника в соревновании нет");
+                return NotFound(Constants.ErrorCodes[Constants.UserEntityName][Constants.EntityDoesntExistErrorName]);
             }
 
             var solutions = await _dbContext.Solutions.Where(s => s.ContestId == contestId && s.ParticipantId == userId)
@@ -834,77 +594,46 @@ namespace ContestSystem.Controllers
             long id)
         {
             var currentUser = await HttpContext.GetCurrentUser();
+            ResponseObject<long> response = new ResponseObject<long>();
             if (contestRequestForm.ContestId != id || id < 0)
             {
-                _logger.LogModeratingWithNonEqualFormAndRequestId("Contest", contestRequestForm.ContestId, id,
+                _logger.LogModeratingWithNonEqualFormAndRequestId(_entityName, contestRequestForm.ContestId, id,
                     currentUser.Id);
-                return Json(new
-                {
-                    status = false,
-                    errors = new List<string> {"Id в запросе не совпадает с Id в форме"}
-                });
+                response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityIdMismatchErrorName]);
             }
-
-            if (ModelState.IsValid)
+            else
             {
-                var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == id);
-                if (contest == null)
+                if (ModelState.IsValid)
                 {
-                    _logger.LogModeratingOfNonExistentEntity("Contest", id, currentUser.Id);
-                    return Json(new
+                    var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == id);
+                    if (contest == null)
                     {
-                        status = false,
-                        errors = new List<string> {"Попытка модерировать несуществующий контест"}
-                    });
+                        _logger.LogModeratingOfNonExistentEntity(_entityName, id, currentUser.Id);
+                        response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityDoesntExistErrorName]);
+                    }
+                    else
+                    {
+                        if (contest.ApprovingModeratorId.GetValueOrDefault(-1) != currentUser.Id &&
+                            contest.ApprovalStatus != ApproveType.NotModeratedYet)
+                        {
+                            _logger.LogModeratingByWrongUser(_entityName, id, currentUser.Id,
+                                contest.ApprovingModeratorId.GetValueOrDefault(-1), contest.ApprovalStatus);
+                            response = ResponseObject<long>.Fail(_errorCodes[Constants.ModerationByWrongModeratorErrorName]);
+                        }
+                        else
+                        {
+                            ModerationStatus status = await _workspace.ModerateContestAsync(_dbContext, contestRequestForm, contest);
+                            _logger.LogModerationStatus(status, _entityName, id, currentUser.Id);
+                            response = ResponseObject<long>.FormResponseObjectForModeration(status, _entityName, id);
+                        }
+                    }
                 }
                 else
                 {
-                    if (contest.ApprovingModeratorId.GetValueOrDefault(-1) != currentUser.Id &&
-                        contest.ApprovalStatus != ApproveType.NotModeratedYet)
-                    {
-                        _logger.LogModeratingByWrongUser("Contest", id, currentUser.Id,
-                            contest.ApprovingModeratorId.GetValueOrDefault(-1), contest.ApprovalStatus);
-                        return Json(new
-                        {
-                            status = false,
-                            errors = new List<string> {"Данный контест уже закреплён за другим модератором"}
-                        });
-                    }
-
-                    contest.ApprovalStatus = contestRequestForm.ApprovalStatus;
-                    contest.ApprovingModeratorId = contestRequestForm.ApprovingModeratorId;
-                    contest.ModerationMessage = contestRequestForm.ModerationMessage;
-                    _dbContext.Contests.Update(contest);
-                    try
-                    {
-                        await _dbContext.SaveChangesAsync();
-                    }
-                    catch (DbUpdateConcurrencyException)
-                    {
-                        _logger.LogParallelSaveError("Contest", id);
-                        return Json(new
-                        {
-                            status = false,
-                            errors = new List<string> {"Ошибка параллельного сохранения"}
-                        });
-                    }
-
-                    _logger.LogModeratingSuccessful("Contest", id, currentUser.Id, contestRequestForm.ApprovalStatus);
-                    return Json(new
-                    {
-                        status = true,
-                        errors = new List<string>()
-                    });
+                    response = ResponseObject<long>.Success(id);
                 }
             }
-
-            return Json(new
-            {
-                status = false,
-                errors = ModelState.Values
-                    .SelectMany(x => x.Errors)
-                    .Select(x => x.ErrorMessage).ToList()
-            });
+            return Json(response);
         }
     }
 }
