@@ -13,6 +13,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using System;
+using ContestSystem.Models.Dictionaries;
 
 namespace ContestSystem.Controllers
 {
@@ -88,6 +90,15 @@ namespace ContestSystem.Controllers
             var currentUser = await HttpContext.GetCurrentUser();
             if (ModelState.IsValid)
             {
+                if (currentUser.Id != checkerForm.AuthorId)
+                {
+                    _logger.LogCreationByNonEqualCurrentUserAndCreator("Checker", currentUser.Id, checkerForm.AuthorId);
+                    return Json(new
+                    {
+                        status = false,
+                        errors = new List<string> { "Id автора в форме отличается от Id текущего пользователя" }
+                    });
+                }
                 var checker = new Checker
                 {
                     AuthorId = checkerForm.AuthorId,
@@ -97,16 +108,6 @@ namespace ContestSystem.Controllers
                     IsPublic = checkerForm.IsPublic,
                     IsArchieved = false
                 };
-                if (currentUser.Id != checkerForm.AuthorId)
-                {
-                    _logger.LogCreationByNonEqualCurrentUserAndCreator("Checker", currentUser.Id, checkerForm.AuthorId);
-                    return Json(new
-                    {
-                        status = false,
-                        errors = new List<string> {"Id автора в форме отличается от Id текущего пользователя"}
-                    });
-                }
-
                 checker.ApprovalStatus = ApproveType.NotModeratedYet;
                 await _dbContext.Checkers.AddAsync(checker);
                 await _dbContext.SaveChangesAsync();
@@ -166,15 +167,33 @@ namespace ContestSystem.Controllers
                     });
                 }
 
-                bool needToRecompile = (checker.Code != checkerForm.Code);
+                var now = DateTime.UtcNow;
+                bool needToCreateNewOne = await _dbContext.ContestsProblems.AnyAsync(cp => cp.Problem.CheckerId == id
+                                                                                            && cp.Contest.StartDateTimeUTC.AddMinutes(-Constants.ContestSetupLockBeforeStartInMinutes) >= now);
+                bool needToRecompile = (checker.Code != checkerForm.Code) || checker.ApprovalStatus == ApproveType.Rejected;
+                if (needToCreateNewOne)
+                {
+                    checker.IsArchieved = true;
+                    _dbContext.Checkers.Update(checker);
+                    var newChecker = new Checker
+                    {
+                        Code = checkerForm.Code,
+                        AuthorId = checkerForm.AuthorId,
+                        Name = checkerForm.Name,
+                        Description = checkerForm.Description,
+                        IsPublic = checkerForm.IsPublic,
+                        Errors = "",
+                        CompilationVerdict = VerdictType.Undefined,
+                    };
+                }
+                
                 checker.Code = checkerForm.Code;
                 checker.Name = checkerForm.Name;
                 checker.Description = checkerForm.Description;
                 checker.IsPublic = checkerForm.IsPublic;
-                if (needToRecompile || checker.ApprovalStatus == ApproveType.Rejected)
+                if (needToRecompile)
                 {
                     checker.ApprovalStatus = ApproveType.NotModeratedYet;
-                    checker.ApprovingModeratorId = null;
                 }
 
                 try

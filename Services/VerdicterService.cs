@@ -1,4 +1,4 @@
-﻿using ContestSystem.Models.Misc;
+﻿using ContestSystem.Models.Dictionaries;
 using ContestSystemDbStructure.Enums;
 using ContestSystemDbStructure.Models;
 using System.Collections.Generic;
