@@ -1,4 +1,5 @@
-﻿using ContestSystemDbStructure.Enums;
+﻿using ContestSystem.Models.Dictionaries;
+using ContestSystemDbStructure.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace ContestSystem.Extensions
@@ -32,6 +33,13 @@ namespace ContestSystem.Extensions
                 $"Пользователем с идентификатором {userId} создана сущность \"{entityName}\" с идентификатором {createdEntityId}, которая автоматически одобрена по причине доверенного статуса автора");
         }
 
+        public static void LogCreationUndefinedStatus(this ILogger logger, string entityName,
+            long? createdEntityId, long userId)
+        {
+            logger.LogWarning(
+                $"При создании сущности \"{entityName}\" пользователем с идентификатором {userId} был получен статус \"Undefined\" и идентификатор {createdEntityId}");
+        }
+
         public static void LogEditingWithNonEqualFormAndRequestId(this ILogger logger, string entityName,
             long? formEntityId, long requestEntityId, long userId)
         {
@@ -59,6 +67,13 @@ namespace ContestSystem.Extensions
                 $"Успешно изменена сущность \"{entityName}\" с идентификатором {entityId} пользователем с идентификатором {userId}");
         }
 
+        public static void LogEditingUndefinedStatus(this ILogger logger, string entityName,
+            long entityId, long userId)
+        {
+            logger.LogWarning(
+                $"При редактировании сущности \"{entityName}\" с идентификатором {entityId} пользователем с идентификатором {userId} был получен статус \"Undefined\"");
+        }
+
         public static void LogDeletingOfNonExistentEnitiy(this ILogger logger, string entityName, long entityId,
             long userId)
         {
@@ -83,6 +98,13 @@ namespace ContestSystem.Extensions
         {
             logger.LogInformation(
                 $"Архивирована сущность \"{entityName}\" с идентификатором {entityId} пользователем с идентификатором {userId}");
+        }
+
+        public static void LogDeletingUndefinedStatus(this ILogger logger, string entityName,
+            long entityId, long userId)
+        {
+            logger.LogWarning(
+                $"При удалении сущности \"{entityName}\" с идентификатором {entityId} пользователем с идентификатором {userId} был получен статус \"Undefined\"");
         }
 
         public static void LogModeratingWithNonEqualFormAndRequestId(this ILogger logger, string entityName,
@@ -138,6 +160,13 @@ namespace ContestSystem.Extensions
             }
         }
 
+        public static void LogModeratingUndefinedStatus(this ILogger logger, string entityName,
+            long entityId, long userId)
+        {
+            logger.LogWarning(
+                $"При модерации сущности \"{entityName}\" с идентификатором {entityId} модератором с идентификатором {userId} был получен статус \"Undefined\"");
+        }
+
         public static void LogParallelSaveError(this ILogger logger, string entityName, long entityId, bool deletion = false)
         {
             if (deletion)
@@ -149,6 +178,88 @@ namespace ContestSystem.Extensions
             {
                 logger.LogWarning(
                    $"При сохранении сущности \"{entityName}\" с идентификатором {entityId} произошла ошибка, связанная с нарушением параллелизма");
+            }
+        }
+
+        public static void LogCreationStatus(this ILogger logger, CreationStatus status, string entityName, long? entityId, long userId)
+        {
+            switch (status)
+            {
+                case CreationStatus.Success:
+                    logger.LogCreationSuccessful(entityName, entityId.GetValueOrDefault(-1), userId);
+                    break;
+                case CreationStatus.SuccessWithAutoAccept:
+                    logger.LogCreationSuccessfulWithAutoAccept(entityName, entityId.GetValueOrDefault(-1), userId);
+                    break;
+                case CreationStatus.LimitExceeded:
+                    logger.LogCreationFailedBecauseOfLimits(entityName, userId);
+                    break;
+                default:
+                    logger.LogCreationUndefinedStatus(entityName, entityId, userId);
+                    break;
+            }
+        }
+
+        public static void LogEditionStatus(this ILogger logger, EditionStatus status, string entityName, long entityId, long userId)
+        {
+            switch (status)
+            {
+                case EditionStatus.Success:
+                    logger.LogEditingSuccessful(entityName, entityId, userId);
+                    break;
+                case EditionStatus.NotExistentEntity:
+                    logger.LogEditingOfNonExistentEntity(entityName, entityId, userId);
+                    break;
+                case EditionStatus.ParallelSaveError:
+                    logger.LogParallelSaveError(entityName, entityId);
+                    break;
+                default:
+                    logger.LogEditingUndefinedStatus(entityName, entityId, userId);
+                    break;
+            }
+        }
+
+        public static void LogDeletionStatus(this ILogger logger, DeletionStatus status, string entityName, long entityId, long userId)
+        {
+            switch (status)
+            {
+                case DeletionStatus.Success:
+                    logger.LogDeletingSuccessful(entityName, entityId, userId);
+                    break;
+                case DeletionStatus.SuccessWithArchiving:
+                    logger.LogDeletingByArchiving(entityName, entityId, userId);
+                    break;
+                case DeletionStatus.NotExistentEntity:
+                    logger.LogDeletingOfNonExistentEnitiy(entityName, entityId, userId);
+                    break;
+                case DeletionStatus.ParallelSaveError:
+                    logger.LogParallelSaveError(entityName, entityId, true);
+                    break;
+                default:
+                    logger.LogDeletingUndefinedStatus(entityName, entityId, userId);
+                    break;
+            }
+        }
+
+        public static void LogModerationStatus(this ILogger logger, ModerationStatus status, string entityName, long entityId, long userId)
+        {
+            switch (status)
+            {
+                case ModerationStatus.Approved:
+                    logger.LogModeratingSuccessful(entityName, entityId, userId, ApproveType.Accepted);
+                    break;
+                case ModerationStatus.Rejected:
+                    logger.LogModeratingSuccessful(entityName, entityId, userId, ApproveType.Rejected);
+                    break;
+                case ModerationStatus.NotExistentEntity:
+                    logger.LogModeratingOfNonExistentEntity(entityName, entityId, userId);
+                    break;
+                case ModerationStatus.ParallelSaveError:
+                    logger.LogParallelSaveError(entityName, entityId);
+                    break;
+                default:
+                    logger.LogModeratingUndefinedStatus(entityName, entityId, userId);
+                    break;
             }
         }
 
