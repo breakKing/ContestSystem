@@ -74,33 +74,5 @@ namespace ContestSystem.Models.Misc
 
         // "Код" ошибки из-за сохранения параллельно редактируемых сущностей
         public static readonly string ErrorParallelDbSave = "ERR_PARALLEL_DB_SAVE";
-
-        public static object SuccessfulResponse<TIdentity>(TIdentity id)
-        {
-            return new
-            {
-                status = true,
-                data = id,
-                errors = new List<string>()
-            };
-        }
-
-        public static object FailResponse(params string[] errorsList)
-        {
-            return new
-            {
-                status = false,
-                errors = new List<string>(errorsList)
-            };
-        }
-
-        public static object FailResponse(ModelStateDictionary modelState, string errorCode)
-        {
-            return FailResponse(modelState.Values
-                                            .SelectMany(x => x.Errors)
-                                            .Select(x => x.ErrorMessage)
-                                            .Prepend(errorCode)
-                                            .ToArray());
-        }
     }
 }

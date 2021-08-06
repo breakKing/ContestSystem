@@ -25,7 +25,7 @@ namespace ContestSystem.Services
             _storage = storage;
         }
 
-        public async Task<object> CreateContestAsync(MainDbContext dbContext, ContestForm form, bool checkForLimit = false)
+        public async Task<ResponseObject<long>> CreateContestAsync(MainDbContext dbContext, ContestForm form, bool checkForLimit = false)
         {
             Contest contest = new Contest
             {
@@ -43,7 +43,7 @@ namespace ContestSystem.Services
                 if (await dbContext.Contests.CountAsync(c => c.CreatorId == form.CreatorUserId && c.ApprovalStatus == ApproveType.NotModeratedYet) >= Constants.ContestsLimitForLimitedUsers)
                 {
                     _logger.LogCreationFailedBecauseOfLimits(Constants.ContestEntityName, form.CreatorUserId);
-                    return Constants.FailResponse(Constants.ErrorContestCreationLimitExceeded);
+                    return ResponseObject<long>.Fail(Constants.ErrorContestCreationLimitExceeded);
                 }
 
                 contest.ApprovalStatus = ApproveType.NotModeratedYet;
@@ -99,41 +99,41 @@ namespace ContestSystem.Services
                 _logger.LogCreationSuccessful(Constants.ContestEntityName, contest.Id, form.CreatorUserId);
             }
 
-            return Constants.SuccessfulResponse(contest.Id);
+            return ResponseObject<long>.Success(contest.Id);
         }
 
-        public async Task<object> CreateProblemAsync(MainDbContext dbContext, ProblemForm form, bool checkForLimit = false)
+        public async Task<ResponseObject<long>> CreateProblemAsync(MainDbContext dbContext, ProblemForm form, bool checkForLimit = false)
         {
-            return false;
+            throw new NotImplementedException();
         }
 
-        public async Task<object> CreateCheckerAsync(MainDbContext dbContext, CheckerForm form, bool checkForLimit = false)
+        public async Task<ResponseObject<long>> CreateCheckerAsync(MainDbContext dbContext, CheckerForm form, bool checkForLimit = false)
         {
-            return false;
+            throw new NotImplementedException();
         }
 
-        public async Task<object> CreateRulesSetAsync(MainDbContext dbContext, RulesSetForm form)
+        public async Task<ResponseObject<long>> CreateRulesSetAsync(MainDbContext dbContext, RulesSetForm form)
         {
-            return false;
+            throw new NotImplementedException();
         }
 
-        /*public async Task<object> CreateCourseAsync(MainDbContext dbContext, CourseForm form, bool checkForLimit = false)
+        /*public async Task<ResponseObject<long>> CreateCourseAsync(MainDbContext dbContext, CourseForm form, bool checkForLimit = false)
         {
-            return false;
+            throw new NotImplementedException();
         }*/
 
-        public async Task<object> CreatePostAsync(MainDbContext dbContext, PostForm form, bool checkForLimit = false)
+        public async Task<ResponseObject<long>> CreatePostAsync(MainDbContext dbContext, PostForm form, bool checkForLimit = false)
         {
-            return false;
+            throw new NotImplementedException();
         }
 
-        public async Task<object> EditContestAsync(MainDbContext dbContext, ContestForm form, long userId, Contest contest = null)
+        public async Task<ResponseObject<long>> EditContestAsync(MainDbContext dbContext, ContestForm form, long userId, Contest contest = null)
         {
             contest ??= await dbContext.Contests.FirstOrDefaultAsync(c => c.Id == form.Id.GetValueOrDefault(-1));
             if (contest == null)
             {
                 _logger.LogEditingOfNonExistentEntity(Constants.ContestEntityName, form.Id.GetValueOrDefault(-1), userId);
-                return Constants.FailResponse(Constants.ErrorContestDoesntExist);
+                return ResponseObject<long>.Fail(Constants.ErrorContestDoesntExist);
             }
 
             if (form.Image != null)
@@ -278,40 +278,45 @@ namespace ContestSystem.Services
             if (!saveSuccess)
             {
                 _logger.LogParallelSaveError(Constants.ContestEntityName, form.Id.Value);
-                return Constants.FailResponse(Constants.ErrorParallelDbSave);
+                return ResponseObject<long>.Fail(Constants.ErrorParallelDbSave);
             }
 
             _logger.LogEditingSuccessful(Constants.ContestEntityName, form.Id.Value, userId);
-            return Constants.SuccessfulResponse(form.Id.Value);
+            return ResponseObject<long>.Success(form.Id.Value);
         }
 
-        public async Task<object> EditProblemAsync(MainDbContext dbContext, ProblemForm form)
+        public async Task<ResponseObject<long>> EditProblemAsync(MainDbContext dbContext, ProblemForm form)
         {
-            return false;
+            throw new NotImplementedException();
         }
 
-        public async Task<object> EditCheckerAsync(MainDbContext dbContext, CheckerForm form)
+        public async Task<ResponseObject<long>> EditCheckerAsync(MainDbContext dbContext, CheckerForm form)
         {
-            return false;
+            throw new NotImplementedException();
         }
 
-        public async Task<object> EditRulesSetAsync(MainDbContext dbContext, RulesSetForm form)
+        public async Task<ResponseObject<long>> EditRulesSetAsync(MainDbContext dbContext, RulesSetForm form)
         {
-            return false;
+            throw new NotImplementedException();
         }
 
-        /*public async Task<object> EditCourseAsync(MainDbContext dbContext, CourseForm form)
+        /*public async Task<ResponseObject<long>> EditCourseAsync(MainDbContext dbContext, CourseForm form)
         {
-            return false;
+            throw new NotImplementedException();
         }*/
 
-        public async Task<object> EditPostAsync(MainDbContext dbContext, PostForm form)
+        public async Task<ResponseObject<long>> EditPostAsync(MainDbContext dbContext, PostForm form)
         {
-            return false;
+            throw new NotImplementedException();
         }
 
-        public async Task<object> DeleteContestAsync(MainDbContext dbContext, Contest contest, long userId)
+        public async Task<ResponseObject<long>> DeleteContestAsync(MainDbContext dbContext, Contest contest, long userId)
         {
+            if (contest == null)
+            {
+                _logger.LogDeletingOfNonExistentEnitiy(Constants.ContestEntityName, -1, userId);
+                return ResponseObject<long>.Fail(Constants.ErrorContestDoesntExist);
+            }
             long id = contest.Id;
             _storage.DeleteFileAsync(contest.ImagePath);
             dbContext.Contests.Remove(contest);
@@ -319,35 +324,35 @@ namespace ContestSystem.Services
             if (!saveSuccess)
             {
                 _logger.LogParallelSaveError(Constants.ContestEntityName, id, true);
-                return Constants.FailResponse(Constants.ErrorParallelDbSave);
+                return ResponseObject<long>.Fail(Constants.ErrorParallelDbSave);
             }
             _logger.LogDeletingSuccessful(Constants.ContestEntityName, id, userId);
-            return Constants.SuccessfulResponse(id);
+            return ResponseObject<long>.Success(id);
         }
 
-        public async Task<object> DeleteProblemAsync(MainDbContext dbContext, ProblemForm form)
+        public async Task<ResponseObject<long>> DeleteProblemAsync(MainDbContext dbContext, ProblemForm form)
         {
-            return false;
+            throw new NotImplementedException();
         }
 
-        public async Task<object> DeleteCheckerAsync(MainDbContext dbContext, CheckerForm form)
+        public async Task<ResponseObject<long>> DeleteCheckerAsync(MainDbContext dbContext, CheckerForm form)
         {
-            return false;
+            throw new NotImplementedException();
         }
 
-        public async Task<object> DeleteRulesSetAsync(MainDbContext dbContext, RulesSetForm form)
+        public async Task<ResponseObject<long>> DeleteRulesSetAsync(MainDbContext dbContext, RulesSetForm form)
         {
-            return false;
+            throw new NotImplementedException();
         }
 
-        /*public async Task<object> DeleteCourseAsync(MainDbContext dbContext, CourseForm form)
+        /*public async Task<ResponseObject<long>> DeleteCourseAsync(MainDbContext dbContext, CourseForm form)
         {
-            return false;
+            throw new NotImplementedException();
         }*/
 
-        public async Task<object> DeletePostAsync(MainDbContext dbContext, PostForm form)
+        public async Task<ResponseObject<long>> DeletePostAsync(MainDbContext dbContext, PostForm form)
         {
-            return false;
+            throw new NotImplementedException();
         }
 
         private async Task<bool> UpdateLinkedEntitiesAsync<TEntityFromForm, TEntity, TLinkedIdentity>(MainDbContext dbContext, DbSet<TEntity> dbSet,
@@ -405,7 +410,7 @@ namespace ContestSystem.Services
             }
             catch (DbUpdateConcurrencyException)
             {
-                return false;
+                throw new NotImplementedException();
             }
             return true;
         }
