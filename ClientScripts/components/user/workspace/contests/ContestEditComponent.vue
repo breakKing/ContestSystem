@@ -123,7 +123,7 @@ export default {
       this.startedRulesSet = contest?.rules || null
       this.image = contest?.image || null
       this.tasks = contest?.problems || []
-      this.startedProblems = contest?.problems || []
+      this.startedProblems = _.cloneDeep(contest?.problems || [])
     },
     updateEvent(data) {
       if (data.type === 'add') {
@@ -225,8 +225,16 @@ export default {
       return _.unionBy(this.availableRuleSets || [], [this.startedRulesSet], (rs) => rs.id)
     },
     availableTasksForContest() {
-      let startedTasks = _.map(this.startedProblems || [], (sp, i) => sp.problem)
-      return _.unionBy(this.availableTasks || [], startedTasks || [], (t) => t.id)
+      if (this.startedProblems && this.startedProblems.length > 0) {
+        let startedTasks = _.map(this.startedProblems || [], (sp, i) => sp.problem) || []
+        if (this.availableTasks && this.availableTasks.length > 0) {
+          return _.unionBy(this.availableTasks || [], startedTasks || [], (t) => t.id)
+        }
+        else {
+          return startedTasks || []
+        }
+      }
+      return this.availableTasks || []
     },
     unavailableRulesSetsInFutureExists() {
       return _.reduce(this.availableRuleSetsForContest || [], (count, rs) => count + +this.shouldRulesSetBeRemarked(rs), 0) > 0
