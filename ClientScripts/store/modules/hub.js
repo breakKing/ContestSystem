@@ -30,7 +30,8 @@ export default {
                 if (token) {
                     let connection = new HubConnectionBuilder().withUrl('/api/real_time_hub', {
                         accessTokenFactory: () => token
-                    }).build()
+                    }).withAutomaticReconnect()
+                      .build()
                     connection.on("UpdateOnSolutionActualResult", async (actualResult) => {
                         await dispatch("addSolutionActualResult", actualResult)
                     })
