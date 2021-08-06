@@ -36,5 +36,10 @@ namespace ContestSystem.Extensions
         {
             services.AddSingleton<NotifierService>();
         }
+
+        public static void AddWorkspace(this IServiceCollection services)
+        {
+            services.AddSingleton<WorkspaceManagerService>();
+        }
     }
 }

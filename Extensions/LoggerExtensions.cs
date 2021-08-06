@@ -138,10 +138,18 @@ namespace ContestSystem.Extensions
             }
         }
 
-        public static void LogParallelSaveError(this ILogger logger, string entityName, long entityId)
+        public static void LogParallelSaveError(this ILogger logger, string entityName, long entityId, bool deletion = false)
         {
-            logger.LogWarning(
-                $"При сохранении сущности \"{entityName}\" с идентификатором {entityId} произошла ошибка, связанная с параллельным редактированием");
+            if (deletion)
+            {
+                logger.LogWarning(
+                   $"При удалении сущности \"{entityName}\" с идентификатором {entityId} произошла ошибка, связанная с нарушением параллелизма");
+            }
+            else
+            {
+                logger.LogWarning(
+                   $"При сохранении сущности \"{entityName}\" с идентификатором {entityId} произошла ошибка, связанная с нарушением параллелизма");
+            }
         }
 
         public static void LogFileWritingFailed(this ILogger logger, string filePath)

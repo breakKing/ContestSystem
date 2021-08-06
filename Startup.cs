@@ -101,6 +101,8 @@ namespace ContestSystem
 
             services.AddFileStorage();
 
+            services.AddWorkspace();
+
             services.AddSignalR();
 
             services.AddUserIdProvider();
