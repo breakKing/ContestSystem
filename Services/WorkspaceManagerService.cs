@@ -224,7 +224,37 @@ namespace ContestSystem.Services
 
         public async Task<CreationStatusData> CreateRulesSetAsync(MainDbContext dbContext, RulesSetForm form)
         {
-            throw new NotImplementedException();
+            var statusData = new CreationStatusData
+            {
+                Status = CreationStatus.Undefined,
+                Id = null
+            };
+
+            var rulesSet = new RulesSet
+            {
+                Name = form.Name,
+                Description = form.Description,
+                ShowFullTestsResults = form.ShowFullTestsResults,
+                PointsForBestSolution = form.PointsForBestSolution,
+                CountMode = form.CountMode,
+                MaxTriesForOneProblem = form.MaxTriesForOneProblem,
+                PenaltyForOneMinute = form.PenaltyForOneMinute,
+                MonitorFreezeTimeBeforeFinishInMinutes = form.MonitorFreezeTimeBeforeFinishInMinutes,
+                PenaltyForCompilationError = form.PenaltyForCompilationError,
+                PenaltyForOneTry = form.PenaltyForOneTry,
+                PublicMonitor = form.PublicMonitor,
+                AuthorId = form.AuthorId,
+                IsPublic = form.IsPublic,
+                IsArchieved = false
+            };
+
+            await dbContext.RulesSets.AddAsync(rulesSet);
+            await dbContext.SaveChangesAsync();
+
+            statusData.Status = CreationStatus.Success;
+            statusData.Id = rulesSet.Id;
+
+            return statusData;
         }
 
         /*public async Task<CreationStatusData> CreateCourseAsync(MainDbContext dbContext, CourseForm form, bool checkForLimit = false)
@@ -510,7 +540,39 @@ namespace ContestSystem.Services
 
         public async Task<EditionStatus> EditRulesSetAsync(MainDbContext dbContext, RulesSetForm form, RulesSet rulesSet = null)
         {
-            throw new NotImplementedException();
+            var status = EditionStatus.Undefined;
+            rulesSet ??= await dbContext.RulesSets.FirstOrDefaultAsync(rs => rs.Id == form.Id.GetValueOrDefault(-1) && !rs.IsArchieved);
+            if (rulesSet == null)
+            {
+                status = EditionStatus.NotExistentEntity;
+            }
+            else
+            {
+                rulesSet.Name = form.Name;
+                rulesSet.Description = form.Description;
+                rulesSet.ShowFullTestsResults = form.ShowFullTestsResults;
+                rulesSet.PointsForBestSolution = form.PointsForBestSolution;
+                rulesSet.CountMode = form.CountMode;
+                rulesSet.MaxTriesForOneProblem = form.MaxTriesForOneProblem;
+                rulesSet.PenaltyForOneMinute = form.PenaltyForOneMinute;
+                rulesSet.MonitorFreezeTimeBeforeFinishInMinutes = form.MonitorFreezeTimeBeforeFinishInMinutes;
+                rulesSet.PenaltyForCompilationError = form.PenaltyForCompilationError;
+                rulesSet.PenaltyForOneTry = form.PenaltyForOneTry;
+                rulesSet.PublicMonitor = form.PublicMonitor;
+                rulesSet.IsPublic = form.IsPublic;
+                dbContext.RulesSets.Update(rulesSet);
+
+                bool saveSuccess = await SecureSaveAsync(dbContext);
+                if (!saveSuccess)
+                {
+                    status = EditionStatus.ParallelSaveError;
+                }
+                else
+                {
+                    status = EditionStatus.Success;
+                }
+            }
+            return status;
         }
 
         /*public async Task<EditionStatus> EditCourseAsync(MainDbContext dbContext, CourseForm form, Course course = null)
@@ -602,7 +664,6 @@ namespace ContestSystem.Services
                     status = DeletionStatus.Success;
                 }
             }
-            
             return status;
         }
 
@@ -680,7 +741,38 @@ namespace ContestSystem.Services
 
         public async Task<DeletionStatus> DeleteRulesSetAsync(MainDbContext dbContext, RulesSet rulesSet)
         {
-            throw new NotImplementedException();
+            var status = DeletionStatus.Undefined;
+            if (rulesSet == null)
+            {
+                status = DeletionStatus.NotExistentEntity;
+            }
+            else
+            {
+                if (await dbContext.Contests.AnyAsync(c => c.RulesSetId == rulesSet.Id))
+                {
+                    do
+                    {
+                        rulesSet.IsArchieved = true;
+                        dbContext.RulesSets.Update(rulesSet);
+                    }
+                    while (!await SecureSaveAsync(dbContext) || (rulesSet = await dbContext.RulesSets.FirstOrDefaultAsync(rs => rs.Id == rulesSet.Id && !rs.IsArchieved)) != null);
+                    status = DeletionStatus.SuccessWithArchiving;
+                }
+                else
+                {
+                    dbContext.RulesSets.Remove(rulesSet);
+                    bool saveSuccess = await SecureSaveAsync(dbContext);
+                    if (!saveSuccess)
+                    {
+                        status = DeletionStatus.ParallelSaveError;
+                    }
+                    else
+                    {
+                        status = DeletionStatus.Success;
+                    }
+                }
+            }
+            return status;
         }
 
         /*public async Task<DeletionStatus> DeleteCourseAsync(MainDbContext dbContext, Course course, long userId)

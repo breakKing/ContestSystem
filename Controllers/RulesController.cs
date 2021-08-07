@@ -11,6 +11,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Identity;
+using ContestSystem.Services;
+using ContestSystem.Models.Dictionaries;
+using ContestSystem.Models.Misc;
 
 namespace ContestSystem.Controllers
 {
@@ -20,11 +24,21 @@ namespace ContestSystem.Controllers
     {
         private readonly MainDbContext _dbContext;
         private readonly ILogger<RulesController> _logger;
+        private readonly UserManager<User> _userManager;
+        private readonly WorkspaceManagerService _workspace;
 
-        public RulesController(MainDbContext dbContext, ILogger<RulesController> logger)
+        private readonly string _entityName = Constants.RulesSetEntityName;
+        private readonly Dictionary<string, string> _errorCodes;
+
+        public RulesController(MainDbContext dbContext, ILogger<RulesController> logger, UserManager<User> userManager,
+            WorkspaceManagerService workspace)
         {
             _dbContext = dbContext;
             _logger = logger;
+            _userManager = userManager;
+            _workspace = workspace;
+
+            _errorCodes = Constants.ErrorCodes[_entityName];
         }
 
         [HttpGet("get-user-rules/{id}")]
@@ -57,215 +71,110 @@ namespace ContestSystem.Controllers
                 return Json(publishedRules);
             }
 
-            return NotFound("Такого набора правил не существует");
+            return NotFound(_errorCodes[Constants.EntityDoesntExistErrorName]);
         }
 
         [HttpPost("add-rules")]
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> AddRules([FromBody] RulesSetForm rulesSetForm)
         {
+            var response = new ResponseObject<long>();
+
             if (ModelState.IsValid)
             {
-                var currentUser = await HttpContext.GetCurrentUser();
+                var currentUser = await HttpContext.GetCurrentUser(_userManager);
                 if (currentUser.Id != rulesSetForm.AuthorId)
                 {
-                    _logger.LogCreationByNonEqualCurrentUserAndCreator("RulesSet", currentUser.Id,
+                    _logger.LogCreationByNonEqualCurrentUserAndCreator(_entityName, currentUser.Id,
                         rulesSetForm.AuthorId);
-                    return Json(new
-                    {
-                        status = false,
-                        errors = new List<string> {"Id автора в форме отличается от Id текущего пользователя"}
-                    });
+                    response = ResponseObject<long>.Fail(_errorCodes[Constants.UserIdMismatchErrorName]);
                 }
-
-                var rules = new RulesSet
+                else
                 {
-                    Name = rulesSetForm.Name,
-                    Description = rulesSetForm.Description,
-                    ShowFullTestsResults = rulesSetForm.ShowFullTestsResults,
-                    PointsForBestSolution = rulesSetForm.PointsForBestSolution,
-                    CountMode = rulesSetForm.CountMode,
-                    MaxTriesForOneProblem = rulesSetForm.MaxTriesForOneProblem,
-                    PenaltyForOneMinute = rulesSetForm.PenaltyForOneMinute,
-                    MonitorFreezeTimeBeforeFinishInMinutes = rulesSetForm.MonitorFreezeTimeBeforeFinishInMinutes,
-                    PenaltyForCompilationError = rulesSetForm.PenaltyForCompilationError,
-                    PenaltyForOneTry = rulesSetForm.PenaltyForOneTry,
-                    PublicMonitor = rulesSetForm.PublicMonitor,
-                    AuthorId = rulesSetForm.AuthorId,
-                    IsPublic = rulesSetForm.IsPublic,
-                    IsArchieved = false
-                };
-                await _dbContext.RulesSets.AddAsync(rules);
-                await _dbContext.SaveChangesAsync();
-                _logger.LogCreationSuccessful("RulesSet", rules.Id, currentUser.Id);
-                return Json(new
-                {
-                    status = true,
-                    data = rules.Id,
-                    errors = new List<string>()
-                });
+                    CreationStatusData statusData = await _workspace.CreateRulesSetAsync(_dbContext, rulesSetForm);
+                    _logger.LogCreationStatus(statusData.Status, _entityName, statusData.Id, currentUser.Id);
+                    response = ResponseObject<long>.FormResponseObjectForCreation(statusData.Status, _entityName, statusData.Id);
+                }
+            }
+            else
+            {
+                response = ResponseObject<long>.Fail(ModelState, _entityName);
             }
 
-            return Json(new
-            {
-                status = false,
-                errors = ModelState.Values
-                    .SelectMany(x => x.Errors)
-                    .Select(x => x.ErrorMessage).ToList()
-            });
+            return Json(response);
         }
 
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         [HttpPut("edit-rules/{id}")]
         public async Task<IActionResult> EditRules([FromBody] RulesSetForm rulesSetForm, long id)
         {
-            var currentUser = await HttpContext.GetCurrentUser();
-            if (rulesSetForm.Id == null || id <= 0 || id != rulesSetForm.Id)
+            var response = new ResponseObject<long>();
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
+            if (id != rulesSetForm.Id)
             {
-                _logger.LogEditingWithNonEqualFormAndRequestId("RulesSet", rulesSetForm.Id, id, currentUser.Id);
-                return Json(new
-                {
-                    success = false,
-                    errors = new List<string> {"Id в запросе не совпадает с Id в форме"}
-                });
+                _logger.LogEditingWithNonEqualFormAndRequestId(_entityName, rulesSetForm.Id, id, currentUser.Id);
+                response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityIdMismatchErrorName]);
             }
-
-            if (ModelState.IsValid)
+            else
             {
-                var rules = await _dbContext.RulesSets.FirstOrDefaultAsync(rs => rs.Id == id && !rs.IsArchieved);
-                if (rules == null)
+                if (ModelState.IsValid)
                 {
-                    _logger.LogEditingOfNonExistentEntity("RulesSet", id, currentUser.Id);
-                    return Json(new
+                    var rules = await _dbContext.RulesSets.FirstOrDefaultAsync(rs => rs.Id == id && !rs.IsArchieved);
+                    if (rules == null)
                     {
-                        status = false,
-                        errors = new List<string> {"Попытка изменить несуществующий набор правил"}
-                    });
+                        _logger.LogEditingOfNonExistentEntity(_entityName, id, currentUser.Id);
+                        response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityDoesntExistErrorName]);
+                    }
+                    else
+                    {
+                        if (currentUser.Id != rules.AuthorId)
+                        {
+                            _logger.LogEditingByNotAppropriateUser(_entityName, id, currentUser.Id);
+                            response = ResponseObject<long>.Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.UserInsufficientRightsErrorName]);
+                        }
+                        else
+                        {
+                            EditionStatus status = await _workspace.EditRulesSetAsync(_dbContext, rulesSetForm, rules);
+                            _logger.LogEditionStatus(status, _entityName, id, currentUser.Id);
+                            response = ResponseObject<long>.FormResponseObjectForEdition(status, _entityName, id);
+                        }
+                    }
                 }
                 else
                 {
-                    if (currentUser.Id != rules.AuthorId)
-                    {
-                        _logger.LogEditingByNotAppropriateUser("RulesSet", id, currentUser.Id);
-                        return Json(new
-                        {
-                            status = false,
-                            errors = new List<string> {"Попытка изменить не свой набор правил"}
-                        });
-                    }
-
-                    rules.Name = rulesSetForm.Name;
-                    rules.Description = rulesSetForm.Description;
-                    rules.ShowFullTestsResults = rulesSetForm.ShowFullTestsResults;
-                    rules.PointsForBestSolution = rulesSetForm.PointsForBestSolution;
-                    rules.CountMode = rulesSetForm.CountMode;
-                    rules.MaxTriesForOneProblem = rulesSetForm.MaxTriesForOneProblem;
-                    rules.PenaltyForOneMinute = rulesSetForm.PenaltyForOneMinute;
-                    rules.MonitorFreezeTimeBeforeFinishInMinutes = rulesSetForm.MonitorFreezeTimeBeforeFinishInMinutes;
-                    rules.PenaltyForCompilationError = rulesSetForm.PenaltyForCompilationError;
-                    rules.PenaltyForOneTry = rulesSetForm.PenaltyForOneTry;
-                    rules.PublicMonitor = rulesSetForm.PublicMonitor;
-                    rules.IsPublic = rulesSetForm.IsPublic;
-                    _dbContext.RulesSets.Update(rules);
-                    try
-                    {
-                        await _dbContext.SaveChangesAsync();
-                    }
-                    catch (DbUpdateConcurrencyException)
-                    {
-                        _logger.LogParallelSaveError("RulesSet", id);
-                        return Json(new
-                        {
-                            status = false,
-                            errors = new List<string> {"Ошибка параллельного сохранения"}
-                        });
-                    }
-
-                    _logger.LogEditingSuccessful("RulesSet", id, currentUser.Id);
-                    return Json(new
-                    {
-                        status = true,
-                        errors = new List<string>()
-                    });
+                    response = ResponseObject<long>.Fail(ModelState, _entityName);
                 }
             }
-
-            return Json(new
-            {
-                status = false,
-                errors = ModelState.Values
-                    .SelectMany(x => x.Errors)
-                    .Select(x => x.ErrorMessage).ToList()
-            });
+            return Json(response);
         }
 
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         [HttpDelete("delete-rules/{id}")]
         public async Task<IActionResult> DeleteRules(long id)
         {
-            var currentUser = await HttpContext.GetCurrentUser();
+            var response = new ResponseObject<long>();
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
             var loadedRules = await _dbContext.RulesSets.FirstOrDefaultAsync(rs => rs.Id == id && !rs.IsArchieved);
             if (loadedRules == null)
             {
-                _logger.LogDeletingOfNonExistentEnitiy("RulesSet", id, currentUser.Id);
-                return Json(new
-                {
-                    status = false,
-                    errors = new List<string> {"Попытка удалить несуществующий набор правил"}
-                });
-            }
-
-            var moderatorRole = await _dbContext.Roles.FirstOrDefaultAsync(r => r.Name == RolesContainer.Moderator);
-            if (currentUser.Id != loadedRules.AuthorId && !currentUser.Roles.Contains(moderatorRole))
-            {
-                _logger.LogDeletingByNotAppropriateUser("RulesSet", id, currentUser.Id);
-                return Json(new
-                {
-                    status = false,
-                    errors = new List<string> {"Попытка удалить не свой набор правил"}
-                });
-            }
-
-            if (await _dbContext.Contests.AnyAsync(c => c.RulesSetId == id))
-            {
-                loadedRules.IsArchieved = true;
-                _dbContext.RulesSets.Update(loadedRules);
-                bool saved = false;
-                while (!saved)
-                {
-                    try
-                    {
-                        await _dbContext.SaveChangesAsync();
-                        saved = true;
-                    }
-                    catch (DbUpdateConcurrencyException)
-                    {
-                        loadedRules =
-                            await _dbContext.RulesSets.FirstOrDefaultAsync(rs => rs.Id == id && !rs.IsArchieved);
-                        if (loadedRules == null)
-                        {
-                            break;
-                        }
-
-                        loadedRules.IsArchieved = true;
-                        _dbContext.RulesSets.Update(loadedRules);
-                    }
-
-                    _logger.LogDeletingByArchiving("RulesSet", id, currentUser.Id);
-                }
+                _logger.LogDeletingOfNonExistentEnitiy(_entityName, id, currentUser.Id);
+                response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityDoesntExistErrorName]);
             }
             else
             {
-                _dbContext.RulesSets.Remove(loadedRules);
-                await _dbContext.SaveChangesAsync();
-                _logger.LogDeletingSuccessful("RulesSet", id, currentUser.Id);
+                if (currentUser.Id != loadedRules.AuthorId && !await _userManager.IsInRoleAsync(currentUser, RolesContainer.Moderator))
+                {
+                    _logger.LogDeletingByNotAppropriateUser(_entityName, id, currentUser.Id);
+                    response = ResponseObject<long>.Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.UserInsufficientRightsErrorName]);
+                }
+                else
+                {
+                    DeletionStatus status = await _workspace.DeleteRulesSetAsync(_dbContext, loadedRules);
+                    _logger.LogDeletionStatus(status, _entityName, id, currentUser.Id);
+                    response = ResponseObject<long>.FormResponseObjectForDeletion(status, _entityName, id);
+                }
             }
-
-            return Json(new
-            {
-                status = true,
-                errors = new List<string>()
-            });
+            return Json(response);
         }
     }
 }
