@@ -13,6 +13,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using ContestSystem.Models.Dictionaries;
+using Microsoft.AspNetCore.Identity;
+using ContestSystem.Services;
+using ContestSystem.Models.Misc;
 
 namespace ContestSystem.Controllers
 {
@@ -22,11 +25,21 @@ namespace ContestSystem.Controllers
     {
         private readonly MainDbContext _dbContext;
         private readonly ILogger<ProblemsController> _logger;
+        private readonly UserManager<User> _userManager;
+        private readonly WorkspaceManagerService _workspace;
 
-        public ProblemsController(MainDbContext dbContext, ILogger<ProblemsController> logger)
+        private readonly string _entityName = Constants.ProblemEntityName;
+        private readonly Dictionary<string, string> _errorCodes;
+
+        public ProblemsController(MainDbContext dbContext, ILogger<ProblemsController> logger, UserManager<User> userManager,
+            WorkspaceManagerService workspace)
         {
             _dbContext = dbContext;
             _logger = logger;
+            _userManager = userManager;
+            _workspace = workspace;
+
+            _errorCodes = Constants.ErrorCodes[_entityName];
         }
 
         [HttpGet("get-user-problems/{id}/{culture}")]
@@ -70,14 +83,14 @@ namespace ContestSystem.Controllers
                 var localizer = problem.ProblemLocalizers.FirstOrDefault(pl => pl.Culture == culture);
                 if (localizer == null)
                 {
-                    return NotFound("Такой локализации под задачу не существует");
+                    return NotFound(_errorCodes[Constants.EntityLocalizerDoesntExistErrorName]);
                 }
 
                 var publishedProblem = PublishedProblem.GetFromModel(problem, localizer);
                 return Json(publishedProblem);
             }
 
-            return NotFound("Такой задачи не существует");
+            return NotFound(_errorCodes[Constants.EntityDoesntExistErrorName]);
         }
 
         [HttpGet("constructed/{id}")]
@@ -91,7 +104,7 @@ namespace ContestSystem.Controllers
                 return Json(constructedProblem);
             }
 
-            return NotFound("Такой задачи не существует");
+            return NotFound(_errorCodes[Constants.EntityDoesntExistErrorName]);
         }
 
         [HttpPost("add-problem")]
@@ -103,410 +116,118 @@ namespace ContestSystem.Controllers
                 ModelState.AddModelError("Tests", $"Sum of available points for all tests is not equal to {Constants.MaxPointsSumForAllTests}");
             }
 
+            var response = new ResponseObject<long>();
             if (ModelState.IsValid)
             {
-                var currentUser = await HttpContext.GetCurrentUser();
-                if (!await _dbContext.Checkers.AnyAsync(ch => ch.Id == problemForm.CheckerId && !ch.IsArchieved))
-                {
-                    _logger.LogWarning(
-                        $"Попытка от пользователя с идентификатором {currentUser.Id} создать сущность \"Problem\" с использованием несуществующей сущности \"Checker\" с идентификатором {problemForm.CheckerId}");
-                    return Json(new
-                    {
-                        status = false,
-                        errors = new List<string> {"Нужного чекера не существует"}
-                    });
-                }
-
-                var problem = new Problem
-                {
-                    CreatorId = problemForm.CreatorId,
-                    IsPublic = problemForm.IsPublic,
-                    MemoryLimitInBytes = problemForm.MemoryLimitInBytes,
-                    TimeLimitInMilliseconds = problemForm.TimeLimitInMilliseconds,
-                    CheckerId = problemForm.CheckerId,
-                    IsArchieved = false
-                };
+                var currentUser = await HttpContext.GetCurrentUser(_userManager);
                 if (problemForm.CreatorId != currentUser.Id)
                 {
-                    _logger.LogCreationByNonEqualCurrentUserAndCreator("Problem", currentUser.Id,
+                    _logger.LogCreationByNonEqualCurrentUserAndCreator(_entityName, currentUser.Id,
                         problemForm.CreatorId);
-                    return Json(new
-                    {
-                        status = false,
-                        errors = new List<string> {"Id автора в форме отличается от Id текущего пользователя"}
-                    });
+                    response = ResponseObject<long>.Fail(_errorCodes[Constants.UserIdMismatchErrorName]);
                 }
-
-                if (currentUser.IsLimitedInProblems)
+                else
                 {
-                    if (await _dbContext.Problems.CountAsync(p =>
-                        p.CreatorId == currentUser.Id && p.ApprovalStatus == ApproveType.NotModeratedYet) >= Constants.ProblemsLimitForLimitedUsers)
+                    if (!await _dbContext.Checkers.AnyAsync(ch => ch.Id == problemForm.CheckerId && !ch.IsArchieved))
                     {
-                        _logger.LogCreationFailedBecauseOfLimits("Problem", currentUser.Id);
-                        return Json(new
-                        {
-                            status = false,
-                            errors = new List<string>
-                                {"Превышено ограничение недоверенного пользователя по созданию задач"}
-                        });
+                        _logger.LogWarning(
+                            $"Попытка от пользователя с идентификатором {currentUser.Id} создать сущность \"{_entityName}\" " +
+                            $"с использованием несуществующей сущности \"{Constants.CheckerEntityName}\" с идентификатором {problemForm.CheckerId}");
+                        response = ResponseObject<long>.Fail(Constants.ErrorCodes[Constants.CheckerEntityName][Constants.EntityDoesntExistErrorName]);
                     }
-
-                    problem.ApprovalStatus = ApproveType.NotModeratedYet;
-                }
-                else
-                {
-                    problem.ApprovalStatus = ApproveType.Accepted;
-                }
-
-                await _dbContext.Problems.AddAsync(problem);
-                await _dbContext.SaveChangesAsync();
-                foreach (var localizer in problemForm.Localizers)
-                {
-                    var problemLocalizer = new ProblemLocalizer
+                    else
                     {
-                        Culture = localizer.Culture,
-                        Description = localizer.Description,
-                        Name = localizer.Name,
-                        InputBlock = localizer.InputBlock,
-                        OutputBlock = localizer.OutputBlock,
-                        ProblemId = problem.Id
-                    };
-                    await _dbContext.ProblemsLocalizers.AddAsync(problemLocalizer);
+                        CreationStatusData statusData = await _workspace.CreateProblemAsync(_dbContext, problemForm, currentUser.IsLimitedInProblems);
+                        _logger.LogCreationStatus(statusData.Status, _entityName, statusData.Id, currentUser.Id);
+                        response = ResponseObject<long>.FormResponseObjectForCreation(statusData.Status, _entityName, statusData.Id);
+                    }
                 }
-
-                foreach (var test in problemForm.Tests)
-                {
-                    var problemTest = new Test
-                    {
-                        Number = test.Number,
-                        Input = test.Input,
-                        Answer = test.Answer,
-                        AvailablePoints = test.AvailablePoints,
-                        ProblemId = problem.Id
-                    };
-                    await _dbContext.Tests.AddAsync(problemTest);
-                }
-
-                foreach (var example in problemForm.Examples)
-                {
-                    var problemExample = new Example
-                    {
-                        Number = example.Number,
-                        InputText = example.InputText,
-                        OutputText = example.OutputText,
-                        ProblemId = problem.Id
-                    };
-                    await _dbContext.Examples.AddAsync(problemExample);
-                }
-
-                await _dbContext.SaveChangesAsync();
-                if (problem.ApprovalStatus == ApproveType.Accepted)
-                {
-                    _logger.LogCreationSuccessfulWithAutoAccept("Problem", problem.Id, currentUser.Id);
-                }
-                else
-                {
-                    _logger.LogCreationSuccessful("Problem", problem.Id, currentUser.Id);
-                }
-
-                return Json(new
-                {
-                    status = true,
-                    data = problem.Id,
-                    errors = new List<string>()
-                });
+            }
+            else
+            {
+                response = ResponseObject<long>.Fail(ModelState, _entityName);
             }
 
-            return Json(new
-            {
-                status = false,
-                errors = ModelState.Values
-                    .SelectMany(x => x.Errors)
-                    .Select(x => x.ErrorMessage).ToList()
-            });
+            return Json(response);
         }
 
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         [HttpPut("edit-problem/{id}")]
         public async Task<IActionResult> EditProblem([FromBody] ProblemForm problemForm, long id)
         {
-            var currentUser = await HttpContext.GetCurrentUser();
-            if (problemForm.Id == null || id <= 0 || id != problemForm.Id)
+            var response = new ResponseObject<long>();
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
+            if (id != problemForm.Id.GetValueOrDefault(-1))
             {
-                _logger.LogEditingWithNonEqualFormAndRequestId("Problem", problemForm.Id, id, currentUser.Id);
-                return Json(new
-                {
-                    success = false,
-                    errors = new List<string> {"Id в запросе не совпадает с Id в форме"}
-                });
+                _logger.LogEditingWithNonEqualFormAndRequestId(_entityName, problemForm.Id, id, currentUser.Id);
+                response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityIdMismatchErrorName]);
             }
-
-            if (problemForm.Tests.Sum(t => t.AvailablePoints) != Constants.MaxPointsSumForAllTests)
+            else
             {
-                ModelState.AddModelError("Tests", $"Sum of available points for all tests is not equal to {Constants.MaxPointsSumForAllTests}");
-            }
-
-            if (ModelState.IsValid)
-            {
-                var problem = await _dbContext.Problems.FirstOrDefaultAsync(p => p.Id == id && !p.IsArchieved);
-                if (problem == null)
+                if (problemForm.Tests.Sum(t => t.AvailablePoints) != Constants.MaxPointsSumForAllTests)
                 {
-                    _logger.LogEditingOfNonExistentEntity("Problem", id, currentUser.Id);
-                    return Json(new
+                    ModelState.AddModelError("Tests", $"Sum of available points for all tests is not equal to {Constants.MaxPointsSumForAllTests}");
+                }
+
+                if (ModelState.IsValid)
+                {
+                    var problem = await _dbContext.Problems.FirstOrDefaultAsync(p => p.Id == id && !p.IsArchieved);
+                    if (problem == null)
                     {
-                        status = false,
-                        errors = new List<string> {"Попытка изменить несуществующую задачу"}
-                    });
+                        _logger.LogEditingOfNonExistentEntity(_entityName, id, currentUser.Id);
+                        response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityDoesntExistErrorName]);
+                    }
+                    else
+                    {
+                        if (currentUser.Id != problem.CreatorId)
+                        {
+                            _logger.LogEditingByNotAppropriateUser(_entityName, id, currentUser.Id);
+                            response = ResponseObject<long>.Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.UserInsufficientRightsErrorName]);
+                        }
+                        else
+                        {
+                            EditionStatus status = await _workspace.EditProblemAsync(_dbContext, problemForm, problem);
+                            _logger.LogEditionStatus(status, _entityName, id, currentUser.Id);
+                            response = ResponseObject<long>.FormResponseObjectForEdition(status, _entityName, id);
+                        }
+                    }
                 }
                 else
                 {
-                    if (currentUser.Id != problem.CreatorId)
-                    {
-                        _logger.LogEditingByNotAppropriateUser("Problem", id, currentUser.Id);
-                        return Json(new
-                        {
-                            status = false,
-                            errors = new List<string> {"Попытка изменить не свою задачу"}
-                        });
-                    }
-
-                    problem.MemoryLimitInBytes = problemForm.MemoryLimitInBytes;
-                    problem.TimeLimitInMilliseconds = problemForm.TimeLimitInMilliseconds;
-                    problem.IsPublic = problemForm.IsPublic;
-                    problem.CheckerId = problemForm.CheckerId;
-                    if (problem.ApprovalStatus == ApproveType.Rejected)
-                    {
-                        problem.ApprovalStatus = ApproveType.NotModeratedYet;
-                        problem.ApprovingModeratorId = null;
-                    }
-
-                    _dbContext.Problems.Update(problem);
-
-                    var localizers = await _dbContext.ProblemsLocalizers.Where(l => l.ProblemId == id).ToListAsync();
-                    var localizersExamined = new Dictionary<long, bool>();
-                    foreach (var l in localizers)
-                    {
-                        localizersExamined.Add(l.Id, false);
-                    }
-
-                    for (int i = 0; i < problemForm.Localizers.Count; i++)
-                    {
-                        var localizer = new ProblemLocalizer
-                        {
-                            Culture = problemForm.Localizers[i].Culture,
-                            Description = problemForm.Localizers[i].Description,
-                            InputBlock = problemForm.Localizers[i].InputBlock,
-                            OutputBlock = problemForm.Localizers[i].OutputBlock,
-                            Name = problemForm.Localizers[i].Name,
-                            ProblemId = problem.Id
-                        };
-                        var loadedLocalizer = localizers.FirstOrDefault(pl => pl.Culture == localizer.Culture);
-                        if (loadedLocalizer == null)
-                        {
-                            await _dbContext.ProblemsLocalizers.AddAsync(localizer);
-                        }
-                        else
-                        {
-                            localizersExamined[loadedLocalizer.Id] = true;
-                            loadedLocalizer.Description = localizer.Description;
-                            loadedLocalizer.Name = localizer.Name;
-                            loadedLocalizer.InputBlock = localizer.InputBlock;
-                            loadedLocalizer.OutputBlock = localizer.OutputBlock;
-                            _dbContext.ProblemsLocalizers.Update(loadedLocalizer);
-                        }
-                    }
-
-                    foreach (var item in localizersExamined)
-                    {
-                        if (!item.Value)
-                        {
-                            var loadedLocalizer = localizers.FirstOrDefault(l => l.Id == item.Key);
-                            _dbContext.ProblemsLocalizers.Remove(loadedLocalizer);
-                        }
-                    }
-
-                    var tests = await _dbContext.Tests.Where(t => t.ProblemId == id).ToListAsync();
-                    var testsExamined = new Dictionary<short, bool>();
-                    foreach (var t in tests)
-                    {
-                        testsExamined.Add(t.Number, false);
-                    }
-
-                    for (int i = 0; i < problemForm.Tests.Count; i++)
-                    {
-                        var test = new Test
-                        {
-                            Number = problemForm.Tests[i].Number,
-                            Input = problemForm.Tests[i].Input,
-                            Answer = problemForm.Tests[i].Answer,
-                            AvailablePoints = problemForm.Tests[i].AvailablePoints,
-                            ProblemId = problem.Id
-                        };
-                        var loadedTest = tests.FirstOrDefault(t => t.Number == test.Number);
-                        if (loadedTest == null)
-                        {
-                            await _dbContext.Tests.AddAsync(test);
-                        }
-                        else
-                        {
-                            testsExamined[loadedTest.Number] = true;
-                            loadedTest.Number = test.Number;
-                            loadedTest.AvailablePoints = test.AvailablePoints;
-                            loadedTest.Input = test.Input;
-                            loadedTest.Answer = test.Answer;
-                            _dbContext.Tests.Update(loadedTest);
-                        }
-                    }
-
-                    foreach (var item in testsExamined)
-                    {
-                        if (!item.Value)
-                        {
-                            var loadedTest = tests.FirstOrDefault(t => t.Number == item.Key);
-                            _dbContext.Tests.Remove(loadedTest);
-                        }
-                    }
-
-                    var examples = await _dbContext.Examples.Where(e => e.ProblemId == id).ToListAsync();
-                    var examplesExamined = new Dictionary<short, bool>();
-                    foreach (var e in examples)
-                    {
-                        examplesExamined.Add(e.Number, false);
-                    }
-
-                    for (int i = 0; i < problemForm.Examples.Count; i++)
-                    {
-                        var example = new Example
-                        {
-                            Number = problemForm.Examples[i].Number,
-                            InputText = problemForm.Examples[i].InputText,
-                            OutputText = problemForm.Examples[i].OutputText,
-                            ProblemId = problem.Id
-                        };
-                        var loadedExample = examples.FirstOrDefault(e => e.Number == example.Number);
-                        if (loadedExample == null)
-                        {
-                            await _dbContext.Examples.AddAsync(example);
-                        }
-                        else
-                        {
-                            examplesExamined[loadedExample.Number] = true;
-                            loadedExample.Number = example.Number;
-                            loadedExample.InputText = example.InputText;
-                            loadedExample.OutputText = example.OutputText;
-                            _dbContext.Examples.Update(loadedExample);
-                        }
-                    }
-
-                    foreach (var item in examplesExamined)
-                    {
-                        if (!item.Value)
-                        {
-                            var loadedExample = examples.FirstOrDefault(e => e.Number == item.Key);
-                            _dbContext.Examples.Remove(loadedExample);
-                        }
-                    }
-
-                    try
-                    {
-                        await _dbContext.SaveChangesAsync();
-                    }
-                    catch (DbUpdateConcurrencyException)
-                    {
-                        _logger.LogParallelSaveError("Problem", id);
-                        return Json(new
-                        {
-                            status = false,
-                            errors = new List<string> {"Ошибка параллельного сохранения"}
-                        });
-                    }
-
-                    _logger.LogEditingSuccessful("Problem", id, currentUser.Id);
-                    return Json(new
-                    {
-                        status = true,
-                        errors = new List<string>()
-                    });
+                    response = ResponseObject<long>.Fail(ModelState, _entityName);
                 }
             }
 
-            return Json(new
-            {
-                status = false,
-                errors = ModelState.Values
-                    .SelectMany(x => x.Errors)
-                    .Select(x => x.ErrorMessage).ToList()
-            });
+            return Json(response);
         }
 
         [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
         [HttpDelete("delete-problem/{id}")]
         public async Task<IActionResult> DeletePost(long id)
         {
-            var currentUser = await HttpContext.GetCurrentUser();
+            var response = new ResponseObject<long>();
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
             var loadedProblem = await _dbContext.Problems.FirstOrDefaultAsync(p => p.Id == id && !p.IsArchieved);
             if (loadedProblem == null)
             {
-                _logger.LogDeletingOfNonExistentEnitiy("Problem", id, currentUser.Id);
-                return Json(new
-                {
-                    status = false,
-                    errors = new List<string> {"Попытка удалить несуществующую задачу"}
-                });
-            }
-
-            var moderatorRole = await _dbContext.Roles.FirstOrDefaultAsync(r => r.Name == RolesContainer.Moderator);
-            if (currentUser.Id != loadedProblem.CreatorId && !currentUser.Roles.Contains(moderatorRole))
-            {
-                _logger.LogDeletingByNotAppropriateUser("Problem", id, currentUser.Id);
-                return Json(new
-                {
-                    status = false,
-                    errors = new List<string> {"Попытка удалить не свою задачу или без модераторских прав"}
-                });
-            }
-
-            if (await _dbContext.ContestsProblems.AnyAsync(cp => cp.ProblemId == id) ||
-                await _dbContext.CoursesProblems.AnyAsync(cp => cp.ProblemId == id))
-            {
-                loadedProblem.IsArchieved = true;
-                _dbContext.Problems.Update(loadedProblem);
-                bool saved = false;
-                while (!saved)
-                {
-                    try
-                    {
-                        await _dbContext.SaveChangesAsync();
-                        saved = true;
-                    }
-                    catch (DbUpdateConcurrencyException)
-                    {
-                        loadedProblem =
-                            await _dbContext.Problems.FirstOrDefaultAsync(p => p.Id == id && !p.IsArchieved);
-                        if (loadedProblem == null)
-                        {
-                            break;
-                        }
-
-                        loadedProblem.IsArchieved = true;
-                        _dbContext.Problems.Update(loadedProblem);
-                    }
-
-                    _logger.LogDeletingByArchiving("Problem", id, currentUser.Id);
-                }
+                _logger.LogDeletingOfNonExistentEnitiy(_entityName, id, currentUser.Id);
+                response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityDoesntExistErrorName]);
             }
             else
             {
-                _dbContext.Problems.Remove(loadedProblem);
-                await _dbContext.SaveChangesAsync();
-                _logger.LogDeletingSuccessful("Problem", id, currentUser.Id);
+                if (currentUser.Id != loadedProblem.CreatorId && !await _userManager.IsInRoleAsync(currentUser, RolesContainer.Moderator))
+                {
+                    _logger.LogDeletingByNotAppropriateUser(_entityName, id, currentUser.Id);
+                    response = ResponseObject<long>.Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.UserInsufficientRightsErrorName]);
+                }
+                else
+                {
+                    DeletionStatus status = await _workspace.DeleteProblemAsync(_dbContext, loadedProblem);
+                    _logger.LogDeletionStatus(status, _entityName, id, currentUser.Id);
+                    response = ResponseObject<long>.FormResponseObjectForDeletion(status, _entityName, id);
+                }
             }
-
-            return Json(new
-            {
-                status = true,
-                errors = new List<string>()
-            });
+            return Json(response);
         }
 
         [HttpGet("get-requests")]
@@ -523,7 +244,7 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetApprovedProblems()
         {
-            var currentUser = await HttpContext.GetCurrentUser();
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
             var problems = await _dbContext.Problems
                 .Where(p => p.ApprovalStatus == ApproveType.Accepted && !p.IsArchieved 
                             && p.ApprovingModeratorId.GetValueOrDefault(-1) == currentUser.Id)
@@ -536,7 +257,7 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetRejectedProblems()
         {
-            var currentUser = await HttpContext.GetCurrentUser();
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
             var problems = await _dbContext.Problems
                 .Where(p => p.ApprovalStatus == ApproveType.Rejected && !p.IsArchieved
                             && p.ApprovingModeratorId.GetValueOrDefault(-1) == currentUser.Id)
@@ -550,75 +271,45 @@ namespace ContestSystem.Controllers
         public async Task<IActionResult> ApproveOrRejectProblem([FromBody] ProblemRequestForm problemRequestForm,
             long id)
         {
-            var currentUser = await HttpContext.GetCurrentUser();
-            if (problemRequestForm.ProblemId != id || id < 0)
+            var response = new ResponseObject<long>();
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
+            if (problemRequestForm.ProblemId != id)
             {
-                _logger.LogModeratingWithNonEqualFormAndRequestId("Problem", problemRequestForm.ProblemId, id,
+                _logger.LogModeratingWithNonEqualFormAndRequestId(_entityName, problemRequestForm.ProblemId, id,
                     currentUser.Id);
-                return Json(new
-                {
-                    status = false,
-                    errors = new List<string> {"Id в запросе не совпадает с Id в форме"}
-                });
+                response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityIdMismatchErrorName]);
             }
-
-            if (ModelState.IsValid)
+            else
             {
-                var problem = await _dbContext.Problems.FirstOrDefaultAsync(p => p.Id == id && !p.IsArchieved);
-                if (problem == null)
+                if (ModelState.IsValid)
                 {
-                    _logger.LogModeratingOfNonExistentEntity("Problem", id, currentUser.Id);
-                    return Json(new
+                    var problem = await _dbContext.Problems.FirstOrDefaultAsync(p => p.Id == id && !p.IsArchieved);
+                    if (problem == null)
                     {
-                        status = false,
-                        errors = new List<string> {"Попытка модерировать несуществующий пост"}
-                    });
+                        _logger.LogModeratingOfNonExistentEntity(_entityName, id, currentUser.Id);
+                        response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityDoesntExistErrorName]);
+                    }
+                    else
+                    {
+                        if (problem.ApprovingModeratorId.GetValueOrDefault(-1) != currentUser.Id && problem.ApprovalStatus != ApproveType.NotModeratedYet)
+                        {
+                            _logger.LogModeratingByWrongUser(_entityName, id, currentUser.Id, problem.ApprovingModeratorId.GetValueOrDefault(-1), problem.ApprovalStatus);
+                            response = ResponseObject<long>.Fail(_errorCodes[Constants.ModerationByWrongModeratorErrorName]);
+                        }
+                        else
+                        {
+                            ModerationStatus status = await _workspace.ModerateProblemAsync(_dbContext, problemRequestForm, problem);
+                            _logger.LogModerationStatus(status, _entityName, id, currentUser.Id);
+                            response = ResponseObject<long>.FormResponseObjectForModeration(status, _entityName, id);
+                        }
+                    }
                 }
                 else
                 {
-                    if (problem.ApprovingModeratorId.GetValueOrDefault(-1) != currentUser.Id && problem.ApprovalStatus != ApproveType.NotModeratedYet)
-                    {
-                        _logger.LogModeratingByWrongUser("Problem", id, currentUser.Id, problem.ApprovingModeratorId.GetValueOrDefault(-1), problem.ApprovalStatus);
-                        return Json(new
-                        {
-                            status = false,
-                            errors = new List<string> { "Данная задача уже закреплена за другим модератором" }
-                        });
-                    }
-                    problem.ApprovalStatus = problemRequestForm.ApprovalStatus;
-                    problem.ApprovingModeratorId = problemRequestForm.ApprovingModeratorId;
-                    problem.ModerationMessage = problemRequestForm.ModerationMessage;
-                    _dbContext.Problems.Update(problem);
-                    try
-                    {
-                        await _dbContext.SaveChangesAsync();
-                    }
-                    catch (DbUpdateConcurrencyException)
-                    {
-                        _logger.LogParallelSaveError("Problem", id);
-                        return Json(new
-                        {
-                            status = false,
-                            errors = new List<string> {"Ошибка параллельного сохранения"}
-                        });
-                    }
-
-                    _logger.LogModeratingSuccessful("Problem", id, currentUser.Id, problemRequestForm.ApprovalStatus);
-                    return Json(new
-                    {
-                        status = true,
-                        errors = new List<string>()
-                    });
+                    response = ResponseObject<long>.Success(id);
                 }
             }
-
-            return Json(new
-            {
-                status = false,
-                errors = ModelState.Values
-                    .SelectMany(x => x.Errors)
-                    .Select(x => x.ErrorMessage).ToList()
-            });
+            return Json(response);
         }
     }
 }
