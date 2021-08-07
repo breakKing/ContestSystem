@@ -47,7 +47,7 @@ namespace ContestSystem.Controllers
         public async Task<IActionResult> GetAvailableContests(string culture)
         {
             DateTime now = DateTime.UtcNow;
-            var currentUser = await HttpContext.GetCurrentUser();
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
             var contests = await _dbContext.Contests.Where(c => c.ApprovalStatus == ApproveType.Accepted
                                                                 && c.StartDateTimeUTC > now
                                                                 && c.IsPublic
@@ -98,7 +98,7 @@ namespace ContestSystem.Controllers
         public async Task<IActionResult> GetParticipatingContests(string culture)
         {
             DateTime now = DateTime.UtcNow;
-            var currentUser = await HttpContext.GetCurrentUser();
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
             var contests = await _dbContext.Contests.Where(c => c.ApprovalStatus == ApproveType.Accepted
                                                                 && c.StartDateTimeUTC >=
                                                                 now.AddMinutes(-c.DurationInMinutes)
@@ -178,14 +178,14 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> AddContest([FromForm] ContestForm contestForm)
         {
-            var currentUser = await HttpContext.GetCurrentUser();
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
             ResponseObject<long> response = new ResponseObject<long>();
             if (ModelState.IsValid)
             {
                 if (currentUser.Id != contestForm.CreatorUserId)
                 {
                     _logger.LogCreationByNonEqualCurrentUserAndCreator(_entityName, currentUser.Id, contestForm.CreatorUserId);
-                    response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityIdMismatchErrorName]);
+                    response = ResponseObject<long>.Fail(_errorCodes[Constants.UserIdMismatchErrorName]);
                 }
                 else
                 {
@@ -205,9 +205,9 @@ namespace ContestSystem.Controllers
         [HttpPut("edit-contest/{id}")]
         public async Task<IActionResult> EditContest([FromForm] ContestForm contestForm, long id)
         {
-            var currentUser = await HttpContext.GetCurrentUser();
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
             ResponseObject<long> response = new ResponseObject<long>();
-            if (contestForm.Id == null || id <= 0 || id != contestForm.Id)
+            if (id != contestForm.Id)
             {
                 _logger.LogEditingWithNonEqualFormAndRequestId(_entityName, contestForm.Id, id, currentUser.Id);
                 response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityIdMismatchErrorName]);
@@ -249,7 +249,7 @@ namespace ContestSystem.Controllers
         [HttpDelete("delete-contest/{id}")]
         public async Task<IActionResult> DeleteContest(long id)
         {
-            var currentUser = await HttpContext.GetCurrentUser();
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
             ResponseObject<long> response = new ResponseObject<long>();
             Contest loadedContest = await _dbContext.Contests.FindAsync(id);
             if (loadedContest == null)
@@ -266,7 +266,7 @@ namespace ContestSystem.Controllers
                 }
                 else
                 {
-                    DeletionStatus status = await _workspace.DeleteContestAsync(_dbContext, loadedContest, currentUser.Id);
+                    DeletionStatus status = await _workspace.DeleteContestAsync(_dbContext, loadedContest);
                     _logger.LogDeletionStatus(status, _entityName, id, currentUser.Id);
                 }
             }
@@ -278,9 +278,9 @@ namespace ContestSystem.Controllers
         public async Task<IActionResult> AddParticipant(long contestId, [FromBody] ParticipantForm participantForm)
         {
             var response = new ResponseObject<long>();
-            var currentUser = await HttpContext.GetCurrentUser();
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
 
-            if (contestId <= 0 || contestId != participantForm.ContestId)
+            if (contestId != participantForm.ContestId)
             {
                 _logger.LogWarning(
                     $"Попытка от пользователя с идентификатором {currentUser.Id} добавить участника с идентификатором {participantForm.UserId} с идентификатором {contestId}, когда в переданной форме указано соревнование с идентификатором {participantForm.ContestId}");
@@ -349,7 +349,7 @@ namespace ContestSystem.Controllers
         public async Task<IActionResult> DeleteParticipant(long contestId, long userId)
         {
             var response = new ResponseObject<long>();
-            var currentUser = await HttpContext.GetCurrentUser();
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
             var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == contestId);
             if (contest == null)
             {
@@ -508,7 +508,7 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
         public async Task<IActionResult> GetUserSolutions(long contestId, long userId)
         {
-            var currentUser = await HttpContext.GetCurrentUser();
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
             var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == contestId);
             if (contest == null)
             {
@@ -558,7 +558,7 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetApprovedContests()
         {
-            var currentUser = await HttpContext.GetCurrentUser();
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
             var contests = await _dbContext.Contests.Where(c => c.ApprovalStatus == ApproveType.Accepted
                                                                 && c.ApprovingModeratorId.GetValueOrDefault(-1) ==
                                                                 currentUser.Id)
@@ -575,7 +575,7 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetRejectedContests()
         {
-            var currentUser = await HttpContext.GetCurrentUser();
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
             var contests = await _dbContext.Contests.Where(c => c.ApprovalStatus == ApproveType.Rejected
                                                                 && c.ApprovingModeratorId.GetValueOrDefault(-1) ==
                                                                 currentUser.Id)
@@ -593,9 +593,9 @@ namespace ContestSystem.Controllers
         public async Task<IActionResult> ApproveOrRejectContest([FromBody] ContestRequestForm contestRequestForm,
             long id)
         {
-            var currentUser = await HttpContext.GetCurrentUser();
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
             ResponseObject<long> response = new ResponseObject<long>();
-            if (contestRequestForm.ContestId != id || id < 0)
+            if (contestRequestForm.ContestId != id)
             {
                 _logger.LogModeratingWithNonEqualFormAndRequestId(_entityName, contestRequestForm.ContestId, id,
                     currentUser.Id);

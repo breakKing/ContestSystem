@@ -289,7 +289,7 @@ namespace ContestSystem.Services
             throw new NotImplementedException();
         }
 
-        public async Task<DeletionStatus> DeleteContestAsync(MainDbContext dbContext, Contest contest, long userId)
+        public async Task<DeletionStatus> DeleteContestAsync(MainDbContext dbContext, Contest contest)
         {
             var status = DeletionStatus.Undefined;
             if (contest == null)
@@ -314,7 +314,7 @@ namespace ContestSystem.Services
             return status;
         }
 
-        public async Task<DeletionStatus> DeleteProblemAsync(MainDbContext dbContext, Problem problem, long userId)
+        public async Task<DeletionStatus> DeleteProblemAsync(MainDbContext dbContext, Problem problem)
         {
             throw new NotImplementedException();
         }
@@ -337,28 +337,6 @@ namespace ContestSystem.Services
                     } 
                     while (!await SecureSaveAsync(dbContext) || (checker = await dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == checker.Id && !ch.IsArchieved)) != null);
                     status = DeletionStatus.SuccessWithArchiving;
-                    /*while (!saved)
-                    {
-                        try
-                        {
-                            await dbContext.SaveChangesAsync();
-                            saved = true;
-                        }
-                        catch (DbUpdateConcurrencyException)
-                        {
-                            checker =
-                                await dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == id && !ch.IsArchieved);
-                            if (checker == null)
-                            {
-                                break;
-                            }
-
-                            checker.IsArchieved = true;
-                            dbContext.Checkers.Update(checker);
-                        }
-
-                        _logger.LogDeletingByArchiving(_entityName, id, currentUser.Id);
-                    }*/
                 }
                 else
                 {
@@ -377,7 +355,7 @@ namespace ContestSystem.Services
             return status;
         }
 
-        public async Task<DeletionStatus> DeleteRulesSetAsync(MainDbContext dbContext, RulesSet rulesSet, long userId)
+        public async Task<DeletionStatus> DeleteRulesSetAsync(MainDbContext dbContext, RulesSet rulesSet)
         {
             throw new NotImplementedException();
         }
@@ -387,7 +365,7 @@ namespace ContestSystem.Services
             throw new NotImplementedException();
         }*/
 
-        public async Task<DeletionStatus> DeletePostAsync(MainDbContext dbContext, Post post, long userId)
+        public async Task<DeletionStatus> DeletePostAsync(MainDbContext dbContext, Post post)
         {
             throw new NotImplementedException();
         }
