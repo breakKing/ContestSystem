@@ -13,8 +13,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using System;
 using ContestSystem.Models.Dictionaries;
+using ContestSystem.Models.Misc;
+using Microsoft.AspNetCore.Identity;
 
 namespace ContestSystem.Controllers
 {
@@ -23,15 +24,21 @@ namespace ContestSystem.Controllers
     public class CheckersController : Controller
     {
         private readonly MainDbContext _dbContext;
-        private readonly CheckerSystemService _checkerSystemService;
+        private readonly WorkspaceManagerService _workspace;
         private readonly ILogger<CheckersController> _logger;
+        private readonly UserManager<User> _userManager;
 
-        public CheckersController(MainDbContext dbContext, CheckerSystemService checkerSystemService,
-            ILogger<CheckersController> logger)
+        private readonly string _entityName = Constants.CheckerEntityName;
+        private readonly Dictionary<string, string> _errorCodes;
+
+        public CheckersController(MainDbContext dbContext, WorkspaceManagerService workspace,
+            ILogger<CheckersController> logger, UserManager<User> userManager)
         {
             _dbContext = dbContext;
-            _checkerSystemService = checkerSystemService;
+            _workspace = workspace;
             _logger = logger;
+            _userManager = userManager;
+            _errorCodes = Constants.ErrorCodes[_entityName];
         }
 
         [HttpGet("get-user-checkers/{id}")]
@@ -62,7 +69,7 @@ namespace ContestSystem.Controllers
             var checker = await _dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == id && !ch.IsArchieved);
             if (checker == null)
             {
-                return NotFound("Такого чекера не существует");
+                return NotFound(_errorCodes[Constants.EntityDoesntExistErrorName]);
             }
 
             var publishedChecker = PublishedChecker.GetFromModel(checker);
@@ -76,7 +83,7 @@ namespace ContestSystem.Controllers
             var checker = await _dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == id && !ch.IsArchieved);
             if (checker == null)
             {
-                return NotFound("Такого чекера не существует");
+                return NotFound(_errorCodes[Constants.EntityDoesntExistErrorName]);
             }
 
             var constructedChecker = ConstructedChecker.GetFromModel(checker);
@@ -87,214 +94,102 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> AddChecker([FromBody] CheckerForm checkerForm)
         {
-            var currentUser = await HttpContext.GetCurrentUser();
+            var response = new ResponseObject<long>();
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
             if (ModelState.IsValid)
             {
                 if (currentUser.Id != checkerForm.AuthorId)
                 {
-                    _logger.LogCreationByNonEqualCurrentUserAndCreator("Checker", currentUser.Id, checkerForm.AuthorId);
-                    return Json(new
-                    {
-                        status = false,
-                        errors = new List<string> { "Id автора в форме отличается от Id текущего пользователя" }
-                    });
+                    _logger.LogCreationByNonEqualCurrentUserAndCreator(_entityName, currentUser.Id, checkerForm.AuthorId);
+                    response = ResponseObject<long>.Fail(_errorCodes[Constants.UserIdMismatchErrorName]);
                 }
-                var checker = new Checker
+                else
                 {
-                    AuthorId = checkerForm.AuthorId,
-                    Code = checkerForm.Code,
-                    Name = checkerForm.Name,
-                    Description = checkerForm.Description,
-                    IsPublic = checkerForm.IsPublic,
-                    IsArchieved = false
-                };
-                checker.ApprovalStatus = ApproveType.NotModeratedYet;
-                await _dbContext.Checkers.AddAsync(checker);
-                await _dbContext.SaveChangesAsync();
-                _logger.LogCreationSuccessful("Checker", checker.Id, currentUser.Id);
-                return Json(new
-                {
-                    status = true,
-                    data = checker.Id,
-                    errors = new List<string>()
-                });
+                    CreationStatusData statusData = await _workspace.CreateCheckerAsync(_dbContext, checkerForm);
+                    _logger.LogCreationStatus(statusData.Status, _entityName, statusData.Id, currentUser.Id);
+                    response = ResponseObject<long>.FormResponseObjectForCreation(statusData.Status, _entityName, statusData.Id);
+                }
             }
-
-            return Json(new
+            else
             {
-                status = false,
-                errors = ModelState.Values
-                    .SelectMany(x => x.Errors)
-                    .Select(x => x.ErrorMessage).ToList()
-            });
+                response = ResponseObject<long>.Fail(ModelState, _entityName);
+            }
+            return Json(response);
         }
 
         [HttpPut("edit-checker/{id}")]
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> EditChecker([FromBody] CheckerForm checkerForm, long id)
         {
-            var currentUser = await HttpContext.GetCurrentUser();
+            var response = new ResponseObject<long>();
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
             if (checkerForm.Id == null || checkerForm.Id.Value != id)
             {
-                _logger.LogEditingWithNonEqualFormAndRequestId("Checker", checkerForm.Id, id, currentUser.Id);
-                return Json(new
-                {
-                    status = false,
-                    errors = new List<string> {"Id в форме не совпадает с Id в запросе"}
-                });
+                _logger.LogEditingWithNonEqualFormAndRequestId(_entityName, checkerForm.Id, id, currentUser.Id);
+                response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityIdMismatchErrorName]);
             }
-
-            if (ModelState.IsValid)
+            else
             {
-                var checker = await _dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == id);
-                if (checker == null)
+                if (ModelState.IsValid)
                 {
-                    _logger.LogEditingOfNonExistentEntity("Checker", id, currentUser.Id);
-                    return Json(new
+                    var checker = await _dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == id && !ch.IsArchieved);
+                    if (checker == null)
                     {
-                        status = false,
-                        errors = new List<string> {"Такого чекера не существует"}
-                    });
-                }
-
-                if (checker.AuthorId != currentUser.Id)
-                {
-                    _logger.LogEditingByNotAppropriateUser("Checker", id, currentUser.Id);
-                    return Json(new
+                        _logger.LogEditingOfNonExistentEntity(_entityName, id, currentUser.Id);
+                        response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityDoesntExistErrorName]);
+                    }
+                    else
                     {
-                        status = false,
-                        errors = new List<string> {"Попытка изменить не свой чекер"}
-                    });
+                        if (checker.AuthorId != currentUser.Id)
+                        {
+                            _logger.LogEditingByNotAppropriateUser(_entityName, id, currentUser.Id);
+                            response = ResponseObject<long>.Fail(_errorCodes[Constants.UserIdMismatchErrorName]);
+                        }
+                        else
+                        {
+                            EditionStatus status = await _workspace.EditCheckerAsync(_dbContext, checkerForm, checker);
+                            _logger.LogEditionStatus(status, _entityName, id, currentUser.Id);
+                            response = ResponseObject<long>.FormResponseObjectForEdition(status, _entityName, id);
+                        }
+                    }
                 }
-
-                var now = DateTime.UtcNow;
-                bool needToCreateNewOne = await _dbContext.ContestsProblems.AnyAsync(cp => cp.Problem.CheckerId == id
-                                                                                            && cp.Contest.StartDateTimeUTC.AddMinutes(-Constants.ContestSetupLockBeforeStartInMinutes) >= now);
-                bool needToRecompile = (checker.Code != checkerForm.Code) || checker.ApprovalStatus == ApproveType.Rejected;
-                if (needToCreateNewOne)
+                else
                 {
-                    checker.IsArchieved = true;
-                    _dbContext.Checkers.Update(checker);
-                    var newChecker = new Checker
-                    {
-                        Code = checkerForm.Code,
-                        AuthorId = checkerForm.AuthorId,
-                        Name = checkerForm.Name,
-                        Description = checkerForm.Description,
-                        IsPublic = checkerForm.IsPublic,
-                        Errors = "",
-                        CompilationVerdict = VerdictType.Undefined,
-                    };
+                    response = ResponseObject<long>.Fail(ModelState, _entityName);
                 }
-                
-                checker.Code = checkerForm.Code;
-                checker.Name = checkerForm.Name;
-                checker.Description = checkerForm.Description;
-                checker.IsPublic = checkerForm.IsPublic;
-                if (needToRecompile)
-                {
-                    checker.ApprovalStatus = ApproveType.NotModeratedYet;
-                }
-
-                try
-                {
-                    await _dbContext.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    _logger.LogParallelSaveError("Checker", id);
-                    return Json(new
-                    {
-                        status = false,
-                        errors = new List<string> {"Ошибка параллельного сохранения"}
-                    });
-                }
-
-                _logger.LogInformation(
-                    $"Механизм проверки с идентификатором {id} успешно изменён и {(needToRecompile ? "" : "не ")}нуждается в модерации и компиляции");
-                return Json(new
-                {
-                    status = true,
-                    errors = new List<string>()
-                });
             }
-
-            return Json(new
-            {
-                status = false,
-                errors = ModelState.Values
-                    .SelectMany(x => x.Errors)
-                    .Select(x => x.ErrorMessage).ToList()
-            });
+            return Json(response);
         }
 
         [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
         [HttpDelete("delete-checker/{id}")]
         public async Task<IActionResult> DeleteChecker(long id)
         {
+            var response = new ResponseObject<long>();
             Checker loadedChecker = await _dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == id && !ch.IsArchieved);
-            var currentUser = await HttpContext.GetCurrentUser();
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
+
             if (loadedChecker == null)
             {
-                _logger.LogDeletingOfNonExistentEnitiy("Checker", id, currentUser.Id);
-                return Json(new
-                {
-                    status = false,
-                    errors = new List<string> {"Попытка удалить несуществующий чекер"}
-                });
-            }
-
-            var moderatorRole = await _dbContext.Roles.FirstOrDefaultAsync(r => r.Name == RolesContainer.Moderator);
-            if (currentUser.Id != loadedChecker.AuthorId && !currentUser.Roles.Contains(moderatorRole))
-            {
-                _logger.LogDeletingByNotAppropriateUser("Checker", id, currentUser.Id);
-                return Json(new
-                {
-                    status = false,
-                    errors = new List<string> {"Попытка удалить не свой чекер или без модераторских прав"}
-                });
-            }
-
-            if (await _dbContext.Problems.AnyAsync(p => p.CheckerId == id))
-            {
-                loadedChecker.IsArchieved = true;
-                _dbContext.Checkers.Update(loadedChecker);
-                bool saved = false;
-                while (!saved)
-                {
-                    try
-                    {
-                        await _dbContext.SaveChangesAsync();
-                        saved = true;
-                    }
-                    catch (DbUpdateConcurrencyException)
-                    {
-                        loadedChecker =
-                            await _dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == id && !ch.IsArchieved);
-                        if (loadedChecker == null)
-                        {
-                            break;
-                        }
-
-                        loadedChecker.IsArchieved = true;
-                        _dbContext.Checkers.Update(loadedChecker);
-                    }
-
-                    _logger.LogDeletingByArchiving("Checker", id, currentUser.Id);
-                }
+                _logger.LogDeletingOfNonExistentEnitiy(_entityName, id, currentUser.Id);
+                response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityDoesntExistErrorName]);
             }
             else
             {
-                _dbContext.Checkers.Remove(loadedChecker);
-                await _dbContext.SaveChangesAsync();
-                _logger.LogDeletingSuccessful("Checker", id, currentUser.Id);
+                if (currentUser.Id != loadedChecker.AuthorId && !await _userManager.IsInRoleAsync(currentUser, RolesContainer.Moderator))
+                {
+                    _logger.LogDeletingByNotAppropriateUser(_entityName, id, currentUser.Id);
+                    response = ResponseObject<long>.Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.UserInsufficientRightsErrorName]);
+                }
+                else
+                {
+                    DeletionStatus status = await _workspace.DeleteCheckerAsync(_dbContext, loadedChecker);
+                    _logger.LogDeletionStatus(status, _entityName, id, currentUser.Id);
+                    response = ResponseObject<long>.FormResponseObjectForDeletion(status, _entityName, id);
+                }
             }
 
-            return Json(new
-            {
-                status = true,
-                errors = new List<string>()
-            });
+            return Json(response);
         }
 
 
@@ -312,7 +207,7 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetApprovedCheckers()
         {
-            var currentUser = await HttpContext.GetCurrentUser();
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
             var checkers = await _dbContext.Checkers
                 .Where(c => c.ApprovalStatus == ApproveType.Accepted && !c.IsArchieved && c.ApprovingModeratorId.GetValueOrDefault(-1) == currentUser.Id)
                 .ToListAsync();
@@ -324,7 +219,7 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetRejectedCheckers()
         {
-            var currentUser = await HttpContext.GetCurrentUser();
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
             var checkers = await _dbContext.Checkers
                 .Where(c => c.ApprovalStatus == ApproveType.Rejected && !c.IsArchieved && c.ApprovingModeratorId.GetValueOrDefault(-1) == currentUser.Id)
                 .ToListAsync();
@@ -334,117 +229,47 @@ namespace ContestSystem.Controllers
 
         [HttpPut("moderate/{id}")]
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
-        public async Task<IActionResult> ApproveOrRejectChecker([FromBody] CheckerRequestForm checkerRequestForm,
-            long id)
+        public async Task<IActionResult> ApproveOrRejectChecker([FromBody] CheckerRequestForm checkerRequestForm, long id)
         {
-            var currentUser = await HttpContext.GetCurrentUser();
-            if (checkerRequestForm.CheckerId != id || id < 0)
+            var response = new ResponseObject<long>();
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
+            if (checkerRequestForm.CheckerId != id)
             {
-                _logger.LogModeratingWithNonEqualFormAndRequestId("Checker", checkerRequestForm.CheckerId, id,
+                _logger.LogModeratingWithNonEqualFormAndRequestId(_entityName, checkerRequestForm.CheckerId, id,
                     currentUser.Id);
-                return Json(new
-                {
-                    status = false,
-                    errors = new List<string> {"Id в запросе не совпадает с Id в форме"}
-                });
+                response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityIdMismatchErrorName]);
             }
-
-            if (ModelState.IsValid)
+            else
             {
-                var checker = await _dbContext.Checkers.FirstOrDefaultAsync(c => c.Id == id && !c.IsArchieved);
-                if (checker == null)
+                if (ModelState.IsValid)
                 {
-                    _logger.LogModeratingOfNonExistentEntity("Checker", id, currentUser.Id);
-                    return Json(new
+                    var checker = await _dbContext.Checkers.FirstOrDefaultAsync(c => c.Id == id && !c.IsArchieved);
+                    if (checker == null)
                     {
-                        status = false,
-                        errors = new List<string> {"Попытка модерировать несуществующий чекер"}
-                    });
+                        _logger.LogModeratingOfNonExistentEntity(_entityName, id, currentUser.Id);
+                        response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityDoesntExistErrorName]);
+                    }
+                    else
+                    {
+                        if (checker.ApprovingModeratorId.GetValueOrDefault(-1) != currentUser.Id && checker.ApprovalStatus != ApproveType.NotModeratedYet)
+                        {
+                            _logger.LogModeratingByWrongUser(_entityName, id, currentUser.Id, checker.ApprovingModeratorId.GetValueOrDefault(-1), checker.ApprovalStatus);
+                            response = ResponseObject<long>.Fail(_errorCodes[Constants.ModerationByWrongModeratorErrorName]);
+                        }
+                        else
+                        {
+                            ModerationStatus status = await _workspace.ModerateCheckerAsync(_dbContext, checkerRequestForm, checker);
+                            _logger.LogModerationStatus(status, _entityName, id, currentUser.Id);
+                            response = ResponseObject<long>.FormResponseObjectForModeration(status, _entityName, id);
+                        }
+                    }
                 }
                 else
                 {
-                    if (checker.ApprovingModeratorId.GetValueOrDefault(-1) != currentUser.Id && checker.ApprovalStatus != ApproveType.NotModeratedYet)
-                    {
-                        _logger.LogModeratingByWrongUser("Checker", id, currentUser.Id, checker.ApprovingModeratorId.GetValueOrDefault(-1), checker.ApprovalStatus);
-                        return Json(new
-                        {
-                            status = false,
-                            errors = new List<string> { "Данный чекер уже закреплён за другим модератором" }
-                        });
-                    }
-                    checker.ApprovalStatus = checkerRequestForm.ApprovalStatus;
-                    checker.ApprovingModeratorId = checkerRequestForm.ApprovingModeratorId;
-                    checker.ModerationMessage = checkerRequestForm.ModerationMessage;
-                    if (checker.ApprovalStatus == ApproveType.Accepted)
-                    {
-                        _logger.LogInformation($"Отправлена на компиляцию сущность \"Checker\" с идентификатором {id} модератором с идентификатором {currentUser.Id}");
-                        var newChecker = await _checkerSystemService.SendCheckerForCompilationAsync(_dbContext, checker);
-                        if (newChecker == null)
-                        {
-                            checker.CompilationVerdict = VerdictType.CheckerServersUnavailable;
-                            checker.ApprovalStatus = ApproveType.NotModeratedYet;
-                            _dbContext.Checkers.Update(checker);
-                            try
-                            {
-                                await _dbContext.SaveChangesAsync();
-                            }
-                            catch (DbUpdateConcurrencyException)
-                            {
-                                _logger.LogParallelSaveError("Checker", id);
-                                return Json(new
-                                {
-                                    status = false,
-                                    errors = new List<string> { "Ошибка параллельного сохранения" }
-                                });
-                            }
-                            _logger.LogWarning($"Модерациия сущности \"Checker\" с идентификатором {id} модератором с идентификатором {currentUser.Id} не осуществлена из-за недоступности всех серверов проверки");
-                            return Json(new
-                            {
-                                status = false,
-                                errors = new List<string> { "Сервера проверки временно недоступны" }
-                            });
-                        }
-                        checker.CompilationVerdict = newChecker.CompilationVerdict;
-                        checker.Errors = newChecker.Errors;
-                        if (newChecker.CompilationVerdict != VerdictType.CompilationSucceed)
-                        {
-                            _logger.LogInformation($"В результате компиляции \"Checker\" с идентификатором {id} возникли ошибки");
-                            checker.ApprovalStatus = ApproveType.Rejected;
-                            checker.ModerationMessage = "Compilation errors:\n" + newChecker.Errors;
-                        }
-                    }
-
-                    _dbContext.Checkers.Update(checker);
-                    try
-                    {
-                        await _dbContext.SaveChangesAsync();
-                    }
-                    catch (DbUpdateConcurrencyException)
-                    {
-                        _logger.LogParallelSaveError("Checker", id);
-                        return Json(new
-                        {
-                            status = false,
-                            errors = new List<string> {"Ошибка параллельного сохранения"}
-                        });
-                    }
-
-                    _logger.LogModeratingSuccessful("Checker", id, currentUser.Id, checkerRequestForm.ApprovalStatus);
-                    return Json(new
-                    {
-                        status = true,
-                        errors = new List<string>()
-                    });
+                    response = ResponseObject<long>.Fail(ModelState, _entityName);
                 }
             }
-
-            return Json(new
-            {
-                status = false,
-                errors = ModelState.Values
-                    .SelectMany(x => x.Errors)
-                    .Select(x => x.ErrorMessage).ToList()
-            });
+            return Json(response);
         }
     }
 }
