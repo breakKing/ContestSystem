@@ -245,7 +245,7 @@ namespace ContestSystem.Extensions
         {
             switch (status)
             {
-                case ModerationStatus.Approved:
+                case ModerationStatus.Accepted:
                     logger.LogModeratingSuccessful(entityName, entityId, userId, ApproveType.Accepted);
                     break;
                 case ModerationStatus.Rejected:

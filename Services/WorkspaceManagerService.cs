@@ -117,7 +117,28 @@ namespace ContestSystem.Services
 
         public async Task<CreationStatusData> CreateCheckerAsync(MainDbContext dbContext, CheckerForm form)
         {
-            throw new NotImplementedException();
+            var statusData = new CreationStatusData
+            {
+                Status = CreationStatus.Undefined,
+                Id = null
+            };
+
+            var checker = new Checker
+            {
+                AuthorId = form.AuthorId,
+                Code = form.Code,
+                Name = form.Name,
+                Description = form.Description,
+                IsPublic = form.IsPublic,
+                IsArchieved = false
+            };
+            checker.ApprovalStatus = ApproveType.NotModeratedYet;
+            await dbContext.Checkers.AddAsync(checker);
+            await dbContext.SaveChangesAsync();
+
+            statusData.Status = CreationStatus.Success;
+            statusData.Id = checker.Id;
+            return statusData;
         }
 
         public async Task<CreationStatusData> CreateRulesSetAsync(MainDbContext dbContext, RulesSetForm form)
@@ -221,7 +242,36 @@ namespace ContestSystem.Services
 
         public async Task<EditionStatus> EditCheckerAsync(MainDbContext dbContext, CheckerForm form, Checker checker = null)
         {
-            throw new NotImplementedException();
+            var status = EditionStatus.Undefined;
+            checker ??= await dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == form.Id.GetValueOrDefault(-1) && !ch.IsArchieved);
+            if (checker == null)
+            {
+                status = EditionStatus.NotExistentEntity;
+            }
+            else
+            {
+                checker.Code = form.Code;
+                checker.Name = form.Name;
+                checker.Description = form.Description;
+                checker.IsPublic = form.IsPublic;
+
+                bool needToRecompile = (checker.Code != form.Code) || checker.ApprovalStatus == ApproveType.Rejected;
+                if (needToRecompile)
+                {
+                    checker.ApprovalStatus = ApproveType.NotModeratedYet;
+                }
+
+                bool saveSuccess = await SecureSaveAsync(dbContext);
+                if (!saveSuccess)
+                {
+                    status = EditionStatus.ParallelSaveError;
+                }
+                else
+                {
+                    status = EditionStatus.Success;
+                }
+            }
+            return status;
         }
 
         public async Task<EditionStatus> EditRulesSetAsync(MainDbContext dbContext, RulesSetForm form, RulesSet rulesSet = null)
@@ -269,9 +319,62 @@ namespace ContestSystem.Services
             throw new NotImplementedException();
         }
 
-        public async Task<DeletionStatus> DeleteCheckerAsync(MainDbContext dbContext, Checker checker, long userId)
+        public async Task<DeletionStatus> DeleteCheckerAsync(MainDbContext dbContext, Checker checker)
         {
-            throw new NotImplementedException();
+            var status = DeletionStatus.Undefined;
+            if (checker == null)
+            {
+                status = DeletionStatus.NotExistentEntity;
+            }
+            else
+            {
+                if (await dbContext.Problems.AnyAsync(p => p.CheckerId == checker.Id))
+                {
+                    do
+                    {
+                        checker.IsArchieved = true;
+                        dbContext.Checkers.Update(checker);
+                    } 
+                    while (!await SecureSaveAsync(dbContext) || (checker = await dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == checker.Id && !ch.IsArchieved)) != null);
+                    status = DeletionStatus.SuccessWithArchiving;
+                    /*while (!saved)
+                    {
+                        try
+                        {
+                            await dbContext.SaveChangesAsync();
+                            saved = true;
+                        }
+                        catch (DbUpdateConcurrencyException)
+                        {
+                            checker =
+                                await dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == id && !ch.IsArchieved);
+                            if (checker == null)
+                            {
+                                break;
+                            }
+
+                            checker.IsArchieved = true;
+                            dbContext.Checkers.Update(checker);
+                        }
+
+                        _logger.LogDeletingByArchiving(_entityName, id, currentUser.Id);
+                    }*/
+                }
+                else
+                {
+                    dbContext.Checkers.Remove(checker);
+                    bool saveSuccess = await SecureSaveAsync(dbContext);
+                    if (!saveSuccess)
+                    {
+                        status = DeletionStatus.ParallelSaveError;
+                    }
+                    else
+                    {
+                        status = DeletionStatus.Success;
+                    }
+                }
+            }
+            return status;
         }
 
         public async Task<DeletionStatus> DeleteRulesSetAsync(MainDbContext dbContext, RulesSet rulesSet, long userId)
@@ -311,7 +414,7 @@ namespace ContestSystem.Services
                 }
                 else
                 {
-                    status = (contest.ApprovalStatus == ApproveType.Accepted) ? ModerationStatus.Approved : ModerationStatus.Rejected;
+                    status = (contest.ApprovalStatus == ApproveType.Accepted) ? ModerationStatus.Accepted : ModerationStatus.Rejected;
                 }
             }
             return status;
@@ -324,7 +427,59 @@ namespace ContestSystem.Services
 
         public async Task<ModerationStatus> ModerateCheckerAsync(MainDbContext dbContext, CheckerRequestForm form, Checker checker = null)
         {
-            throw new NotImplementedException();
+            var status = ModerationStatus.Undefined;
+
+            checker ??= await dbContext.Checkers.FirstOrDefaultAsync(c => c.Id == form.CheckerId);
+            if (checker == null)
+            {
+                status = ModerationStatus.NotExistentEntity;
+            }
+            else
+            {
+                checker.ApprovalStatus = form.ApprovalStatus;
+                checker.ApprovingModeratorId = form.ApprovingModeratorId;
+                checker.ModerationMessage = form.ModerationMessage;
+
+                if (checker.ApprovalStatus == ApproveType.Accepted)
+                {
+                    var newChecker = await _checkerSystem.SendCheckerForCompilationAsync(dbContext, checker);
+                    if (newChecker == null)
+                    {
+                        checker.CompilationVerdict = VerdictType.CheckerServersUnavailable;
+                        checker.ApprovalStatus = ApproveType.Rejected;
+                    }
+                    else
+                    {
+                        checker.CompilationVerdict = newChecker.CompilationVerdict;
+                        checker.Errors = newChecker.Errors;
+
+                        if (newChecker.CompilationVerdict != VerdictType.CompilationSucceed)
+                        {
+                            checker.ApprovalStatus = ApproveType.Rejected;
+                            checker.ModerationMessage = "Compilation errors:\n" + newChecker.Errors;
+                            status = ModerationStatus.Rejected;
+                        }
+                        else
+                        {
+                            status = ModerationStatus.Accepted;
+                        }
+                    }
+                }
+
+                dbContext.Checkers.Update(checker);
+
+                bool saveSuccess = await SecureSaveAsync(dbContext);
+                if (!saveSuccess)
+                {
+                    status = ModerationStatus.ParallelSaveError;
+                }
+                else
+                {
+                    status = (checker.ApprovalStatus == ApproveType.Accepted) ? ModerationStatus.Accepted : ModerationStatus.Rejected;
+                }
+            }
+
+            return status;
         }
 
         /*public async Task<ModerationStatus> ModerateCourseAsync(MainDbContext dbContext, CourseRequestForm form, Course course = null)

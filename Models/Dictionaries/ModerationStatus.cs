@@ -2,7 +2,7 @@
 {
     public enum ModerationStatus
     {
-        Approved = 0,
+        Accepted = 0,
         Rejected = 1,
         NotExistentEntity = 2,
         ParallelSaveError = 3,

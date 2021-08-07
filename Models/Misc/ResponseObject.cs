@@ -155,7 +155,7 @@ namespace ContestSystem.Models.Misc
             ResponseObject<long> response = new ResponseObject<long>();
             switch (status)
             {
-                case ModerationStatus.Approved:
+                case ModerationStatus.Accepted:
                     response = ResponseObject<long>.Success(entityId);
                     break;
                 case ModerationStatus.Rejected:
