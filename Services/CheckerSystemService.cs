@@ -10,6 +10,7 @@ using System;
 using Microsoft.Extensions.Logging;
 using ContestSystem.Models.DbContexts;
 using Microsoft.EntityFrameworkCore;
+using ContestSystemDbStructure.Enums;
 
 namespace ContestSystem.Services
 {
@@ -64,20 +65,30 @@ namespace ContestSystem.Services
         public async Task<Checker> SendCheckerForCompilationAsync(MainDbContext dbContext, Checker checker)
         {
             await InitServersIfNeededAsync(dbContext);
+            _logger.LogInformation($"Отправлена на компиляцию сущность \"Checker\" с идентификатором {checker.Id}");
             Checker resultedChecker = null;
             var servers = await dbContext.CheckerServers.ToListAsync();
             foreach (var server in servers)
             {
                 if (await CheckServerConnectionAsync(server.Address))
                 {
-                    resultedChecker = await PostRequestAsync<Checker, Checker>(server.Address, "api/checker", checker);
-                    if (resultedChecker == null)
+                    var compiledChecker = await PostRequestAsync<Checker, Checker>(server.Address, "api/checker", checker);
+                    if (compiledChecker == null)
                     {
                         _logger.LogWarning($"При компиляции чекера с идентификатором {checker.Id} на сервере проверки {server.Address} не было получено ответа");
                     }
                     else
                     {
-                        _logger.LogInformation($"Запрос на компиляцию чекера с идентификатором {checker.Id} отправлен на сервер проверки {server.Address}, и на него был получен ответ");
+                        if (compiledChecker.CompilationVerdict != VerdictType.CompilationSucceed)
+                        {
+                            _logger.LogInformation($"В результате компиляции \"Checker\" с идентификатором {checker.Id} на сервере проверки {server.Address} возникли ошибки");
+                            resultedChecker ??= compiledChecker;
+                        }
+                        else
+                        {
+                            _logger.LogInformation($"Компиляция \"Checker\" с идентификатором {checker.Id} на сервере проверки {server.Address} прошла успешно");
+                            resultedChecker = compiledChecker;
+                        }
                     }
                 }
                 else
