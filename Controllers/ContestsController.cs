@@ -179,7 +179,7 @@ namespace ContestSystem.Controllers
         public async Task<IActionResult> AddContest([FromForm] ContestForm contestForm)
         {
             var currentUser = await HttpContext.GetCurrentUser(_userManager);
-            ResponseObject<long> response = new ResponseObject<long>();
+            var response = new ResponseObject<long>();
             if (ModelState.IsValid)
             {
                 if (currentUser.Id != contestForm.CreatorUserId)
@@ -189,9 +189,32 @@ namespace ContestSystem.Controllers
                 }
                 else
                 {
-                    CreationStatusData statusData = await _workspace.CreateContestAsync(_dbContext, contestForm, currentUser.IsLimitedInContests);
-                    _logger.LogCreationStatus(statusData.Status, _entityName, statusData.Id, currentUser.Id);
-                    response = ResponseObject<long>.FormResponseObjectForCreation(statusData.Status, _entityName, statusData.Id);
+                    bool allTasksExist = true;
+                    if (contestForm.Problems.Count > 0)
+                    {
+                        allTasksExist = !contestForm.Problems.Any(pf => !_dbContext.Problems.AnyAsync(p => p.Id == pf.ProblemId && !p.IsArchieved)
+                                                                                            .GetAwaiter().GetResult());
+                    }
+                    if (!await _dbContext.RulesSets.AnyAsync(rs => rs.Id == contestForm.RulesSetId && !rs.IsArchieved))
+                    {
+                        _logger.LogWarning(
+                            $"Попытка от пользователя с идентификатором {currentUser.Id} создать сущность \"{_entityName}\" " +
+                            $"с использованием несуществующей сущности \"{Constants.RulesSetEntityName}\" с идентификатором {contestForm.RulesSetId}");
+                        response = ResponseObject<long>.Fail(Constants.ErrorCodes[Constants.RulesSetEntityName][Constants.EntityDoesntExistErrorName]);
+                    }
+                    else if (!allTasksExist)
+                    {
+                        _logger.LogWarning(
+                            $"Попытка от пользователя с идентификатором {currentUser.Id} создать сущность \"{_entityName}\" " +
+                            $"с использованием одной или нескольких несуществующих сущностей \"{Constants.ProblemEntityName}\"");
+                        response = ResponseObject<long>.Fail(Constants.ErrorCodes[Constants.ProblemEntityName][Constants.EntityDoesntExistErrorName]);
+                    }
+                    else
+                    {
+                        CreationStatusData statusData = await _workspace.CreateContestAsync(_dbContext, contestForm, currentUser.IsLimitedInContests);
+                        _logger.LogCreationStatus(statusData.Status, _entityName, statusData.Id, currentUser.Id);
+                        response = ResponseObject<long>.FormResponseObjectForCreation(statusData.Status, _entityName, statusData.Id);
+                    }
                 }
             }
             else
@@ -206,7 +229,7 @@ namespace ContestSystem.Controllers
         public async Task<IActionResult> EditContest([FromForm] ContestForm contestForm, long id)
         {
             var currentUser = await HttpContext.GetCurrentUser(_userManager);
-            ResponseObject<long> response = new ResponseObject<long>();
+            var response = new ResponseObject<long>();
             if (id != contestForm.Id.GetValueOrDefault(-1))
             {
                 _logger.LogEditingWithNonEqualFormAndRequestId(_entityName, contestForm.Id, id, currentUser.Id);
@@ -231,7 +254,7 @@ namespace ContestSystem.Controllers
                         }
                         else
                         {
-                            EditionStatus status = await _workspace.EditContestAsync(_dbContext, contestForm, currentUser.Id, contest);
+                            EditionStatus status = await _workspace.EditContestAsync(_dbContext, contestForm, contest);
                             _logger.LogEditionStatus(status, _entityName, id, currentUser.Id);
                             response = ResponseObject<long>.FormResponseObjectForEdition(status, _entityName, id);
                         }
@@ -250,7 +273,7 @@ namespace ContestSystem.Controllers
         public async Task<IActionResult> DeleteContest(long id)
         {
             var currentUser = await HttpContext.GetCurrentUser(_userManager);
-            ResponseObject<long> response = new ResponseObject<long>();
+            var response = new ResponseObject<long>();
             Contest loadedContest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == id);
             if (loadedContest == null)
             {
@@ -595,7 +618,7 @@ namespace ContestSystem.Controllers
             long id)
         {
             var currentUser = await HttpContext.GetCurrentUser(_userManager);
-            ResponseObject<long> response = new ResponseObject<long>();
+            var response = new ResponseObject<long>();
             if (contestRequestForm.ContestId != id)
             {
                 _logger.LogModeratingWithNonEqualFormAndRequestId(_entityName, contestRequestForm.ContestId, id,
