@@ -207,7 +207,7 @@ namespace ContestSystem.Controllers
         {
             var currentUser = await HttpContext.GetCurrentUser(_userManager);
             ResponseObject<long> response = new ResponseObject<long>();
-            if (id != contestForm.Id)
+            if (id != contestForm.Id.GetValueOrDefault(-1))
             {
                 _logger.LogEditingWithNonEqualFormAndRequestId(_entityName, contestForm.Id, id, currentUser.Id);
                 response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityIdMismatchErrorName]);
@@ -251,7 +251,7 @@ namespace ContestSystem.Controllers
         {
             var currentUser = await HttpContext.GetCurrentUser(_userManager);
             ResponseObject<long> response = new ResponseObject<long>();
-            Contest loadedContest = await _dbContext.Contests.FindAsync(id);
+            Contest loadedContest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == id);
             if (loadedContest == null)
             {
                 _logger.LogDeletingOfNonExistentEnitiy(_entityName, id, currentUser.Id);
@@ -268,6 +268,7 @@ namespace ContestSystem.Controllers
                 {
                     DeletionStatus status = await _workspace.DeleteContestAsync(_dbContext, loadedContest);
                     _logger.LogDeletionStatus(status, _entityName, id, currentUser.Id);
+                    response = ResponseObject<long>.FormResponseObjectForDeletion(status, _entityName, id);
                 }
             }
             return Json(response);

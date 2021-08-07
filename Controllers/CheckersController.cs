@@ -95,9 +95,10 @@ namespace ContestSystem.Controllers
         public async Task<IActionResult> AddChecker([FromBody] CheckerForm checkerForm)
         {
             var response = new ResponseObject<long>();
-            var currentUser = await HttpContext.GetCurrentUser(_userManager);
+            
             if (ModelState.IsValid)
             {
+                var currentUser = await HttpContext.GetCurrentUser(_userManager);
                 if (currentUser.Id != checkerForm.AuthorId)
                 {
                     _logger.LogCreationByNonEqualCurrentUserAndCreator(_entityName, currentUser.Id, checkerForm.AuthorId);
@@ -114,6 +115,7 @@ namespace ContestSystem.Controllers
             {
                 response = ResponseObject<long>.Fail(ModelState, _entityName);
             }
+
             return Json(response);
         }
 
@@ -123,7 +125,7 @@ namespace ContestSystem.Controllers
         {
             var response = new ResponseObject<long>();
             var currentUser = await HttpContext.GetCurrentUser(_userManager);
-            if (checkerForm.Id == null || checkerForm.Id.Value != id)
+            if (checkerForm.Id.GetValueOrDefault(-1) != id)
             {
                 _logger.LogEditingWithNonEqualFormAndRequestId(_entityName, checkerForm.Id, id, currentUser.Id);
                 response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityIdMismatchErrorName]);
