@@ -14,6 +14,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using ContestSystem.Services;
 using ContestSystem.Models.Dictionaries;
+using Microsoft.AspNetCore.Identity;
+using ContestSystem.Models.Misc;
 
 namespace ContestSystem.Controllers
 {
@@ -24,12 +26,22 @@ namespace ContestSystem.Controllers
         private readonly MainDbContext _dbContext;
         private readonly ILogger<PostsController> _logger;
         private readonly FileStorageService _storage;
+        private readonly UserManager<User> _userManager;
+        private readonly WorkspaceManagerService _workspace;
 
-        public PostsController(MainDbContext dbContext, ILogger<PostsController> logger, FileStorageService storage)
+        private readonly string _entityName = Constants.PostEntityName;
+        private readonly Dictionary<string, string> _errorCodes;
+
+        public PostsController(MainDbContext dbContext, ILogger<PostsController> logger, FileStorageService storage,
+            UserManager<User> userManager, WorkspaceManagerService workspace)
         {
             _dbContext = dbContext;
             _logger = logger;
             _storage = storage;
+            _userManager = userManager;
+            _workspace = workspace;
+
+            _errorCodes = Constants.ErrorCodes[_entityName];
         }
 
         [HttpGet("{culture}")]
@@ -70,14 +82,14 @@ namespace ContestSystem.Controllers
                 var localizer = post.PostLocalizers.FirstOrDefault(pl => pl.Culture == culture);
                 if (localizer == null)
                 {
-                    return NotFound("Такой локализации под пост не существует");
+                    return NotFound(_errorCodes[Constants.EntityLocalizerDoesntExistErrorName]);
                 }
 
                 var publishedPost = PublishedPost.GetFromModel(post, localizer, _storage.GetImageInBase64(post.ImagePath));
                 return Json(publishedPost);
             }
 
-            return NotFound("Такого поста не существует");
+            return NotFound(_errorCodes[Constants.EntityDoesntExistErrorName]);
         }
 
         [HttpGet("constructed/{id}")]
@@ -90,252 +102,114 @@ namespace ContestSystem.Controllers
                 var constructedPost = ConstructedPost.GetFromModel(post, _storage.GetImageInBase64(post.ImagePath));
                 return Json(constructedPost);
             }
-            return NotFound("Такого поста не существует");
+            return NotFound(_errorCodes[Constants.EntityDoesntExistErrorName]);
         }
 
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         [HttpPost("add-post")]
         public async Task<IActionResult> AddPost([FromForm] PostForm postForm)
         {
+            var response = new ResponseObject<long>();
+
             if (ModelState.IsValid)
             {
-                var currentUser = await HttpContext.GetCurrentUser();
+                var currentUser = await HttpContext.GetCurrentUser(_userManager);
 
-                Post post = new Post
-                {
-                    PromotedDateTimeUTC = DateTime.UtcNow,
-                    AuthorId = postForm.AuthorUserId,
-                    PostLocalizers = new List<PostLocalizer>()
-                };
                 if (currentUser.Id != postForm.AuthorUserId)
                 {
-                    _logger.LogCreationByNonEqualCurrentUserAndCreator("Post", currentUser.Id, postForm.AuthorUserId);
-                    return Json(new
-                    {
-                        status = false,
-                        errors = new List<string> { "Id автора в форме отличается от Id текущего пользователя" }
-                    });
-                }
-                if (currentUser.IsLimitedInPosts)
-                {
-                    if (await _dbContext.Posts.CountAsync(p => p.AuthorId == currentUser.Id && p.ApprovalStatus == ApproveType.NotModeratedYet) >= Constants.PostsLimitForLimitedUsers)
-                    {
-                        _logger.LogCreationFailedBecauseOfLimits("Post", currentUser.Id);
-                        return Json(new
-                        {
-                            status = false,
-                            errors = new List<string> { "Превышено ограничение недоверенного пользователя по созданию постов" }
-                        });
-                    }
-                    post.ApprovalStatus = ApproveType.NotModeratedYet;
+                    _logger.LogCreationByNonEqualCurrentUserAndCreator(_entityName, currentUser.Id, postForm.AuthorUserId);
+                    response = ResponseObject<long>.Fail(_errorCodes[Constants.UserIdMismatchErrorName]);
                 }
                 else
                 {
-                    post.ApprovalStatus = ApproveType.Accepted;
+                    CreationStatusData statusData = await _workspace.CreatePostAsync(_dbContext, postForm, currentUser.IsLimitedInPosts);
+                    _logger.LogCreationStatus(statusData.Status, _entityName, statusData.Id, currentUser.Id);
+                    response = ResponseObject<long>.FormResponseObjectForCreation(statusData.Status, _entityName, statusData.Id);
                 }
-                await _dbContext.Posts.AddAsync(post);
-                await _dbContext.SaveChangesAsync();
-                post.ImagePath = await _storage.SavePostImageAsync(post.Id, postForm.PreviewImage);
-                _dbContext.Posts.Update(post);
-                
-                for (int i = 0; i < postForm.Localizers.Count; i++)
-                {
-                    var localizer = new PostLocalizer
-                    {
-                        Culture = postForm.Localizers[i].Culture,
-                        PreviewText = postForm.Localizers[i].PreviewText,
-                        Name = postForm.Localizers[i].Name,
-                        HtmlText = postForm.Localizers[i].HtmlText,
-                        PostId = post.Id
-                    };
-                    post.PostLocalizers.Add(localizer);
-                }
-                await _dbContext.SaveChangesAsync();
-                if (post.ApprovalStatus == ApproveType.Accepted)
-                {
-                    _logger.LogCreationSuccessfulWithAutoAccept("Post", post.Id, currentUser.Id);
-                }
-                else
-                {
-                    _logger.LogCreationSuccessful("Post", post.Id, currentUser.Id);
-                }
-                return Json(new
-                {
-                    status = true,
-                    data = post.Id,
-                    errors = new List<string>()
-                });
+            }
+            else
+            {
+                response = ResponseObject<long>.Fail(ModelState, _entityName);
             }
 
-            return Json(new
-            {
-                status = false,
-                errors = ModelState.Values
-                    .SelectMany(x => x.Errors)
-                    .Select(x => x.ErrorMessage).ToList()
-            });
+            return Json(response);
         }
 
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         [HttpPut("edit-post/{id}")]
         public async Task<IActionResult> EditPost([FromForm] PostForm postForm, long id)
         {
-            var currentUser = await HttpContext.GetCurrentUser();
+            var response = new ResponseObject<long>();
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
 
-            if (postForm.Id == null || id <= 0 || id != postForm.Id)
+            if (id != postForm.Id.GetValueOrDefault(-1))
             {
-                _logger.LogEditingWithNonEqualFormAndRequestId("Post", postForm.Id, id, currentUser.Id);
-                return Json(new
-                {
-                    status = false,
-                    errors = new List<string> {"Id в запросе не совпадает с Id в форме"}
-                });
+                _logger.LogEditingWithNonEqualFormAndRequestId(_entityName, postForm.Id, id, currentUser.Id);
+                response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityIdMismatchErrorName]);
             }
-
-            if (ModelState.IsValid)
+            else
             {
-                Post post = await _dbContext.Posts.FirstOrDefaultAsync(p => p.Id == id);
-                if (post == null)
+                if (ModelState.IsValid)
                 {
-                    _logger.LogEditingOfNonExistentEntity("Post", id, currentUser.Id);
-                    return Json(new
+                    Post post = await _dbContext.Posts.FirstOrDefaultAsync(p => p.Id == id);
+                    if (post == null)
                     {
-                        status = false,
-                        errors = new List<string> {"Попытка изменить несуществующий пост"}
-                    });
-                }
-                else
-                {
-                    if (currentUser.Id != post.AuthorId)
+                        _logger.LogEditingOfNonExistentEntity(_entityName, id, currentUser.Id);
+                        response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityDoesntExistErrorName]);
+                    }
+                    else
                     {
-                        _logger.LogEditingByNotAppropriateUser("Post", id, currentUser.Id);
-                        return Json(new
+                        if (currentUser.Id != post.AuthorId)
                         {
-                            status = false,
-                            errors = new List<string> {"Попытка изменить не свой пост"}
-                        });
-                    }
-
-                    if (postForm.PreviewImage != null)
-                    {
-                        post.ImagePath = await _storage.SavePostImageAsync(id, postForm.PreviewImage);
-                    }
-
-                    if (post.ApprovalStatus == ApproveType.Rejected)
-                    {
-                        post.ApprovalStatus = ApproveType.NotModeratedYet;
-                        post.ApprovingModeratorId = null;
-                    }
-                    else if (post.ApprovalStatus == ApproveType.Accepted)
-                    {
-                        post.PublicationDateTimeUTC = DateTime.UtcNow;
-                    }
-                    _dbContext.Posts.Update(post);
-
-                    var localizers = await _dbContext.PostsLocalizers.Where(l => l.PostId == id).ToListAsync();
-                    var localizersExamined = new Dictionary<long, bool>();
-                    foreach (var l in localizers)
-                    {
-                        localizersExamined.Add(l.Id, false);
-                    }
-                    for (int i = 0; i < postForm.Localizers.Count; i++)
-                    {
-                        var localizer = new PostLocalizer
-                        {
-                            Culture = postForm.Localizers[i].Culture,
-                            PreviewText = postForm.Localizers[i].PreviewText,
-                            Name = postForm.Localizers[i].Name,
-                            HtmlText = postForm.Localizers[i].HtmlText,
-                            PostId = post.Id
-                        };
-                        var loadedLocalizer = localizers.FirstOrDefault(pl => pl.Culture == localizer.Culture);
-                        if (loadedLocalizer == null)
-                        {
-                            await _dbContext.PostsLocalizers.AddAsync(localizer);
+                            _logger.LogEditingByNotAppropriateUser(_entityName, id, currentUser.Id);
+                            response = ResponseObject<long>.Fail(_errorCodes[Constants.UserIdMismatchErrorName]);
                         }
                         else
                         {
-                            localizersExamined[loadedLocalizer.Id] = true;
-                            loadedLocalizer.PreviewText = localizer.PreviewText;
-                            loadedLocalizer.Name = localizer.Name;
-                            loadedLocalizer.HtmlText = localizer.HtmlText;
-                            _dbContext.PostsLocalizers.Update(loadedLocalizer);
+                            EditionStatus status = await _workspace.EditPostAsync(_dbContext, postForm, post);
+                            _logger.LogEditionStatus(status, _entityName, id, currentUser.Id);
+                            response = ResponseObject<long>.FormResponseObjectForEdition(status, _entityName, id);
                         }
                     }
-                    foreach (var item in localizersExamined)
-                    {
-                        if (!item.Value)
-                        {
-                            var loadedLocalizer = localizers.FirstOrDefault(l => l.Id == item.Key);
-                            _dbContext.PostsLocalizers.Remove(loadedLocalizer);
-                        }
-                    }
-
-                    try
-                    {
-                        await _dbContext.SaveChangesAsync();
-                    }
-                    catch (DbUpdateConcurrencyException)
-                    {
-                        _logger.LogParallelSaveError("Post", id);
-                        return Json(new
-                        {
-                            status = false,
-                            errors = new List<string> {"Ошибка параллельного сохранения"}
-                        });
-                    }
-                    _logger.LogEditingSuccessful("Post", id, currentUser.Id);
-                    return Json(new
-                    {
-                        status = true,
-                        errors = new List<string>()
-                    });
+                }
+                else
+                {
+                    response = ResponseObject<long>.Fail(ModelState, _entityName);
                 }
             }
 
-            return Json(new
-            {
-                status = false,
-                errors = ModelState.Values
-                    .SelectMany(x => x.Errors)
-                    .Select(x => x.ErrorMessage).ToList()
-            });
+            return Json(response);
         }
 
         [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
         [HttpDelete("delete-post/{id}")]
         public async Task<IActionResult> DeletePost(long id)
         {
-            var currentUser = await HttpContext.GetCurrentUser();
-            Post loadedPost = await _dbContext.Posts.FindAsync(id);
+            var response = new ResponseObject<long>();
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
+            Post loadedPost = await _dbContext.Posts.FirstOrDefaultAsync(p => p.Id == id);
+
             if (loadedPost == null)
             {
-                _logger.LogDeletingOfNonExistentEnitiy("Post", id, currentUser.Id);
-                return Json(new
-                {
-                    status = false,
-                    errors = new List<string> {"Попытка удалить несуществующий пост"}
-                });
+                _logger.LogDeletingOfNonExistentEnitiy(_entityName, id, currentUser.Id);
+                response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityDoesntExistErrorName]);
             }
-            var moderatorRole = await _dbContext.Roles.FirstOrDefaultAsync(r => r.Name == RolesContainer.Moderator);
-            if (currentUser.Id != loadedPost.AuthorId && !currentUser.Roles.Contains(moderatorRole))
+            else
             {
-                _logger.LogDeletingByNotAppropriateUser("Post", id, currentUser.Id);
-                return Json(new
+                if (currentUser.Id != loadedPost.AuthorId && !await _userManager.IsInRoleAsync(currentUser, RolesContainer.Moderator))
                 {
-                    status = false,
-                    errors = new List<string> {"Попытка удалить не свой пост или без админских прав"}
-                });
+                    _logger.LogDeletingByNotAppropriateUser(_entityName, id, currentUser.Id);
+                    response = ResponseObject<long>.Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.UserInsufficientRightsErrorName]);
+                }
+                else
+                {
+                    DeletionStatus status = await _workspace.DeletePostAsync(_dbContext, loadedPost);
+                    _logger.LogDeletionStatus(status, _entityName, id, currentUser.Id);
+                    response = ResponseObject<long>.FormResponseObjectForDeletion(status, _entityName, id);
+                }
             }
-            _storage.DeleteFileAsync(loadedPost.ImagePath);
-            _dbContext.Posts.Remove(loadedPost);
-            await _dbContext.SaveChangesAsync();
-            _logger.LogDeletingSuccessful("Post", id, currentUser.Id);
-            return Json(new
-            {
-                status = true,
-                errors = new List<string>()
-            });
+
+            return Json(response);
         }
 
         [HttpGet("get-requests")]
@@ -355,7 +229,7 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetApprovedPosts()
         {
-            var currentUser = await HttpContext.GetCurrentUser();
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
             var posts = await _dbContext.Posts.Where(p => p.ApprovalStatus == ApproveType.Accepted 
                                                             && p.ApprovingModeratorId.GetValueOrDefault(-1) == currentUser.Id)
                                                 .ToListAsync();
@@ -371,7 +245,7 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetRejectedPosts()
         {
-            var currentUser = await HttpContext.GetCurrentUser();
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
             var posts = await _dbContext.Posts.Where(p => p.ApprovalStatus == ApproveType.Rejected
                                                             && p.ApprovingModeratorId.GetValueOrDefault(-1) == currentUser.Id)
                                                 .ToListAsync();
@@ -387,75 +261,46 @@ namespace ContestSystem.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> ApproveOrRejectPost([FromBody] PostRequestForm postRequestForm, long id)
         {
-            var currentUser = await HttpContext.GetCurrentUser();
+            var response = new ResponseObject<long>();
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
 
-            if (postRequestForm.PostId != id || id < 0)
+            if (postRequestForm.PostId != id)
             {
-                _logger.LogModeratingWithNonEqualFormAndRequestId("Post", postRequestForm.PostId, id, currentUser.Id);
-                return Json(new
-                {
-                    status = false,
-                    errors = new List<string> {"Id в запросе не совпадает с Id в форме"}
-                });
+                _logger.LogModeratingWithNonEqualFormAndRequestId(_entityName, postRequestForm.PostId, id, currentUser.Id);
+                response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityIdMismatchErrorName]);
             }
-
-            if (ModelState.IsValid)
+            else
             {
-                var post = await _dbContext.Posts.FirstOrDefaultAsync(p => p.Id == id);
-                if (post == null)
+                if (ModelState.IsValid)
                 {
-                    _logger.LogModeratingOfNonExistentEntity("Post", id, currentUser.Id);
-                    return Json(new
+                    var post = await _dbContext.Posts.FirstOrDefaultAsync(p => p.Id == id);
+                    if (post == null)
                     {
-                        status = false,
-                        errors = new List<string> {"Попытка модерировать несуществующий пост"}
-                    });
+                        _logger.LogModeratingOfNonExistentEntity(_entityName, id, currentUser.Id);
+                        response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityDoesntExistErrorName]);
+                    }
+                    else
+                    {
+                        if (post.ApprovingModeratorId.GetValueOrDefault(-1) != currentUser.Id && post.ApprovalStatus != ApproveType.NotModeratedYet)
+                        {
+                            _logger.LogModeratingByWrongUser(_entityName, id, currentUser.Id, post.ApprovingModeratorId.GetValueOrDefault(-1), post.ApprovalStatus);
+                            response = ResponseObject<long>.Fail(_errorCodes[Constants.ModerationByWrongModeratorErrorName]);
+                        }
+                        else
+                        {
+                            ModerationStatus status = await _workspace.ModeratePostAsync(_dbContext, postRequestForm, post);
+                            _logger.LogModerationStatus(status, _entityName, id, currentUser.Id);
+                            response = ResponseObject<long>.FormResponseObjectForModeration(status, _entityName, id);
+                        }
+                    }
                 }
                 else
                 {
-                    if (post.ApprovingModeratorId.GetValueOrDefault(-1) != currentUser.Id && post.ApprovalStatus != ApproveType.NotModeratedYet)
-                    {
-                        _logger.LogModeratingByWrongUser("Post", id, currentUser.Id, post.ApprovingModeratorId.GetValueOrDefault(-1), post.ApprovalStatus);
-                        return Json(new
-                        {
-                            status = false,
-                            errors = new List<string> { "Данный пост уже закреплён за другим модератором" }
-                        });
-                    }
-                    post.ApprovalStatus = postRequestForm.ApprovalStatus;
-                    post.ApprovingModeratorId = postRequestForm.ApprovingModeratorId;
-                    post.ModerationMessage = postRequestForm.ModerationMessage;
-                    post.PublicationDateTimeUTC = DateTime.UtcNow;
-                    _dbContext.Posts.Update(post);
-                    try
-                    {
-                        await _dbContext.SaveChangesAsync();
-                    }
-                    catch (DbUpdateConcurrencyException)
-                    {
-                        _logger.LogParallelSaveError("Post", id);
-                        return Json(new
-                        {
-                            status = false,
-                            errors = new List<string> {"Ошибка параллельного сохранения"}
-                        });
-                    }
-                    _logger.LogModeratingSuccessful("Post", id, currentUser.Id, postRequestForm.ApprovalStatus);
-                    return Json(new
-                    {
-                        status = true,
-                        errors = new List<string>()
-                    });
+                    response = ResponseObject<long>.Fail(ModelState, _entityName);
                 }
             }
 
-            return Json(new
-            {
-                status = false,
-                errors = ModelState.Values
-                    .SelectMany(x => x.Errors)
-                    .Select(x => x.ErrorMessage).ToList()
-            });
+            return Json(response);
         }
     }
 }

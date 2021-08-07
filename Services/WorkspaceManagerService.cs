@@ -153,7 +153,66 @@ namespace ContestSystem.Services
 
         public async Task<CreationStatusData> CreatePostAsync(MainDbContext dbContext, PostForm form, bool checkForLimit = false)
         {
-            throw new NotImplementedException();
+            var statusData = new CreationStatusData
+            {
+                Status = CreationStatus.Undefined,
+                Id = null
+            };
+
+            Post post = new Post
+            {
+                PromotedDateTimeUTC = DateTime.UtcNow,
+                AuthorId = form.AuthorUserId,
+                PostLocalizers = new List<PostLocalizer>()
+            };
+
+            if (checkForLimit)
+            {
+                if (await dbContext.Posts.CountAsync(p => p.AuthorId == form.AuthorUserId && p.ApprovalStatus == ApproveType.NotModeratedYet) >= Constants.PostsLimitForLimitedUsers)
+                {
+                    statusData.Status = CreationStatus.LimitExceeded;
+                }
+                else
+                {
+                    post.ApprovalStatus = ApproveType.NotModeratedYet;
+                }
+            }
+            else
+            {
+                post.ApprovalStatus = ApproveType.Accepted;
+                post.PublicationDateTimeUTC = DateTime.UtcNow;
+            }
+            if (statusData.Status == CreationStatus.Undefined)
+            {
+                await dbContext.Posts.AddAsync(post);
+                await dbContext.SaveChangesAsync();
+
+                post.ImagePath = await _storage.SavePostImageAsync(post.Id, form.PreviewImage);
+                dbContext.Posts.Update(post);
+
+                await CreateLinkedEntitiesAsync(dbContext, dbContext.PostsLocalizers, post.Id,
+                                                form.Localizers,
+                                                (plf, id) => new PostLocalizer
+                                                {
+                                                    Culture = plf.Culture,
+                                                    PreviewText = plf.PreviewText,
+                                                    Name = plf.Name,
+                                                    HtmlText = plf.HtmlText,
+                                                    PostId = post.Id
+                                                });
+
+                await dbContext.SaveChangesAsync();
+
+                if (post.ApprovalStatus == ApproveType.Accepted)
+                {
+                    statusData.Status = CreationStatus.SuccessWithAutoAccept;
+                }
+                else
+                {
+                    statusData.Status = CreationStatus.Success;
+                }
+            }
+            return statusData;
         }
 
         public async Task<EditionStatus> EditContestAsync(MainDbContext dbContext, ContestForm form, long userId, Contest contest = null)
@@ -286,7 +345,65 @@ namespace ContestSystem.Services
 
         public async Task<EditionStatus> EditPostAsync(MainDbContext dbContext, PostForm form, Post post = null)
         {
-            throw new NotImplementedException();
+            var status = EditionStatus.Undefined;
+
+            post ??= await dbContext.Posts.FirstOrDefaultAsync(c => c.Id == form.Id.GetValueOrDefault(-1));
+            if (post == null)
+            {
+                status = EditionStatus.NotExistentEntity;
+            }
+            else
+            {
+                if (form.PreviewImage != null)
+                {
+                    post.ImagePath = await _storage.SavePostImageAsync(form.Id.Value, form.PreviewImage);
+                }
+
+                if (post.ApprovalStatus == ApproveType.Rejected)
+                {
+                    post.ApprovalStatus = ApproveType.NotModeratedYet;
+                    post.ApprovingModeratorId = null;
+                }
+                else if (post.ApprovalStatus == ApproveType.Accepted)
+                {
+                    post.PublicationDateTimeUTC = DateTime.UtcNow;
+                }
+
+                dbContext.Posts.Update(post);
+
+                await UpdateLinkedEntitiesAsync(dbContext, dbContext.PostsLocalizers, form.Localizers,
+                                                l => l.PostId == form.Id.Value,
+                                                l => l.Culture,
+                                                (id1, id2) => id1 == id2,
+                                                lf => new PostLocalizer
+                                                {
+                                                    Culture = lf.Culture,
+                                                    PreviewText = lf.PreviewText,
+                                                    Name = lf.Name,
+                                                    HtmlText = lf.HtmlText,
+                                                    PostId = post.Id
+                                                },
+                                                (l, lf) =>
+                                                {
+                                                    PostLocalizer localizer = l;
+                                                    localizer.PreviewText = lf.PreviewText;
+                                                    localizer.Name = lf.Name;
+                                                    localizer.HtmlText = lf.HtmlText;
+                                                    return localizer;
+                                                });
+
+                bool saveSuccess = await SecureSaveAsync(dbContext);
+                if (!saveSuccess)
+                {
+                    status = EditionStatus.ParallelSaveError;
+                }
+                else
+                {
+                    status = EditionStatus.Success;
+                }
+            }
+
+            return status;
         }
 
         public async Task<DeletionStatus> DeleteContestAsync(MainDbContext dbContext, Contest contest)
@@ -367,7 +484,27 @@ namespace ContestSystem.Services
 
         public async Task<DeletionStatus> DeletePostAsync(MainDbContext dbContext, Post post)
         {
-            throw new NotImplementedException();
+            var status = DeletionStatus.Undefined;
+            if (post == null)
+            {
+                status = DeletionStatus.NotExistentEntity;
+            }
+            else
+            {
+                _storage.DeleteFileAsync(post.ImagePath);
+                dbContext.Posts.Remove(post);
+                bool saveSuccess = await SecureSaveAsync(dbContext);
+                if (!saveSuccess)
+                {
+                    status = DeletionStatus.ParallelSaveError;
+                }
+                else
+                {
+                    status = DeletionStatus.Success;
+                }
+            }
+
+            return status;
         }
 
         public async Task<ModerationStatus> ModerateContestAsync(MainDbContext dbContext, ContestRequestForm form, Contest contest = null)
@@ -467,36 +604,62 @@ namespace ContestSystem.Services
 
         public async Task<ModerationStatus> ModeratePostAsync(MainDbContext dbContext, PostRequestForm form, Post post = null)
         {
-            throw new NotImplementedException();
+            var status = ModerationStatus.Undefined;
+
+            post ??= await dbContext.Posts.FirstOrDefaultAsync(p => p.Id == form.PostId);
+            if (post == null)
+            {
+                status = ModerationStatus.NotExistentEntity;
+            }
+            else
+            {
+                post.ApprovalStatus = form.ApprovalStatus;
+                post.ApprovingModeratorId = form.ApprovingModeratorId;
+                post.ModerationMessage = form.ModerationMessage;
+                post.PublicationDateTimeUTC = DateTime.UtcNow;
+
+                dbContext.Posts.Update(post);
+
+                bool saveSuccess = await SecureSaveAsync(dbContext);
+                if (!saveSuccess)
+                {
+                    status = ModerationStatus.ParallelSaveError;
+                }
+                else
+                {
+                    status = (post.ApprovalStatus == ApproveType.Accepted) ? ModerationStatus.Accepted : ModerationStatus.Rejected;
+                }
+            }
+
+            return status;
         }
 
-        private async Task<bool> UpdateLinkedEntitiesAsync<TEntityFromForm, TEntity, TLinkedIdentity>(MainDbContext dbContext, DbSet<TEntity> dbSet,
-            List<TEntityFromForm> entitiesFromForm, Expression<Func<TEntity, bool>> predicateForDbSearch,
-            Func<TEntity, TLinkedIdentity> predicateForLinkedEntityIdentity, Func<TLinkedIdentity, TLinkedIdentity, bool> predicateForLinkedIdentityCompare,
-            Func<TEntityFromForm, TEntity> predicateForFormParse, Func<TEntity, TEntityFromForm, TEntity> predicateBeforeUpdate,
+        private async Task<bool> UpdateLinkedEntitiesAsync<TEntityForm, TEntity, TIdentity>(MainDbContext dbContext, DbSet<TEntity> dbSet,
+            List<TEntityForm> entitiesFromForm, Expression<Func<TEntity, bool>> predicateForDbSearch,
+            Func<TEntity, TIdentity> predicateForIdentity, Func<TIdentity, TIdentity, bool> predicateForIdentityCompare,
+            Func<TEntityForm, TEntity> predicateForFormParse, Func<TEntity, TEntityForm, TEntity> predicateBeforeUpdate,
             bool needToSave = false)
             where TEntity : class
-            where TEntityFromForm : class
-            where TLinkedIdentity : IEquatable<TLinkedIdentity>
+            where TEntityForm : class
         {
             var entities = await dbSet.Where(predicateForDbSearch).ToListAsync();
-            var entitiesExamined = new Dictionary<TLinkedIdentity, bool>();
+            var entitiesExamined = new Dictionary<TIdentity, bool>();
             foreach (var entity in entities)
             {
-                entitiesExamined.Add(predicateForLinkedEntityIdentity(entity), false);
+                entitiesExamined.Add(predicateForIdentity(entity), false);
             }
 
             for (int i = 0; i < entitiesFromForm.Count; i++)
             {
                 var entity = predicateForFormParse(entitiesFromForm[i]);
-                var loadedEntity = entities.FirstOrDefault(e => predicateForLinkedIdentityCompare(predicateForLinkedEntityIdentity(e), predicateForLinkedEntityIdentity(entity)));
+                var loadedEntity = entities.FirstOrDefault(e => predicateForIdentityCompare(predicateForIdentity(e), predicateForIdentity(entity)));
                 if (loadedEntity == null)
                 {
                     await dbSet.AddAsync(entity);
                 }
                 else
                 {
-                    entitiesExamined[predicateForLinkedEntityIdentity(entity)] = true;
+                    entitiesExamined[predicateForIdentity(entity)] = true;
                     loadedEntity = predicateBeforeUpdate(loadedEntity, entitiesFromForm[i]);
                     dbSet.Update(loadedEntity);
                 }
@@ -506,7 +669,7 @@ namespace ContestSystem.Services
             {
                 if (!item.Value)
                 {
-                    var loadedEntity = entities.FirstOrDefault(e => predicateForLinkedIdentityCompare(predicateForLinkedEntityIdentity(e), item.Key));
+                    var loadedEntity = entities.FirstOrDefault(e => predicateForIdentityCompare(predicateForIdentity(e), item.Key));
                     if (loadedEntity != null)
                     {
                         dbSet.Remove(loadedEntity);
@@ -528,7 +691,7 @@ namespace ContestSystem.Services
                 await dbSet.AddAsync(entity);
             }
 
-            return needToSave ? await SecureSaveAsync(dbContext) : true;
+            return needToSave ? await SecureSaveAsync(dbContext) : true; // НЕ ПРИНИМАТЬ предложение IDE упростить данное выражение
         }
 
         private async Task<bool> SecureSaveAsync(MainDbContext dbContext)
