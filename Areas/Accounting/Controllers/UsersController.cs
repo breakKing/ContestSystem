@@ -1,6 +1,7 @@
 ﻿using ContestSystem.Extensions;
 using ContestSystem.Models.Attributes;
 using ContestSystem.Models.DbContexts;
+using ContestSystem.Models.Dictionaries;
 using ContestSystem.Models.FormModels;
 using ContestSystemDbStructure.Models;
 using Microsoft.AspNetCore.Http;
@@ -23,11 +24,16 @@ namespace ContestSystem.Areas.Accounting.Controllers
         private readonly MainDbContext _dbContext;
         private readonly UserManager<User> _userManager;
 
+        private readonly string _entityName = Constants.UserEntityName;
+        private readonly Dictionary<string, string> _errorCodes;
+
         public UsersController(ILogger<UsersController> logger, MainDbContext dbContext, UserManager<User> userManager)
         {
             _logger = logger;
             _dbContext = dbContext;
             _userManager = userManager;
+
+            _errorCodes = Constants.ErrorCodes[_entityName];
         }
 
         [HttpPost("get-all-users")]
@@ -82,14 +88,14 @@ namespace ContestSystem.Areas.Accounting.Controllers
                     }
                     catch (DbUpdateConcurrencyException)
                     {
-                        _logger.LogParallelSaveError("User", user.Id);
+                        _logger.LogParallelSaveError(_entityName, user.Id);
                         return Json(new
                         {
                             status = false,
-                            errors = new List<string> { "Ошибка параллельного сохранения" }
+                            errors = new List<string> { Constants.ErrorCodes[Constants.CommonSectionName][Constants.ParallelDbSaveErrorName] }
                         });
                     }
-                    _logger.LogEditingSuccessful("User", user.Id, currentUser.Id);
+                    _logger.LogEditingSuccessful(_entityName, user.Id, currentUser.Id);
                     return Json(new
                     {
                         success = true

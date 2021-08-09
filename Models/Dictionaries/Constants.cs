@@ -34,6 +34,10 @@ namespace ContestSystem.Models.Dictionaries
         public static readonly string ModerationByWrongModeratorErrorName = "EntityModerationByWrongModerator";
         public static readonly string UserAlreadyInContestErrorName = "UserAlreadyInContest";
         public static readonly string UserInsufficientRightsErrorName = "UserInsufficientRights";
+        public static readonly string UserAlreadyExistsErrorName = "UserAlreadyExists";
+        public static readonly string AuthFailedErrorName = "AuthFailed";
+        public static readonly string TokenGenerationFailedErrorName = "TokenGenerationFailed";
+        public static readonly string UserRegisterFailedErrorName = "UserRegisterFailed";
         public static readonly string ParallelDbSaveErrorName = "ParallelDbSaveError";
         public static readonly string UndefinedErrorName = "UndefinedError";
 
@@ -100,7 +104,11 @@ namespace ContestSystem.Models.Dictionaries
                 { ValidationFailedErrorName, "ERR_USER_VALIDATION_FAILED" },
                 { EntityDoesntExistErrorName, "ERR_USER_DOESNT_EXIST" },
                 { UserAlreadyInContestErrorName, "ERR_USER_ALREADY_IN_CONTEST" },
-                { UserInsufficientRightsErrorName, "ERR_USER_HAS_INSUFFICIENT_RIGHTS" }
+                { UserInsufficientRightsErrorName, "ERR_USER_HAS_INSUFFICIENT_RIGHTS" },
+                { UserAlreadyExistsErrorName, "ERR_USER_ALREADY_EXISTS" },
+                { AuthFailedErrorName, "ERR_USER_AUTH_FAILED" },
+                { TokenGenerationFailedErrorName, "ERR_USER_TOKEN_GENERATION_FAILED" },
+                { UserRegisterFailedErrorName, "ERR_USER_REGISTER_FAILED" }
             },
             [CommonSectionName] = new Dictionary<string, string>
             {

@@ -52,7 +52,11 @@
         ValidationFailed: "ERR_USER_VALIDATION_FAILED",
         EntityDoesntExist: "ERR_USER_DOESNT_EXIST",
         UserAlreadyInContest: "ERR_USER_ALREADY_IN_CONTEST",
-        UserInsufficientRights: "ERR_USER_HAS_INSUFFICIENT_RIGHTS"
+        UserInsufficientRights: "ERR_USER_HAS_INSUFFICIENT_RIGHTS",
+        UserAlreadyExists: "ERR_USER_ALREADY_EXISTS",
+        AuthFailed: "ERR_USER_AUTH_FAILED",
+        TokenGenerationFailed: "ERR_USER_TOKEN_GENERATION_FAILED",
+        UserRegisterFailed: "ERR_USER_REGISTER_FAILED"
     },
     Common: {
         ParallelDbSave: "ERR_PARALLEL_DB_SAVE",

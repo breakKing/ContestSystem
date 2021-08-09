@@ -1,6 +1,7 @@
 ﻿using ContestSystem.Extensions;
 using ContestSystem.Models;
 using ContestSystem.Models.Attributes;
+using ContestSystem.Models.Dictionaries;
 using ContestSystem.Models.FormModels;
 using ContestSystemDbStructure.Models;
 using Microsoft.AspNetCore.Http;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace ContestSystem.Areas.Accounting.Controllers
@@ -23,6 +25,9 @@ namespace ContestSystem.Areas.Accounting.Controllers
         private readonly SignInManager<User> _signInManager;
         private readonly JwtSettingsService _jwtSettingsService;
 
+        private readonly string _entityName = Constants.UserEntityName;
+        private readonly Dictionary<string, string> _errorCodes;
+
         public SessionController(ILogger<SessionController> logger, UserManager<User> userManager, RoleManager<Role> roleManager, SignInManager<User> signInManager, JwtSettingsService jwtSettingsService)
         {
             _logger = logger;
@@ -30,6 +35,8 @@ namespace ContestSystem.Areas.Accounting.Controllers
             _roleManager = roleManager;
             _signInManager = signInManager;
             _jwtSettingsService = jwtSettingsService;
+
+            _errorCodes = Constants.ErrorCodes[_entityName];
         }
 
         [HttpPost("login")]
@@ -51,7 +58,7 @@ namespace ContestSystem.Areas.Accounting.Controllers
             return Json(new
             {
                 status = false,
-                message = "Не верный логин или пароль",
+                message = _errorCodes[Constants.AuthFailedErrorName],
             });
         }
 
@@ -67,7 +74,7 @@ namespace ContestSystem.Areas.Accounting.Controllers
                         new
                         {
                             status = false,
-                            message = "Такой пользователь уже зарегистрирован"
+                            message = _errorCodes[Constants.UserAlreadyExistsErrorName]
                         });
                 }
 
@@ -100,7 +107,7 @@ namespace ContestSystem.Areas.Accounting.Controllers
                         return Json(new
                         {
                             status = false,
-                            message = "Не удалось создать Jwt токен",
+                            message = _errorCodes[Constants.TokenGenerationFailedErrorName],
                         });
                     }
 
@@ -118,7 +125,7 @@ namespace ContestSystem.Areas.Accounting.Controllers
                 new
                 {
                     status = false,
-                    message = "Не удалось зарегистрировать пользователя"
+                    message = _errorCodes[Constants.UserRegisterFailedErrorName]
                 });
         }
 
