@@ -1,24 +1,27 @@
-﻿using ContestSystemDbStructure.Enums;
-using ContestSystemDbStructure.Models;
+﻿using ContestSystem.Areas.Workspace.Services;
 using ContestSystem.Extensions;
 using ContestSystem.Models.Attributes;
 using ContestSystem.Models.DbContexts;
+using ContestSystem.Models.Dictionaries;
 using ContestSystem.Models.ExternalModels;
 using ContestSystem.Models.FormModels;
+using ContestSystem.Models.Misc;
+using ContestSystem.Services;
+using ContestSystemDbStructure.Enums;
+using ContestSystemDbStructure.Models;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using ContestSystem.Services;
-using ContestSystem.Models.Dictionaries;
-using Microsoft.AspNetCore.Identity;
-using ContestSystem.Models.Misc;
 
-namespace ContestSystem.Controllers
+namespace ContestSystem.Areas.Workspace.Controllers
 {
-    [Route("api/[controller]")]
+    [Area("Workspace")]
+    [Route("api/[area]/[controller]")]
     [ApiController]
     public class PostsController : Controller
     {
@@ -43,55 +46,7 @@ namespace ContestSystem.Controllers
             _errorCodes = Constants.ErrorCodes[_entityName];
         }
 
-        [HttpGet("{culture}")]
-        public async Task<IActionResult> GetAllPublishedPosts(string culture)
-        {
-            var posts = await _dbContext.Posts.Where(p => p.ApprovalStatus == ApproveType.Accepted).ToListAsync();
-            var localizers = posts.ConvertAll(post => post.PostLocalizers.FirstOrDefault(pl => pl.Culture == culture));
-            var publishedPosts = new List<PublishedPost>();
-            for (int i = 0; i < posts.Count; i++)
-            {
-                var pp = PublishedPost.GetFromModel(posts[i], localizers[i], _storage.GetImageInBase64(posts[i].ImagePath));
-                publishedPosts.Add(pp);
-            }
-
-            return Json(publishedPosts);
-        }
-
-        [HttpGet("get-user-posts/{id}/{culture}")]
-        [AuthorizeByJwt(Roles = RolesContainer.User)]
-        public async Task<IActionResult> GetUserPosts(long id, string culture)
-        {
-            var posts = await _dbContext.Posts.Where(p => p.AuthorId == id).ToListAsync();
-            List<PublishedPost> publishedPosts = posts.ConvertAll(p =>
-            {
-                var localizer = p.PostLocalizers.FirstOrDefault(pl => pl.Culture == culture);
-                var pp = PublishedPost.GetFromModel(p, localizer, _storage.GetImageInBase64(p.ImagePath));
-                return pp;
-            });
-            return Json(publishedPosts);
-        }
-
-        [HttpGet("{id}/{culture}")]
-        public async Task<IActionResult> GetPublishedPost(long id, string culture)
-        {
-            var post = await _dbContext.Posts.FirstOrDefaultAsync(p => p.Id == id);
-            if (post != null)
-            {
-                var localizer = post.PostLocalizers.FirstOrDefault(pl => pl.Culture == culture);
-                if (localizer == null)
-                {
-                    return NotFound(_errorCodes[Constants.EntityLocalizerDoesntExistErrorName]);
-                }
-
-                var publishedPost = PublishedPost.GetFromModel(post, localizer, _storage.GetImageInBase64(post.ImagePath));
-                return Json(publishedPost);
-            }
-
-            return NotFound(_errorCodes[Constants.EntityDoesntExistErrorName]);
-        }
-
-        [HttpGet("constructed/{id}")]
+        [HttpGet("{id}")]
         [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
         public async Task<IActionResult> GetConstructedPost(long id)
         {
@@ -104,8 +59,22 @@ namespace ContestSystem.Controllers
             return NotFound(_errorCodes[Constants.EntityDoesntExistErrorName]);
         }
 
+        [HttpGet("user/{userId}/{culture}")]
         [AuthorizeByJwt(Roles = RolesContainer.User)]
-        [HttpPost("add-post")]
+        public async Task<IActionResult> GetUserPosts(long userId, string culture)
+        {
+            var posts = await _dbContext.Posts.Where(p => p.AuthorId == userId).ToListAsync();
+            List<PublishedPost> publishedPosts = posts.ConvertAll(p =>
+            {
+                var localizer = p.PostLocalizers.FirstOrDefault(pl => pl.Culture == culture);
+                var pp = PublishedPost.GetFromModel(p, localizer, _storage.GetImageInBase64(p.ImagePath));
+                return pp;
+            });
+            return Json(publishedPosts);
+        }
+
+        [AuthorizeByJwt(Roles = RolesContainer.User)]
+        [HttpPost("")]
         public async Task<IActionResult> AddPost([FromForm] PostForm postForm)
         {
             var response = new ResponseObject<long>();
@@ -135,7 +104,7 @@ namespace ContestSystem.Controllers
         }
 
         [AuthorizeByJwt(Roles = RolesContainer.User)]
-        [HttpPut("edit-post/{id}")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> EditPost([FromForm] PostForm postForm, long id)
         {
             var response = new ResponseObject<long>();
@@ -181,7 +150,7 @@ namespace ContestSystem.Controllers
         }
 
         [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
-        [HttpDelete("delete-post/{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePost(long id)
         {
             var response = new ResponseObject<long>();
@@ -211,7 +180,7 @@ namespace ContestSystem.Controllers
             return Json(response);
         }
 
-        [HttpGet("get-requests")]
+        [HttpGet("requests")]
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetPostsRequests()
         {
@@ -224,12 +193,12 @@ namespace ContestSystem.Controllers
             return Json(requests);
         }
 
-        [HttpGet("get-approved")]
+        [HttpGet("accepted")]
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
-        public async Task<IActionResult> GetApprovedPosts()
+        public async Task<IActionResult> GetAcceptedPosts()
         {
             var currentUser = await HttpContext.GetCurrentUser(_userManager);
-            var posts = await _dbContext.Posts.Where(p => p.ApprovalStatus == ApproveType.Accepted 
+            var posts = await _dbContext.Posts.Where(p => p.ApprovalStatus == ApproveType.Accepted
                                                             && p.ApprovingModeratorId.GetValueOrDefault(-1) == currentUser.Id)
                                                 .ToListAsync();
             var requests = posts.ConvertAll(p =>
@@ -240,7 +209,7 @@ namespace ContestSystem.Controllers
             return Json(requests);
         }
 
-        [HttpGet("get-rejected")]
+        [HttpGet("rejected")]
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetRejectedPosts()
         {
@@ -256,9 +225,9 @@ namespace ContestSystem.Controllers
             return Json(requests);
         }
 
-        [HttpPut("moderate/{id}")]
+        [HttpPut("{id}/moderate")]
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
-        public async Task<IActionResult> ApproveOrRejectPost([FromBody] PostRequestForm postRequestForm, long id)
+        public async Task<IActionResult> ModeratePost([FromBody] PostRequestForm postRequestForm, long id)
         {
             var response = new ResponseObject<long>();
             var currentUser = await HttpContext.GetCurrentUser(_userManager);

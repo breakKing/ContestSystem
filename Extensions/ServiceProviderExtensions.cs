@@ -1,4 +1,7 @@
-﻿using ContestSystem.Providers;
+﻿using ContestSystem.Areas.Messenger.Services;
+using ContestSystem.Areas.Solutions.Services;
+using ContestSystem.Areas.Workspace.Services;
+using ContestSystem.Providers;
 using ContestSystem.Services;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,9 +15,9 @@ namespace ContestSystem.Extensions
             services.AddSingleton<CheckerSystemService>();
         }
 
-        public static void AddVerdicter(this IServiceCollection services)
+        public static void AddSolutionsManager(this IServiceCollection services)
         {
-            services.AddSingleton<VerdicterService>();
+            services.AddSingleton<SolutionsManagerService>();
         }
 
         public static void AddFileStorage(this IServiceCollection services)

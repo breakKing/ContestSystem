@@ -102,7 +102,7 @@ export default {
                     // возможно авторизован
                     axios.defaults.headers.common = getters.getHeaders
                     try {
-                        let {data} = await axios.post('/api/session/verify-token', {})
+                        let {data} = await axios.post('/api/accounting/session/verify-token', {})
                         if (data.token) {
                             await dispatch('updateTokenAndHeaders', data.token)
                             commit('setCurrentUser', data.user)
@@ -118,7 +118,7 @@ export default {
         },
         async sendLoginRequest({commit, state, dispatch, getters}, {username, password}) {
             try {
-                let {data} = await axios.post('/api/session/login', {
+                let {data} = await axios.post('/api/accounting/session/login', {
                     username,
                     password
                 })
@@ -143,7 +143,7 @@ export default {
         },
         async sendRegistrationRequest({commit, state, dispatch, getters}, request_data) {
             try {
-                let {data} = await axios.post('/api/session/register', request_data)
+                let {data} = await axios.post('/api/accounting/session/register', request_data)
                 if (data.status) {
                     await dispatch('updateTokenAndHeaders', data.token)
                     commit('setCurrentUser', data.user)
@@ -186,7 +186,7 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.post('/api/session/get-all-roles', {})
+                let {data} = await axios.post('/api/accounting/session/get-all-roles', {})
                 commit('setAllRolesArray', data.roles)
             } catch (e) {
                 console.error(e)

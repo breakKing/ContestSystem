@@ -31,7 +31,7 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.get(`/api/rules/get-available-rules/${rootGetters.currentUser.id}`)
+                let {data} = await axios.get(`/api/workspace/rules/available/${rootGetters.currentUser.id}`)
                 commit('setAvailableRuleSets', data)
             } catch (e) {
                 console.error(e)
@@ -45,7 +45,7 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.get(`/api/rules/get-user-rules/${rootGetters.currentUser.id}`)
+                let {data} = await axios.get(`/api/workspace/rules/user/${rootGetters.currentUser.id}`)
                 commit('setCurrentUserRuleSets', data)
             } catch (e) {
                 console.error(e)
@@ -60,7 +60,7 @@ export default {
         },
         async deleteRuleSet({getters, dispatch}, ruleset_id) {
             try {
-                let {data} = await axios.delete(`/api/rules/delete-rules/${ruleset_id}`)
+                let {data} = await axios.delete(`/api/workspace/rules/${ruleset_id}`)
                 return data
             } catch (e) {
                 console.error(e)

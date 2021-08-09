@@ -40,7 +40,7 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.get(`/api/problems/get-user-problems/${rootGetters.currentUser.id}/ru`)
+                let {data} = await axios.get(`/api/workspace/problems/user/${rootGetters.currentUser.id}/ru`)
                 commit('setCurrentUserTasks', data)
             } catch (e) {
                 console.error(e)
@@ -54,7 +54,7 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.get(`/api/problems/get-available-problems/${rootGetters.currentUser.id}/ru`)
+                let {data} = await axios.get(`/api/workspace/problems/available/${rootGetters.currentUser.id}/ru`)
                 commit('setAvailableTasks', data)
             } catch (e) {
                 console.error(e)
@@ -65,7 +65,7 @@ export default {
                 return null
             }
             try {
-                let {data} = await axios.get(`/api/problems/constructed/${task_id}`)
+                let {data} = await axios.get(`/api/workspace/problems/${task_id}`)
                 return data
             } catch (e) {
                 console.error(e)
@@ -74,7 +74,7 @@ export default {
         },
         async deleteTask({commit, state, dispatch, getters, rootGetters}, task_id) {
             try {
-                let {data} = await axios.delete(`/api/problems/delete-problem/${task_id}`)
+                let {data} = await axios.delete(`/api/workspace/problems/${task_id}`)
                 return data
             } catch (e) {
                 console.error(e)

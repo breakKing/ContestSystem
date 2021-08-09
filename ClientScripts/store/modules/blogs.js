@@ -43,7 +43,7 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.get('/api/posts/ru')
+                let {data} = await axios.get('/api/blog/posts/ru')
                 commit('setPostsList', data)
             } catch (e) {
                 console.error(e)
@@ -54,7 +54,7 @@ export default {
                 return null
             }
             try {
-                let {data} = await axios.get(`/api/posts/${blog_id}/ru`)
+                let {data} = await axios.get(`/api/blog/posts/${blog_id}/ru`)
                 return data
             } catch (e) {
                 console.error(e)
@@ -65,7 +65,7 @@ export default {
             try {
                 if (post_id) {
                     return await $.ajax({
-                        url: `/api/posts/edit-post/${post_id}`,
+                        url: `/api/workspace/posts/${post_id}`,
                         data: request_data,
                         processData: false,
                         contentType: false,
@@ -73,7 +73,7 @@ export default {
                     })
                 } else {
                     return await $.ajax({
-                        url: `/api/posts/add-post`,
+                        url: `/api/workspace/posts`,
                         data: request_data,
                         processData: false,
                         contentType: false,
@@ -93,7 +93,7 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.get(`/api/posts/get-user-posts/${rootGetters.currentUser.id}/ru`)
+                let {data} = await axios.get(`/api/workspace/posts/user/${rootGetters.currentUser.id}/ru`)
                 commit('setCurrentUserPosts', data)
             } catch (e) {
                 console.error(e)
@@ -101,7 +101,7 @@ export default {
         },
         async deletePost({commit, state, dispatch, getters}, post_id) {
             try {
-                let {data} = await axios.delete(`/api/posts/delete-post/${post_id}`)
+                let {data} = await axios.delete(`/api/workspace/posts/${post_id}`)
                 return data
             } catch (e) {
                 console.error(e)

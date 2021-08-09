@@ -93,11 +93,11 @@ export default {
       let result = {};
       try {
         if (this.id) {
-          let {data} = await axios.put(`/api/checkers/edit-checker/${this.id}`, request)
+          let {data} = await axios.put(`/api/workspace/checkers/${this.id}`, request)
           result = data
         } else {
           request.id = null
-          let {data} = await axios.post(`/api/checkers/add-checker`, request)
+          let {data} = await axios.post(`/api/workspace/checkers`, request)
           result = data
         }
       } catch (e) {

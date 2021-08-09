@@ -1,25 +1,26 @@
-﻿using ContestSystemDbStructure.Enums;
-using ContestSystemDbStructure.Models;
+﻿using ContestSystem.Areas.Workspace.Services;
 using ContestSystem.Extensions;
 using ContestSystem.Models.Attributes;
 using ContestSystem.Models.DbContexts;
+using ContestSystem.Models.Dictionaries;
 using ContestSystem.Models.ExternalModels;
 using ContestSystem.Models.FormModels;
+using ContestSystem.Models.Misc;
+using ContestSystemDbStructure.Enums;
+using ContestSystemDbStructure.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using ContestSystem.Models.Dictionaries;
-using Microsoft.AspNetCore.Identity;
-using ContestSystem.Services;
-using ContestSystem.Models.Misc;
 
-namespace ContestSystem.Controllers
+namespace ContestSystem.Areas.Workspace.Controllers
 {
-    [Route("api/[controller]")]
+    [Area("Workspace")]
+    [Route("api/[area]/[controller]")]
     [ApiController]
     public class ProblemsController : Controller
     {
@@ -42,11 +43,11 @@ namespace ContestSystem.Controllers
             _errorCodes = Constants.ErrorCodes[_entityName];
         }
 
-        [HttpGet("get-user-problems/{id}/{culture}")]
+        [HttpGet("user/{userId}/{culture}")]
         [AuthorizeByJwt(Roles = RolesContainer.User)]
-        public async Task<IActionResult> GetUserProblems(long id, string culture)
+        public async Task<IActionResult> GetUserProblems(long userId, string culture)
         {
-            var problems = await _dbContext.Problems.Where(p => p.CreatorId == id && !p.IsArchieved).ToListAsync();
+            var problems = await _dbContext.Problems.Where(p => p.CreatorId == userId && !p.IsArchieved).ToListAsync();
             var publishedProblems = problems.ConvertAll(p =>
             {
                 var localizer = p.ProblemLocalizers.FirstOrDefault(pl => pl.Culture == culture);
@@ -56,11 +57,11 @@ namespace ContestSystem.Controllers
             return Json(publishedProblems);
         }
 
-        [HttpGet("get-available-problems/{id}/{culture}")]
+        [HttpGet("available/{userId}/{culture}")]
         [AuthorizeByJwt(Roles = RolesContainer.User)]
-        public async Task<IActionResult> GetAvailableProblems(long id, string culture)
+        public async Task<IActionResult> GetAvailableProblems(long userId, string culture)
         {
-            var problems = await _dbContext.Problems.Where(p => (p.CreatorId == id || p.IsPublic)
+            var problems = await _dbContext.Problems.Where(p => (p.CreatorId == userId || p.IsPublic)
                                                                 && p.ApprovalStatus == ApproveType.Accepted
                                                                 && !p.IsArchieved)
                 .ToListAsync();
@@ -72,28 +73,8 @@ namespace ContestSystem.Controllers
             });
             return Json(publishedProblems);
         }
-
-        [HttpGet("published/{id}/{culture}")]
-        [AuthorizeByJwt(Roles = RolesContainer.User)]
-        public async Task<IActionResult> GetPublishedProblem(long id, string culture)
-        {
-            var problem = await _dbContext.Problems.FirstOrDefaultAsync(p => p.Id == id && !p.IsArchieved);
-            if (problem != null)
-            {
-                var localizer = problem.ProblemLocalizers.FirstOrDefault(pl => pl.Culture == culture);
-                if (localizer == null)
-                {
-                    return NotFound(_errorCodes[Constants.EntityLocalizerDoesntExistErrorName]);
-                }
-
-                var publishedProblem = PublishedProblem.GetFromModel(problem, localizer);
-                return Json(publishedProblem);
-            }
-
-            return NotFound(_errorCodes[Constants.EntityDoesntExistErrorName]);
-        }
-
-        [HttpGet("constructed/{id}")]
+        
+        [HttpGet("{id}")]
         [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
         public async Task<IActionResult> GetConstructedProblem(long id)
         {
@@ -107,7 +88,7 @@ namespace ContestSystem.Controllers
             return NotFound(_errorCodes[Constants.EntityDoesntExistErrorName]);
         }
 
-        [HttpPost("add-problem")]
+        [HttpPost("")]
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> AddProblem([FromBody] ProblemForm problemForm)
         {
@@ -152,7 +133,7 @@ namespace ContestSystem.Controllers
         }
 
         [AuthorizeByJwt(Roles = RolesContainer.User)]
-        [HttpPut("edit-problem/{id}")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> EditProblem([FromBody] ProblemForm problemForm, long id)
         {
             var response = new ResponseObject<long>();
@@ -202,7 +183,7 @@ namespace ContestSystem.Controllers
         }
 
         [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
-        [HttpDelete("delete-problem/{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePost(long id)
         {
             var response = new ResponseObject<long>();
@@ -230,7 +211,7 @@ namespace ContestSystem.Controllers
             return Json(response);
         }
 
-        [HttpGet("get-requests")]
+        [HttpGet("requests")]
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetProblemsRequests()
         {
@@ -240,20 +221,20 @@ namespace ContestSystem.Controllers
             return Json(requests);
         }
 
-        [HttpGet("get-approved")]
+        [HttpGet("accepted")]
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
-        public async Task<IActionResult> GetApprovedProblems()
+        public async Task<IActionResult> GetAcceptedProblems()
         {
             var currentUser = await HttpContext.GetCurrentUser(_userManager);
             var problems = await _dbContext.Problems
-                .Where(p => p.ApprovalStatus == ApproveType.Accepted && !p.IsArchieved 
+                .Where(p => p.ApprovalStatus == ApproveType.Accepted && !p.IsArchieved
                             && p.ApprovingModeratorId.GetValueOrDefault(-1) == currentUser.Id)
                 .ToListAsync();
             var requests = problems.ConvertAll(ConstructedProblem.GetFromModel);
             return Json(requests);
         }
 
-        [HttpGet("get-rejected")]
+        [HttpGet("rejected")]
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetRejectedProblems()
         {
@@ -266,9 +247,9 @@ namespace ContestSystem.Controllers
             return Json(requests);
         }
 
-        [HttpPut("moderate/{id}")]
+        [HttpPut("{id}/moderate")]
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
-        public async Task<IActionResult> ApproveOrRejectProblem([FromBody] ProblemRequestForm problemRequestForm,
+        public async Task<IActionResult> ModerateProblem([FromBody] ProblemRequestForm problemRequestForm,
             long id)
         {
             var response = new ResponseObject<long>();

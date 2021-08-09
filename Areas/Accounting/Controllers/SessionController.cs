@@ -1,18 +1,20 @@
-﻿using System.Threading.Tasks;
-using ContestSystemDbStructure.Models;
-using ContestSystem.Extensions;
+﻿using ContestSystem.Extensions;
 using ContestSystem.Models;
 using ContestSystem.Models.Attributes;
 using ContestSystem.Models.FormModels;
+using ContestSystemDbStructure.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
-namespace ContestSystem.Controllers
+namespace ContestSystem.Areas.Accounting.Controllers
 {
+    [Area("Accounting")]
+    [Route("api/[area]/[controller]")]
     [ApiController]
-    [Route("api/[controller]")]
     public class SessionController : Controller
     {
         private readonly ILogger<SessionController> _logger;

@@ -56,7 +56,7 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.get('/api/checkers/get-requests')
+                let {data} = await axios.get('/api/workspace/checkers/requests')
                 commit('setCheckersToModerate', data)
             } catch (e) {
                 console.error(e)
@@ -67,7 +67,7 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.get('/api/checkers/get-approved')
+                let {data} = await axios.get('/api/workspace/checkers/accepted')
                 commit('setApprovedCheckers', data)
             } catch (e) {
                 console.error(e)
@@ -78,7 +78,7 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.get('/api/checkers/get-rejected')
+                let {data} = await axios.get('/api/workspace/checkers/rejected')
                 commit('setRejectedCheckers', data)
             } catch (e) {
                 console.error(e)
@@ -86,7 +86,7 @@ export default {
         },
         async moderateChecker({commit, state, dispatch, getters}, {checker_id, request_body}) {
             try {
-                let {data} = await axios.put(`/api/checkers/moderate/${checker_id}`, request_body)
+                let {data} = await axios.put(`/api/workspace/checkers/${checker_id}/moderate`, request_body)
                 return data
             } catch (e) {
                 console.error(e)

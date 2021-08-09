@@ -1,42 +1,43 @@
-﻿using ContestSystemDbStructure.Models;
+﻿using ContestSystem.Areas.Solutions.Services;
+using ContestSystem.Extensions;
 using ContestSystem.Models.Attributes;
 using ContestSystem.Models.DbContexts;
+using ContestSystem.Models.ExternalModels;
+using ContestSystem.Models.FormModels;
+using ContestSystem.Models.Misc;
 using ContestSystem.Services;
+using ContestSystemDbStructure.Enums;
+using ContestSystemDbStructure.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ContestSystem.Models.ExternalModels;
-using ContestSystem.Models.Misc;
-using ContestSystem.Models.FormModels;
-using ContestSystemDbStructure.Enums;
-using Microsoft.Extensions.Logging;
-using ContestSystem.Extensions;
-using ContestSystem.Hubs;
-using Microsoft.AspNetCore.SignalR;
 
-namespace ContestSystem.Controllers
+namespace ContestSystem.Areas.Solutions.Controllers
 {
-    [Route("api/[controller]")]
+    [Area("Solutions")]
+    [Route("api/[area]")]
     [ApiController]
-    public class SolutionsController : Controller
+    public class HomeController : Controller
     {
         private readonly MainDbContext _dbContext;
         private readonly CheckerSystemService _checkerSystemService;
-        private readonly VerdicterService _verdicter;
+        private readonly SolutionsManagerService _solutionsManager;
         private readonly FileStorageService _storage;
-        private readonly ILogger<SolutionsController> _logger;
+        private readonly ILogger<HomeController> _logger;
         private readonly NotifierService _notifier;
 
-        public SolutionsController(MainDbContext dbContext, CheckerSystemService checkerSystemService,
-            VerdicterService verdicter, ILogger<SolutionsController> logger, FileStorageService storage, 
+        public HomeController(MainDbContext dbContext, CheckerSystemService checkerSystemService,
+            SolutionsManagerService solutionsManager, ILogger<HomeController> logger, FileStorageService storage,
             NotifierService notifier)
         {
             _dbContext = dbContext;
             _checkerSystemService = checkerSystemService;
-            _verdicter = verdicter;
+            _solutionsManager = solutionsManager;
             _storage = storage;
             _logger = logger;
             _notifier = notifier;
@@ -59,7 +60,7 @@ namespace ContestSystem.Controllers
             return Json(constructedSolution);
         }
 
-        [HttpGet("get-compilers")]
+        [HttpGet("compilers")]
         [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
         public async Task<IActionResult> GetCompilers()
         {
@@ -71,7 +72,7 @@ namespace ContestSystem.Controllers
             return Json(compilers);
         }
 
-        [HttpPost("send-solution")]
+        [HttpPost("")]
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> SendSolution([FromBody] SolutionForm solutionForm)
         {
@@ -83,7 +84,7 @@ namespace ContestSystem.Controllers
                 return Json(new
                 {
                     status = false,
-                    errors = new List<string> {"Id текущего пользователя не совпадает с Id пользователя в форме"}
+                    errors = new List<string> { "Id текущего пользователя не совпадает с Id пользователя в форме" }
                 });
             }
 
@@ -145,7 +146,7 @@ namespace ContestSystem.Controllers
                     return Json(new
                     {
                         status = false,
-                        errors = new List<string> {"Такое решение уже имеется"}
+                        errors = new List<string> { "Такое решение уже имеется" }
                     });
                 }
             }
@@ -172,7 +173,7 @@ namespace ContestSystem.Controllers
                 return Json(new
                 {
                     status = false,
-                    errors = new List<string> {"Такого решения не существует"}
+                    errors = new List<string> { "Такого решения не существует" }
                 });
             }
 
@@ -183,7 +184,7 @@ namespace ContestSystem.Controllers
                 return Json(new
                 {
                     status = false,
-                    errors = new List<string> {"Попытка скомпилировать не своё решение"}
+                    errors = new List<string> { "Попытка скомпилировать не своё решение" }
                 });
             }
 
@@ -211,7 +212,7 @@ namespace ContestSystem.Controllers
                 return Json(new
                 {
                     status = false,
-                    errors = new List<string> {"Ошибка параллельного сохранения"}
+                    errors = new List<string> { "Ошибка параллельного сохранения" }
                 });
             }
             if (solution.Verdict != VerdictType.CheckerServersUnavailable)
@@ -227,7 +228,7 @@ namespace ContestSystem.Controllers
             });
         }
 
-        [HttpPost("{solutionId}/run-tests")]
+        [HttpPost("{solutionId}/run")]
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> RunTests(long solutionId)
         {
@@ -257,7 +258,7 @@ namespace ContestSystem.Controllers
                 return Json(new
                 {
                     status = false,
-                    errors = new List<string> {"Ошибка параллельного сохранения"}
+                    errors = new List<string> { "Ошибка параллельного сохранения" }
                 });
             }
 
@@ -278,7 +279,7 @@ namespace ContestSystem.Controllers
             }
             if (state)
             {
-                solution.Verdict = _verdicter.GetVerdictForSolution(solution, solution.Contest.RulesSet);
+                solution.Verdict = _solutionsManager.GetVerdictForSolution(solution, solution.Contest.RulesSet);
                 _dbContext.Solutions.Update(solution);
                 var contestParticipant = await _dbContext.ContestsParticipants.FirstOrDefaultAsync(cp => cp.ParticipantId == solution.ParticipantId && cp.ContestId == solution.ContestId);
                 var otherSolutions = await _dbContext.Solutions.Where(s => s.ParticipantId == solution.ParticipantId
@@ -288,7 +289,7 @@ namespace ContestSystem.Controllers
                                                                 .Include(s => s.Contest)
                                                                 .ThenInclude(c => c.RulesSet)
                                                                 .ToListAsync();
-                contestParticipant.Result += _verdicter.GetAdditionalResultForSolutionSubmit(otherSolutions, solution, solution.Contest.RulesSet);
+                contestParticipant.Result += _solutionsManager.GetAdditionalResultForSolutionSubmit(otherSolutions, solution, solution.Contest.RulesSet);
                 _dbContext.ContestsParticipants.Update(contestParticipant);
                 bool saved = false;
                 while (!saved)
@@ -308,7 +309,7 @@ namespace ContestSystem.Controllers
                                                                 .Include(s => s.Contest)
                                                                 .ThenInclude(c => c.RulesSet)
                                                                 .ToListAsync();
-                        contestParticipant.Result += _verdicter.GetAdditionalResultForSolutionSubmit(otherSolutions, solution, solution.Contest.RulesSet);
+                        contestParticipant.Result += _solutionsManager.GetAdditionalResultForSolutionSubmit(otherSolutions, solution, solution.Contest.RulesSet);
                         _dbContext.ContestsParticipants.Update(contestParticipant);
                     }
                 }

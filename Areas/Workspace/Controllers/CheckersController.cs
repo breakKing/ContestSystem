@@ -1,25 +1,27 @@
-﻿using ContestSystemDbStructure.Enums;
-using ContestSystemDbStructure.Models;
+﻿using ContestSystem.Areas.Workspace.Services;
 using ContestSystem.Extensions;
 using ContestSystem.Models.Attributes;
 using ContestSystem.Models.DbContexts;
+using ContestSystem.Models.Dictionaries;
 using ContestSystem.Models.ExternalModels;
 using ContestSystem.Models.FormModels;
-using ContestSystem.Services;
+using ContestSystem.Models.Misc;
+using ContestSystemDbStructure.Enums;
+using ContestSystemDbStructure.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using ContestSystem.Models.Dictionaries;
-using ContestSystem.Models.Misc;
-using Microsoft.AspNetCore.Identity;
 
-namespace ContestSystem.Controllers
+namespace ContestSystem.Areas.Workspace.Controllers
 {
-    [Route("api/[controller]")]
+    [Area("Workspace")]
+    [Route("api/[area]/[controller]")]
     [ApiController]
     public class CheckersController : Controller
     {
@@ -41,20 +43,20 @@ namespace ContestSystem.Controllers
             _errorCodes = Constants.ErrorCodes[_entityName];
         }
 
-        [HttpGet("get-user-checkers/{id}")]
+        [HttpGet("user/{userId}")]
         [AuthorizeByJwt(Roles = RolesContainer.User)]
-        public async Task<IActionResult> GetUserCheckers(long id)
+        public async Task<IActionResult> GetUserCheckers(long userId)
         {
-            var checkers = await _dbContext.Checkers.Where(p => p.AuthorId == id && !p.IsArchieved).ToListAsync();
+            var checkers = await _dbContext.Checkers.Where(p => p.AuthorId == userId && !p.IsArchieved).ToListAsync();
             var publishedCheckers = checkers.ConvertAll(PublishedChecker.GetFromModel);
             return Json(publishedCheckers);
         }
 
-        [HttpGet("get-available-checkers/{id}")]
+        [HttpGet("available/{userId}")]
         [AuthorizeByJwt(Roles = RolesContainer.User)]
-        public async Task<IActionResult> GetAvailableCheckers(long id)
+        public async Task<IActionResult> GetAvailableCheckers(long userId)
         {
-            var checkers = await _dbContext.Checkers.Where(c => (c.AuthorId == id || c.IsPublic)
+            var checkers = await _dbContext.Checkers.Where(c => (c.AuthorId == userId || c.IsPublic)
                                                                 && !c.IsArchieved
                                                                 && c.ApprovalStatus == ApproveType.Accepted)
                 .ToListAsync();
@@ -62,23 +64,9 @@ namespace ContestSystem.Controllers
             return Json(publishedCheckers);
         }
 
-        [HttpGet("published/{id}")]
-        [AuthorizeByJwt(Roles = RolesContainer.User)]
-        public async Task<IActionResult> GetPublishedChecker(long id)
-        {
-            var checker = await _dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == id && !ch.IsArchieved);
-            if (checker == null)
-            {
-                return NotFound(_errorCodes[Constants.EntityDoesntExistErrorName]);
-            }
-
-            var publishedChecker = PublishedChecker.GetFromModel(checker);
-            return Json(publishedChecker);
-        }
-
-        [HttpGet("constructed/{id}")]
+        [HttpGet("{id}")]
         [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
-        public async Task<IActionResult> GetConstructedChecker(long id)
+        public async Task<IActionResult> GetChecker(long id)
         {
             var checker = await _dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == id && !ch.IsArchieved);
             if (checker == null)
@@ -90,12 +78,12 @@ namespace ContestSystem.Controllers
             return Json(constructedChecker);
         }
 
-        [HttpPost("add-checker")]
+        [HttpPost("")]
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> AddChecker([FromBody] CheckerForm checkerForm)
         {
             var response = new ResponseObject<long>();
-            
+
             if (ModelState.IsValid)
             {
                 var currentUser = await HttpContext.GetCurrentUser(_userManager);
@@ -119,7 +107,7 @@ namespace ContestSystem.Controllers
             return Json(response);
         }
 
-        [HttpPut("edit-checker/{id}")]
+        [HttpPut("{id}")]
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> EditChecker([FromBody] CheckerForm checkerForm, long id)
         {
@@ -164,7 +152,7 @@ namespace ContestSystem.Controllers
         }
 
         [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
-        [HttpDelete("delete-checker/{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteChecker(long id)
         {
             var response = new ResponseObject<long>();
@@ -194,8 +182,7 @@ namespace ContestSystem.Controllers
             return Json(response);
         }
 
-
-        [HttpGet("get-requests")]
+        [HttpGet("requests")]
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetCheckersRequests()
         {
@@ -205,9 +192,9 @@ namespace ContestSystem.Controllers
             return Json(requests);
         }
 
-        [HttpGet("get-approved")]
+        [HttpGet("accepted")]
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
-        public async Task<IActionResult> GetApprovedCheckers()
+        public async Task<IActionResult> GetAcceptedCheckers()
         {
             var currentUser = await HttpContext.GetCurrentUser(_userManager);
             var checkers = await _dbContext.Checkers
@@ -217,7 +204,7 @@ namespace ContestSystem.Controllers
             return Json(requests);
         }
 
-        [HttpGet("get-rejected")]
+        [HttpGet("rejected")]
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetRejectedCheckers()
         {
@@ -229,15 +216,15 @@ namespace ContestSystem.Controllers
             return Json(requests);
         }
 
-        [HttpPut("moderate/{id}")]
+        [HttpPut("{checkerId}/moderate")]
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
-        public async Task<IActionResult> ApproveOrRejectChecker([FromBody] CheckerRequestForm checkerRequestForm, long id)
+        public async Task<IActionResult> ModerateChecker([FromBody] CheckerRequestForm checkerRequestForm, long checkerId)
         {
             var response = new ResponseObject<long>();
             var currentUser = await HttpContext.GetCurrentUser(_userManager);
-            if (checkerRequestForm.CheckerId != id)
+            if (checkerRequestForm.CheckerId != checkerId)
             {
-                _logger.LogModeratingWithNonEqualFormAndRequestId(_entityName, checkerRequestForm.CheckerId, id,
+                _logger.LogModeratingWithNonEqualFormAndRequestId(_entityName, checkerRequestForm.CheckerId, checkerId,
                     currentUser.Id);
                 response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityIdMismatchErrorName]);
             }
@@ -245,24 +232,24 @@ namespace ContestSystem.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    var checker = await _dbContext.Checkers.FirstOrDefaultAsync(c => c.Id == id && !c.IsArchieved);
+                    var checker = await _dbContext.Checkers.FirstOrDefaultAsync(c => c.Id == checkerId && !c.IsArchieved);
                     if (checker == null)
                     {
-                        _logger.LogModeratingOfNonExistentEntity(_entityName, id, currentUser.Id);
+                        _logger.LogModeratingOfNonExistentEntity(_entityName, checkerId, currentUser.Id);
                         response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityDoesntExistErrorName]);
                     }
                     else
                     {
                         if (checker.ApprovingModeratorId.GetValueOrDefault(-1) != currentUser.Id && checker.ApprovalStatus != ApproveType.NotModeratedYet)
                         {
-                            _logger.LogModeratingByWrongUser(_entityName, id, currentUser.Id, checker.ApprovingModeratorId.GetValueOrDefault(-1), checker.ApprovalStatus);
+                            _logger.LogModeratingByWrongUser(_entityName, checkerId, currentUser.Id, checker.ApprovingModeratorId.GetValueOrDefault(-1), checker.ApprovalStatus);
                             response = ResponseObject<long>.Fail(_errorCodes[Constants.ModerationByWrongModeratorErrorName]);
                         }
                         else
                         {
                             ModerationStatus status = await _workspace.ModerateCheckerAsync(_dbContext, checkerRequestForm, checker);
-                            _logger.LogModerationStatus(status, _entityName, id, currentUser.Id);
-                            response = ResponseObject<long>.FormResponseObjectForModeration(status, _entityName, id);
+                            _logger.LogModerationStatus(status, _entityName, checkerId, currentUser.Id);
+                            response = ResponseObject<long>.FormResponseObjectForModeration(status, _entityName, checkerId);
                         }
                     }
                 }

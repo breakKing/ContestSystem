@@ -141,7 +141,7 @@ export default {
                 return []
             }
             try {
-                let {data} = await axios.get(`/api/contests/${contest_id}/get-participants`)
+                let {data} = await axios.get(`/api/contests/participants/${contest_id}`)
                 return data
             } catch (e) {
                 console.error(e)
@@ -153,7 +153,7 @@ export default {
                 return []
             }
             try {
-                let {data} = await axios.get(`/api/contests/${contest_id}/get-monitor`)
+                let {data} = await axios.get(`/api/contests/${contest_id}/monitor`)
                 return data
             } catch (e) {
                 console.error(e)
@@ -165,7 +165,7 @@ export default {
                 return []
             }
             try {
-                let {data} = await axios.get(`/api/contests/${contest_id}/get-solutions/${user_id}`)
+                let {data} = await axios.get(`/api/contests/${contest_id}/solutions/${user_id}`)
                 return data
             } catch (e) {
                 console.error(e)
@@ -180,7 +180,7 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.get('/api/contests/get-running-contests/ru')
+                let {data} = await axios.get('/api/contests/running/ru')
                 commit('setRunningContests', data)
             } catch (e) {
                 console.error(e)
@@ -194,7 +194,7 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.get('/api/contests/get-available-contests/ru')
+                let {data} = await axios.get('/api/contests/upcoming/ru')
                 commit('setAvailableContests', data)
             } catch (e) {
                 console.error(e)
@@ -208,7 +208,7 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.get('/api/contests/get-participating-contests/ru')
+                let {data} = await axios.get('/api/contests/participating/ru')
                 commit('setParticipatingContests', data)
             } catch (e) {
                 console.error(e)
@@ -222,7 +222,7 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.get(`/api/contests/get-user-created-contests/${rootGetters.currentUser.id}/ru`)
+                let {data} = await axios.get(`/api/workspace/contests/user/${rootGetters.currentUser.id}/ru`)
                 commit('setCurrentUserContests', data)
             } catch (e) {
                 console.error(e)
@@ -245,7 +245,7 @@ export default {
                 return null
             }
             try {
-                let {data} = await axios.get(`/api/contests/constructed/${contest_id}`)
+                let {data} = await axios.get(`/api/workspace/contests/${contest_id}`)
                 return data
             } catch (e) {
                 console.error(e)
@@ -254,7 +254,7 @@ export default {
         },
         async addUserToContest({commit, state, dispatch, getters}, {user_name, user_id, contest_id}) {
             try {
-                let {data} = await axios.post(`/api/contests/${contest_id}/add-participant`, {
+                let {data} = await axios.post(`/api/contests/participants/${contest_id}`, {
                     userId: user_id,
                     contestId: contest_id,
                     alias: user_name,
@@ -270,7 +270,7 @@ export default {
                 return {}
             }
             try {
-                let {data} = await axios.delete(`/api/contests/${contest_id}/delete-participant/${user_id}`)
+                let {data} = await axios.delete(`/api/contests/participants/${contest_id}/${user_id}`)
                 return data
             } catch (e) {
                 console.error(e)
@@ -279,7 +279,7 @@ export default {
         },
         async deleteContest({commit, state, dispatch, getters}, contest_id) {
             try {
-                let {data} = await axios.delete(`/api/contests/delete-contest/${contest_id}`)
+                let {data} = await axios.delete(`/api/workspace/contests/${contest_id}`)
                 return data
             } catch (e) {
                 console.error(e)

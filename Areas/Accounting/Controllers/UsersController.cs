@@ -1,21 +1,22 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
-using ContestSystemDbStructure.Models;
-using ContestSystem.Extensions;
-using ContestSystem.Models;
+﻿using ContestSystem.Extensions;
 using ContestSystem.Models.Attributes;
 using ContestSystem.Models.DbContexts;
 using ContestSystem.Models.FormModels;
+using ContestSystemDbStructure.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace ContestSystem.Controllers
+namespace ContestSystem.Areas.Accounting.Controllers
 {
+    [Area("Accounting")]
+    [Route("api/[area]/[controller]")]
     [ApiController]
-    [Route("api/[controller]")]
     public class UsersController : Controller
     {
         private readonly ILogger<UsersController> _logger;

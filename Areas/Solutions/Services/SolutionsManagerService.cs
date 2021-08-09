@@ -4,9 +4,9 @@ using ContestSystemDbStructure.Models;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ContestSystem.Services
+namespace ContestSystem.Areas.Solutions.Services
 {
-    public class VerdicterService
+    public class SolutionsManagerService
     {
         public long GetResultForSolution(Solution solution, RulesSet rules)
         {

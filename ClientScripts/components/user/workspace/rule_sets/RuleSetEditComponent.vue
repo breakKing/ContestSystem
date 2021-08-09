@@ -168,10 +168,10 @@ export default {
       let url;
       let method;
       if (this.ruleSet) {
-        url = `/api/rules/edit-rules/${this.ruleSet.id}`
+        url = `/api/workspace/rules${this.ruleSet.id}`
         method = 'put'
       } else {
-        url = `/api/rules/add-rules`
+        url = `/api/workspace/rules`
         method = 'post'
       }
       let request = {

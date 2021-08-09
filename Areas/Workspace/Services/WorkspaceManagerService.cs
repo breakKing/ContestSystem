@@ -2,6 +2,7 @@
 using ContestSystem.Models.Dictionaries;
 using ContestSystem.Models.FormModels;
 using ContestSystem.Models.Misc;
+using ContestSystem.Services;
 using ContestSystemDbStructure.Enums;
 using ContestSystemDbStructure.Models;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +12,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace ContestSystem.Services
+namespace ContestSystem.Areas.Workspace.Services
 {
     public class WorkspaceManagerService
     {
@@ -94,7 +95,7 @@ namespace ContestSystem.Services
                                                });
 
                 await dbContext.SaveChangesAsync();
-                
+
                 if (contest.ApprovalStatus == ApproveType.Accepted)
                 {
                     statusData.Status = CreationStatus.SuccessWithAutoAccept;
@@ -181,7 +182,7 @@ namespace ContestSystem.Services
                                               });
 
                 await dbContext.SaveChangesAsync();
-                
+
                 if (problem.ApprovalStatus == ApproveType.Accepted)
                 {
                     statusData.Status = CreationStatus.SuccessWithAutoAccept;
@@ -718,7 +719,7 @@ namespace ContestSystem.Services
                     {
                         checker.IsArchieved = true;
                         dbContext.Checkers.Update(checker);
-                    } 
+                    }
                     while (!await SecureSaveAsync(dbContext) || (checker = await dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == checker.Id && !ch.IsArchieved)) != null);
                     status = DeletionStatus.SuccessWithArchiving;
                 }

@@ -39,7 +39,7 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.get('/api/solutions/get-compilers')
+                let {data} = await axios.get('/api/solutions/compilers')
                 commit('setAvailableCompilers', data)
             } catch (e) {
                 console.error(e)
@@ -47,7 +47,7 @@ export default {
         },
         async sendSolution({commit, state, dispatch, getters}, request) {
             try {
-                let {data} = await axios.post(`/api/solutions/send-solution`, request)
+                let {data} = await axios.post(`/api/solutions`, request)
                 return data
             } catch (e) {
                 console.error(e)
@@ -65,7 +65,7 @@ export default {
         },
         async runSolutionTests({commit, state, dispatch, getters}, solution_id) {
             try {
-                let {data} = await axios.post(`/api/solutions/${solution_id}/run-tests`)
+                let {data} = await axios.post(`/api/solutions/${solution_id}/run`)
                 return data
             } catch (e) {
                 console.error(e)

@@ -176,10 +176,10 @@ export default {
       let url;
       let type;
       if (this.contest_id) {
-        url = `/api/contests/edit-contest/${this.contest_id}`
+        url = `/api/workspace/contests/${this.contest_id}`
         type = 'PUT'
       } else {
-        url = `/api/contests/add-contest`
+        url = `/api/workspace/contests`
         type = 'POST'
       }
 

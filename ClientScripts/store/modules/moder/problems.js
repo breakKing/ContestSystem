@@ -59,7 +59,7 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.get('/api/problems/get-requests')
+                let {data} = await axios.get('/api/workspace/problems/requests')
                 commit('setProblemsToModerate', data)
             } catch (e) {
                 console.error(e)
@@ -70,7 +70,7 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.get('/api/problems/get-approved')
+                let {data} = await axios.get('/api/workspace/problems/accepted')
                 commit('setApprovedProblems', data)
             } catch (e) {
                 console.error(e)
@@ -81,7 +81,7 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.get('/api/problems/get-rejected')
+                let {data} = await axios.get('/api/workspace/problems/rejected')
                 commit('setRejectedProblems', data)
             } catch (e) {
                 console.error(e)
@@ -89,7 +89,7 @@ export default {
         },
         async moderateProblem({commit, state, dispatch, getters}, {problem_id, request_body}) {
             try {
-                let {data} = await axios.put(`/api/problems/moderate/${problem_id}`, request_body)
+                let {data} = await axios.put(`/api/workspace/problems/${problem_id}/moderate`, request_body)
                 return data
             } catch (e) {
                 console.error(e)

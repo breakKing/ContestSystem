@@ -172,11 +172,11 @@ export default {
       let url;
       let method;
       if (this.task_id) {
-        url = `/api/problems/edit-problem/${this.task_id}`
+        url = `/api/workspace/problems/${this.task_id}`
         method = 'put'
 
       } else {
-        url = `/api/problems/add-problem`
+        url = `/api/workspace/problems`
         method = 'post'
       }
       let data = {

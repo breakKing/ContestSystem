@@ -1,24 +1,25 @@
-﻿using ContestSystemDbStructure.Models;
+﻿using ContestSystem.Areas.Workspace.Services;
 using ContestSystem.Extensions;
 using ContestSystem.Models.Attributes;
 using ContestSystem.Models.DbContexts;
+using ContestSystem.Models.Dictionaries;
 using ContestSystem.Models.ExternalModels;
 using ContestSystem.Models.FormModels;
+using ContestSystem.Models.Misc;
+using ContestSystemDbStructure.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Identity;
-using ContestSystem.Services;
-using ContestSystem.Models.Dictionaries;
-using ContestSystem.Models.Misc;
 
-namespace ContestSystem.Controllers
+namespace ContestSystem.Areas.Workspace.Controllers
 {
-    [Route("api/[controller]")]
+    [Area("Workspace")]
+    [Route("api/[area]/[controller]")]
     [ApiController]
     public class RulesController : Controller
     {
@@ -41,26 +42,26 @@ namespace ContestSystem.Controllers
             _errorCodes = Constants.ErrorCodes[_entityName];
         }
 
-        [HttpGet("get-user-rules/{id}")]
+        [HttpGet("user/{userId}")]
         [AuthorizeByJwt(Roles = RolesContainer.User)]
-        public async Task<IActionResult> GetUserRules(long id)
+        public async Task<IActionResult> GetUserRules(long userId)
         {
-            var rules = await _dbContext.RulesSets.Where(r => r.AuthorId == id && !r.IsArchieved).ToListAsync();
+            var rules = await _dbContext.RulesSets.Where(r => r.AuthorId == userId && !r.IsArchieved).ToListAsync();
             var publishedRules = rules.ConvertAll(ConstructedRulesSet.GetFromModel);
             return Json(publishedRules);
         }
 
-        [HttpGet("get-available-rules/{id}")]
+        [HttpGet("available/{userId}")]
         [AuthorizeByJwt(Roles = RolesContainer.User)]
-        public async Task<IActionResult> GetAvailableRules(long id)
+        public async Task<IActionResult> GetAvailableRules(long userId)
         {
-            var rules = await _dbContext.RulesSets.Where(rs => (rs.AuthorId == id || rs.IsPublic)
+            var rules = await _dbContext.RulesSets.Where(rs => (rs.AuthorId == userId || rs.IsPublic)
                                                                && !rs.IsArchieved).ToListAsync();
             var publishedRules = rules.ConvertAll(ConstructedRulesSet.GetFromModel);
             return Json(publishedRules);
         }
 
-        [HttpGet("constructed/{id}")]
+        [HttpGet("{id}")]
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> GetConstructedRules(long id)
         {
@@ -74,7 +75,7 @@ namespace ContestSystem.Controllers
             return NotFound(_errorCodes[Constants.EntityDoesntExistErrorName]);
         }
 
-        [HttpPost("add-rules")]
+        [HttpPost("")]
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> AddRules([FromBody] RulesSetForm rulesSetForm)
         {
@@ -105,7 +106,7 @@ namespace ContestSystem.Controllers
         }
 
         [AuthorizeByJwt(Roles = RolesContainer.User)]
-        [HttpPut("edit-rules/{id}")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> EditRules([FromBody] RulesSetForm rulesSetForm, long id)
         {
             var response = new ResponseObject<long>();
@@ -149,7 +150,7 @@ namespace ContestSystem.Controllers
         }
 
         [AuthorizeByJwt(Roles = RolesContainer.User)]
-        [HttpDelete("delete-rules/{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRules(long id)
         {
             var response = new ResponseObject<long>();

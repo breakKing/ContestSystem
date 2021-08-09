@@ -23,7 +23,7 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.post('/api/users/get-all-users', {})
+                let {data} = await axios.post('/api/accounting/users/get-all-users', {})
                 commit('setAllUsers', data.users)
             } catch (e) {
                 console.error(e)
@@ -31,7 +31,7 @@ export default {
         },
         async updateUser({commit, state, dispatch, getters}, params) {
             try {
-                let {data} = await axios.post('/api/users/update-user', params)
+                let {data} = await axios.post('/api/accounting/users/update-user', params)
                 if (data.success) {
                     await dispatch('fetchAllUsers', true)
                 } else if (data.errors) {

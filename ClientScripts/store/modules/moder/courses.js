@@ -56,7 +56,7 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.get('/api/courses/get-requests')
+                let {data} = await axios.get('/api/workspace/courses/requests')
                 commit('setCoursesToModerate', data)
             } catch (e) {
                 console.error(e)
@@ -67,7 +67,7 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.get('/api/courses/get-approved')
+                let {data} = await axios.get('/api/workspace/courses/accepted')
                 commit('setApprovedCourses', data)
             } catch (e) {
                 console.error(e)
@@ -78,7 +78,7 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.get('/api/courses/get-rejected')
+                let {data} = await axios.get('/api/workspace/courses/rejected')
                 commit('setRejectedCourses', data)
             } catch (e) {
                 console.error(e)
@@ -86,7 +86,7 @@ export default {
         },
         async moderateCourse({commit, state, dispatch, getters}, {course_id, request_body}) {
             try {
-                let {data} = await axios.put(`/api/courses/moderate/${course_id}`, request_body)
+                let {data} = await axios.put(`/api/workspace/courses/${course_id}/moderate`, request_body)
                 return data
             } catch (e) {
                 console.error(e)
