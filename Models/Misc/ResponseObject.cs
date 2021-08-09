@@ -74,6 +74,10 @@ namespace ContestSystem.Models.Misc
                     }
                     response = ResponseObject<long>.Fail(error);
                     break;
+                case CreationStatus.ParallelSaveError:
+                    error = Constants.ErrorCodes[Constants.CommonSectionName][Constants.ParallelDbSaveErrorName];
+                    response = ResponseObject<long>.Fail(error);
+                    break;
                 default:
                     response = ResponseObject<long>.Fail(Constants.ErrorCodes[Constants.CommonSectionName][Constants.UndefinedErrorName]);
                     break;

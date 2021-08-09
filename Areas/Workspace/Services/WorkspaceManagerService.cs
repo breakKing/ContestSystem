@@ -62,49 +62,63 @@ namespace ContestSystem.Areas.Workspace.Services
             if (statusData.Status == CreationStatus.Undefined)
             {
                 await dbContext.Contests.AddAsync(contest);
-                await dbContext.SaveChangesAsync();
-                contest.ImagePath = await _storage.SaveContestImageAsync(contest.Id, form.Image);
-                dbContext.Contests.Update(contest);
-
-                var localModerator = new ContestLocalModerator
+                bool saveSuccess = await dbContext.SecureSaveAsync();
+                if (!saveSuccess)
                 {
-                    ContestId = contest.Id,
-                    Alias = contest.Creator.FullName, // TODO: надо получать алиас из формы
-                    LocalModeratorId = contest.CreatorId.GetValueOrDefault()
-                };
-                await dbContext.ContestsLocalModerators.AddAsync(localModerator);
-                await dbContext.SaveChangesAsync();
-
-                await CreateLinkedEntitiesAsync(dbContext, dbContext.ContestsLocalizers, contest.Id,
-                                                form.Localizers,
-                                                (clf, id) => new ContestLocalizer
-                                                {
-                                                    Culture = clf.Culture,
-                                                    Description = clf.Description,
-                                                    Name = clf.Name,
-                                                    ContestId = id
-                                                });
-
-                await CreateLinkedEntitiesAsync(dbContext, dbContext.ContestsProblems, contest.Id,
-                                               form.Problems,
-                                               (cpf, id) => new ContestProblem
-                                               {
-                                                   ContestId = id,
-                                                   ProblemId = cpf.ProblemId,
-                                                   Letter = cpf.Letter
-                                               });
-
-                await dbContext.SaveChangesAsync();
-
-                if (contest.ApprovalStatus == ApproveType.Accepted)
-                {
-                    statusData.Status = CreationStatus.SuccessWithAutoAccept;
+                    statusData.Status = CreationStatus.ParallelSaveError;
                 }
                 else
                 {
-                    statusData.Status = CreationStatus.Success;
+                    contest.ImagePath = await _storage.SaveContestImageAsync(contest.Id, form.Image);
+                    dbContext.Contests.Update(contest);
+
+                    var localModerator = new ContestLocalModerator
+                    {
+                        ContestId = contest.Id,
+                        Alias = contest.Creator.FullName, // TODO: надо получать алиас из формы
+                        LocalModeratorId = contest.CreatorId.GetValueOrDefault(-1)
+                    };
+                    await dbContext.ContestsLocalModerators.AddAsync(localModerator);
+
+                    await CreateLinkedEntitiesAsync(dbContext, dbContext.ContestsLocalizers, contest.Id,
+                                                    form.Localizers,
+                                                    (clf, id) => new ContestLocalizer
+                                                    {
+                                                        Culture = clf.Culture,
+                                                        Description = clf.Description,
+                                                        Name = clf.Name,
+                                                        ContestId = id
+                                                    });
+
+                    await CreateLinkedEntitiesAsync(dbContext, dbContext.ContestsProblems, contest.Id,
+                                                   form.Problems,
+                                                   (cpf, id) => new ContestProblem
+                                                   {
+                                                       ContestId = id,
+                                                       ProblemId = cpf.ProblemId,
+                                                       Letter = cpf.Letter
+                                                   });
+
+                    saveSuccess = await dbContext.SecureSaveAsync();
+                    if (!saveSuccess)
+                    {
+                        statusData.Status = CreationStatus.ParallelSaveError;
+                        contest = await dbContext.Contests.FirstOrDefaultAsync(c => c.Id == contest.Id);
+                        await DeleteContestAsync(dbContext, contest);
+                    }
+                    else
+                    {
+                        if (contest.ApprovalStatus == ApproveType.Accepted)
+                        {
+                            statusData.Status = CreationStatus.SuccessWithAutoAccept;
+                        }
+                        else
+                        {
+                            statusData.Status = CreationStatus.Success;
+                        }
+                        statusData.Id = contest.Id;
+                    }
                 }
-                statusData.Id = contest.Id;
             }
             return statusData;
         }
@@ -146,9 +160,15 @@ namespace ContestSystem.Areas.Workspace.Services
             if (statusData.Status == CreationStatus.Undefined)
             {
                 await dbContext.Problems.AddAsync(problem);
-                await dbContext.SaveChangesAsync();
 
-                await CreateLinkedEntitiesAsync(dbContext, dbContext.ProblemsLocalizers, problem.Id,
+                bool saveSuccess = await dbContext.SecureSaveAsync();
+                if (!saveSuccess)
+                {
+                    statusData.Status = CreationStatus.ParallelSaveError;
+                }
+                else
+                {
+                    await CreateLinkedEntitiesAsync(dbContext, dbContext.ProblemsLocalizers, problem.Id,
                                                form.Localizers,
                                                (lf, id) => new ProblemLocalizer
                                                {
@@ -160,38 +180,47 @@ namespace ContestSystem.Areas.Workspace.Services
                                                    ProblemId = id
                                                });
 
-                await CreateLinkedEntitiesAsync(dbContext, dbContext.Tests, problem.Id,
-                                               form.Tests,
-                                               (tf, id) => new Test
-                                               {
-                                                   Number = tf.Number,
-                                                   Input = tf.Input,
-                                                   Answer = tf.Answer,
-                                                   AvailablePoints = tf.AvailablePoints,
-                                                   ProblemId = id
-                                               });
+                    await CreateLinkedEntitiesAsync(dbContext, dbContext.Tests, problem.Id,
+                                                   form.Tests,
+                                                   (tf, id) => new Test
+                                                   {
+                                                       Number = tf.Number,
+                                                       Input = tf.Input,
+                                                       Answer = tf.Answer,
+                                                       AvailablePoints = tf.AvailablePoints,
+                                                       ProblemId = id
+                                                   });
 
-                await CreateLinkedEntitiesAsync(dbContext, dbContext.Examples, problem.Id,
-                                              form.Examples,
-                                              (ef, id) => new Example
-                                              {
-                                                  Number = ef.Number,
-                                                  InputText = ef.InputText,
-                                                  OutputText = ef.OutputText,
-                                                  ProblemId = id
-                                              });
+                    await CreateLinkedEntitiesAsync(dbContext, dbContext.Examples, problem.Id,
+                                                  form.Examples,
+                                                  (ef, id) => new Example
+                                                  {
+                                                      Number = ef.Number,
+                                                      InputText = ef.InputText,
+                                                      OutputText = ef.OutputText,
+                                                      ProblemId = id
+                                                  });
 
-                await dbContext.SaveChangesAsync();
-
-                if (problem.ApprovalStatus == ApproveType.Accepted)
-                {
-                    statusData.Status = CreationStatus.SuccessWithAutoAccept;
+                    saveSuccess = await dbContext.SecureSaveAsync();
+                    if (!saveSuccess)
+                    {
+                        statusData.Status = CreationStatus.ParallelSaveError;
+                        problem = await dbContext.Problems.FirstOrDefaultAsync(p => p.Id == problem.Id);
+                        await DeleteProblemAsync(dbContext, problem);
+                    }
+                    else
+                    {
+                        if (problem.ApprovalStatus == ApproveType.Accepted)
+                        {
+                            statusData.Status = CreationStatus.SuccessWithAutoAccept;
+                        }
+                        else
+                        {
+                            statusData.Status = CreationStatus.Success;
+                        }
+                        statusData.Id = problem.Id;
+                    }
                 }
-                else
-                {
-                    statusData.Status = CreationStatus.Success;
-                }
-                statusData.Id = problem.Id;
             }
 
             return statusData;
@@ -216,10 +245,18 @@ namespace ContestSystem.Areas.Workspace.Services
             };
             checker.ApprovalStatus = ApproveType.NotModeratedYet;
             await dbContext.Checkers.AddAsync(checker);
-            await dbContext.SaveChangesAsync();
 
-            statusData.Status = CreationStatus.Success;
-            statusData.Id = checker.Id;
+            bool saveSuccess = await dbContext.SecureSaveAsync();
+            if (!saveSuccess)
+            {
+                statusData.Status = CreationStatus.ParallelSaveError;
+            }
+            else
+            {
+                statusData.Status = CreationStatus.Success;
+                statusData.Id = checker.Id;
+            }
+
             return statusData;
         }
 
@@ -250,10 +287,17 @@ namespace ContestSystem.Areas.Workspace.Services
             };
 
             await dbContext.RulesSets.AddAsync(rulesSet);
-            await dbContext.SaveChangesAsync();
 
-            statusData.Status = CreationStatus.Success;
-            statusData.Id = rulesSet.Id;
+            bool saveSuccess = await dbContext.SecureSaveAsync();
+            if (!saveSuccess)
+            {
+                statusData.Status = CreationStatus.ParallelSaveError;
+            }
+            else
+            {
+                statusData.Status = CreationStatus.Success;
+                statusData.Id = rulesSet.Id;
+            }
 
             return statusData;
         }
@@ -297,33 +341,48 @@ namespace ContestSystem.Areas.Workspace.Services
             if (statusData.Status == CreationStatus.Undefined)
             {
                 await dbContext.Posts.AddAsync(post);
-                await dbContext.SaveChangesAsync();
 
-                post.ImagePath = await _storage.SavePostImageAsync(post.Id, form.PreviewImage);
-                dbContext.Posts.Update(post);
-
-                await CreateLinkedEntitiesAsync(dbContext, dbContext.PostsLocalizers, post.Id,
-                                                form.Localizers,
-                                                (plf, id) => new PostLocalizer
-                                                {
-                                                    Culture = plf.Culture,
-                                                    PreviewText = plf.PreviewText,
-                                                    Name = plf.Name,
-                                                    HtmlText = plf.HtmlText,
-                                                    PostId = post.Id
-                                                });
-
-                await dbContext.SaveChangesAsync();
-
-                if (post.ApprovalStatus == ApproveType.Accepted)
+                bool saveSuccess = await dbContext.SecureSaveAsync();
+                if (!saveSuccess)
                 {
-                    statusData.Status = CreationStatus.SuccessWithAutoAccept;
+                    statusData.Status = CreationStatus.ParallelSaveError;
                 }
                 else
                 {
-                    statusData.Status = CreationStatus.Success;
+                    post.ImagePath = await _storage.SavePostImageAsync(post.Id, form.PreviewImage);
+                    dbContext.Posts.Update(post);
+
+                    await CreateLinkedEntitiesAsync(dbContext, dbContext.PostsLocalizers, post.Id,
+                                                    form.Localizers,
+                                                    (plf, id) => new PostLocalizer
+                                                    {
+                                                        Culture = plf.Culture,
+                                                        PreviewText = plf.PreviewText,
+                                                        Name = plf.Name,
+                                                        HtmlText = plf.HtmlText,
+                                                        PostId = id
+                                                    });
+
+                    saveSuccess = await dbContext.SecureSaveAsync();
+                    if (!saveSuccess)
+                    {
+                        statusData.Status = CreationStatus.ParallelSaveError;
+                        post = await dbContext.Posts.FirstOrDefaultAsync(p => p.Id == post.Id);
+                        await DeletePostAsync(dbContext, post);
+                    }
+                    else
+                    {
+                        if (post.ApprovalStatus == ApproveType.Accepted)
+                        {
+                            statusData.Status = CreationStatus.SuccessWithAutoAccept;
+                        }
+                        else
+                        {
+                            statusData.Status = CreationStatus.Success;
+                        }
+                        statusData.Id = post.Id;
+                    }
                 }
-                statusData.Id = post.Id;
             }
             return statusData;
         }
@@ -393,7 +452,7 @@ namespace ContestSystem.Areas.Workspace.Services
                                                     return problem;
                                                 });
 
-                bool saveSuccess = await SecureSaveAsync(dbContext);
+                bool saveSuccess = await dbContext.SecureSaveAsync();
                 if (!saveSuccess)
                 {
                     status = EditionStatus.ParallelSaveError;
@@ -491,7 +550,7 @@ namespace ContestSystem.Areas.Workspace.Services
                                                     return example;
                                                 });
 
-                bool saveSuccess = await SecureSaveAsync(dbContext);
+                bool saveSuccess = await dbContext.SecureSaveAsync();
                 if (!saveSuccess)
                 {
                     status = EditionStatus.ParallelSaveError;
@@ -526,7 +585,7 @@ namespace ContestSystem.Areas.Workspace.Services
                     checker.ApprovalStatus = ApproveType.NotModeratedYet;
                 }
 
-                bool saveSuccess = await SecureSaveAsync(dbContext);
+                bool saveSuccess = await dbContext.SecureSaveAsync();
                 if (!saveSuccess)
                 {
                     status = EditionStatus.ParallelSaveError;
@@ -563,7 +622,7 @@ namespace ContestSystem.Areas.Workspace.Services
                 rulesSet.IsPublic = form.IsPublic;
                 dbContext.RulesSets.Update(rulesSet);
 
-                bool saveSuccess = await SecureSaveAsync(dbContext);
+                bool saveSuccess = await dbContext.SecureSaveAsync();
                 if (!saveSuccess)
                 {
                     status = EditionStatus.ParallelSaveError;
@@ -630,7 +689,7 @@ namespace ContestSystem.Areas.Workspace.Services
                                                     return localizer;
                                                 });
 
-                bool saveSuccess = await SecureSaveAsync(dbContext);
+                bool saveSuccess = await dbContext.SecureSaveAsync();
                 if (!saveSuccess)
                 {
                     status = EditionStatus.ParallelSaveError;
@@ -655,7 +714,7 @@ namespace ContestSystem.Areas.Workspace.Services
             {
                 _storage.DeleteFileAsync(contest.ImagePath);
                 dbContext.Contests.Remove(contest);
-                bool saveSuccess = await SecureSaveAsync(dbContext);
+                bool saveSuccess = await dbContext.SecureSaveAsync();
                 if (!saveSuccess)
                 {
                     status = DeletionStatus.ParallelSaveError;
@@ -684,13 +743,13 @@ namespace ContestSystem.Areas.Workspace.Services
                         problem.IsArchieved = true;
                         dbContext.Problems.Update(problem);
                     }
-                    while (!await SecureSaveAsync(dbContext) || (problem = await dbContext.Problems.FirstOrDefaultAsync(p => p.Id == problem.Id && !p.IsArchieved)) != null);
+                    while (!await dbContext.SecureSaveAsync() || (problem = await dbContext.Problems.FirstOrDefaultAsync(p => p.Id == problem.Id && !p.IsArchieved)) != null);
                     status = DeletionStatus.SuccessWithArchiving;
                 }
                 else
                 {
                     dbContext.Problems.Remove(problem);
-                    bool saveSuccess = await SecureSaveAsync(dbContext);
+                    bool saveSuccess = await dbContext.SecureSaveAsync();
                     if (!saveSuccess)
                     {
                         status = DeletionStatus.ParallelSaveError;
@@ -720,13 +779,13 @@ namespace ContestSystem.Areas.Workspace.Services
                         checker.IsArchieved = true;
                         dbContext.Checkers.Update(checker);
                     }
-                    while (!await SecureSaveAsync(dbContext) || (checker = await dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == checker.Id && !ch.IsArchieved)) != null);
+                    while (!await dbContext.SecureSaveAsync() || (checker = await dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == checker.Id && !ch.IsArchieved)) != null);
                     status = DeletionStatus.SuccessWithArchiving;
                 }
                 else
                 {
                     dbContext.Checkers.Remove(checker);
-                    bool saveSuccess = await SecureSaveAsync(dbContext);
+                    bool saveSuccess = await dbContext.SecureSaveAsync();
                     if (!saveSuccess)
                     {
                         status = DeletionStatus.ParallelSaveError;
@@ -756,13 +815,13 @@ namespace ContestSystem.Areas.Workspace.Services
                         rulesSet.IsArchieved = true;
                         dbContext.RulesSets.Update(rulesSet);
                     }
-                    while (!await SecureSaveAsync(dbContext) || (rulesSet = await dbContext.RulesSets.FirstOrDefaultAsync(rs => rs.Id == rulesSet.Id && !rs.IsArchieved)) != null);
+                    while (!await dbContext.SecureSaveAsync() || (rulesSet = await dbContext.RulesSets.FirstOrDefaultAsync(rs => rs.Id == rulesSet.Id && !rs.IsArchieved)) != null);
                     status = DeletionStatus.SuccessWithArchiving;
                 }
                 else
                 {
                     dbContext.RulesSets.Remove(rulesSet);
-                    bool saveSuccess = await SecureSaveAsync(dbContext);
+                    bool saveSuccess = await dbContext.SecureSaveAsync();
                     if (!saveSuccess)
                     {
                         status = DeletionStatus.ParallelSaveError;
@@ -792,7 +851,7 @@ namespace ContestSystem.Areas.Workspace.Services
             {
                 _storage.DeleteFileAsync(post.ImagePath);
                 dbContext.Posts.Remove(post);
-                bool saveSuccess = await SecureSaveAsync(dbContext);
+                bool saveSuccess = await dbContext.SecureSaveAsync();
                 if (!saveSuccess)
                 {
                     status = DeletionStatus.ParallelSaveError;
@@ -821,7 +880,7 @@ namespace ContestSystem.Areas.Workspace.Services
                 contest.ModerationMessage = form.ModerationMessage;
                 dbContext.Contests.Update(contest);
 
-                bool saveSuccess = await SecureSaveAsync(dbContext);
+                bool saveSuccess = await dbContext.SecureSaveAsync();
                 if (!saveSuccess)
                 {
                     status = ModerationStatus.ParallelSaveError;
@@ -849,7 +908,7 @@ namespace ContestSystem.Areas.Workspace.Services
                 problem.ModerationMessage = form.ModerationMessage;
                 dbContext.Problems.Update(problem);
 
-                bool saveSuccess = await SecureSaveAsync(dbContext);
+                bool saveSuccess = await dbContext.SecureSaveAsync();
                 if (!saveSuccess)
                 {
                     status = ModerationStatus.ParallelSaveError;
@@ -905,7 +964,7 @@ namespace ContestSystem.Areas.Workspace.Services
 
                 dbContext.Checkers.Update(checker);
 
-                bool saveSuccess = await SecureSaveAsync(dbContext);
+                bool saveSuccess = await dbContext.SecureSaveAsync();
                 if (!saveSuccess)
                 {
                     status = ModerationStatus.ParallelSaveError;
@@ -942,7 +1001,7 @@ namespace ContestSystem.Areas.Workspace.Services
 
                 dbContext.Posts.Update(post);
 
-                bool saveSuccess = await SecureSaveAsync(dbContext);
+                bool saveSuccess = await dbContext.SecureSaveAsync();
                 if (!saveSuccess)
                 {
                     status = ModerationStatus.ParallelSaveError;
@@ -999,7 +1058,7 @@ namespace ContestSystem.Areas.Workspace.Services
                 }
             }
 
-            return needToSave ? await SecureSaveAsync(dbContext) : true; // НЕ ПРИНИМАТЬ предложение IDE упростить данное выражение
+            return needToSave ? await dbContext.SecureSaveAsync() : true; // НЕ ПРИНИМАТЬ предложение IDE упростить данное выражение
         }
 
         private async Task<bool> CreateLinkedEntitiesAsync<TEntity, TForm, TIdentity>(MainDbContext dbContext, DbSet<TEntity> dbSet,
@@ -1013,20 +1072,7 @@ namespace ContestSystem.Areas.Workspace.Services
                 await dbSet.AddAsync(entity);
             }
 
-            return needToSave ? await SecureSaveAsync(dbContext) : true; // НЕ ПРИНИМАТЬ предложение IDE упростить данное выражение
-        }
-
-        private async Task<bool> SecureSaveAsync(MainDbContext dbContext)
-        {
-            try
-            {
-                await dbContext.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                return false;
-            }
-            return true;
+            return needToSave ? await dbContext.SecureSaveAsync() : true; // НЕ ПРИНИМАТЬ предложение IDE упростить данное выражение
         }
     }
 }

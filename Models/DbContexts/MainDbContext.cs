@@ -2,6 +2,7 @@
 using ContestSystemDbStructure.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace ContestSystem.Models.DbContexts
 {
@@ -63,6 +64,19 @@ namespace ContestSystem.Models.DbContexts
             builder.ApplyConfiguration(new CourseLocalModeratorConfiguration());
             builder.ApplyConfiguration(new CourseParticipantConfiguration());
             builder.ApplyConfiguration(new CourseProblemConfiguration());
+        }
+
+        public async Task<bool> SecureSaveAsync()
+        {
+            try
+            {
+                await SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return false;
+            }
+            return true;
         }
     }
 }

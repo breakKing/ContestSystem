@@ -3,6 +3,7 @@ using ContestSystem.Models.Attributes;
 using ContestSystem.Models.DbContexts;
 using ContestSystem.Models.Dictionaries;
 using ContestSystem.Models.FormModels;
+using ContestSystem.Services;
 using ContestSystemDbStructure.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -25,15 +26,12 @@ namespace ContestSystem.Areas.Accounting.Controllers
         private readonly UserManager<User> _userManager;
 
         private readonly string _entityName = Constants.UserEntityName;
-        private readonly Dictionary<string, string> _errorCodes;
 
         public UsersController(ILogger<UsersController> logger, MainDbContext dbContext, UserManager<User> userManager)
         {
             _logger = logger;
             _dbContext = dbContext;
             _userManager = userManager;
-
-            _errorCodes = Constants.ErrorCodes[_entityName];
         }
 
         [HttpPost("get-all-users")]
@@ -82,11 +80,7 @@ namespace ContestSystem.Areas.Accounting.Controllers
                         .Where(r => r != null)
                         .ToList();
                     user.Roles = rolesToAssign;
-                    try
-                    {
-                        await _dbContext.SaveChangesAsync();
-                    }
-                    catch (DbUpdateConcurrencyException)
+                    if (!await _dbContext.SecureSaveAsync())
                     {
                         _logger.LogParallelSaveError(_entityName, user.Id);
                         return Json(new

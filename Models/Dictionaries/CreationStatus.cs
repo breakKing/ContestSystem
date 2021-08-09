@@ -5,6 +5,7 @@
         Success = 0,
         SuccessWithAutoAccept = 1,
         LimitExceeded = 2,
-        Undefined = 3
+        ParallelSaveError = 3,
+        Undefined = 4
     }
 }

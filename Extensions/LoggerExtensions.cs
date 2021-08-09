@@ -194,6 +194,9 @@ namespace ContestSystem.Extensions
                 case CreationStatus.LimitExceeded:
                     logger.LogCreationFailedBecauseOfLimits(entityName, userId);
                     break;
+                case CreationStatus.ParallelSaveError:
+                    logger.LogParallelSaveError(entityName, userId);
+                    break;
                 default:
                     logger.LogCreationUndefinedStatus(entityName, entityId, userId);
                     break;
