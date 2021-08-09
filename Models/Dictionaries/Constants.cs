@@ -38,7 +38,7 @@ namespace ContestSystem.Models.Dictionaries
         public static readonly string AuthFailedErrorName = "AuthFailed";
         public static readonly string TokenGenerationFailedErrorName = "TokenGenerationFailed";
         public static readonly string UserRegisterFailedErrorName = "UserRegisterFailed";
-        public static readonly string ParallelDbSaveErrorName = "ParallelDbSaveError";
+        public static readonly string DbSaveErrorName = "DbSaveError";
         public static readonly string UndefinedErrorName = "UndefinedError";
 
         // Все "коды" ошибок
@@ -112,7 +112,7 @@ namespace ContestSystem.Models.Dictionaries
             },
             [CommonSectionName] = new Dictionary<string, string>
             {
-                { ParallelDbSaveErrorName, "ERR_PARALLEL_DB_SAVE" },
+                { DbSaveErrorName, "ERR_DB_SAVE" },
                 { UndefinedErrorName, "ERR_UNDEFINED" }
             },
         };

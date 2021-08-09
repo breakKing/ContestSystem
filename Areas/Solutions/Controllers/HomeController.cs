@@ -208,7 +208,7 @@ namespace ContestSystem.Areas.Solutions.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                _logger.LogParallelSaveError("Solution", solution.Id);
+                _logger.LogDbSaveError("Solution", solution.Id);
                 return Json(new
                 {
                     status = false,
@@ -254,7 +254,7 @@ namespace ContestSystem.Areas.Solutions.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                _logger.LogParallelSaveError("Solution", solutionId);
+                _logger.LogDbSaveError("Solution", solutionId);
                 return Json(new
                 {
                     status = false,

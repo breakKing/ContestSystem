@@ -82,11 +82,11 @@ namespace ContestSystem.Areas.Accounting.Controllers
                     user.Roles = rolesToAssign;
                     if (!await _dbContext.SecureSaveAsync())
                     {
-                        _logger.LogParallelSaveError(_entityName, user.Id);
+                        _logger.LogDbSaveError(_entityName, user.Id);
                         return Json(new
                         {
                             status = false,
-                            errors = new List<string> { Constants.ErrorCodes[Constants.CommonSectionName][Constants.ParallelDbSaveErrorName] }
+                            errors = new List<string> { Constants.ErrorCodes[Constants.CommonSectionName][Constants.DbSaveErrorName] }
                         });
                     }
                     _logger.LogEditingSuccessful(_entityName, user.Id, currentUser.Id);

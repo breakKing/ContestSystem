@@ -59,7 +59,7 @@
         UserRegisterFailed: "ERR_USER_REGISTER_FAILED"
     },
     Common: {
-        ParallelDbSave: "ERR_PARALLEL_DB_SAVE",
+        DbSave: "ERR__DB_SAVE",
         Undefined: "ERR_UNDEFINED"
     }
 }

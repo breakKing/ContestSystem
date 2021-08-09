@@ -75,7 +75,7 @@ namespace ContestSystem.Models.Misc
                     response = ResponseObject<long>.Fail(error);
                     break;
                 case CreationStatus.ParallelSaveError:
-                    error = Constants.ErrorCodes[Constants.CommonSectionName][Constants.ParallelDbSaveErrorName];
+                    error = Constants.ErrorCodes[Constants.CommonSectionName][Constants.DbSaveErrorName];
                     response = ResponseObject<long>.Fail(error);
                     break;
                 default:
@@ -107,7 +107,7 @@ namespace ContestSystem.Models.Misc
                     response = ResponseObject<long>.Fail(error);
                     break;
                 case EditionStatus.ParallelSaveError:
-                    error = Constants.ErrorCodes[Constants.CommonSectionName][Constants.ParallelDbSaveErrorName];
+                    error = Constants.ErrorCodes[Constants.CommonSectionName][Constants.DbSaveErrorName];
                     response = ResponseObject<long>.Fail(error);
                     break;
                 default:
@@ -143,7 +143,7 @@ namespace ContestSystem.Models.Misc
                     response = ResponseObject<long>.Fail(error);
                     break;
                 case DeletionStatus.ParallelSaveError:
-                    error = Constants.ErrorCodes[Constants.CommonSectionName][Constants.ParallelDbSaveErrorName];
+                    error = Constants.ErrorCodes[Constants.CommonSectionName][Constants.DbSaveErrorName];
                     response = ResponseObject<long>.Fail(error);
                     break;
                 default:
@@ -179,7 +179,7 @@ namespace ContestSystem.Models.Misc
                     response = ResponseObject<long>.Fail(error);
                     break;
                 case ModerationStatus.ParallelSaveError:
-                    error = Constants.ErrorCodes[Constants.CommonSectionName][Constants.ParallelDbSaveErrorName];
+                    error = Constants.ErrorCodes[Constants.CommonSectionName][Constants.DbSaveErrorName];
                     response = ResponseObject<long>.Fail(error);
                     break;
                 default:

@@ -167,7 +167,7 @@ namespace ContestSystem.Extensions
                 $"При модерации сущности \"{entityName}\" с идентификатором {entityId} модератором с идентификатором {userId} был получен статус \"Undefined\"");
         }
 
-        public static void LogParallelSaveError(this ILogger logger, string entityName, long entityId, bool deletion = false)
+        public static void LogDbSaveError(this ILogger logger, string entityName, long entityId, bool deletion = false)
         {
             if (deletion)
             {
@@ -195,7 +195,7 @@ namespace ContestSystem.Extensions
                     logger.LogCreationFailedBecauseOfLimits(entityName, userId);
                     break;
                 case CreationStatus.ParallelSaveError:
-                    logger.LogParallelSaveError(entityName, userId);
+                    logger.LogDbSaveError(entityName, userId);
                     break;
                 default:
                     logger.LogCreationUndefinedStatus(entityName, entityId, userId);
@@ -214,7 +214,7 @@ namespace ContestSystem.Extensions
                     logger.LogEditingOfNonExistentEntity(entityName, entityId, userId);
                     break;
                 case EditionStatus.ParallelSaveError:
-                    logger.LogParallelSaveError(entityName, entityId);
+                    logger.LogDbSaveError(entityName, entityId);
                     break;
                 default:
                     logger.LogEditingUndefinedStatus(entityName, entityId, userId);
@@ -236,7 +236,7 @@ namespace ContestSystem.Extensions
                     logger.LogDeletingOfNonExistentEnitiy(entityName, entityId, userId);
                     break;
                 case DeletionStatus.ParallelSaveError:
-                    logger.LogParallelSaveError(entityName, entityId, true);
+                    logger.LogDbSaveError(entityName, entityId, true);
                     break;
                 default:
                     logger.LogDeletingUndefinedStatus(entityName, entityId, userId);
@@ -258,7 +258,7 @@ namespace ContestSystem.Extensions
                     logger.LogModeratingOfNonExistentEntity(entityName, entityId, userId);
                     break;
                 case ModerationStatus.ParallelSaveError:
-                    logger.LogParallelSaveError(entityName, entityId);
+                    logger.LogDbSaveError(entityName, entityId);
                     break;
                 default:
                     logger.LogModeratingUndefinedStatus(entityName, entityId, userId);
