@@ -13,8 +13,8 @@
         <div>
           <label class="fs-4">Описание</label>
           <v-field v-model="description" name="description" type="hidden"/>
-          <ckeditor :editor="editor" v-model="description"
-                    class="form-control" :config="editorConfig"></ckeditor>
+          <quill-editor ref="quill_editor_description" theme="snow" v-model:content="description" contentType="html"
+                    class="form-control"></quill-editor>
           <error-message name="description"></error-message>
         </div>
         <div>
@@ -105,6 +105,7 @@ import * as Yup from 'yup';
 import {mapActions, mapGetters} from "vuex";
 import axios from 'axios'
 import CountModes from "../../../../dictionaries/CountModes";
+import $ from "jquery";
 import {QuillEditor} from "@vueup/vue-quill";
 
 export default {
@@ -153,6 +154,8 @@ export default {
       this.ruleSet = await this.getRuleSet(this.set_id)
       this.name = this.ruleSet?.name || null
       this.description = this.ruleSet?.description || null
+      // у компонента баг. Начальное значение не отрисовывается
+      this.$refs.quill_editor_description.setHTML(this.description)
       this.countMode = this.ruleSet?.countMode || CountModes.CountPenalty
       this.penaltyForCompilationError = this.ruleSet?.penaltyForCompilationError || false
       this.penaltyForOneTry = this.ruleSet?.penaltyForOneTry || 0
