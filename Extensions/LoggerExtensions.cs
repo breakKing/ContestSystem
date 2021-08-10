@@ -206,7 +206,7 @@ namespace ContestSystem.Extensions
                 case CreationStatus.LimitExceeded:
                     logger.LogCreationFailedBecauseOfLimits(entityName, userId);
                     break;
-                case CreationStatus.ParallelSaveError:
+                case CreationStatus.DbSaveError:
                     logger.LogDbSaveError(entityName, userId);
                     break;
                 default:
@@ -225,7 +225,7 @@ namespace ContestSystem.Extensions
                 case EditionStatus.NotExistentEntity:
                     logger.LogEditingOfNonExistentEntity(entityName, entityId, userId);
                     break;
-                case EditionStatus.ParallelSaveError:
+                case EditionStatus.DbSaveError:
                     logger.LogDbSaveError(entityName, entityId);
                     break;
                 default:
@@ -247,7 +247,7 @@ namespace ContestSystem.Extensions
                 case DeletionStatus.NotExistentEntity:
                     logger.LogDeletingOfNonExistentEnitiy(entityName, entityId, userId);
                     break;
-                case DeletionStatus.ParallelSaveError:
+                case DeletionStatus.DbSaveError:
                     logger.LogDbSaveError(entityName, entityId, true);
                     break;
                 default:
@@ -269,7 +269,7 @@ namespace ContestSystem.Extensions
                 case ModerationStatus.NotExistentEntity:
                     logger.LogModeratingOfNonExistentEntity(entityName, entityId, userId);
                     break;
-                case ModerationStatus.ParallelSaveError:
+                case ModerationStatus.DbSaveError:
                     logger.LogDbSaveError(entityName, entityId);
                     break;
                 default:

@@ -126,7 +126,7 @@ namespace ContestSystem.Areas.Solutions.Services
             bool saveSuccess = await dbContext.SecureSaveAsync();
             if (!saveSuccess)
             {
-                statusData.Status = CreationStatus.ParallelSaveError;
+                statusData.Status = CreationStatus.DbSaveError;
             }
             else
             {

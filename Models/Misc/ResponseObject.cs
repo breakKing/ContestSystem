@@ -74,7 +74,7 @@ namespace ContestSystem.Models.Misc
                     }
                     response = Fail(error);
                     break;
-                case CreationStatus.ParallelSaveError:
+                case CreationStatus.DbSaveError:
                     error = Constants.ErrorCodes[Constants.CommonSectionName][Constants.DbSaveErrorName];
                     response = Fail(error);
                     break;
@@ -106,7 +106,7 @@ namespace ContestSystem.Models.Misc
                     }
                     response = Fail(error);
                     break;
-                case EditionStatus.ParallelSaveError:
+                case EditionStatus.DbSaveError:
                     error = Constants.ErrorCodes[Constants.CommonSectionName][Constants.DbSaveErrorName];
                     response = Fail(error);
                     break;
@@ -142,7 +142,7 @@ namespace ContestSystem.Models.Misc
                     }
                     response = Fail(error);
                     break;
-                case DeletionStatus.ParallelSaveError:
+                case DeletionStatus.DbSaveError:
                     error = Constants.ErrorCodes[Constants.CommonSectionName][Constants.DbSaveErrorName];
                     response = Fail(error);
                     break;
@@ -178,7 +178,7 @@ namespace ContestSystem.Models.Misc
                     }
                     response = Fail(error);
                     break;
-                case ModerationStatus.ParallelSaveError:
+                case ModerationStatus.DbSaveError:
                     error = Constants.ErrorCodes[Constants.CommonSectionName][Constants.DbSaveErrorName];
                     response = Fail(error);
                     break;

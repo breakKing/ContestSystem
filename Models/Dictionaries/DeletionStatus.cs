@@ -5,7 +5,7 @@
         Success = 0,
         SuccessWithArchiving = 1,
         NotExistentEntity = 2,
-        ParallelSaveError = 3,
+        DbSaveError = 3,
         Undefined = 4
     }
 }

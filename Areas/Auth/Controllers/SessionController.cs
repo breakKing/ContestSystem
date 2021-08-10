@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace ContestSystem.Areas.Accounting.Controllers
+namespace ContestSystem.Areas.Auth.Controllers
 {
     [Area("Accounting")]
     [Route("api/[area]/[controller]")]

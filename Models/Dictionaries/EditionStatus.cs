@@ -4,7 +4,7 @@
     {
         Success = 0,
         NotExistentEntity = 1,
-        ParallelSaveError = 2,
+        DbSaveError = 2,
         Undefined = 3
     }
 }

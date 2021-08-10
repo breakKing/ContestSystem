@@ -65,7 +65,7 @@ namespace ContestSystem.Areas.Workspace.Services
                 bool saveSuccess = await dbContext.SecureSaveAsync();
                 if (!saveSuccess)
                 {
-                    statusData.Status = CreationStatus.ParallelSaveError;
+                    statusData.Status = CreationStatus.DbSaveError;
                 }
                 else
                 {
@@ -102,7 +102,7 @@ namespace ContestSystem.Areas.Workspace.Services
                     saveSuccess = await dbContext.SecureSaveAsync();
                     if (!saveSuccess)
                     {
-                        statusData.Status = CreationStatus.ParallelSaveError;
+                        statusData.Status = CreationStatus.DbSaveError;
                         contest = await dbContext.Contests.FirstOrDefaultAsync(c => c.Id == contest.Id);
                         await DeleteContestAsync(dbContext, contest);
                     }
@@ -164,7 +164,7 @@ namespace ContestSystem.Areas.Workspace.Services
                 bool saveSuccess = await dbContext.SecureSaveAsync();
                 if (!saveSuccess)
                 {
-                    statusData.Status = CreationStatus.ParallelSaveError;
+                    statusData.Status = CreationStatus.DbSaveError;
                 }
                 else
                 {
@@ -204,7 +204,7 @@ namespace ContestSystem.Areas.Workspace.Services
                     saveSuccess = await dbContext.SecureSaveAsync();
                     if (!saveSuccess)
                     {
-                        statusData.Status = CreationStatus.ParallelSaveError;
+                        statusData.Status = CreationStatus.DbSaveError;
                         problem = await dbContext.Problems.FirstOrDefaultAsync(p => p.Id == problem.Id);
                         await DeleteProblemAsync(dbContext, problem);
                     }
@@ -249,7 +249,7 @@ namespace ContestSystem.Areas.Workspace.Services
             bool saveSuccess = await dbContext.SecureSaveAsync();
             if (!saveSuccess)
             {
-                statusData.Status = CreationStatus.ParallelSaveError;
+                statusData.Status = CreationStatus.DbSaveError;
             }
             else
             {
@@ -291,7 +291,7 @@ namespace ContestSystem.Areas.Workspace.Services
             bool saveSuccess = await dbContext.SecureSaveAsync();
             if (!saveSuccess)
             {
-                statusData.Status = CreationStatus.ParallelSaveError;
+                statusData.Status = CreationStatus.DbSaveError;
             }
             else
             {
@@ -345,7 +345,7 @@ namespace ContestSystem.Areas.Workspace.Services
                 bool saveSuccess = await dbContext.SecureSaveAsync();
                 if (!saveSuccess)
                 {
-                    statusData.Status = CreationStatus.ParallelSaveError;
+                    statusData.Status = CreationStatus.DbSaveError;
                 }
                 else
                 {
@@ -366,7 +366,7 @@ namespace ContestSystem.Areas.Workspace.Services
                     saveSuccess = await dbContext.SecureSaveAsync();
                     if (!saveSuccess)
                     {
-                        statusData.Status = CreationStatus.ParallelSaveError;
+                        statusData.Status = CreationStatus.DbSaveError;
                         post = await dbContext.Posts.FirstOrDefaultAsync(p => p.Id == post.Id);
                         await DeletePostAsync(dbContext, post);
                     }
@@ -455,7 +455,7 @@ namespace ContestSystem.Areas.Workspace.Services
                 bool saveSuccess = await dbContext.SecureSaveAsync();
                 if (!saveSuccess)
                 {
-                    status = EditionStatus.ParallelSaveError;
+                    status = EditionStatus.DbSaveError;
                 }
                 else
                 {
@@ -553,7 +553,7 @@ namespace ContestSystem.Areas.Workspace.Services
                 bool saveSuccess = await dbContext.SecureSaveAsync();
                 if (!saveSuccess)
                 {
-                    status = EditionStatus.ParallelSaveError;
+                    status = EditionStatus.DbSaveError;
                 }
                 else
                 {
@@ -588,7 +588,7 @@ namespace ContestSystem.Areas.Workspace.Services
                 bool saveSuccess = await dbContext.SecureSaveAsync();
                 if (!saveSuccess)
                 {
-                    status = EditionStatus.ParallelSaveError;
+                    status = EditionStatus.DbSaveError;
                 }
                 else
                 {
@@ -625,7 +625,7 @@ namespace ContestSystem.Areas.Workspace.Services
                 bool saveSuccess = await dbContext.SecureSaveAsync();
                 if (!saveSuccess)
                 {
-                    status = EditionStatus.ParallelSaveError;
+                    status = EditionStatus.DbSaveError;
                 }
                 else
                 {
@@ -692,7 +692,7 @@ namespace ContestSystem.Areas.Workspace.Services
                 bool saveSuccess = await dbContext.SecureSaveAsync();
                 if (!saveSuccess)
                 {
-                    status = EditionStatus.ParallelSaveError;
+                    status = EditionStatus.DbSaveError;
                 }
                 else
                 {
@@ -717,7 +717,7 @@ namespace ContestSystem.Areas.Workspace.Services
                 bool saveSuccess = await dbContext.SecureSaveAsync();
                 if (!saveSuccess)
                 {
-                    status = DeletionStatus.ParallelSaveError;
+                    status = DeletionStatus.DbSaveError;
                 }
                 else
                 {
@@ -752,7 +752,7 @@ namespace ContestSystem.Areas.Workspace.Services
                     bool saveSuccess = await dbContext.SecureSaveAsync();
                     if (!saveSuccess)
                     {
-                        status = DeletionStatus.ParallelSaveError;
+                        status = DeletionStatus.DbSaveError;
                     }
                     else
                     {
@@ -788,7 +788,7 @@ namespace ContestSystem.Areas.Workspace.Services
                     bool saveSuccess = await dbContext.SecureSaveAsync();
                     if (!saveSuccess)
                     {
-                        status = DeletionStatus.ParallelSaveError;
+                        status = DeletionStatus.DbSaveError;
                     }
                     else
                     {
@@ -824,7 +824,7 @@ namespace ContestSystem.Areas.Workspace.Services
                     bool saveSuccess = await dbContext.SecureSaveAsync();
                     if (!saveSuccess)
                     {
-                        status = DeletionStatus.ParallelSaveError;
+                        status = DeletionStatus.DbSaveError;
                     }
                     else
                     {
@@ -854,7 +854,7 @@ namespace ContestSystem.Areas.Workspace.Services
                 bool saveSuccess = await dbContext.SecureSaveAsync();
                 if (!saveSuccess)
                 {
-                    status = DeletionStatus.ParallelSaveError;
+                    status = DeletionStatus.DbSaveError;
                 }
                 else
                 {
@@ -883,7 +883,7 @@ namespace ContestSystem.Areas.Workspace.Services
                 bool saveSuccess = await dbContext.SecureSaveAsync();
                 if (!saveSuccess)
                 {
-                    status = ModerationStatus.ParallelSaveError;
+                    status = ModerationStatus.DbSaveError;
                 }
                 else
                 {
@@ -911,7 +911,7 @@ namespace ContestSystem.Areas.Workspace.Services
                 bool saveSuccess = await dbContext.SecureSaveAsync();
                 if (!saveSuccess)
                 {
-                    status = ModerationStatus.ParallelSaveError;
+                    status = ModerationStatus.DbSaveError;
                 }
                 else
                 {
@@ -967,7 +967,7 @@ namespace ContestSystem.Areas.Workspace.Services
                 bool saveSuccess = await dbContext.SecureSaveAsync();
                 if (!saveSuccess)
                 {
-                    status = ModerationStatus.ParallelSaveError;
+                    status = ModerationStatus.DbSaveError;
                 }
                 else
                 {
@@ -1004,7 +1004,7 @@ namespace ContestSystem.Areas.Workspace.Services
                 bool saveSuccess = await dbContext.SecureSaveAsync();
                 if (!saveSuccess)
                 {
-                    status = ModerationStatus.ParallelSaveError;
+                    status = ModerationStatus.DbSaveError;
                 }
                 else
                 {
