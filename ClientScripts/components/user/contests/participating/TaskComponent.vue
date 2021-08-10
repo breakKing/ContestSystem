@@ -140,6 +140,7 @@ export default {
       let {data, status, errors} = await this.sendSolution({
         code: this.code,
         compilerGUID: this.compiler,
+        compilerName: _.find(this.availableCompilers || [], (c, i) => c.guid == this.compiler)?.name,
         contestId: this.contest_id,
         userId: this.currentUser.id,
         problemId: this.actualTaskId,

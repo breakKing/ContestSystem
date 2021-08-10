@@ -74,7 +74,7 @@ namespace ContestSystem.Areas.Accounting.Controllers
                         new
                         {
                             status = false,
-                            message = _errorCodes[Constants.UserAlreadyExistsErrorName]
+                            message = _errorCodes[Constants.EntityAlreadyExistsErrorName]
                         });
                 }
 

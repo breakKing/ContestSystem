@@ -52,14 +52,25 @@
         ValidationFailed: "ERR_USER_VALIDATION_FAILED",
         EntityDoesntExist: "ERR_USER_DOESNT_EXIST",
         UserAlreadyInContest: "ERR_USER_ALREADY_IN_CONTEST",
+        UserNotInContest: "ERR_USER_NOT_IN_CONTEST",
         UserInsufficientRights: "ERR_USER_HAS_INSUFFICIENT_RIGHTS",
-        UserAlreadyExists: "ERR_USER_ALREADY_EXISTS",
+        EntityAlreadyExists: "ERR_USER_ALREADY_EXISTS",
         AuthFailed: "ERR_USER_AUTH_FAILED",
         TokenGenerationFailed: "ERR_USER_TOKEN_GENERATION_FAILED",
         UserRegisterFailed: "ERR_USER_REGISTER_FAILED"
     },
+    Solution: {
+        ValidationFailed: "ERR_SOLUTION_VALIDATION_FAILED",
+        UserIdMismatch: "ERR_SOLUTION_USER_ID_MISMATCH",
+        EntityDoesntExist: "ERR_SOLUTION_DOESNT_EXIST",
+        CreationLimitExceeded: "ERR_SOLUTION_CREATION_LIMIT_EXCEEDED",
+        EntityAlreadyExists: "ERR_SOLUTION_ALREADY_EXISTS"
+    },
+    Compiler: {
+        EntityDoesntExist: "ERR_COMPILER_DOESNT_EXIST"
+    },
     Common: {
-        DbSave: "ERR__DB_SAVE",
+        DbSave: "ERR_DB_SAVE",
         Undefined: "ERR_UNDEFINED"
     }
 }

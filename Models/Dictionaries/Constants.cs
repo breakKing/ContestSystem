@@ -20,6 +20,8 @@ namespace ContestSystem.Models.Dictionaries
         public static readonly string CheckerEntityName = "Checker";
         public static readonly string RulesSetEntityName = "RulesSet";
         public static readonly string UserEntityName = "User";
+        public static readonly string SolutionEntityName = "Solution";
+        public static readonly string CompilerEntityName = "Compiler";
 
         // Названия для разделов "кодов" ошибок
         public static readonly string CommonSectionName = "Common";
@@ -33,12 +35,14 @@ namespace ContestSystem.Models.Dictionaries
         public static readonly string CreationLimitExceededErrorName = "EntityCreationLimitExceeded";
         public static readonly string ModerationByWrongModeratorErrorName = "EntityModerationByWrongModerator";
         public static readonly string UserAlreadyInContestErrorName = "UserAlreadyInContest";
+        public static readonly string UserNotInContestErrorName = "UserNotInContest";
         public static readonly string UserInsufficientRightsErrorName = "UserInsufficientRights";
-        public static readonly string UserAlreadyExistsErrorName = "UserAlreadyExists";
+        public static readonly string EntityAlreadyExistsErrorName = "EntityAlreadyExists";
         public static readonly string AuthFailedErrorName = "AuthFailed";
         public static readonly string TokenGenerationFailedErrorName = "TokenGenerationFailed";
         public static readonly string UserRegisterFailedErrorName = "UserRegisterFailed";
         public static readonly string DbSaveErrorName = "DbSaveError";
+        public static readonly string CheckerServersUnavailableErrorName = "CheckerServersUnavailable";
         public static readonly string UndefinedErrorName = "UndefinedError";
 
         // Все "коды" ошибок
@@ -104,15 +108,29 @@ namespace ContestSystem.Models.Dictionaries
                 { ValidationFailedErrorName, "ERR_USER_VALIDATION_FAILED" },
                 { EntityDoesntExistErrorName, "ERR_USER_DOESNT_EXIST" },
                 { UserAlreadyInContestErrorName, "ERR_USER_ALREADY_IN_CONTEST" },
+                { UserNotInContestErrorName, "ERR_USER_NOT_IN_CONTEST" },
                 { UserInsufficientRightsErrorName, "ERR_USER_HAS_INSUFFICIENT_RIGHTS" },
-                { UserAlreadyExistsErrorName, "ERR_USER_ALREADY_EXISTS" },
+                { EntityAlreadyExistsErrorName, "ERR_USER_ALREADY_EXISTS" },
                 { AuthFailedErrorName, "ERR_USER_AUTH_FAILED" },
                 { TokenGenerationFailedErrorName, "ERR_USER_TOKEN_GENERATION_FAILED" },
                 { UserRegisterFailedErrorName, "ERR_USER_REGISTER_FAILED" }
             },
+            [SolutionEntityName] = new Dictionary<string, string>
+            {
+                { ValidationFailedErrorName, "ERR_SOLUTION_VALIDATION_FAILED" },
+                { UserIdMismatchErrorName, "ERR_SOLUTION_USER_ID_MISMATCH" },
+                { EntityDoesntExistErrorName, "ERR_SOLUTION_DOESNT_EXIST" },
+                { CreationLimitExceededErrorName, "ERR_SOLUTION_CREATION_LIMIT_EXCEEDED" },
+                { EntityAlreadyExistsErrorName, "ERR_SOLUTION_ALREADY_EXISTS" }
+            },
+            [CompilerEntityName] = new Dictionary<string, string>
+            {
+                { EntityDoesntExistErrorName, "ERR_COMPILER_DOESNT_EXIST" }
+            },
             [CommonSectionName] = new Dictionary<string, string>
             {
                 { DbSaveErrorName, "ERR_DB_SAVE" },
+                { CheckerServersUnavailableErrorName, "ERR_CHECKER_SERVERS_UNAVAILABLE" },
                 { UndefinedErrorName, "ERR_UNDEFINED" }
             },
         };

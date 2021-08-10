@@ -181,6 +181,18 @@ namespace ContestSystem.Extensions
             }
         }
 
+        public static void LogNonExistentEntityInForm(this ILogger logger, string entityName, string nonExistentEntityName, long userId)
+        {
+            logger.LogWarning( $"При проверке формы для сущности \"{entityName}\" от пользователя с идентификатором {userId} было обнаружено " +
+                   $"использование несуществующей сущности \"{nonExistentEntityName}\"");
+        }
+
+        public static void LogExistentEntityInForm(this ILogger logger, string entityName, string nonExistentEntityName, long userId)
+        {
+            logger.LogWarning($"При проверке формы для сущности \"{entityName}\" от пользователя с идентификатором {userId} было обнаружено " +
+                   $"использование уже существующей сущности \"{nonExistentEntityName}\"");
+        }
+
         public static void LogCreationStatus(this ILogger logger, CreationStatus status, string entityName, long? entityId, long userId)
         {
             switch (status)
@@ -262,6 +274,42 @@ namespace ContestSystem.Extensions
                     break;
                 default:
                     logger.LogModeratingUndefinedStatus(entityName, entityId, userId);
+                    break;
+            }
+        }
+
+        public static void LogFormCheckStatus(this ILogger logger, FormCheckStatus status, string entityName, long userId, string entityId = "")
+        {
+            switch (status)
+            {
+                case FormCheckStatus.Correct:
+                    break;
+                case FormCheckStatus.NonExistentCompiler:
+                    logger.LogNonExistentEntityInForm(entityName, Constants.CompilerEntityName, userId);
+                    break;
+                case FormCheckStatus.NonExistentParticipant:
+                    logger.LogWarning($"При проверке формы для сущности \"{entityName}\" от пользователя с идентификатором {userId} было обнаружено " +
+                   $"использование несуществующего участника соревнования");
+                    break;
+                case FormCheckStatus.NonExistentContest:
+                    logger.LogNonExistentEntityInForm(entityName, Constants.ContestEntityName, userId);
+                    break;
+                case FormCheckStatus.NonExistentProblem:
+                    logger.LogNonExistentEntityInForm(entityName, Constants.ProblemEntityName, userId);
+                    break;
+                case FormCheckStatus.NonExistentRulesSet:
+                    logger.LogNonExistentEntityInForm(entityName, Constants.RulesSetEntityName, userId);
+                    break;
+                case FormCheckStatus.NonExistentChecker:
+                    logger.LogNonExistentEntityInForm(entityName, Constants.CheckerEntityName, userId);
+                    break;
+                case FormCheckStatus.NonExistentUser:
+                    logger.LogNonExistentEntityInForm(entityName, Constants.UserEntityName, userId);
+                    break;
+                case FormCheckStatus.ExistentSolution:
+                    logger.LogExistentEntityInForm(entityName, Constants.CompilerEntityName, userId);
+                    break;
+                default:
                     break;
             }
         }

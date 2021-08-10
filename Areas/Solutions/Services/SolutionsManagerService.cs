@@ -1,13 +1,244 @@
-﻿using ContestSystem.Models.Dictionaries;
+﻿using ContestSystem.Models.DbContexts;
+using ContestSystem.Models.Dictionaries;
+using ContestSystem.Models.FormModels;
+using ContestSystem.Models.Misc;
+using ContestSystem.Services;
 using ContestSystemDbStructure.Enums;
 using ContestSystemDbStructure.Models;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace ContestSystem.Areas.Solutions.Services
 {
     public class SolutionsManagerService
     {
+        private readonly CheckerSystemService _checkerSystem;
+        private readonly NotifierService _notifier;
+
+        public SolutionsManagerService(CheckerSystemService checkerSystem, NotifierService notifier)
+        {
+            _checkerSystem = checkerSystem;
+            _notifier = notifier;
+        }
+
+        public async Task<List<CompilerInfo>> GetCompilersAsync(MainDbContext dbContext)
+        {
+            return await _checkerSystem.GetAvailableCompilersAsync(dbContext);
+        }
+
+        public async Task<FormCheckStatus> CheckSolutionFormAsync(MainDbContext dbContext, SolutionForm form)
+        {
+            var status = FormCheckStatus.Undefined;
+
+            var now = DateTime.UtcNow;
+
+            bool isContestExistent = await dbContext.Contests.AnyAsync(c => c.Id == form.ContestId
+                                                                            && c.ApprovalStatus == ApproveType.Accepted
+                                                                            && c.StartDateTimeUTC <= now
+                                                                            && c.StartDateTimeUTC.AddMinutes(c.DurationInMinutes) > now);
+
+            if (isContestExistent)
+            {
+                bool isUserParticipant = await dbContext.ContestsParticipants.AnyAsync(cp => cp.ContestId == form.ContestId
+                                                                                            && cp.ParticipantId == form.UserId
+                                                                                            && cp.ConfirmedByLocalModerator
+                                                                                            && cp.ConfirmedByParticipant);
+
+                if (isUserParticipant)
+                {
+                    bool isProblemExistent = await dbContext.ContestsProblems.AnyAsync(cp => cp.ContestId == form.ContestId
+                                                                                        && cp.ProblemId == form.ProblemId);
+
+                    if (isProblemExistent)
+                    {
+                        var compilerInfo = await GetCompilersAsync(dbContext);
+                        bool isCompilerExistent = (compilerInfo != null && compilerInfo.Count != 0 && compilerInfo.Any(c => c.GUID == form.CompilerGUID));
+
+                        if (isCompilerExistent)
+                        {
+                            bool isSolutionExistent = await dbContext.Solutions.AnyAsync(s => s.ContestId == form.ContestId
+                                                                                                && s.ParticipantId == form.UserId
+                                                                                                && s.ProblemId == form.ProblemId
+                                                                                                && s.CompilerGUID == form.CompilerGUID
+                                                                                                && s.Code == form.Code);
+
+                            if (isSolutionExistent)
+                            {
+                                status = FormCheckStatus.ExistentSolution;
+                            }
+                            else
+                            {
+                                status = FormCheckStatus.Correct;
+                            }
+                        }
+                        else
+                        {
+                            status = FormCheckStatus.NonExistentCompiler;
+                        }
+                    }
+                    else
+                    {
+                        status = FormCheckStatus.NonExistentProblem;
+                    }
+                }
+                else
+                {
+                    status = FormCheckStatus.NonExistentParticipant;
+                }
+            }
+            else
+            {
+                status = FormCheckStatus.NonExistentContest;
+            }
+
+            return status;
+        }
+
+        public async Task<CreationStatusData> CreateSolutionAsync(MainDbContext dbContext, SolutionForm form)
+        {
+            var statusData = new CreationStatusData
+            {
+                Status = CreationStatus.Undefined,
+                Id = null
+            };
+
+            // TODO: проверка ограничений отправки решений
+
+            var solution = new Solution
+            {
+                Code = form.Code,
+                CompilerGUID = form.CompilerGUID,
+                ContestId = form.ContestId,
+                ParticipantId = form.UserId,
+                ProblemId = form.ProblemId,
+                SubmitTimeUTC = DateTime.UtcNow,
+                CompilerName = form.CompilerName,
+                ErrorsMessage = "",
+                Verdict = VerdictType.Undefined,
+                Points = 0
+            };
+
+            await dbContext.Solutions.AddAsync(solution);
+
+            bool saveSuccess = await dbContext.SecureSaveAsync();
+            if (!saveSuccess)
+            {
+                statusData.Status = CreationStatus.ParallelSaveError;
+            }
+            else
+            {
+                statusData.Status = CreationStatus.Success;
+                statusData.Id = solution.Id;
+            }
+
+            return statusData;
+        }
+
+        public async Task<Solution> CompileSolutionAsync(MainDbContext dbContext, Solution solution)
+        {
+            if (solution != null)
+            {
+                var newSolution = await _checkerSystem.CompileSolutionAsync(dbContext, solution);
+                if (newSolution == null)
+                {
+                    solution.Verdict = VerdictType.CheckerServersUnavailable;
+                }
+                else
+                {
+                    solution.ErrorsMessage = newSolution.ErrorsMessage;
+                    solution.Verdict = newSolution.Verdict;
+                }
+
+                dbContext.Solutions.Update(solution);
+
+                bool saveSuccess = await dbContext.SecureSaveAsync();
+                if (!saveSuccess)
+                {
+                    solution = await dbContext.Solutions.FirstOrDefaultAsync(s => s.Id == solution.Id);
+                    solution = await CompileSolutionAsync(dbContext, solution);
+                }
+            }
+            return solution;
+        }
+
+        public async Task<Solution> TestSolutionAsync(MainDbContext dbContext, Solution solution)
+        {
+            if (solution != null)
+            {
+                bool state = true;
+                List<Test> tests = solution.Problem.Tests.OrderBy(t => t.Number).ToList();
+                foreach (var test in tests)
+                {
+                    var result = await RunTestAsync(dbContext, solution, test);
+                    if (result == null)
+                    {
+                        state = false;
+                        break;
+                    }
+                    if (result.Verdict != VerdictType.Accepted && solution.Contest.RulesSet.CountMode == RulesCountMode.CountPenalty)
+                    {
+                        break;
+                    }
+                }
+                if (state)
+                {
+                    solution.Verdict = GetVerdictForSolution(solution, solution.Contest.RulesSet);
+                    dbContext.Solutions.Update(solution);
+
+                    bool saveSuccess = false;
+                    while (!saveSuccess)
+                    {
+                        var contestParticipant = await dbContext.ContestsParticipants.FirstOrDefaultAsync(cp => cp.ParticipantId == solution.ParticipantId && cp.ContestId == solution.ContestId);
+                        var otherSolutions = await dbContext.Solutions.Where(s => s.ParticipantId == solution.ParticipantId
+                                                                                    && s.ContestId == solution.ContestId
+                                                                                    && s.ProblemId == solution.ProblemId
+                                                                                    && s.Id != solution.Id)
+                                                                        .ToListAsync();
+
+                        contestParticipant.Result += GetAdditionalResultForSolutionSubmit(otherSolutions, solution, solution.Contest.RulesSet);
+                        dbContext.ContestsParticipants.Update(contestParticipant);
+
+                        saveSuccess = await dbContext.SecureSaveAsync();
+                    }
+                }
+            }
+            return solution;
+        }
+
+        private async Task<TestResult> RunTestAsync(MainDbContext dbContext, Solution solution, Test test)
+        {
+            var testResult = solution.TestResults.FirstOrDefault(tr => tr.Number == test.Number);
+
+            if (testResult == null)
+            {
+                var newTestResult = await _checkerSystem.RunTestForSolutionAsync(dbContext, solution, test.Number);
+                if (newTestResult == null)
+                {
+                    solution.Verdict = VerdictType.CheckerServersUnavailable;
+                }
+                else
+                {
+                    solution.Points += newTestResult.GotPoints;
+                    solution.TestResults.Add(newTestResult);
+                }
+                dbContext.Solutions.Update(solution);
+
+                bool saveSuccess = await dbContext.SecureSaveAsync();
+                while (!saveSuccess)
+                {
+                    solution = await dbContext.Solutions.FirstOrDefaultAsync(s => s.Id == solution.Id);
+                    newTestResult = await RunTestAsync(dbContext, solution, test);
+                }
+                await _notifier.UpdateOnSolutionActualResultAsync(solution.Contest, solution);
+                return newTestResult;
+            }
+
+            return testResult;
+        }
+
         public long GetResultForSolution(Solution solution, RulesSet rules)
         {
             long result = 0;
@@ -148,7 +379,7 @@ namespace ContestSystem.Areas.Solutions.Services
             return result;
         }
 
-        private static long GetTimePenaltyForSolution(Solution solution)
+        private long GetTimePenaltyForSolution(Solution solution)
         {
             long penalty = 0;
             if (solution == null)
@@ -160,7 +391,7 @@ namespace ContestSystem.Areas.Solutions.Services
             return penalty;
         }
 
-        private static bool AllTestsAreAccepted(List<TestResult> testResults)
+        private bool AllTestsAreAccepted(List<TestResult> testResults)
         {
             if (testResults == null || testResults.Count == 0)
             {

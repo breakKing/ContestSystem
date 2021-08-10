@@ -50,16 +50,16 @@ namespace ContestSystem.Models.Misc
                                     .ToArray());
         }
 
-        public static ResponseObject<long> FormResponseObjectForCreation(CreationStatus status, string entityName, long? entityId)
+        public static ResponseObject<TIdentity> FormResponseObjectForCreation(CreationStatus status, string entityName, TIdentity entityId)
         {
-            ResponseObject<long> response = new ResponseObject<long>();
+            ResponseObject<TIdentity> response = new ResponseObject<TIdentity>();
             switch (status)
             {
                 case CreationStatus.Success:
-                    response = ResponseObject<long>.Success(entityId.GetValueOrDefault(-1));
+                    response = Success(entityId);
                     break;
                 case CreationStatus.SuccessWithAutoAccept:
-                    response = ResponseObject<long>.Success(entityId.GetValueOrDefault(-1));
+                    response = Success(entityId);
                     break;
                 case CreationStatus.LimitExceeded:
                     string error = string.Empty;
@@ -72,26 +72,26 @@ namespace ContestSystem.Models.Misc
                     {
                         error = Constants.ErrorCodes[Constants.CommonSectionName][Constants.UndefinedErrorName];
                     }
-                    response = ResponseObject<long>.Fail(error);
+                    response = Fail(error);
                     break;
                 case CreationStatus.ParallelSaveError:
                     error = Constants.ErrorCodes[Constants.CommonSectionName][Constants.DbSaveErrorName];
-                    response = ResponseObject<long>.Fail(error);
+                    response = Fail(error);
                     break;
                 default:
-                    response = ResponseObject<long>.Fail(Constants.ErrorCodes[Constants.CommonSectionName][Constants.UndefinedErrorName]);
+                    response = Fail(Constants.ErrorCodes[Constants.CommonSectionName][Constants.UndefinedErrorName]);
                     break;
             }
             return response;
         }
 
-        public static ResponseObject<long> FormResponseObjectForEdition(EditionStatus status, string entityName, long entityId)
+        public static ResponseObject<TIdentity> FormResponseObjectForEdition(EditionStatus status, string entityName, TIdentity entityId)
         {
-            ResponseObject<long> response = new ResponseObject<long>();
+            ResponseObject<TIdentity> response = new ResponseObject<TIdentity>();
             switch (status)
             {
                 case EditionStatus.Success:
-                    response = ResponseObject<long>.Success(entityId);
+                    response = Success(entityId);
                     break;
                 case EditionStatus.NotExistentEntity:
                     string error = string.Empty;
@@ -104,30 +104,30 @@ namespace ContestSystem.Models.Misc
                     {
                         error = Constants.ErrorCodes[Constants.CommonSectionName][Constants.UndefinedErrorName];
                     }
-                    response = ResponseObject<long>.Fail(error);
+                    response = Fail(error);
                     break;
                 case EditionStatus.ParallelSaveError:
                     error = Constants.ErrorCodes[Constants.CommonSectionName][Constants.DbSaveErrorName];
-                    response = ResponseObject<long>.Fail(error);
+                    response = Fail(error);
                     break;
                 default:
                     error = Constants.ErrorCodes[Constants.CommonSectionName][Constants.UndefinedErrorName];
-                    response = ResponseObject<long>.Fail(error);
+                    response = Fail(error);
                     break;
             }
             return response;
         }
 
-        public static ResponseObject<long> FormResponseObjectForDeletion(DeletionStatus status, string entityName, long entityId)
+        public static ResponseObject<TIdentity> FormResponseObjectForDeletion(DeletionStatus status, string entityName, TIdentity entityId)
         {
-            ResponseObject<long> response = new ResponseObject<long>();
+            ResponseObject<TIdentity> response = new ResponseObject<TIdentity>();
             switch (status)
             {
                 case DeletionStatus.Success:
-                    response = ResponseObject<long>.Success(entityId);
+                    response = Success(entityId);
                     break;
                 case DeletionStatus.SuccessWithArchiving:
-                    response = ResponseObject<long>.Success(entityId);
+                    response = Success(entityId);
                     break;
                 case DeletionStatus.NotExistentEntity:
                     string error = string.Empty;
@@ -140,30 +140,30 @@ namespace ContestSystem.Models.Misc
                     {
                         error = Constants.ErrorCodes[Constants.CommonSectionName][Constants.UndefinedErrorName];
                     }
-                    response = ResponseObject<long>.Fail(error);
+                    response = Fail(error);
                     break;
                 case DeletionStatus.ParallelSaveError:
                     error = Constants.ErrorCodes[Constants.CommonSectionName][Constants.DbSaveErrorName];
-                    response = ResponseObject<long>.Fail(error);
+                    response = Fail(error);
                     break;
                 default:
                     error = Constants.ErrorCodes[Constants.CommonSectionName][Constants.UndefinedErrorName];
-                    response = ResponseObject<long>.Fail(error);
+                    response = Fail(error);
                     break;
             }
             return response;
         }
 
-        public static ResponseObject<long> FormResponseObjectForModeration(ModerationStatus status, string entityName, long entityId)
+        public static ResponseObject<TIdentity> FormResponseObjectForModeration(ModerationStatus status, string entityName, TIdentity entityId)
         {
-            ResponseObject<long> response = new ResponseObject<long>();
+            ResponseObject<TIdentity> response = new ResponseObject<TIdentity>();
             switch (status)
             {
                 case ModerationStatus.Accepted:
-                    response = ResponseObject<long>.Success(entityId);
+                    response = Success(entityId);
                     break;
                 case ModerationStatus.Rejected:
-                    response = ResponseObject<long>.Success(entityId);
+                    response = Success(entityId);
                     break;
                 case ModerationStatus.NotExistentEntity:
                     string error = string.Empty;
@@ -176,15 +176,54 @@ namespace ContestSystem.Models.Misc
                     {
                         error = Constants.ErrorCodes[Constants.CommonSectionName][Constants.UndefinedErrorName];
                     }
-                    response = ResponseObject<long>.Fail(error);
+                    response = Fail(error);
                     break;
                 case ModerationStatus.ParallelSaveError:
                     error = Constants.ErrorCodes[Constants.CommonSectionName][Constants.DbSaveErrorName];
-                    response = ResponseObject<long>.Fail(error);
+                    response = Fail(error);
                     break;
                 default:
                     error = Constants.ErrorCodes[Constants.CommonSectionName][Constants.UndefinedErrorName];
-                    response = ResponseObject<long>.Fail(error);
+                    response = Fail(error);
+                    break;
+            }
+            return response;
+        }
+
+        public static ResponseObject<TIdentity> FormResponseObjectForFormCheck(FormCheckStatus status, string entityName, TIdentity entityId = default)
+        {
+            ResponseObject<TIdentity> response = new ResponseObject<TIdentity>();
+            switch (status)
+            {
+                case FormCheckStatus.Correct:
+                    response = Success(entityId);
+                    break;
+                case FormCheckStatus.NonExistentCompiler:
+                    response = Fail(Constants.ErrorCodes[Constants.CompilerEntityName][Constants.EntityDoesntExistErrorName]);
+                    break;
+                case FormCheckStatus.NonExistentParticipant:
+                    response = Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.UserNotInContestErrorName]);
+                    break;
+                case FormCheckStatus.NonExistentContest:
+                    response = Fail(Constants.ErrorCodes[Constants.ContestEntityName][Constants.EntityDoesntExistErrorName]);
+                    break;
+                case FormCheckStatus.NonExistentProblem:
+                    response = Fail(Constants.ErrorCodes[Constants.ProblemEntityName][Constants.EntityDoesntExistErrorName]);
+                    break;
+                case FormCheckStatus.NonExistentRulesSet:
+                    response = Fail(Constants.ErrorCodes[Constants.RulesSetEntityName][Constants.EntityDoesntExistErrorName]);
+                    break;
+                case FormCheckStatus.NonExistentChecker:
+                    response = Fail(Constants.ErrorCodes[Constants.CheckerEntityName][Constants.EntityDoesntExistErrorName]);
+                    break;
+                case FormCheckStatus.NonExistentUser:
+                    response = Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.EntityDoesntExistErrorName]);
+                    break;
+                case FormCheckStatus.ExistentSolution:
+                    response = Fail(Constants.ErrorCodes[Constants.SolutionEntityName][Constants.EntityAlreadyExistsErrorName]);
+                    break;
+                default:
+                    response = Fail(Constants.ErrorCodes[Constants.CommonSectionName][Constants.UndefinedErrorName]);
                     break;
             }
             return response;
