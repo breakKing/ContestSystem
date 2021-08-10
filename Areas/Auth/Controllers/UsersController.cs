@@ -3,7 +3,6 @@ using ContestSystem.Models.Attributes;
 using ContestSystem.Models.DbContexts;
 using ContestSystem.Models.Dictionaries;
 using ContestSystem.Models.FormModels;
-using ContestSystem.Services;
 using ContestSystemDbStructure.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -16,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace ContestSystem.Areas.Auth.Controllers
 {
-    [Area("Accounting")]
+    [Area("Auth")]
     [Route("api/[area]/[controller]")]
     [ApiController]
     public class UsersController : Controller

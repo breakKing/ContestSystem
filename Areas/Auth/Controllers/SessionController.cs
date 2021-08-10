@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace ContestSystem.Areas.Auth.Controllers
 {
-    [Area("Accounting")]
+    [Area("Auth")]
     [Route("api/[area]/[controller]")]
     [ApiController]
     public class SessionController : Controller
