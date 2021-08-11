@@ -4,134 +4,22 @@ using ContestSystem.Models.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ContestSystem.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    partial class MainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210811184039_Deleting ulong PKs pt 1")]
+    partial class DeletingulongPKspt1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("ProductVersion", "5.0.8")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Chat", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<long?>("AdminId")
-                        .HasColumnType("bigint");
-
-                    b.Property<bool>("AnyoneCanJoin")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("ImagePath")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsBetweenTwoUsers")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsCreatedBySystem")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Link")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<byte[]>("Timestamp")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AdminId");
-
-                    b.ToTable("Chats");
-                });
-
-            modelBuilder.Entity("ContestSystemDbStructure.Models.ChatEvent", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<decimal>("ChatId")
-                        .HasColumnType("decimal(20,0)");
-
-                    b.Property<long?>("ChatId1")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("DateTimeUTC")
-                        .HasColumnType("datetime2");
-
-                    b.Property<byte[]>("Timestamp")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
-
-                    b.Property<long?>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ChatId1");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ChatsEvents");
-                });
-
-            modelBuilder.Entity("ContestSystemDbStructure.Models.ChatUser", b =>
-                {
-                    b.Property<decimal>("ChatId")
-                        .HasColumnType("decimal(20,0)");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("ChatId1")
-                        .HasColumnType("bigint");
-
-                    b.Property<bool>("ConfirmedByChatAdmin")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("ConfirmedByThemselves")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("MutedChat")
-                        .HasColumnType("bit");
-
-                    b.Property<byte[]>("Timestamp")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.HasKey("ChatId", "UserId")
-                        .HasName("PK_ChatsUsers")
-                        .IsClustered();
-
-                    b.HasIndex("ChatId");
-
-                    b.HasIndex("ChatId1");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ChatsUsers");
-                });
 
             modelBuilder.Entity("ContestSystemDbStructure.Models.Checker", b =>
                 {
@@ -241,47 +129,6 @@ namespace ContestSystem.Migrations
                     b.ToTable("CheckerServersCompilers");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Comment", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<decimal?>("CommentToReplyId")
-                        .HasColumnType("decimal(20,0)");
-
-                    b.Property<long?>("CommentToReplyId1")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("PostId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("SenderId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("SentDateTimeUTC")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Text")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<byte[]>("Timestamp")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CommentToReplyId1");
-
-                    b.HasIndex("PostId");
-
-                    b.HasIndex("SenderId");
-
-                    b.ToTable("Comments");
-                });
-
             modelBuilder.Entity("ContestSystemDbStructure.Models.Contest", b =>
                 {
                     b.Property<long>("Id")
@@ -361,47 +208,6 @@ namespace ContestSystem.Migrations
                     b.HasIndex("ContestId");
 
                     b.ToTable("ContestsFiles");
-                });
-
-            modelBuilder.Entity("ContestSystemDbStructure.Models.ContestHistory", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<long>("AddedResult")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("ContestId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("ParticipantId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("ProblemId")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("SecondsAfterStart")
-                        .HasColumnType("int");
-
-                    b.Property<byte[]>("Timestamp")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<int>("Verdict")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ContestId");
-
-                    b.HasIndex("ParticipantId");
-
-                    b.HasIndex("ProblemId");
-
-                    b.ToTable("ContestsHistories");
                 });
 
             modelBuilder.Entity("ContestSystemDbStructure.Models.ContestLocalModerator", b =>
@@ -811,50 +617,6 @@ namespace ContestSystem.Migrations
                     b.HasIndex("ProblemId");
 
                     b.ToTable("Examples");
-                });
-
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Message", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<decimal>("ChatId")
-                        .HasColumnType("decimal(20,0)");
-
-                    b.Property<long?>("ChatId1")
-                        .HasColumnType("bigint");
-
-                    b.Property<decimal?>("MessageToReplyId")
-                        .HasColumnType("decimal(20,0)");
-
-                    b.Property<long?>("MessageToReplyId1")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("SenderId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("SentDateTimeUTC")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Text")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<byte[]>("Timestamp")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ChatId1");
-
-                    b.HasIndex("MessageToReplyId1");
-
-                    b.HasIndex("SenderId");
-
-                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("ContestSystemDbStructure.Models.Post", b =>
@@ -1469,47 +1231,6 @@ namespace ContestSystem.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Chat", b =>
-                {
-                    b.HasOne("ContestSystemDbStructure.Models.User", "Admin")
-                        .WithMany()
-                        .HasForeignKey("AdminId");
-
-                    b.Navigation("Admin");
-                });
-
-            modelBuilder.Entity("ContestSystemDbStructure.Models.ChatEvent", b =>
-                {
-                    b.HasOne("ContestSystemDbStructure.Models.Chat", "Chat")
-                        .WithMany("ChatEvents")
-                        .HasForeignKey("ChatId1");
-
-                    b.HasOne("ContestSystemDbStructure.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("Chat");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("ContestSystemDbStructure.Models.ChatUser", b =>
-                {
-                    b.HasOne("ContestSystemDbStructure.Models.Chat", "Chat")
-                        .WithMany("ChatUsers")
-                        .HasForeignKey("ChatId1");
-
-                    b.HasOne("ContestSystemDbStructure.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Chat");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("ContestSystemDbStructure.Models.Checker", b =>
                 {
                     b.HasOne("ContestSystemDbStructure.Models.User", "ApprovingModerator")
@@ -1534,29 +1255,6 @@ namespace ContestSystem.Migrations
                         .IsRequired();
 
                     b.Navigation("CheckerServer");
-                });
-
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Comment", b =>
-                {
-                    b.HasOne("ContestSystemDbStructure.Models.Comment", "CommentToReply")
-                        .WithMany()
-                        .HasForeignKey("CommentToReplyId1");
-
-                    b.HasOne("ContestSystemDbStructure.Models.Post", "Post")
-                        .WithMany()
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ContestSystemDbStructure.Models.User", "Sender")
-                        .WithMany()
-                        .HasForeignKey("SenderId");
-
-                    b.Navigation("CommentToReply");
-
-                    b.Navigation("Post");
-
-                    b.Navigation("Sender");
                 });
 
             modelBuilder.Entity("ContestSystemDbStructure.Models.Contest", b =>
@@ -1589,33 +1287,6 @@ namespace ContestSystem.Migrations
                         .IsRequired();
 
                     b.Navigation("Contest");
-                });
-
-            modelBuilder.Entity("ContestSystemDbStructure.Models.ContestHistory", b =>
-                {
-                    b.HasOne("ContestSystemDbStructure.Models.Contest", "Contest")
-                        .WithMany()
-                        .HasForeignKey("ContestId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ContestSystemDbStructure.Models.User", "Participant")
-                        .WithMany()
-                        .HasForeignKey("ParticipantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ContestSystemDbStructure.Models.Problem", "Problem")
-                        .WithMany()
-                        .HasForeignKey("ProblemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Contest");
-
-                    b.Navigation("Participant");
-
-                    b.Navigation("Problem");
                 });
 
             modelBuilder.Entity("ContestSystemDbStructure.Models.ContestLocalModerator", b =>
@@ -1831,27 +1502,6 @@ namespace ContestSystem.Migrations
                     b.Navigation("Problem");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Message", b =>
-                {
-                    b.HasOne("ContestSystemDbStructure.Models.Chat", "Chat")
-                        .WithMany()
-                        .HasForeignKey("ChatId1");
-
-                    b.HasOne("ContestSystemDbStructure.Models.Message", "MessageToReply")
-                        .WithMany()
-                        .HasForeignKey("MessageToReplyId1");
-
-                    b.HasOne("ContestSystemDbStructure.Models.User", "Sender")
-                        .WithMany()
-                        .HasForeignKey("SenderId");
-
-                    b.Navigation("Chat");
-
-                    b.Navigation("MessageToReply");
-
-                    b.Navigation("Sender");
-                });
-
             modelBuilder.Entity("ContestSystemDbStructure.Models.Post", b =>
                 {
                     b.HasOne("ContestSystemDbStructure.Models.User", "ApprovingModerator")
@@ -2040,13 +1690,6 @@ namespace ContestSystem.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Chat", b =>
-                {
-                    b.Navigation("ChatEvents");
-
-                    b.Navigation("ChatUsers");
                 });
 
             modelBuilder.Entity("ContestSystemDbStructure.Models.CheckerServer", b =>

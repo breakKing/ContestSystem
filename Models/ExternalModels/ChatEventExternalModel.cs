@@ -6,7 +6,7 @@ namespace ContestSystem.Models.ExternalModels
 {
     public class ChatEventExternalModel
     {
-        public ulong Id { get; set; }
+        public long Id { get; set; }
         public string ChatLink { get; set; }
         public ChatEventType Type { get; set; }
         public long? UserId { get; set; }

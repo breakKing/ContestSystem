@@ -5,7 +5,7 @@ namespace ContestSystem.Models.ExternalModels
 {
     public class ChatMessageExternalModel
     {
-        public ulong Id { get; set; }
+        public long Id { get; set; }
         public string ChatLink { get; set; }
         public long UserId { get; set; }
         public string Text { get; set; }
