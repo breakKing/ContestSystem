@@ -19,6 +19,14 @@ namespace ContestSystem.Areas.Workspace.Services
         private readonly CheckerSystemService _checkerSystem;
         private readonly FileStorageService _storage;
 
+        private enum EntityInLockedContestStatus
+        {
+            NotLocked = 0,
+            LockedByOwnContest = 1,
+            LockedByOthersContests = 2,
+            Undefined = 3
+        }
+
         public WorkspaceManagerService(CheckerSystemService checkerSystem, FileStorageService storage)
         {
             _checkerSystem = checkerSystem;
@@ -397,242 +405,443 @@ namespace ContestSystem.Areas.Workspace.Services
             }
             else
             {
-                if (form.Image != null)
+                if (IsContestLocked(contest))
                 {
-                    contest.ImagePath = await _storage.SaveContestImageAsync(form.Id.Value, form.Image);
-                }
-
-                contest.StartDateTimeUTC = form.StartDateTimeUTC;
-                contest.DurationInMinutes = form.DurationInMinutes;
-                contest.AreVirtualContestsAvailable = form.AreVirtualContestsAvailable;
-                contest.IsPublic = form.IsPublic;
-                contest.RulesSetId = form.RulesSetId;
-
-                bool needToRemoderate = (form.StartDateTimeUTC != contest.StartDateTimeUTC && contest.Creator.IsLimitedInContests) || contest.ApprovalStatus == ApproveType.Rejected;
-                if (needToRemoderate)
-                {
-                    contest.ApprovalStatus = ApproveType.NotModeratedYet;
-                }
-
-                dbContext.Contests.Update(contest);
-
-                await UpdateLinkedEntitiesAsync(dbContext, dbContext.ContestsLocalizers, form.Localizers,
-                                                l => l.ContestId == form.Id.Value,
-                                                l => l.Culture,
-                                                (id1, id2) => id1 == id2,
-                                                lf => new ContestLocalizer
-                                                {
-                                                    Culture = lf.Culture,
-                                                    Description = lf.Description,
-                                                    Name = lf.Name,
-                                                    ContestId = contest.Id
-                                                },
-                                                (l, lf) =>
-                                                {
-                                                    ContestLocalizer localizer = l;
-                                                    localizer.Description = lf.Description;
-                                                    localizer.Name = lf.Name;
-                                                    return localizer;
-                                                });
-
-                await UpdateLinkedEntitiesAsync(dbContext, dbContext.ContestsProblems, form.Problems,
-                                                cp => cp.ContestId == form.Id.Value,
-                                                cp => cp.ProblemId,
-                                                (id1, id2) => id1 == id2,
-                                                cpf => new ContestProblem
-                                                {
-                                                    ContestId = contest.Id,
-                                                    ProblemId = cpf.ProblemId,
-                                                    Letter = cpf.Letter
-                                                },
-                                                (cp, cpf) =>
-                                                {
-                                                    ContestProblem problem = cp;
-                                                    problem.Letter = cpf.Letter;
-                                                    return problem;
-                                                });
-
-                bool saveSuccess = await dbContext.SecureSaveAsync();
-                if (!saveSuccess)
-                {
-                    status = EditionStatus.DbSaveError;
+                    status = EditionStatus.ContestLocked;
                 }
                 else
                 {
-                    status = EditionStatus.Success;
+                    if (form.Image != null)
+                    {
+                        contest.ImagePath = await _storage.SaveContestImageAsync(form.Id.Value, form.Image);
+                    }
+
+                    contest.StartDateTimeUTC = form.StartDateTimeUTC;
+                    contest.DurationInMinutes = form.DurationInMinutes;
+                    contest.AreVirtualContestsAvailable = form.AreVirtualContestsAvailable;
+                    contest.IsPublic = form.IsPublic;
+                    contest.RulesSetId = form.RulesSetId;
+
+                    bool needToRemoderate = (form.StartDateTimeUTC != contest.StartDateTimeUTC && contest.Creator.IsLimitedInContests) || contest.ApprovalStatus == ApproveType.Rejected;
+                    if (needToRemoderate)
+                    {
+                        contest.ApprovalStatus = ApproveType.NotModeratedYet;
+                    }
+
+                    dbContext.Contests.Update(contest);
+
+                    await UpdateLinkedEntitiesAsync(dbContext, dbContext.ContestsLocalizers, form.Localizers,
+                                                    l => l.ContestId == form.Id.Value,
+                                                    l => l.Culture,
+                                                    (id1, id2) => id1 == id2,
+                                                    lf => new ContestLocalizer
+                                                    {
+                                                        Culture = lf.Culture,
+                                                        Description = lf.Description,
+                                                        Name = lf.Name,
+                                                        ContestId = contest.Id
+                                                    },
+                                                    (l, lf) =>
+                                                    {
+                                                        ContestLocalizer localizer = l;
+                                                        localizer.Description = lf.Description;
+                                                        localizer.Name = lf.Name;
+                                                        return localizer;
+                                                    });
+
+                    await UpdateLinkedEntitiesAsync(dbContext, dbContext.ContestsProblems, form.Problems,
+                                                    cp => cp.ContestId == form.Id.Value,
+                                                    cp => cp.ProblemId,
+                                                    (id1, id2) => id1 == id2,
+                                                    cpf => new ContestProblem
+                                                    {
+                                                        ContestId = contest.Id,
+                                                        ProblemId = cpf.ProblemId,
+                                                        Letter = cpf.Letter
+                                                    },
+                                                    (cp, cpf) =>
+                                                    {
+                                                        ContestProblem problem = cp;
+                                                        problem.Letter = cpf.Letter;
+                                                        return problem;
+                                                    });
+
+                    bool saveSuccess = await dbContext.SecureSaveAsync();
+                    if (!saveSuccess)
+                    {
+                        status = EditionStatus.DbSaveError;
+                    }
+                    else
+                    {
+                        status = EditionStatus.Success;
+                    }
                 }
             }
 
             return status;
         }
 
-        public async Task<EditionStatus> EditProblemAsync(MainDbContext dbContext, ProblemForm form, Problem problem = null)
+        public async Task<EditionStatusData> EditProblemAsync(MainDbContext dbContext, ProblemForm form, Problem problem = null)
         {
-            var status = EditionStatus.Undefined;
+            var statusData = new EditionStatusData
+            {
+                Status = EditionStatus.Undefined,
+                Id = null
+            };
+
             problem ??= await dbContext.Problems.FirstOrDefaultAsync(c => c.Id == form.Id.GetValueOrDefault(-1));
             if (problem == null)
             {
-                status = EditionStatus.NotExistentEntity;
+                statusData.Status = EditionStatus.NotExistentEntity;
             }
             else
             {
-                problem.MemoryLimitInBytes = form.MemoryLimitInBytes;
-                problem.TimeLimitInMilliseconds = form.TimeLimitInMilliseconds;
-                problem.IsPublic = form.IsPublic;
-                problem.CheckerId = form.CheckerId;
-                if (problem.ApprovalStatus == ApproveType.Rejected)
+                var lockStatus = await IsEntityUsedInLockedContestsAsync(dbContext, form.CreatorId,
+                                                                                c => c.ContestProblems.Any(cp => cp.ProblemId == problem.Id));
+                if (lockStatus == EntityInLockedContestStatus.LockedByOwnContest)
                 {
-                    problem.ApprovalStatus = ApproveType.NotModeratedYet;
+                    statusData.Status = EditionStatus.ContestLocked;
                 }
-
-                dbContext.Problems.Update(problem);
-
-                await UpdateLinkedEntitiesAsync(dbContext, dbContext.ProblemsLocalizers, form.Localizers,
-                                                l => l.ProblemId == form.Id.Value,
-                                                l => l.Culture,
-                                                (id1, id2) => id1 == id2,
-                                                lf => new ProblemLocalizer
-                                                {
-                                                    Culture = lf.Culture,
-                                                    Description = lf.Description,
-                                                    InputBlock = lf.InputBlock,
-                                                    OutputBlock = lf.OutputBlock,
-                                                    Name = lf.Name,
-                                                    ProblemId = problem.Id
-                                                },
-                                                (l, lf) =>
-                                                {
-                                                    ProblemLocalizer localizer = l;
-                                                    localizer.Description = lf.Description;
-                                                    localizer.Name = lf.Name;
-                                                    localizer.InputBlock = lf.InputBlock;
-                                                    localizer.OutputBlock = lf.OutputBlock;
-                                                    return localizer;
-                                                });
-
-                await UpdateLinkedEntitiesAsync(dbContext, dbContext.Tests, form.Tests,
-                                                t => t.ProblemId == form.Id.Value,
-                                                t => t.Number,
-                                                (id1, id2) => id1 == id2,
-                                                tf => new Test
-                                                {
-                                                    Number = tf.Number,
-                                                    Input = tf.Input,
-                                                    Answer = tf.Answer,
-                                                    AvailablePoints = tf.AvailablePoints,
-                                                    ProblemId = problem.Id
-                                                },
-                                                (t, tf) =>
-                                                {
-                                                    Test test = t;
-                                                    test.AvailablePoints = tf.AvailablePoints;
-                                                    test.Input = tf.Input;
-                                                    test.Answer = tf.Answer;
-                                                    return test;
-                                                });
-
-                await UpdateLinkedEntitiesAsync(dbContext, dbContext.Examples, form.Examples,
-                                                ex => ex.ProblemId == form.Id.Value,
-                                                ex => ex.Number,
-                                                (id1, id2) => id1 == id2,
-                                                ef => new Example
-                                                {
-                                                    Number = ef.Number,
-                                                    InputText = ef.InputText,
-                                                    OutputText = ef.OutputText,
-                                                    ProblemId = problem.Id
-                                                },
-                                                (e, ef) =>
-                                                {
-                                                    Example example = e;
-                                                    example.InputText = ef.InputText;
-                                                    example.OutputText = ef.OutputText;
-                                                    return example;
-                                                });
-
-                bool saveSuccess = await dbContext.SecureSaveAsync();
-                if (!saveSuccess)
+                else if (lockStatus == EntityInLockedContestStatus.LockedByOthersContests)
                 {
-                    status = EditionStatus.DbSaveError;
+                    var creationStatusData = await CreateProblemAsync(dbContext, form);
+
+                    if (creationStatusData.Status == CreationStatus.DbSaveError)
+                    {
+                        statusData.Status = EditionStatus.DbSaveError;
+                    }
+                    else
+                    {
+                        var newProblem = await dbContext.Problems.FirstOrDefaultAsync(p => p.Id == creationStatusData.Id.GetValueOrDefault(-1));
+                        if (newProblem == null)
+                        {
+                            statusData.Status = EditionStatus.DbSaveError;
+                        }
+                        else
+                        {
+                            newProblem.ApprovalStatus = problem.ApprovalStatus;
+                            if (newProblem.ApprovalStatus == ApproveType.Rejected)
+                            {
+                                newProblem.ApprovalStatus = ApproveType.NotModeratedYet;
+                            }
+                            newProblem.ApprovingModeratorId = problem.ApprovingModeratorId;
+                            newProblem.ModerationMessage = problem.ModerationMessage;
+
+                            dbContext.Problems.Update(newProblem);
+
+                            bool saveSuccess = await dbContext.SecureSaveAsync();
+                            if (!saveSuccess)
+                            {
+                                newProblem = await dbContext.Problems.FirstOrDefaultAsync(p => p.Id == creationStatusData.Id.GetValueOrDefault(-1));
+                                if (newProblem != null)
+                                {
+                                    await DeleteProblemAsync(dbContext, newProblem);
+                                }
+
+                                statusData.Status = EditionStatus.DbSaveError;
+                            }
+                            else
+                            {
+                                await DeleteProblemAsync(dbContext, problem, true);
+                                statusData.Status = EditionStatus.ArchivedAndRecreated;
+                                statusData.Id = newProblem.Id;
+                            }
+                        }
+                    }
                 }
                 else
                 {
-                    status = EditionStatus.Success;
+                    problem.MemoryLimitInBytes = form.MemoryLimitInBytes;
+                    problem.TimeLimitInMilliseconds = form.TimeLimitInMilliseconds;
+                    problem.IsPublic = form.IsPublic;
+                    problem.CheckerId = form.CheckerId;
+                    if (problem.ApprovalStatus == ApproveType.Rejected)
+                    {
+                        problem.ApprovalStatus = ApproveType.NotModeratedYet;
+                    }
+
+                    dbContext.Problems.Update(problem);
+
+                    await UpdateLinkedEntitiesAsync(dbContext, dbContext.ProblemsLocalizers, form.Localizers,
+                                                    l => l.ProblemId == form.Id.Value,
+                                                    l => l.Culture,
+                                                    (id1, id2) => id1 == id2,
+                                                    lf => new ProblemLocalizer
+                                                    {
+                                                        Culture = lf.Culture,
+                                                        Description = lf.Description,
+                                                        InputBlock = lf.InputBlock,
+                                                        OutputBlock = lf.OutputBlock,
+                                                        Name = lf.Name,
+                                                        ProblemId = problem.Id
+                                                    },
+                                                    (l, lf) =>
+                                                    {
+                                                        ProblemLocalizer localizer = l;
+                                                        localizer.Description = lf.Description;
+                                                        localizer.Name = lf.Name;
+                                                        localizer.InputBlock = lf.InputBlock;
+                                                        localizer.OutputBlock = lf.OutputBlock;
+                                                        return localizer;
+                                                    });
+
+                    await UpdateLinkedEntitiesAsync(dbContext, dbContext.Tests, form.Tests,
+                                                    t => t.ProblemId == form.Id.Value,
+                                                    t => t.Number,
+                                                    (id1, id2) => id1 == id2,
+                                                    tf => new Test
+                                                    {
+                                                        Number = tf.Number,
+                                                        Input = tf.Input,
+                                                        Answer = tf.Answer,
+                                                        AvailablePoints = tf.AvailablePoints,
+                                                        ProblemId = problem.Id
+                                                    },
+                                                    (t, tf) =>
+                                                    {
+                                                        Test test = t;
+                                                        test.AvailablePoints = tf.AvailablePoints;
+                                                        test.Input = tf.Input;
+                                                        test.Answer = tf.Answer;
+                                                        return test;
+                                                    });
+
+                    await UpdateLinkedEntitiesAsync(dbContext, dbContext.Examples, form.Examples,
+                                                    ex => ex.ProblemId == form.Id.Value,
+                                                    ex => ex.Number,
+                                                    (id1, id2) => id1 == id2,
+                                                    ef => new Example
+                                                    {
+                                                        Number = ef.Number,
+                                                        InputText = ef.InputText,
+                                                        OutputText = ef.OutputText,
+                                                        ProblemId = problem.Id
+                                                    },
+                                                    (e, ef) =>
+                                                    {
+                                                        Example example = e;
+                                                        example.InputText = ef.InputText;
+                                                        example.OutputText = ef.OutputText;
+                                                        return example;
+                                                    });
+
+                    bool saveSuccess = await dbContext.SecureSaveAsync();
+                    if (!saveSuccess)
+                    {
+                        statusData.Status = EditionStatus.DbSaveError;
+                    }
+                    else
+                    {
+                        statusData.Status = EditionStatus.Success;
+                        statusData.Id = problem.Id;
+                    }
                 }
             }
 
-            return status;
+            return statusData;
         }
 
-        public async Task<EditionStatus> EditCheckerAsync(MainDbContext dbContext, CheckerForm form, Checker checker = null)
+        public async Task<EditionStatusData> EditCheckerAsync(MainDbContext dbContext, CheckerForm form, Checker checker = null)
         {
-            var status = EditionStatus.Undefined;
+            var statusData = new EditionStatusData
+            {
+                Status = EditionStatus.Undefined,
+                Id = null
+            };
+
             checker ??= await dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == form.Id.GetValueOrDefault(-1) && !ch.IsArchieved);
             if (checker == null)
             {
-                status = EditionStatus.NotExistentEntity;
+                statusData.Status = EditionStatus.NotExistentEntity;
             }
             else
             {
-                checker.Code = form.Code;
-                checker.Name = form.Name;
-                checker.Description = form.Description;
-                checker.IsPublic = form.IsPublic;
-
-                bool needToRecompile = (checker.Code != form.Code) || checker.ApprovalStatus == ApproveType.Rejected;
-                if (needToRecompile)
+                var lockStatus = await IsEntityUsedInLockedContestsAsync(dbContext, form.AuthorId,
+                                                                                c => c.ContestProblems.Any(cp => cp.Problem.CheckerId == checker.Id));
+                if (lockStatus == EntityInLockedContestStatus.LockedByOwnContest)
                 {
-                    checker.ApprovalStatus = ApproveType.NotModeratedYet;
+                    statusData.Status = EditionStatus.ContestLocked;
                 }
-
-                bool saveSuccess = await dbContext.SecureSaveAsync();
-                if (!saveSuccess)
+                else if (lockStatus == EntityInLockedContestStatus.LockedByOthersContests)
                 {
-                    status = EditionStatus.DbSaveError;
+                    var creationStatusData = await CreateCheckerAsync(dbContext, form);
+
+                    if (creationStatusData.Status == CreationStatus.DbSaveError)
+                    {
+                        statusData.Status = EditionStatus.DbSaveError;
+                    }
+                    else
+                    {
+                        var newChecker = await dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == creationStatusData.Id.GetValueOrDefault(-1));
+                        if (newChecker == null)
+                        {
+                            statusData.Status = EditionStatus.DbSaveError;
+                        }
+                        else
+                        {
+                            bool needToRecompile = (checker.Code != form.Code) || checker.ApprovalStatus == ApproveType.Rejected;
+                            if (needToRecompile)
+                            {
+                                newChecker.ApprovalStatus = ApproveType.NotModeratedYet;
+                            }
+                            else
+                            {
+                                newChecker.ApprovalStatus = checker.ApprovalStatus;
+                            }
+
+                            if (newChecker.ApprovalStatus == ApproveType.Accepted)
+                            {
+                                var requestForm = new CheckerRequestForm
+                                {
+                                    CheckerId = newChecker.Id,
+                                    ApprovalStatus = ApproveType.Accepted,
+                                    ApprovingModeratorId = checker.ApprovingModeratorId.Value,
+                                    ModerationMessage = checker.ModerationMessage
+                                };
+
+                                var moderationStatus = await ModerateCheckerAsync(dbContext, requestForm, newChecker);
+                                if (moderationStatus == ModerationStatus.DbSaveError)
+                                {
+                                    newChecker = await dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == creationStatusData.Id.GetValueOrDefault(-1));
+                                    if (newChecker != null)
+                                    {
+                                        await DeleteCheckerAsync(dbContext, newChecker);
+                                    }
+
+                                    statusData.Status = EditionStatus.DbSaveError;
+                                }
+                            }
+                            else
+                            {
+                                newChecker.ApprovingModeratorId = checker.ApprovingModeratorId;
+                                newChecker.ModerationMessage = checker.ModerationMessage;
+
+                                dbContext.Checkers.Update(newChecker);
+
+                                bool saveSuccess = await dbContext.SecureSaveAsync();
+                                if (!saveSuccess)
+                                {
+                                    newChecker = await dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == creationStatusData.Id.GetValueOrDefault(-1));
+                                    if (newChecker != null)
+                                    {
+                                        await DeleteCheckerAsync(dbContext, newChecker);
+                                    }
+
+                                    statusData.Status = EditionStatus.DbSaveError;
+                                }
+                            }
+
+                            if (statusData.Status != EditionStatus.DbSaveError)
+                            {
+                                await DeleteCheckerAsync(dbContext, checker, true);
+                                statusData.Status = EditionStatus.ArchivedAndRecreated;
+                                statusData.Id = newChecker.Id;
+                            }
+                        }
+                    }
                 }
                 else
                 {
-                    status = EditionStatus.Success;
+                    checker.Code = form.Code;
+                    checker.Name = form.Name;
+                    checker.Description = form.Description;
+                    checker.IsPublic = form.IsPublic;
+
+                    bool needToRecompile = (checker.Code != form.Code) || checker.ApprovalStatus == ApproveType.Rejected;
+                    if (needToRecompile)
+                    {
+                        checker.ApprovalStatus = ApproveType.NotModeratedYet;
+                    }
+
+                    bool saveSuccess = await dbContext.SecureSaveAsync();
+                    if (!saveSuccess)
+                    {
+                        statusData.Status = EditionStatus.DbSaveError;
+                    }
+                    else
+                    {
+                        statusData.Status = EditionStatus.Success;
+                        statusData.Id = checker.Id;
+                    }
                 }
             }
-            return status;
+            return statusData;
         }
 
-        public async Task<EditionStatus> EditRulesSetAsync(MainDbContext dbContext, RulesSetForm form, RulesSet rulesSet = null)
+        public async Task<EditionStatusData> EditRulesSetAsync(MainDbContext dbContext, RulesSetForm form, RulesSet rulesSet = null)
         {
-            var status = EditionStatus.Undefined;
+            var statusData = new EditionStatusData
+            {
+                Status = EditionStatus.Undefined,
+                Id = null
+            };
+
             rulesSet ??= await dbContext.RulesSets.FirstOrDefaultAsync(rs => rs.Id == form.Id.GetValueOrDefault(-1) && !rs.IsArchieved);
             if (rulesSet == null)
             {
-                status = EditionStatus.NotExistentEntity;
+                statusData.Status = EditionStatus.NotExistentEntity;
             }
             else
             {
-                rulesSet.Name = form.Name;
-                rulesSet.Description = form.Description;
-                rulesSet.ShowFullTestsResults = form.ShowFullTestsResults;
-                rulesSet.PointsForBestSolution = form.PointsForBestSolution;
-                rulesSet.CountMode = form.CountMode;
-                rulesSet.MaxTriesForOneProblem = form.MaxTriesForOneProblem;
-                rulesSet.PenaltyForOneMinute = form.PenaltyForOneMinute;
-                rulesSet.MonitorFreezeTimeBeforeFinishInMinutes = form.MonitorFreezeTimeBeforeFinishInMinutes;
-                rulesSet.PenaltyForCompilationError = form.PenaltyForCompilationError;
-                rulesSet.PenaltyForOneTry = form.PenaltyForOneTry;
-                rulesSet.PublicMonitor = form.PublicMonitor;
-                rulesSet.IsPublic = form.IsPublic;
-                dbContext.RulesSets.Update(rulesSet);
-
-                bool saveSuccess = await dbContext.SecureSaveAsync();
-                if (!saveSuccess)
+                var lockStatus = await IsEntityUsedInLockedContestsAsync(dbContext, form.AuthorId,
+                                                                                c => c.RulesSetId == rulesSet.Id);
+                if (lockStatus == EntityInLockedContestStatus.LockedByOwnContest)
                 {
-                    status = EditionStatus.DbSaveError;
+                    statusData.Status = EditionStatus.ContestLocked;
+                }
+                else if (lockStatus == EntityInLockedContestStatus.LockedByOthersContests)
+                {
+                    var creationStatusData = await CreateRulesSetAsync(dbContext, form);
+
+                    if (creationStatusData.Status == CreationStatus.DbSaveError)
+                    {
+                        statusData.Status = EditionStatus.DbSaveError;
+                    }
+                    else
+                    {
+                        var newRulesSet = await dbContext.RulesSets.FirstOrDefaultAsync(rs => rs.Id == creationStatusData.Id.GetValueOrDefault(-1));
+                        if (newRulesSet == null)
+                        {
+                            statusData.Status = EditionStatus.DbSaveError;
+                        }
+                        else
+                        {
+                            await DeleteRulesSetAsync(dbContext, rulesSet, true);
+                            statusData.Status = EditionStatus.ArchivedAndRecreated;
+                            statusData.Id = newRulesSet.Id;
+                        }
+                    }
                 }
                 else
                 {
-                    status = EditionStatus.Success;
+                    rulesSet.Name = form.Name;
+                    rulesSet.Description = form.Description;
+                    rulesSet.ShowFullTestsResults = form.ShowFullTestsResults;
+                    rulesSet.PointsForBestSolution = form.PointsForBestSolution;
+                    rulesSet.CountMode = form.CountMode;
+                    rulesSet.MaxTriesForOneProblem = form.MaxTriesForOneProblem;
+                    rulesSet.PenaltyForOneMinute = form.PenaltyForOneMinute;
+                    rulesSet.MonitorFreezeTimeBeforeFinishInMinutes = form.MonitorFreezeTimeBeforeFinishInMinutes;
+                    rulesSet.PenaltyForCompilationError = form.PenaltyForCompilationError;
+                    rulesSet.PenaltyForOneTry = form.PenaltyForOneTry;
+                    rulesSet.PublicMonitor = form.PublicMonitor;
+                    rulesSet.IsPublic = form.IsPublic;
+
+                    dbContext.RulesSets.Update(rulesSet);
+
+                    bool saveSuccess = await dbContext.SecureSaveAsync();
+                    if (!saveSuccess)
+                    {
+                        statusData.Status = EditionStatus.DbSaveError;
+                    }
+                    else
+                    {
+                        statusData.Status = EditionStatus.Success;
+                        statusData.Id = rulesSet.Id;
+                    }
                 }
             }
-            return status;
+            return statusData;
         }
 
         /*public async Task<EditionStatus> EditCourseAsync(MainDbContext dbContext, CourseForm form, Course course = null)
@@ -727,7 +936,7 @@ namespace ContestSystem.Areas.Workspace.Services
             return status;
         }
 
-        public async Task<DeletionStatus> DeleteProblemAsync(MainDbContext dbContext, Problem problem)
+        public async Task<DeletionStatus> DeleteProblemAsync(MainDbContext dbContext, Problem problem, bool forceArchiving = false)
         {
             var status = DeletionStatus.Undefined;
             if (problem == null)
@@ -736,7 +945,7 @@ namespace ContestSystem.Areas.Workspace.Services
             }
             else
             {
-                if (await dbContext.ContestsProblems.AnyAsync(cp => cp.ProblemId == problem.Id) || await dbContext.CoursesProblems.AnyAsync(cp => cp.ProblemId == problem.Id))
+                if (forceArchiving || await dbContext.ContestsProblems.AnyAsync(cp => cp.ProblemId == problem.Id) || await dbContext.CoursesProblems.AnyAsync(cp => cp.ProblemId == problem.Id))
                 {
                     do
                     {
@@ -763,7 +972,7 @@ namespace ContestSystem.Areas.Workspace.Services
             return status;
         }
 
-        public async Task<DeletionStatus> DeleteCheckerAsync(MainDbContext dbContext, Checker checker)
+        public async Task<DeletionStatus> DeleteCheckerAsync(MainDbContext dbContext, Checker checker, bool forceArchiving = false)
         {
             var status = DeletionStatus.Undefined;
             if (checker == null)
@@ -772,7 +981,7 @@ namespace ContestSystem.Areas.Workspace.Services
             }
             else
             {
-                if (await dbContext.Problems.AnyAsync(p => p.CheckerId == checker.Id))
+                if (forceArchiving || await dbContext.Problems.AnyAsync(p => p.CheckerId == checker.Id))
                 {
                     do
                     {
@@ -799,7 +1008,7 @@ namespace ContestSystem.Areas.Workspace.Services
             return status;
         }
 
-        public async Task<DeletionStatus> DeleteRulesSetAsync(MainDbContext dbContext, RulesSet rulesSet)
+        public async Task<DeletionStatus> DeleteRulesSetAsync(MainDbContext dbContext, RulesSet rulesSet, bool forceArchiving = false)
         {
             var status = DeletionStatus.Undefined;
             if (rulesSet == null)
@@ -808,7 +1017,7 @@ namespace ContestSystem.Areas.Workspace.Services
             }
             else
             {
-                if (await dbContext.Contests.AnyAsync(c => c.RulesSetId == rulesSet.Id))
+                if (forceArchiving || await dbContext.Contests.AnyAsync(c => c.RulesSetId == rulesSet.Id))
                 {
                     do
                     {
@@ -1013,6 +1222,50 @@ namespace ContestSystem.Areas.Workspace.Services
             }
 
             return status;
+        }
+
+        private bool IsContestLocked(Contest contest)
+        {
+            bool result = false;
+
+            if (contest == null)
+            {
+                result = false;
+            }
+            else
+            {
+                var now = DateTime.UtcNow;
+                result = contest.StartDateTimeUTC.AddMinutes(-Constants.ContestLockBeforeStartInMinutes) <= now
+                            && now < contest.EndDateTimeUTC;
+            }
+
+            return result;
+        }
+
+        private async Task<EntityInLockedContestStatus> IsEntityUsedInLockedContestsAsync(MainDbContext dbContext, long userId, Expression<Func<Contest, bool>> predicate)
+        {
+            var result = EntityInLockedContestStatus.Undefined;
+
+            var contests = await dbContext.Contests.Where(predicate).ToListAsync();
+
+            contests = contests.Where(c => IsContestLocked(c)).ToList();
+            if (contests != null && contests.Count > 0)
+            {
+                if (contests.Any(c => c.CreatorId == userId))
+                {
+                    result = EntityInLockedContestStatus.LockedByOwnContest;
+                }
+                else
+                {
+                    result = EntityInLockedContestStatus.LockedByOthersContests;
+                }
+            }
+            else
+            {
+                result = EntityInLockedContestStatus.NotLocked;
+            }
+
+            return result;
         }
 
         private async Task<bool> UpdateLinkedEntitiesAsync<TEntityForm, TEntity, TIdentity>(MainDbContext dbContext, DbSet<TEntity> dbSet,

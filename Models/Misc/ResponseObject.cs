@@ -110,6 +110,13 @@ namespace ContestSystem.Models.Misc
                     error = Constants.ErrorCodes[Constants.CommonSectionName][Constants.DbSaveErrorName];
                     response = Fail(error);
                     break;
+                case EditionStatus.ContestLocked:
+                    error = Constants.ErrorCodes[Constants.ContestEntityName][Constants.LockedErrorName];
+                    response = Fail(error);
+                    break;
+                case EditionStatus.ArchivedAndRecreated:
+                    response = Success(entityId);
+                    break;
                 default:
                     error = Constants.ErrorCodes[Constants.CommonSectionName][Constants.UndefinedErrorName];
                     response = Fail(error);

@@ -67,6 +67,13 @@ namespace ContestSystem.Extensions
                 $"Успешно изменена сущность \"{entityName}\" с идентификатором {entityId} пользователем с идентификатором {userId}");
         }
 
+        public static void LogEditingByArchiving(this ILogger logger, string entityName, long entityId, long userId)
+        {
+            logger.LogInformation(
+                $"В результате редактирования сущности \"{entityName}\" с идентификатором {entityId} пользователем с идентификатором {userId} " +
+                $"данная сущность была архивирована, а вместо неё создана новая сущность с запрашиваемыми параметрами");
+        }
+
         public static void LogEditingUndefinedStatus(this ILogger logger, string entityName,
             long entityId, long userId)
         {
@@ -193,6 +200,12 @@ namespace ContestSystem.Extensions
                    $"использование уже существующей сущности \"{nonExistentEntityName}\"");
         }
 
+        public static void LogLocked(this ILogger logger, string entityName, long entityId, long userId)
+        {
+            logger.LogInformation($"Редактирование сущности \"{entityName}\" с идентификатором {entityId} пользователем с идентификатором {userId} " +
+                   $"не осуществлено, так как она заблокирована для редактирования");
+        }
+
         public static void LogCreationStatus(this ILogger logger, CreationStatus status, string entityName, long? entityId, long userId)
         {
             switch (status)
@@ -227,6 +240,12 @@ namespace ContestSystem.Extensions
                     break;
                 case EditionStatus.DbSaveError:
                     logger.LogDbSaveError(entityName, entityId);
+                    break;
+                case EditionStatus.ContestLocked:
+                    logger.LogLocked(entityName, entityId, userId);
+                    break;
+                case EditionStatus.ArchivedAndRecreated:
+                    logger.LogEditingByArchiving(entityName, entityId, userId);
                     break;
                 default:
                     logger.LogEditingUndefinedStatus(entityName, entityId, userId);

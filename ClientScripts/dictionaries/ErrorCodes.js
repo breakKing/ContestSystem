@@ -6,7 +6,8 @@
         EntityDoesntExist: "ERR_CONTEST_DOESNT_EXIST",
         EntityLocalizerDoesntExist: "ERR_CONTEST_LOCALIZER_DOESNT_EXIST",
         CreationLimitExceeded: "ERR_CONTEST_CREATION_LIMIT_EXCEEDED",
-        ModerationByWrongModerator: "ERR_CONTEST_MODERATION_BY_WRONG_MODERATOR"
+        ModerationByWrongModerator: "ERR_CONTEST_MODERATION_BY_WRONG_MODERATOR",
+        Locked: "ERR_CONTEST_LOCKED"
     },
     Course: {
         ValidationFailed: "ERR_COURSE_VALIDATION_FAILED",

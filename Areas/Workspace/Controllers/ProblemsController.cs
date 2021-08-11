@@ -167,9 +167,9 @@ namespace ContestSystem.Areas.Workspace.Controllers
                         }
                         else
                         {
-                            EditionStatus status = await _workspace.EditProblemAsync(_dbContext, problemForm, problem);
-                            _logger.LogEditionStatus(status, _entityName, id, currentUser.Id);
-                            response = ResponseObject<long>.FormResponseObjectForEdition(status, _entityName, id);
+                            EditionStatusData statusData = await _workspace.EditProblemAsync(_dbContext, problemForm, problem);
+                            _logger.LogEditionStatus(statusData.Status, _entityName, id, currentUser.Id);
+                            response = ResponseObject<long>.FormResponseObjectForEdition(statusData.Status, _entityName, statusData.Id.GetValueOrDefault(-1));
                         }
                     }
                 }

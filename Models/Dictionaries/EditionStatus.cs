@@ -5,6 +5,8 @@
         Success = 0,
         NotExistentEntity = 1,
         DbSaveError = 2,
-        Undefined = 3
+        ContestLocked = 3,
+        ArchivedAndRecreated = 4,
+        Undefined = 5
     }
 }

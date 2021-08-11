@@ -9,7 +9,7 @@ namespace ContestSystem.Models.Dictionaries
         public static readonly int ProblemsLimitForLimitedUsers = 1;
         public static readonly int ContestsLimitForLimitedUsers = 1;
         public static readonly int CoursesLimitForLimitedUsers = 1;
-        public static readonly int ContestSetupLockBeforeStartInMinutes = 60;
+        public static readonly int ContestLockBeforeStartInMinutes = 60;
         public static readonly int MaxPointsSumForAllTests = 100;
 
         // Названия сущностей
@@ -41,6 +41,7 @@ namespace ContestSystem.Models.Dictionaries
         public static readonly string AuthFailedErrorName = "AuthFailed";
         public static readonly string TokenGenerationFailedErrorName = "TokenGenerationFailed";
         public static readonly string UserRegisterFailedErrorName = "UserRegisterFailed";
+        public static readonly string LockedErrorName = "Locked";
         public static readonly string DbSaveErrorName = "DbSaveError";
         public static readonly string CheckerServersUnavailableErrorName = "CheckerServersUnavailable";
         public static readonly string UndefinedErrorName = "UndefinedError";
@@ -56,7 +57,8 @@ namespace ContestSystem.Models.Dictionaries
                 { EntityDoesntExistErrorName, "ERR_CONTEST_DOESNT_EXIST" },
                 { EntityLocalizerDoesntExistErrorName, "ERR_CONTEST_LOCALIZER_DOESNT_EXIST" },
                 { CreationLimitExceededErrorName, "ERR_CONTEST_CREATION_LIMIT_EXCEEDED" },
-                { ModerationByWrongModeratorErrorName, "ERR_CONTEST_MODERATION_BY_WRONG_MODERATOR" }
+                { ModerationByWrongModeratorErrorName, "ERR_CONTEST_MODERATION_BY_WRONG_MODERATOR" },
+                { LockedErrorName, "ERR_CONTEST_LOCKED" }
             },
             [CourseEntityName] = new Dictionary<string, string>
             {
