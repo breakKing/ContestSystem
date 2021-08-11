@@ -103,6 +103,8 @@ namespace ContestSystem
 
             services.AddWorkspace();
 
+            services.AddLocalizers();
+
             services.AddSignalR();
 
             services.AddUserIdProvider();

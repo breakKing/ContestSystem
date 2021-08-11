@@ -44,5 +44,10 @@ namespace ContestSystem.Extensions
         {
             services.AddSingleton<WorkspaceManagerService>();
         }
+
+        public static void AddLocalizers(this IServiceCollection services)
+        {
+            services.AddSingleton<LocalizerHelperService>();
+        }
     }
 }
