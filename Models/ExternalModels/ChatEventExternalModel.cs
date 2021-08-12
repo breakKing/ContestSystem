@@ -1,5 +1,5 @@
 ﻿using ContestSystemDbStructure.Enums;
-using ContestSystemDbStructure.Models;
+using ContestSystemDbStructure.Models.Messenger;
 using System;
 
 namespace ContestSystem.Models.ExternalModels

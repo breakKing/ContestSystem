@@ -1,4 +1,4 @@
-﻿using ContestSystemDbStructure.Models;
+﻿using ContestSystemDbStructure.Models.Messenger;
 using System;
 
 namespace ContestSystem.Models.ExternalModels
@@ -12,7 +12,7 @@ namespace ContestSystem.Models.ExternalModels
         public DateTime DateTimeUTC { get; set; }
         public ChatMessageExternalModel MessageToReply { get; set; }
 
-        public static ChatMessageExternalModel GetFromModel(Chat chat, Message message, Message messageToReply, bool stopRecursion = false)
+        public static ChatMessageExternalModel GetFromModel(Chat chat, ChatMessage message, ChatMessage messageToReply, bool stopRecursion = false)
         {
             return new ChatMessageExternalModel
             {

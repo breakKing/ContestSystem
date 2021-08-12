@@ -1,4 +1,4 @@
-﻿using ContestSystemDbStructure.Models;
+﻿using ContestSystemDbStructure.Models.Messenger;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -14,7 +14,7 @@ namespace ContestSystem.Models.ExternalModels
         public List<ChatEventExternalModel> Events { get; set; }
         public List<ChatMessageExternalModel> Messages { get; set; }
 
-        public static ChatExternalModel GetFromModel(Chat chat, List<ChatUser> users, List<Message> messages, List<ChatEvent> events, string imageInBase64)
+        public static ChatExternalModel GetFromModel(Chat chat, List<ChatUser> users, List<ChatMessage> messages, List<ChatEvent> events, string imageInBase64)
         {
             return new ChatExternalModel
             {

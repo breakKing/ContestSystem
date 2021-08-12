@@ -1,5 +1,6 @@
 ﻿using ContestSystemDbStructure.Configurations;
 using ContestSystemDbStructure.Models;
+using ContestSystemDbStructure.Models.Messenger;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
@@ -20,7 +21,6 @@ namespace ContestSystem.Models.DbContexts
         public DbSet<VirtualContest> VirtualContests { get; set; }
         public DbSet<Test> Tests { get; set; }
         public DbSet<TestResult> TestsResults { get; set; }
-        public DbSet<Message> Messages { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Post> Posts { get; set; }
         public DbSet<ContestProblem> ContestsProblems { get; set; }
@@ -41,6 +41,8 @@ namespace ContestSystem.Models.DbContexts
         public DbSet<Chat> Chats { get; set; }
         public DbSet<ChatUser> ChatsUsers { get; set; }
         public DbSet<ChatEvent> ChatsEvents { get; set; }
+        public DbSet<ChatMessage> ChatsMessages { get; set; }
+        public DbSet<PrivateMessage> PrivateMessages { get; set; }
 
         public MainDbContext(DbContextOptions<MainDbContext> options) : base(options)
         {
