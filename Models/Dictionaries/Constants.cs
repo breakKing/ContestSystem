@@ -12,6 +12,10 @@ namespace ContestSystem.Models.Dictionaries
         public static readonly int ContestLockBeforeStartInMinutes = 60;
         public static readonly int MaxPointsSumForAllTests = 100;
 
+        // Некоторые "настройки" мессенджера
+        public static readonly int ChatDefaultOffset = 0;
+        public static readonly int ChatDefaultCount = 50;
+
         // Названия сущностей
         public static readonly string ContestEntityName = "Contest";
         public static readonly string CourseEntityName = "Course";
@@ -22,9 +26,11 @@ namespace ContestSystem.Models.Dictionaries
         public static readonly string UserEntityName = "User";
         public static readonly string SolutionEntityName = "Solution";
         public static readonly string CompilerEntityName = "Compiler";
+        public static readonly string ChatEntityName = "Chat";
 
         // Названия для разделов "кодов" ошибок
         public static readonly string CommonSectionName = "Common";
+        public static readonly string MessengerSectionName = "Messenger";
 
         // Наименования ключей для "кодов" ошибок
         public static readonly string ValidationFailedErrorName = "ValidationFailed";
@@ -35,12 +41,15 @@ namespace ContestSystem.Models.Dictionaries
         public static readonly string CreationLimitExceededErrorName = "EntityCreationLimitExceeded";
         public static readonly string ModerationByWrongModeratorErrorName = "EntityModerationByWrongModerator";
         public static readonly string UserAlreadyInContestErrorName = "UserAlreadyInContest";
+        public static readonly string UserAlreadyInvitedErrorName = "UserAlreadyInvited";
         public static readonly string UserNotInContestErrorName = "UserNotInContest";
+        public static readonly string UserNotInChatErrorName = "UserNotInChat";
         public static readonly string UserInsufficientRightsErrorName = "UserInsufficientRights";
         public static readonly string EntityAlreadyExistsErrorName = "EntityAlreadyExists";
         public static readonly string AuthFailedErrorName = "AuthFailed";
         public static readonly string TokenGenerationFailedErrorName = "TokenGenerationFailed";
         public static readonly string UserRegisterFailedErrorName = "UserRegisterFailed";
+        public static readonly string ChatDoenstExistErrorName = "ChatDoenstExist";
         public static readonly string LockedErrorName = "Locked";
         public static readonly string DbSaveErrorName = "DbSaveError";
         public static readonly string CheckerServersUnavailableErrorName = "CheckerServersUnavailable";
@@ -115,7 +124,8 @@ namespace ContestSystem.Models.Dictionaries
                 { EntityAlreadyExistsErrorName, "ERR_USER_ALREADY_EXISTS" },
                 { AuthFailedErrorName, "ERR_USER_AUTH_FAILED" },
                 { TokenGenerationFailedErrorName, "ERR_USER_TOKEN_GENERATION_FAILED" },
-                { UserRegisterFailedErrorName, "ERR_USER_REGISTER_FAILED" }
+                { UserRegisterFailedErrorName, "ERR_USER_REGISTER_FAILED" },
+                { UserAlreadyInvitedErrorName, "ERR_USER_ALREADY_INVITED" }
             },
             [SolutionEntityName] = new Dictionary<string, string>
             {
@@ -128,6 +138,11 @@ namespace ContestSystem.Models.Dictionaries
             [CompilerEntityName] = new Dictionary<string, string>
             {
                 { EntityDoesntExistErrorName, "ERR_COMPILER_DOESNT_EXIST" }
+            },
+            [MessengerSectionName] = new Dictionary<string, string>
+            {
+                { UserNotInChatErrorName, "ERR_USER_NOT_IN_CHAT" },
+                { ChatDoenstExistErrorName, "ERR_CHAT_DOESNT_EXIST" }
             },
             [CommonSectionName] = new Dictionary<string, string>
             {

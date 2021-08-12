@@ -58,7 +58,8 @@
         EntityAlreadyExists: "ERR_USER_ALREADY_EXISTS",
         AuthFailed: "ERR_USER_AUTH_FAILED",
         TokenGenerationFailed: "ERR_USER_TOKEN_GENERATION_FAILED",
-        UserRegisterFailed: "ERR_USER_REGISTER_FAILED"
+        UserRegisterFailed: "ERR_USER_REGISTER_FAILED",
+        UserAlreadyInvited: "ERR_USER_ALREADY_INVITED"
     },
     Solution: {
         ValidationFailed: "ERR_SOLUTION_VALIDATION_FAILED",
@@ -70,8 +71,13 @@
     Compiler: {
         EntityDoesntExist: "ERR_COMPILER_DOESNT_EXIST"
     },
+    MessengerSectionName: {
+        UserNotInChat: "ERR_USER_NOT_IN_CHAT",
+        ChatDoenstExist: "ERR_CHAT_DOESNT_EXIST"
+    },
     Common: {
         DbSave: "ERR_DB_SAVE",
+        CheckerServersUnavailable: "ERR_CHECKER_SERVERS_UNAVAILABLE",
         Undefined: "ERR_UNDEFINED"
     }
 }

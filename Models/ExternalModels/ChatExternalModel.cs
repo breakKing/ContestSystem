@@ -1,6 +1,5 @@
 ﻿using ContestSystemDbStructure.Models.Messenger;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace ContestSystem.Models.ExternalModels
 {
@@ -11,10 +10,9 @@ namespace ContestSystem.Models.ExternalModels
         public string Image { get; set; }
         public long AdminId { get; set; }
         public List<object> Users { get; set; }
-        public List<ChatEventExternalModel> Events { get; set; }
-        public List<ChatMessageExternalModel> Messages { get; set; }
+        public List<ChatHistoryEntry> HistoryEntries { get; set; } = new List<ChatHistoryEntry>();
 
-        public static ChatExternalModel GetFromModel(Chat chat, List<ChatUser> users, List<ChatMessage> messages, List<ChatEvent> events, string imageInBase64)
+        public static ChatExternalModel GetFromModel(Chat chat, List<ChatUser> users, List<ChatHistoryEntry> historyEntries, string imageInBase64)
         {
             return new ChatExternalModel
             {
@@ -23,12 +21,7 @@ namespace ContestSystem.Models.ExternalModels
                 Image = imageInBase64,
                 AdminId = chat.AdminId.GetValueOrDefault(),
                 Users = users.ConvertAll(u => u.User?.ResponseStructure),
-                Events = events.ConvertAll(e => ChatEventExternalModel.GetFromModel(chat, e))
-                                .OrderByDescending(e => e.DateTimeUTC)
-                                .ToList(),
-                Messages = messages.ConvertAll(m => ChatMessageExternalModel.GetFromModel(chat, m, m.MessageToReply))
-                                .OrderByDescending(m => m.DateTimeUTC)
-                                .ToList()
+                HistoryEntries = historyEntries
             };
         }
     }

@@ -1,10 +1,15 @@
 ﻿using ContestSystem.Areas.Messenger.Services;
+using ContestSystem.Extensions;
 using ContestSystem.Models.Attributes;
 using ContestSystem.Models.DbContexts;
+using ContestSystem.Models.Dictionaries;
 using ContestSystem.Models.FormModels;
+using ContestSystem.Models.Misc;
 using ContestSystem.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace ContestSystem.Areas.Messenger.Controllers
@@ -20,6 +25,9 @@ namespace ContestSystem.Areas.Messenger.Controllers
         private readonly ILogger<ChatsController> _logger;
         private readonly NotifierService _notifier;
 
+        private readonly string _entityName = Constants.ChatEntityName;
+        private readonly Dictionary<string, string> _errorCodes = Constants.ErrorCodes[Constants.MessengerSectionName];
+
         public ChatsController(MainDbContext dbContext, FileStorageService fileStorage, MessengerService messenger, ILogger<ChatsController> logger, NotifierService notifier)
         {
             _dbContext = dbContext;
@@ -31,16 +39,64 @@ namespace ContestSystem.Areas.Messenger.Controllers
 
         [HttpGet("{link}")]
         [AuthorizeByJwt]
-        public async Task<IActionResult> GetChat(string link, ulong? offset = null, ulong? count = null)
+        public async Task<IActionResult> GetChat(string link, int? offset = null, int? count = null)
         {
-            return null;
+            var currentUser = await HttpContext.GetCurrentUser();
+
+            if (!await _messenger.ChatExistsAsync(_dbContext, link))
+            {
+                return NotFound(_errorCodes[Constants.ChatDoenstExistErrorName]);
+            }
+
+            if (!await _messenger.IsUserInChatAsync(_dbContext, currentUser.Id, link))
+            {
+                return BadRequest(_errorCodes[Constants.UserNotInChatErrorName]);
+            }
+
+            return Json(await _messenger.GetChatHistoryAsync(_dbContext, link, offset, count));
         }
 
         [HttpPost("{link}/invite/{userId}")]
         [AuthorizeByJwt]
         public async Task<IActionResult> InviteToChat(string link, long userId)
         {
-            return null;
+            var response = new ResponseObject<bool>();
+
+            var currentUser = await HttpContext.GetCurrentUser();
+
+            if (!await _messenger.ChatExistsAsync(_dbContext, link))
+            {
+                _logger.LogNonExistentEntityInForm("ChatUser", _entityName, currentUser.Id);
+                response = ResponseObject<bool>.Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.UserInsufficientRightsErrorName]);
+            }
+            else
+            {
+                if (!await _dbContext.Users.AnyAsync(u => u.Id == userId))
+                {
+                    _logger.LogWarning($"Администратор чата \"{link}\" с идентификатором {currentUser.Id} попытался пригласить несуществующего пользователя с идентификатором {userId}");
+                    response = ResponseObject<bool>.Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.EntityDoesntExistErrorName]);
+                }
+                else
+                {
+                    if (!await _messenger.IsUserChatAdminAsync(_dbContext, currentUser.Id, link))
+                    {
+                        _logger.LogWarning($"Пользователь с идентификатором {currentUser.Id} попытался пригласить пользователя с идентификатором {userId} в чат " +
+                            $"\"{link}\", однако он не является главным локальным модератором чата");
+                        response = ResponseObject<bool>.Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.UserInsufficientRightsErrorName]);
+                    }
+                    else
+                    {
+                        var status = await _messenger.InviteUserToChatAsync(_dbContext, userId, link);
+                        _logger.LogInviteStatus(status, _entityName, currentUser.Id, userId, link);
+                        response = ResponseObject<bool>.FormResponseObjectForInvitation(status);
+                    }
+                }
+            }
+
+            // В случае успешного инвайта возвращается status = true и:
+            // data = true, если пользователь сразу добавлен в чат
+            // data = false, если админу надо дождаться подтверждение приглашённого пользователя
+            return Json(response); 
         }
 
         [HttpPost("{link}/users/{userId}")]

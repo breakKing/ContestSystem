@@ -188,6 +188,20 @@ namespace ContestSystem.Extensions
             }
         }
 
+        public static void LogDbSaveError(this ILogger logger, string entityName, string entityId, bool deletion = false)
+        {
+            if (deletion)
+            {
+                logger.LogWarning(
+                   $"При удалении сущности \"{entityName}\" с идентификатором {entityId} произошла ошибка, связанная с нарушением параллелизма");
+            }
+            else
+            {
+                logger.LogWarning(
+                   $"При сохранении сущности \"{entityName}\" с идентификатором {entityId} произошла ошибка, связанная с нарушением параллелизма");
+            }
+        }
+
         public static void LogNonExistentEntityInForm(this ILogger logger, string entityName, string nonExistentEntityName, long userId)
         {
             logger.LogWarning( $"При проверке формы для сущности \"{entityName}\" от пользователя с идентификатором {userId} было обнаружено " +
@@ -329,6 +343,38 @@ namespace ContestSystem.Extensions
                     logger.LogExistentEntityInForm(entityName, Constants.CompilerEntityName, userId);
                     break;
                 default:
+                    break;
+            }
+        }
+
+        public static void LogInviteStatus(this ILogger logger, InviteStatus status, string entityName, long adminId, long userId, string entityId, bool mainAdmin = true)
+        {
+            string admin = mainAdmin ? "Главный локальный модератор" : "Локальный модератор";
+
+            switch (status)
+            {
+                case InviteStatus.Pending:
+                    logger.LogInformation($"{admin} сущности \"{entityName}\" с идентификатором {entityId} (пользователь с идентификатором " +
+                        $"{adminId}) пригласил пользователя с идентификатором {userId}. Ожидается решение приглашённого пользователя");
+                    break;
+                case InviteStatus.Added:
+                    logger.LogInformation($"{admin} сущности \"{entityName}\" с идентификатором {entityId} (пользователь с идентификатором " +
+                        $"{adminId}) добавил пользователя с идентификатором {userId}");
+                    break;
+                case InviteStatus.UserAlreadyInvited:
+                    logger.LogInformation($"{admin} сущности \"{entityName}\" с идентификатором {entityId} (пользователь с идентификатором " +
+                        $"{adminId}) попытался пригласить уже приглашённого пользователя с идентификатором {userId}");
+                    break;
+                case InviteStatus.UserAlreadyInEntity:
+                    logger.LogInformation($"{admin} сущности \"{entityName}\" с идентификатором {entityId} (пользователь с идентификатором " +
+                        $"{adminId}) попытался пригласить уже добавленного пользователя с идентификатором {userId}");
+                    break;
+                case InviteStatus.DbSaveError:
+                    logger.LogDbSaveError(entityName, entityId);
+                    break;
+                default:
+                    logger.LogError($"{admin} сущности \"{entityName}\" с идентификатором {entityId} (пользователя с идентификатором " +
+                        $"{adminId}) пытадся пригласить пользователя с идентификатором {userId}, однако произошла непредвиденная ошибка");
                     break;
             }
         }

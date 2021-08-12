@@ -1,29 +1,30 @@
 ﻿using ContestSystem.Models.Dictionaries;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace ContestSystem.Models.Misc
 {
-    public class ResponseObject<TIdentity>
+    public class ResponseObject<TData>
     {
         public bool Status { get; set; }
-        public TIdentity Data { get; set; }
+        public TData Data { get; set; }
         public List<string> Errors { get; set; }
 
-        public static ResponseObject<TIdentity> Success(TIdentity id)
+        public static ResponseObject<TData> Success(TData data)
         {
-            return new ResponseObject<TIdentity>
+            return new ResponseObject<TData>
             {
                 Status = true,
-                Data = id,
+                Data = data,
                 Errors = new List<string>()
             };
         }
 
-        public static ResponseObject<TIdentity> Fail(params string[] errorsList)
+        public static ResponseObject<TData> Fail(params string[] errorsList)
         {
-            return new ResponseObject<TIdentity>
+            return new ResponseObject<TData>
             {
                 Status = false,
                 Errors = new List<string>(errorsList),
@@ -31,7 +32,7 @@ namespace ContestSystem.Models.Misc
             };
         }
 
-        public static ResponseObject<TIdentity> Fail(ModelStateDictionary modelState, string entityName)
+        public static ResponseObject<TData> Fail(ModelStateDictionary modelState, string entityName)
         {
             string error = string.Empty;
             if (Constants.ErrorCodes.TryGetValue(entityName, out Dictionary<string, string> codes))
@@ -50,9 +51,9 @@ namespace ContestSystem.Models.Misc
                                     .ToArray());
         }
 
-        public static ResponseObject<TIdentity> FormResponseObjectForCreation(CreationStatus status, string entityName, TIdentity entityId)
+        public static ResponseObject<TData> FormResponseObjectForCreation(CreationStatus status, string entityName, TData entityId)
         {
-            ResponseObject<TIdentity> response = new ResponseObject<TIdentity>();
+            ResponseObject<TData> response = new ResponseObject<TData>();
             switch (status)
             {
                 case CreationStatus.Success:
@@ -85,9 +86,9 @@ namespace ContestSystem.Models.Misc
             return response;
         }
 
-        public static ResponseObject<TIdentity> FormResponseObjectForEdition(EditionStatus status, string entityName, TIdentity entityId)
+        public static ResponseObject<TData> FormResponseObjectForEdition(EditionStatus status, string entityName, TData entityId)
         {
-            ResponseObject<TIdentity> response = new ResponseObject<TIdentity>();
+            ResponseObject<TData> response = new ResponseObject<TData>();
             switch (status)
             {
                 case EditionStatus.Success:
@@ -125,9 +126,9 @@ namespace ContestSystem.Models.Misc
             return response;
         }
 
-        public static ResponseObject<TIdentity> FormResponseObjectForDeletion(DeletionStatus status, string entityName, TIdentity entityId)
+        public static ResponseObject<TData> FormResponseObjectForDeletion(DeletionStatus status, string entityName, TData entityId)
         {
-            ResponseObject<TIdentity> response = new ResponseObject<TIdentity>();
+            ResponseObject<TData> response = new ResponseObject<TData>();
             switch (status)
             {
                 case DeletionStatus.Success:
@@ -161,9 +162,9 @@ namespace ContestSystem.Models.Misc
             return response;
         }
 
-        public static ResponseObject<TIdentity> FormResponseObjectForModeration(ModerationStatus status, string entityName, TIdentity entityId)
+        public static ResponseObject<TData> FormResponseObjectForModeration(ModerationStatus status, string entityName, TData entityId)
         {
-            ResponseObject<TIdentity> response = new ResponseObject<TIdentity>();
+            ResponseObject<TData> response = new ResponseObject<TData>();
             switch (status)
             {
                 case ModerationStatus.Accepted:
@@ -197,9 +198,9 @@ namespace ContestSystem.Models.Misc
             return response;
         }
 
-        public static ResponseObject<TIdentity> FormResponseObjectForFormCheck(FormCheckStatus status, string entityName, TIdentity entityId = default)
+        public static ResponseObject<TData> FormResponseObjectForFormCheck(FormCheckStatus status, string entityName, TData entityId = default)
         {
-            ResponseObject<TIdentity> response = new ResponseObject<TIdentity>();
+            ResponseObject<TData> response = new ResponseObject<TData>();
             switch (status)
             {
                 case FormCheckStatus.Correct:
@@ -233,6 +234,35 @@ namespace ContestSystem.Models.Misc
                     response = Fail(Constants.ErrorCodes[Constants.CommonSectionName][Constants.UndefinedErrorName]);
                     break;
             }
+            return response;
+        }
+
+        public static ResponseObject<bool> FormResponseObjectForInvitation(InviteStatus status)
+        {
+            var response = new ResponseObject<bool>();
+
+            switch (status)
+            {
+                case InviteStatus.Pending:
+                    response = ResponseObject<bool>.Success(false);
+                    break;
+                case InviteStatus.Added:
+                    response = ResponseObject<bool>.Success(true);
+                    break;
+                case InviteStatus.UserAlreadyInvited:
+                    response = ResponseObject<bool>.Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.UserAlreadyInvitedErrorName]);
+                    break;
+                case InviteStatus.UserAlreadyInEntity:
+                    response = ResponseObject<bool>.Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.EntityAlreadyExistsErrorName]);
+                    break;
+                case InviteStatus.DbSaveError:
+                    response = ResponseObject<bool>.Fail(Constants.ErrorCodes[Constants.CommonSectionName][Constants.DbSaveErrorName]);
+                    break;
+                default:
+                    response = ResponseObject<bool>.Fail(Constants.ErrorCodes[Constants.CommonSectionName][Constants.UndefinedErrorName]);
+                    break;
+            }
+
             return response;
         }
     }
