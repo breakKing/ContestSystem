@@ -5,7 +5,13 @@
           currentModeratingChecker && currentModeratingChecker.author && currentModeratingChecker.author.fullName
         }}</h2>
       <p>{{ currentModeratingChecker && currentModeratingChecker.description }}</p>
-      <textarea class="form-control code-input">{{currentModeratingChecker && currentModeratingChecker.code}}</textarea>
+      <v-ace-editor v-model:value="checkerCode"
+                    @init="editorInit"
+                    lang="c_cpp"
+                    theme="eclipse"
+                    style="height: 400px; font-size: medium; border: 2px solid gray; border-radius: 3px 4px;"
+                    :printMargin="false"
+                    :readonly="true" />
 
       <div class="row">
         <div class="col">
@@ -37,12 +43,16 @@
 import {ErrorMessage, Field, Form} from "vee-validate";
 import * as Yup from "yup";
 import {mapActions, mapGetters} from "vuex";
+import { VAceEditor } from "vue3-ace-editor";
+import 'ace-builds/src-noconflict/mode-c_cpp';
+import 'ace-builds/src-noconflict/theme-eclipse';
 
 export default {
   name: "ModeratorCheckerModerationPage",
   props: ['checker_id'],
   data() {
     return {
+      checkerCode: '',
       error_msg: '',
       message: '',
       current_status: null,
@@ -98,7 +108,8 @@ export default {
       await this.$router.push({
         name: 'ModeratorNotModeratedCheckersPage'
       })
-    }
+    },
+    editorInit() {}
   },
   beforeRouteEnter(to, from, next) {
     next(async vm => {
@@ -106,12 +117,14 @@ export default {
       vm.message = vm.currentModeratingChecker?.moderationMessage
       vm.current_status = +vm.currentModeratingChecker?.approvalStatus
       vm.error_msg = ''
+      vm.checkerCode = vm.currentModeratingChecker?.code
     })
   },
   components: {
     VForm: Form,
     VField: Field,
     ErrorMessage,
+    VAceEditor
   },
   mounted() {
   },

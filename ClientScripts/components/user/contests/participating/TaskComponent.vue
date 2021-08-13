@@ -33,7 +33,15 @@
       <h2>Решение</h2>
       <v-form @submit="onSubmitSolution" :validation-schema="solutionSchema" class="mb-3">
         <div>
-          <v-field :disabled="loading" as="textarea" v-model="code" class="form-control code-input" name="code"/>
+          <v-field v-model="code" name="code" type="hidden" />
+          <v-ace-editor v-model:value="code"
+                          @init="editorInit"
+                          lang="c_cpp"
+                          theme="eclipse"
+                          style="height: 400px; font-size: medium; border: 2px solid gray; border-radius: 3px 4px;"
+                          :printMargin="false"
+                          :disabled="loading"
+                          placeholder="Код решения" />
           <error-message name="code"></error-message>
         </div>
         <div>
@@ -53,6 +61,9 @@
 
 <script>
 import {mapActions, mapGetters, mapMutations} from "vuex";
+import { VAceEditor } from "vue3-ace-editor";
+import 'ace-builds/src-noconflict/mode-c_cpp';
+import 'ace-builds/src-noconflict/theme-eclipse';
 import TasksNavigationComponent from "./TasksNavigationComponent";
 import * as _ from "lodash";
 import {ErrorMessage, Field, Form} from "vee-validate";
@@ -70,6 +81,7 @@ export default {
     VForm: Form,
     VField: Field,
     ErrorMessage,
+    VAceEditor
   },
   props: ['contest_id', 'task_id'],
   data() {
@@ -168,7 +180,8 @@ export default {
         this.error_msg = (errors || []).join(', ')
       }
       this.loading = false
-    }
+    },
+    editorInit() {}
   },
   mounted() {
   },

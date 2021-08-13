@@ -23,8 +23,14 @@
     </div>
     <div>
       <label class="fs-4">Код</label>
-      <v-field v-model="code" class="form-control" name="code" as="textarea" placeholder="Код программы-чекера"
-               rows="6"/>
+      <v-field v-model="code" name="code" type="hidden"/>
+      <v-ace-editor v-model:value="code"
+                    @init="editorInit"
+                    lang="c_cpp"
+                    theme="eclipse"
+                    style="height: 400px; font-size: medium; border: 2px solid gray; border-radius: 3px 4px;"
+                    :printMargin="false"
+                    placeholder="Код программы-чекера"/>
       <error-message name="code"></error-message>
     </div>
     <button type="submit">Сохранить</button>
@@ -38,6 +44,9 @@ import {mapActions, mapGetters} from "vuex";
 import axios from "axios";
 import {QuillEditor} from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
+import { VAceEditor } from "vue3-ace-editor";
+import 'ace-builds/src-noconflict/mode-c_cpp'; // импорт для использования свойства lang в v-ace-editor (см. в вёртске). Для любого mode нужен подобный импорт, иначе компонент крашится
+import 'ace-builds/src-noconflict/theme-eclipse'; // аналогично предыдущему импорту, но только для theme
 
 export default {
   name: "CheckerEditComponent",
@@ -45,7 +54,8 @@ export default {
     VForm: Form,
     VField: Field,
     ErrorMessage,
-    QuillEditor
+    QuillEditor,
+    VAceEditor,
   },
   props: ['id'],
   data() {
@@ -74,7 +84,7 @@ export default {
       // у компонента баг. Начальное значение не отрисовывается
       this.$refs.quill_editor_description.setHTML(this.description)
 
-      this.code = checker?.code || null
+      this.code = checker?.code || "" // v-ace-editor крашится, если привязанная к нему строка с кодом является null
       this.isPublic = checker?.isPublic || false
     },
     async onSubmit() {
@@ -111,7 +121,8 @@ export default {
       } else if (result.errors) {
         this.errors = result.errors.join(', ')
       }
-    }
+    },
+    editorInit() {} // хз зачем, во всех примерах у v-ace-editor определяют @init и пихают туда пустую функцию
   },
   beforeRouteEnter(to, from, next) {
     next(async vm => {
