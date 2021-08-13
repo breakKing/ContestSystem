@@ -73,7 +73,8 @@
     },
     MessengerSectionName: {
         UserNotInChat: "ERR_USER_NOT_IN_CHAT",
-        ChatDoenstExist: "ERR_CHAT_DOESNT_EXIST"
+        ChatDoenstExist: "ERR_CHAT_DOESNT_EXIST",
+        UserKickedFromChat: "ERR_USER_KICKED_FROM_CHAT"
     },
     Common: {
         DbSave: "ERR_DB_SAVE",
