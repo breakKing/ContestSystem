@@ -1,6 +1,7 @@
 ﻿using ContestSystem.Hubs;
 using ContestSystem.Models.ExternalModels;
 using ContestSystemDbStructure.Models;
+using ContestSystemDbStructure.Models.Messenger;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using System;
@@ -38,13 +39,34 @@ namespace ContestSystem.Services
                 usersIds.AddRange(localModeratorsIds);
             }
 
+            var actualResult = SolutionActualResultExternalModel.GetFromModel(solution);
+
+            await SignalRSendAsync(usersIds, "UpdateOnSolutionActualResult", actualResult);
+        }
+
+        public async Task UpdateOnChatEventsAsync(ChatEvent chatEvent, List<ChatUser> chatUsers)
+        {
+            if (chatEvent == null || chatUsers == null || chatUsers.Count == 0)
+            {
+                return;
+            }
+
+            var usersIds = chatUsers.Select(cu => cu.UserId.ToString()).ToList();
+
+            var historyEntry = ChatHistoryEntry.GetFromModel(chatEvent);
+
+            await SignalRSendAsync(usersIds, "UpdateOnChatEvents", historyEntry);
+        }
+
+        private async Task SignalRSendAsync(List<string> usersIds, string method, params object[] data)
+        {
             try
             {
-                await _hubContext.Clients.Users(usersIds).SendAsync("UpdateOnSolutionActualResult", SolutionActualResultExternalModel.GetFromModel(solution));
+                await _hubContext.Clients.Users(usersIds).SendAsync(method, data);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                _logger.LogError($"Ошибка рассылки UpdateOnSolutionActualResult: {e.Message}");
+                _logger.LogError($"Ошибка рассылки {method}: {ex.Message}");
             }
         }
     }

@@ -67,13 +67,14 @@ namespace ContestSystem.Areas.Messenger.Controllers
             if (!await _messenger.ChatExistsAsync(_dbContext, link))
             {
                 _logger.LogNonExistentEntityInForm("ChatUser", _entityName, currentUser.Id);
-                response = ResponseObject<bool>.Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.UserInsufficientRightsErrorName]);
+                response = ResponseObject<bool>.Fail(_errorCodes[Constants.ChatDoenstExistErrorName]);
             }
             else
             {
                 if (!await _dbContext.Users.AnyAsync(u => u.Id == userId))
                 {
-                    _logger.LogWarning($"Администратор чата \"{link}\" с идентификатором {currentUser.Id} попытался пригласить несуществующего пользователя с идентификатором {userId}");
+                    _logger.LogWarning($"Главный локальный модератор чата \"{link}\" (пользователь с идентификатором {currentUser.Id}) " +
+                        $"попытался пригласить несуществующего пользователя с идентификатором {userId}");
                     response = ResponseObject<bool>.Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.EntityDoesntExistErrorName]);
                 }
                 else
@@ -96,14 +97,65 @@ namespace ContestSystem.Areas.Messenger.Controllers
             // В случае успешного инвайта возвращается status = true и:
             // data = true, если пользователь сразу добавлен в чат
             // data = false, если админу надо дождаться подтверждение приглашённого пользователя
-            return Json(response); 
+            return Json(response);
         }
 
-        [HttpPost("{link}/users/{userId}")]
+        [HttpPost("{link}/join")]
         [AuthorizeByJwt]
-        public async Task<IActionResult> AddUserToChat(string link, long userId)
+        public async Task<IActionResult> AddUserToChat(string link)
         {
-            return null;
+            var response = new ResponseObject<bool>();
+
+            var currentUser = await HttpContext.GetCurrentUser();
+
+            if (!await _messenger.ChatExistsAsync(_dbContext, link))
+            {
+                _logger.LogNonExistentEntityInForm("ChatUser", _entityName, currentUser.Id);
+                response = ResponseObject<bool>.Fail(_errorCodes[Constants.ChatDoenstExistErrorName]);
+            }
+            else
+            {
+                if (await _messenger.IsUserInChatAsync(_dbContext, currentUser.Id, link))
+                {
+                    _logger.LogWarning($"Пользователь с идентификатором {currentUser.Id} попытался войти в чат " +
+                        $"\"{link}\", когда он уже в нём есть");
+                    response = ResponseObject<bool>.Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.EntityAlreadyExistsErrorName]);
+                }
+                else
+                {
+                    if (!await _messenger.IsChatJoinableAsync(_dbContext, link) && !await _messenger.IsUserInvitedInChatAsync(_dbContext, currentUser.Id, link))
+                    {
+                        _logger.LogWarning($"Пользователь с идентификатором {currentUser.Id} попытался войти в чат " +
+                            $"\"{link}\", однако в чат можно войти только по приглашению");
+                        response = ResponseObject<bool>.Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.UserInsufficientRightsErrorName]);
+                    }
+                    else
+                    {
+                        if (await _messenger.IsUserKickedFromChatAsync(_dbContext, currentUser.Id, link))
+                        {
+                            _logger.LogWarning($"Пользователь с идентификатором {currentUser.Id} попытался войти в чат " +
+                                $"\"{link}\", однако ранее он был исключён главным локальным модератором чата");
+                            response = ResponseObject<bool>.Fail(_errorCodes[Constants.UserKickedFromChatErrorName]);
+                        }
+                        else
+                        {
+                            bool additionSuccess = await _messenger.AddUserToChatAsync(_dbContext, currentUser.Id, link);
+                            if (!additionSuccess)
+                            {
+                                _logger.LogDbSaveError(_entityName, link);
+                                response = ResponseObject<bool>.Fail(Constants.ErrorCodes[Constants.CommonSectionName][Constants.DbSaveErrorName]);
+                            }
+                            else
+                            {
+                                _logger.LogInformation($"Пользователь с идентификатором {currentUser.Id} добавлен в чат \"{link}\"");
+                                response = ResponseObject<bool>.Success(additionSuccess);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return Json(response);
         }
 
         [HttpPost("")]

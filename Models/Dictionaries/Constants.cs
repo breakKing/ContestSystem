@@ -50,6 +50,7 @@ namespace ContestSystem.Models.Dictionaries
         public static readonly string TokenGenerationFailedErrorName = "TokenGenerationFailed";
         public static readonly string UserRegisterFailedErrorName = "UserRegisterFailed";
         public static readonly string ChatDoenstExistErrorName = "ChatDoenstExist";
+        public static readonly string UserKickedFromChatErrorName = "UserKickedFromChat";
         public static readonly string LockedErrorName = "Locked";
         public static readonly string DbSaveErrorName = "DbSaveError";
         public static readonly string CheckerServersUnavailableErrorName = "CheckerServersUnavailable";
@@ -142,7 +143,8 @@ namespace ContestSystem.Models.Dictionaries
             [MessengerSectionName] = new Dictionary<string, string>
             {
                 { UserNotInChatErrorName, "ERR_USER_NOT_IN_CHAT" },
-                { ChatDoenstExistErrorName, "ERR_CHAT_DOESNT_EXIST" }
+                { ChatDoenstExistErrorName, "ERR_CHAT_DOESNT_EXIST" },
+                { UserKickedFromChatErrorName, "ERR_USER_KICKED_FROM_CHAT" }
             },
             [CommonSectionName] = new Dictionary<string, string>
             {
