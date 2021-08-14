@@ -30,10 +30,10 @@ export default {
                     verdict = 'Ошибка представления на тесте ' + actualResult.lastRunTestNumber
                     break
                 case TestResultVerdicts.CheckerServersUnavailable:
-                    verdict = 'Сервера проверки недоступны' + actualResult.lastRunTestNumber
+                    verdict = 'Сервера проверки недоступны'
                     break
                 case TestResultVerdicts.TestlibFail:
-                    verdict = 'Ошибка механизма проверки' + actualResult.lastRunTestNumber
+                    verdict = 'Ошибка механизма проверки'
                     break
                 case TestResultVerdicts.UnexpectedError:
                     verdict = 'Непредвиденная ошибка на тесте' + actualResult.lastRunTestNumber
