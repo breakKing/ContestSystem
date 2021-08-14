@@ -34,7 +34,7 @@ namespace ContestSystem.Models.ExternalModels
                 SubmitTimeUTC = solution.SubmitTimeUTC,
                 ErrorsMessage = solution.ErrorsMessage,
                 Points = solution.Points,
-                TestResults = solution.TestResults?.ConvertAll(TestResultExternalModel.GetFromModel),
+                TestResults = solution.TestResults?.ConvertAll(tr => TestResultExternalModel.GetFromModel(tr)),
                 ActualResult = SolutionActualResultExternalModel.GetFromModel(solution)
             };
         }

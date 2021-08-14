@@ -13,10 +13,11 @@ namespace ContestSystem.Models.ExternalModels
         public int UsedTimeInMillis { get; set; }
         public short GotPoints { get; set; }
         public VerdictType Verdict { get; set; }
+        public string CheckerOutput { get; set; }
 
-        public static TestResultExternalModel GetFromModel(TestResult testResult)
+        public static TestResultExternalModel GetFromModel(TestResult testResult, bool includeCheckerData = false)
         {
-            return new TestResultExternalModel
+            var result =  new TestResultExternalModel
             {
                 Number = testResult.Number,
                 Input = testResult.Input,
@@ -25,8 +26,16 @@ namespace ContestSystem.Models.ExternalModels
                 UsedMemoryInBytes = testResult.UsedMemoryInBytes,
                 UsedTimeInMillis = testResult.UsedTimeInMillis,
                 GotPoints = testResult.GotPoints,
-                Verdict = testResult.Verdict
+                Verdict = testResult.Verdict,
+                CheckerOutput = null
             };
+
+            if (includeCheckerData)
+            {
+                result.CheckerOutput = testResult.CheckerOutput;
+            }
+
+            return result;
         }
     }
 }
