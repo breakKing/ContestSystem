@@ -76,11 +76,6 @@ export default {
       if (vm.currentContest && vm.currentContestIsInPast) {
         return await vm.$router.replace({name: 'ContestPage', params: {contest_id: vm.currentContest.id}})
       }
-      let solutions = await vm.getUserSolutionsInContest({
-        contest_id: vm.contest_id,
-        user_id: vm.currentUser?.id
-      })
-      vm.setCurrentContestSolutionsForCurrentUser(solutions)
     })
   }
 }

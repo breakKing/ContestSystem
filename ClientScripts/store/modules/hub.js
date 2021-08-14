@@ -60,11 +60,13 @@ export default {
             let index = _.findIndex(solutions, (s) => +s.id === +actual_result.solutionId)
             if (+index > -1) {
                 solutions[index].actualResult = actual_result
-            } else {
-                solutions = await dispatch('getUserSolutionsInContest', {
-                    contest_id: rootGetters.currentContest?.id,
-                    user_id: rootGetters.currentUser?.id
-                })
+            } 
+            else {
+                let newSolution = await dispatch('getSolution', +actual_result.solutionId)
+                if (newSolution) {
+                    solutions = _.concat(solutions, newSolution)
+                    solutions[solutions.length-1].actualResult = actual_result
+                }
             }
             commit('setCurrentContestSolutionsForCurrentUser', solutions)
         },

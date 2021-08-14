@@ -146,7 +146,7 @@ export default {
   },
   methods: {
     ...mapMutations(['setCurrentContestSolutionsForCurrentUser']),
-    ...mapActions(['getTask', 'changeCurrentContest', 'fetchAvailableCompilers', 'sendSolution', 'compileSolution', 'runSolutionTests', 'getUserSolutionsInContest']),
+    ...mapActions(['getTask', 'changeCurrentContest', 'fetchAvailableCompilers', 'getSolution', 'sendSolution', 'compileSolution', 'runSolutionTests', 'getUserSolutionsInContest']),
     async onSubmitSolution() {
       this.loading = true
       let {data, status, errors} = await this.sendSolution({
@@ -161,19 +161,20 @@ export default {
         this.error_msg = ''
         let solutionId = data
         this.compileSolution(solutionId).then(async () => {
-          let solutions = await this.getUserSolutionsInContest({
-            contest_id: this.contest_id,
-            user_id: this.currentUser?.id
-          })
-          this.setCurrentContestSolutionsForCurrentUser(solutions)
-          let thisSolution = _.find(solutions || [], (s) => +s.id === +solutionId)
-          if (thisSolution && +thisSolution.actualResult?.verdict === TestResultVerdicts.CompilationSucceed) {
-            this.runSolutionTests(solutionId)
+          let newSolution = await this.getSolution(solutionId)
+          let solutions = _.cloneDeep(this.currentContestSolutionsForCurrentUser)
+          if (newSolution) {
+            solutions = _.concat(solutions, newSolution)
+            this.setCurrentContestSolutionsForCurrentUser(solutions)
+            if (+newSolution.actualResult?.verdict === TestResultVerdicts.CompilationSucceed) {
+              this.runSolutionTests(solutionId)
+            }
+            
           }
         })
         await this.$router.push({
           name: 'ContestMySolutionsPage',
-          params: {contest_id: this.contest_id}
+          params: { contest_id: this.contest_id }
         })
       }
       else {

@@ -62,7 +62,14 @@ namespace ContestSystem.Services
         {
             try
             {
-                await _hubContext.Clients.Users(usersIds).SendAsync(method, data);
+                if (data.Length == 1)
+                {
+                    await _hubContext.Clients.Users(usersIds).SendAsync(method, data[0]);
+                }
+                else
+                {
+                    await _hubContext.Clients.Users(usersIds).SendAsync(method, data);
+                }
             }
             catch (Exception ex)
             {
