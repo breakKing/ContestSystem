@@ -8,3 +8,4 @@ ContestSystem.csproj.user
 appsettings.Development.json
 Logs/*
 Storage/*
+.vscode/*
