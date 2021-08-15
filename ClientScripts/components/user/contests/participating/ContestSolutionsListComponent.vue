@@ -10,18 +10,19 @@
       <th v-if="pointsAreCounted">Очки</th>
       <th>Время</th>
       <th>Память</th>
+      <th>Подробности</th>
     </tr>
     </thead>
     <tbody>
-    <tr v-for="solution of sortedSolutions"
-        @click="$router.push({name: 'SolutionViewPage', params: {solution_id: solution.id}})">
-      <td>{{ problemName(solution.problem) }}</td>
+    <tr v-for="solution of sortedSolutions">
+      <td><router-link :to="{name: 'ContestParticipatingPage', params: {task_id: solution.problem.id}}">{{ problemName(solution.problem) }}</router-link></td>
       <td>{{ solution.compilerName }}</td>
       <td>{{ getFormattedFullDateTime(solution.submitTimeUTC) }}</td>
       <td>{{ verdictInfo(actualResult(solution)) }}</td>
       <td v-if="pointsAreCounted">{{ (actualResult(solution) && actualResult(solution).points) || 0 }}</td>
       <td>{{ getFormattedTime((actualResult(solution) && actualResult(solution).usedTimeInMillis) || 0) }}</td>
       <td>{{ getFormattedMemory((actualResult(solution) && actualResult(solution).usedMemoryInBytes) || 0) }}</td>
+      <td><router-link :to="{name: 'SolutionViewPage', params: {solution_id: solution.id}}">Перейти</router-link></td>
     </tr>
     </tbody>
   </table>
