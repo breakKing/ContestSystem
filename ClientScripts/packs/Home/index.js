@@ -8,6 +8,8 @@ import VueAxios from 'vue-axios'
 import $ from "jquery";
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'vue-prism-editor/dist/prismeditor.min.css';
+import 'prismjs/themes/prism-tomorrow.css'; 
 import '../../styles/style.scss';
 
 const app = createApp({

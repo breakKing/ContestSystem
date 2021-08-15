@@ -34,14 +34,11 @@
       <v-form @submit="onSubmitSolution" :validation-schema="solutionSchema" class="mb-3">
         <div>
           <v-field v-model="code" name="code" type="hidden" />
-          <v-ace-editor v-model:value="code"
-                          @init="editorInit"
-                          lang="c_cpp"
-                          theme="eclipse"
-                          style="height: 400px; font-size: medium; border: 2px solid gray; border-radius: 3px 4px;"
-                          :printMargin="false"
-                          :disabled="loading"
-                          placeholder="Код решения" />
+          <prism-editor v-model="code" 
+                      :highlight="highlighter" 
+                      :tabSize="4" 
+                      line-numbers
+                      class="code-editor"/>
           <error-message name="code"></error-message>
         </div>
         <div>
@@ -61,9 +58,6 @@
 
 <script>
 import {mapActions, mapGetters, mapMutations} from "vuex";
-import { VAceEditor } from "vue3-ace-editor";
-import 'ace-builds/src-noconflict/mode-c_cpp';
-import 'ace-builds/src-noconflict/theme-eclipse';
 import TasksNavigationComponent from "./TasksNavigationComponent";
 import * as _ from "lodash";
 import {ErrorMessage, Field, Form} from "vee-validate";
@@ -72,6 +66,7 @@ import BreadCrumbsComponent from "../../../BreadCrumbsComponent";
 import ContestParticipatingTaskBreads
   from "../../../../dictionaries/bread_crumbs/contest/ContestParticipatingTaskBreads";
 import TestResultVerdicts from "../../../../dictionaries/TestResultVerdicts";
+import code_editor_mixin from '../../../mixins/code_editor_mixin';
 
 export default {
   name: "TaskComponent",
@@ -80,10 +75,10 @@ export default {
     TasksNavigationComponent,
     VForm: Form,
     VField: Field,
-    ErrorMessage,
-    VAceEditor
+    ErrorMessage
   },
   props: ['contest_id', 'task_id'],
+  mixins: [code_editor_mixin],
   data() {
     return {
       loading: false,
@@ -181,8 +176,7 @@ export default {
         this.error_msg = (errors || []).join(', ')
       }
       this.loading = false
-    },
-    editorInit() {}
+    }
   },
   mounted() {
   },

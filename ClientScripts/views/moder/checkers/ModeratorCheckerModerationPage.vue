@@ -4,15 +4,13 @@
       <h2>{{ currentModeratingChecker && currentModeratingChecker.name }} {{
           currentModeratingChecker && currentModeratingChecker.author && currentModeratingChecker.author.fullName
         }}</h2>
-      <p>{{ currentModeratingChecker && currentModeratingChecker.description }}</p>
-      <v-ace-editor v-model:value="checkerCode"
-                    @init="editorInit"
-                    lang="c_cpp"
-                    theme="eclipse"
-                    style="height: 400px; font-size: medium; border: 2px solid gray; border-radius: 3px 4px;"
-                    :printMargin="false"
-                    :readonly="true" />
-
+      <p v-html="currentModeratingChecker && currentModeratingChecker.description"></p>
+      <prism-editor v-model="checkerCode" 
+                      :highlight="highlighter" 
+                      :tabSize="4" 
+                      line-numbers
+                      readonly
+                      class="code-editor"/>
       <div class="row">
         <div class="col">
           <v-form @submit="submitEntity" :validation-schema="schema" class="mb-3">
@@ -43,13 +41,12 @@
 import {ErrorMessage, Field, Form} from "vee-validate";
 import * as Yup from "yup";
 import {mapActions, mapGetters} from "vuex";
-import { VAceEditor } from "vue3-ace-editor";
-import 'ace-builds/src-noconflict/mode-c_cpp';
-import 'ace-builds/src-noconflict/theme-eclipse';
+import code_editor_mixin from '../../../components/mixins/code_editor_mixin';
 
 export default {
   name: "ModeratorCheckerModerationPage",
   props: ['checker_id'],
+  mixins: [code_editor_mixin],
   data() {
     return {
       checkerCode: '',
@@ -109,7 +106,6 @@ export default {
         name: 'ModeratorNotModeratedCheckersPage'
       })
     },
-    editorInit() {}
   },
   beforeRouteEnter(to, from, next) {
     next(async vm => {
@@ -123,8 +119,7 @@ export default {
   components: {
     VForm: Form,
     VField: Field,
-    ErrorMessage,
-    VAceEditor
+    ErrorMessage
   },
   mounted() {
   },

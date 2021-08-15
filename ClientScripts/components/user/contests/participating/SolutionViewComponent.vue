@@ -13,32 +13,29 @@
       <span>{{ solution && solution.compilerName }}</span>
     </div>
     <div>
-        <v-ace-editor v-model:value="code"
-                      @init="editorInit"
-                      lang="c_cpp"
-                      theme="eclipse"
-                      style="height: 400px; font-size: medium; border: 2px solid gray; border-radius: 3px 4px;"
-                      :printMargin="false"
-                      :readonly="true" />
+        <prism-editor v-model="code" 
+                      :highlight="highlighter" 
+                      :tabSize="4" 
+                      line-numbers
+                      readonly
+                      class="code-editor"/>
     </div>
   </div>
 </template>
 
 <script>
 import {mapActions, mapGetters} from "vuex";
-import { VAceEditor } from "vue3-ace-editor";
-import 'ace-builds/src-noconflict/mode-c_cpp';
-import 'ace-builds/src-noconflict/theme-eclipse';
 import * as _ from 'lodash'
 import TestResultVerdicts from "../../../../dictionaries/TestResultVerdicts";
 import BreadCrumbsComponent from "../../../BreadCrumbsComponent";
 import MySolutionViewBreads from "../../../../dictionaries/bread_crumbs/contest/MySolutionViewBreads";
 import solution_verdict_readable_presentation from "../../../mixins/solution_verdict_readable_presentation";
+import code_editor_mixin from "../../../mixins/code_editor_mixin";
 
 export default {
   name: "SolutionViewComponent",
-  mixins: [solution_verdict_readable_presentation],
-  components: {BreadCrumbsComponent, VAceEditor},
+  mixins: [solution_verdict_readable_presentation, code_editor_mixin],
+  components: {BreadCrumbsComponent},
   props: ['contest_id', 'solution_id'],
   data() {
     return {
@@ -62,8 +59,7 @@ export default {
     ...mapActions(['getSolution', 'changeCurrentContest']),
     getProblemName(problem) {
       return _.find((problem?.localizers || []), (l) => l.culture === 'ru')?.name
-    },
-    editorInit() {}
+    }
   },
   computed: {
     ...mapGetters(['getFormattedFullDateTime', 'getLastTestNumber',
