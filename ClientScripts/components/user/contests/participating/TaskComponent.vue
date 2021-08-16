@@ -141,7 +141,7 @@ export default {
   },
   methods: {
     ...mapMutations(['setCurrentContestSolutionsForCurrentUser']),
-    ...mapActions(['getTask', 'changeCurrentContest', 'fetchAvailableCompilers', 'getSolution', 'sendSolution', 'compileSolution', 'runSolutionTests', 'getUserSolutionsInContest']),
+    ...mapActions(['changeCurrentContest', 'fetchAvailableCompilers', 'getSolution', 'sendSolution', 'compileSolution', 'runSolutionTests', 'getUserSolutionsInContest']),
     async onSubmitSolution() {
       this.loading = true
       let {data, status, errors} = await this.sendSolution({

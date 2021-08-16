@@ -106,10 +106,10 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['getPostInfo', 'savePostInfo', 'fetchPostsList', 'fetchUserPostsList']),
+    ...mapActions(['getLocalizedPost', 'savePostInfo', 'fetchPostsList', 'fetchUserWorkspacePostsList']),
     async updateFields() {
       if (this.post_id) {
-        let post_data = await this.getPostInfo(this.post_id)
+        let post_data = await this.getLocalizedPost(this.post_id)
         this.postName = post_data.localizedName || null
         this.previewImage = post_data.previewImage || null
         this.postPreview = post_data.previewText || null
@@ -142,7 +142,7 @@ export default {
       })
       if (result.status) {
         await this.fetchPostsList(true);
-        await this.fetchUserPostsList(true);
+        await this.fetchUserWorkspacePostsList(true);
         await this.updateFields()
         this.hideModal()
         this.error_msg = '';

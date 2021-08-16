@@ -8,11 +8,11 @@ import {mapActions} from "vuex";
 export default {
   name: "PostsMainComponent",
   methods: {
-    ...mapActions(['fetchUserPostsList'])
+    ...mapActions(['fetchUserWorkspacePostsList'])
   },
   beforeRouteEnter(to, from, next) {
     next(async vm => {
-      await vm.fetchUserPostsList()
+      await vm.fetchUserWorkspacePostsList()
     })
   },
 }

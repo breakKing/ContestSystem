@@ -113,7 +113,7 @@ export default {
             if (!force && +getters.currentContest?.id === +contest_id) {
                 return
             }
-            let contest = await dispatch('getPublishedContest', contest_id)
+            let contest = await dispatch('getLocalizedContest', contest_id)
             let participants = await dispatch('getContestParticipants', contest_id)
             let monitor = await dispatch('getContestMonitor', contest_id)
 
@@ -129,12 +129,6 @@ export default {
                 })
                 commit('setCurrentContestSolutionsForCurrentUser', solutions)
             }
-        },
-        async getContestById({commit, state, dispatch, getters}, contest_id) {
-            if (!contest_id) {
-                return null;
-            }
-            return await dispatch('getConstructedContest', contest_id)
         },
         async getContestParticipants({commit, state, dispatch, getters}, contest_id) {
             if (!contest_id) {
@@ -228,7 +222,7 @@ export default {
                 console.error(e)
             }
         },
-        async getPublishedContest({commit, state, dispatch, getters}, contest_id) {
+        async getLocalizedContest({commit, state, dispatch, getters}, contest_id) {
             if (!contest_id) {
                 return null
             }
@@ -240,7 +234,7 @@ export default {
             }
             return null
         },  
-        async getConstructedContest({commit, state, dispatch, getters}, contest_id) {
+        async getWorkspaceContest({commit, state, dispatch, getters}, contest_id) {
             if (!contest_id) {
                 return null
             }

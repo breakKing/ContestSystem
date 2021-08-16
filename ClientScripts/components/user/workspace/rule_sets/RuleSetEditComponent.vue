@@ -149,9 +149,9 @@ export default {
   },
 
   methods: {
-    ...mapActions(['getRuleSet', 'fetchAvailableRuleSets', 'fetchCurrentUserRuleSets']),
+    ...mapActions(['getWorkspaceRulesSet', 'fetchAvailableRuleSets', 'fetchCurrentUserRuleSets']),
     async updateFields() {
-      this.ruleSet = await this.getRuleSet(this.set_id)
+      this.ruleSet = await this.getWorkspaceRulesSet(this.set_id)
       this.name = this.ruleSet?.name || null
       this.description = this.ruleSet?.description || null
       // у компонента баг. Начальное значение не отрисовывается

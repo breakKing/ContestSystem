@@ -72,9 +72,9 @@ export default {
     ...mapGetters(['currentUser']),
   },
   methods: {
-    ...mapActions(['getChecker', 'fetchCurrentUserCheckers', 'fetchAvailableCheckers']),
+    ...mapActions(['getWorkspaceChecker', 'fetchCurrentUserCheckers', 'fetchAvailableCheckers']),
     async updateFields() {
-      let checker = await this.getChecker(this.id)
+      let checker = await this.getWorkspaceChecker(this.id)
       this.name = checker?.name || null
       this.description = checker?.description || null
       // у компонента баг. Начальное значение не отрисовывается

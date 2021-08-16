@@ -1,4 +1,5 @@
-﻿using ContestSystemDbStructure.Models;
+﻿using ContestSystemDbStructure.Enums;
+using ContestSystemDbStructure.Models;
 using System;
 
 namespace ContestSystem.Models.ExternalModels
@@ -11,6 +12,7 @@ namespace ContestSystem.Models.ExternalModels
         public string PreviewImage { get; set; }
         public string PreviewText { get; set; }
         public DateTime PublicationDateTimeUTC { get; set; }
+        public ApproveType ApprovalStatus { get; set; }
 
         public static PostBaseInfo GetFromModel(Post post, PostLocalizer localizer, string imageInBase64)
         {
@@ -26,7 +28,8 @@ namespace ContestSystem.Models.ExternalModels
                 PublicationDateTimeUTC = post.PublicationDateTimeUTC,
                 Author = post.Author?.ResponseStructure,
                 PreviewImage = imageInBase64,
-                PreviewText = localizer?.PreviewText
+                PreviewText = localizer?.PreviewText,
+                ApprovalStatus = post.ApprovalStatus
             };
         }
     }

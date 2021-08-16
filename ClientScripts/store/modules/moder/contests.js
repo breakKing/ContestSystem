@@ -52,7 +52,7 @@ export default {
             if (!force && +getters.currentModeratingContest?.id === +contest_id) {
                 return
             }
-            let contest = await dispatch('getContestById', contest_id, { root: true })
+            let contest = await dispatch('getWorkspaceContest', contest_id, { root: true })
             commit('setCurrentModeratingContest', contest)
         },
         async fetchContestsToModerate({commit, state, dispatch, getters}, force = false) {

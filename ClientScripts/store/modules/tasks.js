@@ -60,7 +60,7 @@ export default {
                 console.error(e)
             }
         },
-        async getTask({commit, state, dispatch, getters, rootGetters}, task_id) {
+        async getWorkspaceTask({commit, state, dispatch, getters, rootGetters}, task_id) {
             if (!task_id) {
                 return null
             }

@@ -49,7 +49,7 @@ export default {
             if (!force && +getters.currentModeratingChecker?.id === +checker_id) {
                 return
             }
-            let checker = await dispatch('getChecker', checker_id, { root: true })
+            let checker = await dispatch('getWorkspaceChecker', checker_id, { root: true })
             commit('setCurrentModeratingChecker', checker)
         },
         async fetchCheckersToModerate({commit, state, dispatch, getters}, force = false) {

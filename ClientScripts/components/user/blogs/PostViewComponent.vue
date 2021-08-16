@@ -57,11 +57,11 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['getPostInfo']),
+    ...mapActions(['getLocalizedPost']),
   },
   beforeRouteEnter(to, from, next) {
     next(async vm => {
-      vm.post_info = await vm.getPostInfo(vm.post_id)
+      vm.post_info = await vm.getLocalizedPost(vm.post_id)
     })
   },
 }

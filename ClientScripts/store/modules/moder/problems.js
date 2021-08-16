@@ -52,7 +52,7 @@ export default {
             if (!force && +getters.currentModeratingProblem?.id === +problem_id) {
                 return
             }
-            let problem = await dispatch('getTask', problem_id, {root: true})
+            let problem = await dispatch('getWorkspaceTask', problem_id, {root: true})
             commit('setCurrentModeratingProblem', problem)
         },
         async fetchProblemsToModerate({commit, state, dispatch, getters}, force = false) {

@@ -60,7 +60,7 @@ export default {
                 console.error(e)
             }
         },
-        async getChecker({commit, state, dispatch, getters, rootGetters}, checker_id) {
+        async getWorkspaceChecker({commit, state, dispatch, getters, rootGetters}, checker_id) {
             if (!checker_id) {
                 return null
             }

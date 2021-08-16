@@ -61,7 +61,7 @@ export default {
                 return null
             }
         },
-        async getPostInfo({commit, state, dispatch, getters}, blog_id) {
+        async getLocalizedPost({commit, state, dispatch, getters}, blog_id) {
             if (!blog_id) {
                 return null
             }
@@ -97,7 +97,7 @@ export default {
                 return {}
             }
         },
-        async fetchUserPostsList({commit, state, dispatch, getters, rootGetters}, force = false) {
+        async fetchUserWorkspacePostsList({commit, state, dispatch, getters, rootGetters}, force = false) {
             if (!rootGetters.currentUser) {
                 return
             }
@@ -110,6 +110,18 @@ export default {
             } catch (e) {
                 console.error(e)
             }
+        },
+        async fetchUserBlogPostsList({commit, state, dispatch, getters, rootGetters}, user_id) {
+            if (!user_id) {
+                return []
+            }
+            try {
+                let {data} = await axios.get(`/api/blog/posts/user/${user_id}/ru`)
+                return data
+            } catch (e) {
+                console.error(e)
+            }
+            return []
         },
         async deletePost({commit, state, dispatch, getters}, post_id) {
             try {

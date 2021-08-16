@@ -105,11 +105,11 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['getContestById', 'getRuleSet', 'fetchAvailableRuleSets', 'fetchRunningContests', 'fetchAvailableContests', 'fetchParticipatingContests', 'fetchCurrentUserContestsList', 'fetchAvailableTasks']),
+    ...mapActions(['getWorkspaceContest', 'getWorkspaceRulesSet', 'fetchAvailableRuleSets', 'fetchRunningContests', 'fetchAvailableContests', 'fetchParticipatingContests', 'fetchCurrentUserContestsList', 'fetchAvailableTasks']),
     async updateFields() {
       await this.fetchAvailableRuleSets()
       await this.fetchAvailableTasks()
-      let contest = await this.getContestById(this.contest_id)
+      let contest = await this.getWorkspaceContest(this.contest_id)
       this.name = (contest?.localizers || [])[0]?.name || null
       this.description = (contest?.localizers || [])[0]?.description || null
       // у компонента баг. Начальное значение не отрисовывается

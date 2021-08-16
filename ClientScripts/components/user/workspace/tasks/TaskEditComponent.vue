@@ -144,10 +144,10 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['getTask', 'fetchAvailableCheckers', 'fetchCurrentUserTasks', 'fetchAvailableTasks']),
+    ...mapActions(['getWorkspaceTask', 'fetchAvailableCheckers', 'fetchCurrentUserTasks', 'fetchAvailableTasks']),
     async updateFields() {
       await this.fetchAvailableCheckers();
-      let data = await this.getTask(this.task_id)
+      let data = await this.getWorkspaceTask(this.task_id)
       this.memoryLimitInBytes = data?.memoryLimitInBytes || null
       this.timeLimitInMilliseconds = data?.timeLimitInMilliseconds || null
       this.isPublic = data?.isPublic || false
