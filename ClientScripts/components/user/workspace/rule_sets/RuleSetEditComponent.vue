@@ -14,7 +14,7 @@
           <label class="fs-4">Описание</label>
           <v-field v-model="description" name="description" type="hidden"/>
           <quill-editor ref="quill_editor_description" theme="snow" v-model:content="description" contentType="html"
-                    class="form-control"></quill-editor>
+                    toolbar="full" class="form-control"></quill-editor>
           <error-message name="description"></error-message>
         </div>
         <div>
@@ -26,7 +26,7 @@
           </v-field>
           <error-message name="countMode"></error-message>
         </div>
-        <div>
+        <div v-show="+countMode === countModes.CountPenalty">
           <v-field v-model="penaltyForCompilationError"
                    type="checkbox" class="custom-checkbox"
                    :value="true" :uncheckedValue="false"
@@ -37,21 +37,21 @@
 
           <error-message name="penaltyForCompilationError"></error-message>
         </div>
-        <div>
+        <div v-show="+countMode === countModes.CountPenalty">
           <label class="fs-4">Размер наказания за одну попытку</label>
           <v-field v-model="penaltyForOneTry" type="number" class="form-control"
                    :disabled="+countMode !== countModes.CountPenalty"
                    name="penaltyForOneTry"/>
           <error-message name="penaltyForOneTry"></error-message>
         </div>
-        <div>
+        <div v-show="+countMode !== countModes.CountPoints">
           <label class="fs-4">Размер наказания за одну минуту</label>
           <v-field v-model="penaltyForOneMinute" type="number" class="form-control"
                    :disabled="+countMode === countModes.CountPoints"
                    name="penaltyForOneMinute"/>
           <error-message name="penaltyForOneMinute"></error-message>
         </div>
-        <div>
+        <div v-show="+countMode === countModes.CountPoints">
           <v-field v-model="pointsForBestSolution" id="pointsForBestSolution" class="custom-checkbox" type="checkbox"
                    :disabled="+countMode !== countModes.CountPoints"
                    :value="true" :uncheckedValue="false"

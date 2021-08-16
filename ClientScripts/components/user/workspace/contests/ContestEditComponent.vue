@@ -12,7 +12,7 @@
       <label class=" fs-4">Описание</label>
       <v-field v-model="description" name="description" type="hidden"/>
       <quill-editor ref="quill_editor_description" theme="snow" v-model:content="description" contentType="html"
-                    class="form-control"></quill-editor>
+                    toolbar="full" class="form-control"></quill-editor>
       <error-message name="description"></error-message>
     </div>
     <div>

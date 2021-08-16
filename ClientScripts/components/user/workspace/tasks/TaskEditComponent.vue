@@ -15,21 +15,21 @@
           <label class="fs-4">Описание</label>
           <v-field v-model="description" name="description" type="hidden"/>
           <quill-editor ref="quill_editor_description" theme="snow" v-model:content="description" contentType="html"
-                        class="form-control"></quill-editor>
+                        toolbar="full" class="form-control"></quill-editor>
           <error-message name="description"></error-message>
         </div>
         <div>
           <label class="fs-4">Входные данные</label>
           <v-field v-model="inputBlock" name="inputBlock" type="hidden"/>
           <quill-editor ref="quill_editor_inputBlock" theme="snow" v-model:content="inputBlock" contentType="html"
-                        class="form-control"></quill-editor>
+                        toolbar="full" class="form-control"></quill-editor>
           <error-message name="inputBlock"></error-message>
         </div>
         <div>
           <label class="fs-4">Выходные данные</label>
           <v-field v-model="outputBlock" name="outputBlock" type="hidden"/>
           <quill-editor ref="quill_editor_outputBlock" theme="snow" v-model:content="outputBlock" contentType="html"
-                        class="form-control"></quill-editor>
+                        toolbar="full" class="form-control"></quill-editor>
           <error-message name="outputBlock"></error-message>
         </div>
         <div>

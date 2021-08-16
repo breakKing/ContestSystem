@@ -33,7 +33,7 @@
                 <label class="fs-4">Текст поста</label>
                 <v-field v-model="postText" name="postText" type="hidden"/>
                 <quill-editor ref="quill_editor_postText" theme="snow" v-model:content="postText" contentType="html"
-                              class="form-control"></quill-editor>
+                              toolbar="full" class="form-control"></quill-editor>
                 <error-message name="postText"></error-message>
               </div>
               <div>
