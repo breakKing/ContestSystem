@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -48,7 +47,7 @@ namespace ContestSystem.Areas.Workspace.Controllers
         public async Task<IActionResult> GetUserCheckers(long userId)
         {
             var checkers = await _dbContext.Checkers.Where(p => p.AuthorId == userId && !p.IsArchieved).ToListAsync();
-            var publishedCheckers = checkers.ConvertAll(PublishedChecker.GetFromModel);
+            var publishedCheckers = checkers.ConvertAll(CheckerBaseInfo.GetFromModel);
             return Json(publishedCheckers);
         }
 
@@ -60,7 +59,7 @@ namespace ContestSystem.Areas.Workspace.Controllers
                                                                 && !c.IsArchieved
                                                                 && c.ApprovalStatus == ApproveType.Accepted)
                 .ToListAsync();
-            var publishedCheckers = checkers.ConvertAll(PublishedChecker.GetFromModel);
+            var publishedCheckers = checkers.ConvertAll(CheckerBaseInfo.GetFromModel);
             return Json(publishedCheckers);
         }
 
@@ -74,7 +73,7 @@ namespace ContestSystem.Areas.Workspace.Controllers
                 return NotFound(_errorCodes[Constants.EntityDoesntExistErrorName]);
             }
 
-            var constructedChecker = ConstructedChecker.GetFromModel(checker);
+            var constructedChecker = CheckerWorkspaceModel.GetFromModel(checker);
             return Json(constructedChecker);
         }
 
@@ -188,7 +187,7 @@ namespace ContestSystem.Areas.Workspace.Controllers
         {
             var checkers = await _dbContext.Checkers
                 .Where(c => c.ApprovalStatus == ApproveType.NotModeratedYet && !c.IsArchieved).ToListAsync();
-            var requests = checkers.ConvertAll(ConstructedChecker.GetFromModel);
+            var requests = checkers.ConvertAll(CheckerBaseInfo.GetFromModel);
             return Json(requests);
         }
 
@@ -200,7 +199,7 @@ namespace ContestSystem.Areas.Workspace.Controllers
             var checkers = await _dbContext.Checkers
                 .Where(c => c.ApprovalStatus == ApproveType.Accepted && !c.IsArchieved && c.ApprovingModeratorId.GetValueOrDefault(-1) == currentUser.Id)
                 .ToListAsync();
-            var requests = checkers.ConvertAll(ConstructedChecker.GetFromModel);
+            var requests = checkers.ConvertAll(CheckerBaseInfo.GetFromModel);
             return Json(requests);
         }
 
@@ -212,7 +211,7 @@ namespace ContestSystem.Areas.Workspace.Controllers
             var checkers = await _dbContext.Checkers
                 .Where(c => c.ApprovalStatus == ApproveType.Rejected && !c.IsArchieved && c.ApprovingModeratorId.GetValueOrDefault(-1) == currentUser.Id)
                 .ToListAsync();
-            var requests = checkers.ConvertAll(ConstructedChecker.GetFromModel);
+            var requests = checkers.ConvertAll(CheckerBaseInfo.GetFromModel);
             return Json(requests);
         }
 

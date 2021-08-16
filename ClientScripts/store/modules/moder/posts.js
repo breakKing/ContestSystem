@@ -65,7 +65,8 @@ export default {
             if (!force && +getters.currentModeratingPost?.id === +post_id) {
                 return
             }
-            commit('setCurrentModeratingPost', _.find(getters.allPosts, (el) => +el.id === +post_id))
+            let post = await dispatch('getWorkspacePost', post_id, { root: true })
+            commit('setCurrentModeratingPost', post)
         },
         async fetchPostsToModerate({commit, state, dispatch, getters}, force = false) {
             if (!force && state.posts_to_moderate && state.posts_to_moderate.length > 0) {

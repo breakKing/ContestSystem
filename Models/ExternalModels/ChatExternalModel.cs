@@ -14,6 +14,11 @@ namespace ContestSystem.Models.ExternalModels
 
         public static ChatExternalModel GetFromModel(Chat chat, List<ChatUser> users, List<ChatHistoryEntry> historyEntries, string imageInBase64)
         {
+            if (chat == null)
+            {
+                return null;
+            }
+
             return new ChatExternalModel
             {
                 Link = chat.Link,

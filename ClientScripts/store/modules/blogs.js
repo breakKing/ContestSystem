@@ -49,6 +49,18 @@ export default {
                 console.error(e)
             }
         },
+        async getWorkspacePost({ commit, state, dispatch, getters }, post_id) {
+            if (!post_id) {
+                return null
+            }
+            try {
+                let { data } = await axios.get(`/api/workspace/posts/${post_id}`)
+                return data
+            } catch (e) {
+                console.error(e)
+                return null
+            }
+        },
         async getPostInfo({commit, state, dispatch, getters}, blog_id) {
             if (!blog_id) {
                 return null

@@ -62,12 +62,8 @@ export default {
         return ''
       }
       let letter = _.find(this.currentContest?.problems || [], (p) => +p.problemId === +problem.id)?.letter + '. ' || ''
-      let result
-      if (!problem.localizers) {
-        result = letter + (problem.localizedName || '')
-      } else {
-        result = letter + (problem.localizers[0]?.name || '')
-      }
+      let result = letter + (problem.localizedName || '')
+
       return result
     },
   },

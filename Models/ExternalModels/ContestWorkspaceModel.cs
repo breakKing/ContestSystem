@@ -2,11 +2,10 @@
 using ContestSystemDbStructure.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace ContestSystem.Models.ExternalModels
 {
-    public class ConstructedContest
+    public class ContestWorkspaceModel
     {
         public long Id { get; set; }
         public object Creator { get; set; }
@@ -19,13 +18,17 @@ namespace ContestSystem.Models.ExternalModels
         public object ApprovingModerator { get; set; }
         public string ModerationMessage { get; set; }
         public List<ProblemEntry> Problems { get; set; }
-        public ConstructedRulesSet Rules { get; set; }
-        public long? RulesSetId { get; set; }
+        public RulesSetBaseInfo Rules { get; set; }
         public bool AreVirtualContestsAvailable { get; set; }
 
-        public static ConstructedContest GetFromModel(Contest contest, List<ContestProblem> problems, string imageInBase64)
+        public static ContestWorkspaceModel GetFromModel(Contest contest, string imageInBase64, Func<Problem, ProblemLocalizer> localizerPredicate)
         {
-            return new ConstructedContest
+            if (contest == null)
+            {
+                return null;
+            }
+
+            return new ContestWorkspaceModel
             {
                 Id = contest.Id,
                 Localizers = contest.ContestLocalizers?.ConvertAll(ContestLocalizerExternalModel.GetFromModel),
@@ -35,20 +38,19 @@ namespace ContestSystem.Models.ExternalModels
                 DurationInMinutes = contest.DurationInMinutes,
                 Creator = contest.Creator?.ResponseStructure,
                 ApprovalStatus = contest.ApprovalStatus,
-                RulesSetId = contest.RulesSet.Id,
-                Rules = ConstructedRulesSet.GetFromModel(contest.RulesSet),
+                Rules = RulesSetBaseInfo.GetFromModel(contest.RulesSet),
                 ApprovingModerator = contest.ApprovingModerator?.ResponseStructure,
                 ModerationMessage = contest.ModerationMessage,
                 AreVirtualContestsAvailable = contest.AreVirtualContestsAvailable,
-                Problems = problems.ConvertAll(cp =>
+                Problems = contest.ContestProblems?.ConvertAll(cp =>
                 {
                     return new ProblemEntry
                     {
                         Letter = cp.Letter,
                         ProblemId = cp.ProblemId,
                         ContestId = cp.ContestId,
-                        Problem = PublishedProblem.GetFromModel(cp.Problem,
-                            cp.Problem.ProblemLocalizers.First(pl => pl.Culture == "ru")),
+                        Problem = ProblemLocalizedModel.GetFromModel(cp.Problem,
+                            localizerPredicate(cp.Problem))
                     };
                 })
             };

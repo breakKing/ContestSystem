@@ -11,6 +11,11 @@ namespace ContestSystem.Models.ExternalModels
 
         public static ContestLocalizerExternalModel GetFromModel(ContestLocalizer localizer)
         {
+            if (localizer == null)
+            {
+                return null;
+            }
+
             return new ContestLocalizerExternalModel
             {
                 Culture = localizer.Culture,

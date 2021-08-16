@@ -49,7 +49,8 @@ export default {
             if (!force && +getters.currentModeratingChecker?.id === +checker_id) {
                 return
             }
-            commit('setCurrentModeratingChecker', _.find(getters.allCheckers, (el) => +el.id === +checker_id))
+            let checker = await dispatch('getChecker', checker_id, { root: true })
+            commit('setCurrentModeratingChecker', checker)
         },
         async fetchCheckersToModerate({commit, state, dispatch, getters}, force = false) {
             if (!force && state.checkers_to_moderate && state.checkers_to_moderate.length > 0) {

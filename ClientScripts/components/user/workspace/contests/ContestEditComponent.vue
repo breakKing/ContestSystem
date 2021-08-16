@@ -119,7 +119,7 @@ export default {
       this.durationInMinutes = contest?.durationInMinutes || null
       this.areVirtualContestsAvailable = contest?.areVirtualContestsAvailable || false
       this.isPublic = contest?.isPublic || false
-      this.rulesSetId = contest?.rulesSetId || null
+      this.rulesSetId = contest?.rules?.id || null
       this.startedRulesSet = contest?.rules || null
       this.image = contest?.image || null
       this.tasks = contest?.problems || []
@@ -209,7 +209,7 @@ export default {
     shouldRulesSetBeRemarked(rulesSet) {
       let remark = false
       if (rulesSet) {
-        if ((+rulesSet.author?.id !== this.currentUser.id && !rulesSet.isPublic) || rulesSet.isArchieved) {
+        if ((+rulesSet.author?.id !== this.currentUser?.id && !rulesSet.isPublic) || rulesSet.isArchieved) {
           remark = true
         }
       }

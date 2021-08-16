@@ -17,6 +17,11 @@ namespace ContestSystem.Models.ExternalModels
 
         public static TestResultExternalModel GetFromModel(TestResult testResult, bool includeCheckerData = false)
         {
+            if (testResult == null)
+            {
+                return null;
+            }
+
             var result =  new TestResultExternalModel
             {
                 Number = testResult.Number,

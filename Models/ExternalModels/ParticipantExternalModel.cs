@@ -10,6 +10,11 @@ namespace ContestSystem.Models.ExternalModels
 
         public static ParticipantExternalModel GetFromModel(ContestParticipant contestParticipant)
         {
+            if (contestParticipant == null)
+            {
+                return null;
+            }
+
             return new ParticipantExternalModel
             {
                 ContestId = contestParticipant.ContestId,

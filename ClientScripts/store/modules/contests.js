@@ -113,7 +113,7 @@ export default {
             if (!force && +getters.currentContest?.id === +contest_id) {
                 return
             }
-            let contest = await dispatch('getContestById', contest_id)
+            let contest = await dispatch('getPublishedContest', contest_id)
             let participants = await dispatch('getContestParticipants', contest_id)
             let monitor = await dispatch('getContestMonitor', contest_id)
 

@@ -1,10 +1,9 @@
-﻿using ContestSystemDbStructure.Enums;
-using ContestSystemDbStructure.Models;
+﻿using ContestSystemDbStructure.Models;
 using System;
 
 namespace ContestSystem.Models.ExternalModels
 {
-    public class PublishedPost
+    public class PostLocalizedModel
     {
         public long Id { get; set; }
         public object Author { get; set; }
@@ -13,12 +12,15 @@ namespace ContestSystem.Models.ExternalModels
         public string PreviewText { get; set; }
         public string HtmlLocalizedText { get; set; }
         public DateTime PublicationDateTimeUTC { get; set; }
-        public string ModerationMessage { get; set; }
-        public ApproveType ApprovalStatus { get; set; }
         
-        public static PublishedPost GetFromModel(Post post, PostLocalizer localizer, string imageInBase64)
+        public static PostLocalizedModel GetFromModel(Post post, PostLocalizer localizer, string imageInBase64)
         {
-            return new PublishedPost
+            if (post == null)
+            {
+                return null;
+            }
+
+            return new PostLocalizedModel
             {
                 Id = post.Id,
                 LocalizedName = localizer?.Name,
@@ -26,8 +28,7 @@ namespace ContestSystem.Models.ExternalModels
                 PublicationDateTimeUTC = post.PublicationDateTimeUTC,
                 Author = post.Author?.ResponseStructure,
                 PreviewImage = imageInBase64,
-                PreviewText = localizer?.PreviewText,
-                ApprovalStatus = post.ApprovalStatus
+                PreviewText = localizer?.PreviewText
             };
         }
     }

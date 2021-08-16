@@ -16,6 +16,11 @@ namespace ContestSystem.Models.ExternalModels
 
         public static ChatHistoryEntry GetFromModel(ChatEvent chatEvent)
         {
+            if (chatEvent == null)
+            {
+                return null;
+            }
+
             return new ChatHistoryEntry
             {
                 Id = chatEvent.Id,
@@ -30,6 +35,11 @@ namespace ContestSystem.Models.ExternalModels
 
         public static ChatHistoryEntry GetFromModel(ChatMessage chatMessage, bool stopRecursion = false)
         {
+            if (chatMessage == null)
+            {
+                return null;
+            }
+
             return new ChatHistoryEntry
             {
                 Id = chatMessage.Id,

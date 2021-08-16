@@ -30,18 +30,20 @@ namespace ContestSystem.Areas.Workspace.Controllers
         private readonly FileStorageService _storage;
         private readonly UserManager<User> _userManager;
         private readonly WorkspaceManagerService _workspace;
+        private readonly LocalizerHelperService _localizerHelper;
 
         private readonly string _entityName = Constants.PostEntityName;
         private readonly Dictionary<string, string> _errorCodes;
 
         public PostsController(MainDbContext dbContext, ILogger<PostsController> logger, FileStorageService storage,
-            UserManager<User> userManager, WorkspaceManagerService workspace)
+            UserManager<User> userManager, WorkspaceManagerService workspace, LocalizerHelperService localizerHelper)
         {
             _dbContext = dbContext;
             _logger = logger;
             _storage = storage;
             _userManager = userManager;
             _workspace = workspace;
+            _localizerHelper = localizerHelper;
 
             _errorCodes = Constants.ErrorCodes[_entityName];
         }
@@ -53,7 +55,7 @@ namespace ContestSystem.Areas.Workspace.Controllers
             var post = await _dbContext.Posts.FirstOrDefaultAsync(p => p.Id == id);
             if (post != null)
             {
-                var constructedPost = ConstructedPost.GetFromModel(post, _storage.GetImageInBase64(post.ImagePath));
+                var constructedPost = PostWorkspaceModel.GetFromModel(post, _storage.GetImageInBase64(post.ImagePath));
                 return Json(constructedPost);
             }
             return NotFound(_errorCodes[Constants.EntityDoesntExistErrorName]);
@@ -64,10 +66,10 @@ namespace ContestSystem.Areas.Workspace.Controllers
         public async Task<IActionResult> GetUserPosts(long userId, string culture)
         {
             var posts = await _dbContext.Posts.Where(p => p.AuthorId == userId).ToListAsync();
-            List<PublishedPost> publishedPosts = posts.ConvertAll(p =>
+            List<PostBaseInfo> publishedPosts = posts.ConvertAll(p =>
             {
-                var localizer = p.PostLocalizers.FirstOrDefault(pl => pl.Culture == culture);
-                var pp = PublishedPost.GetFromModel(p, localizer, _storage.GetImageInBase64(p.ImagePath));
+                var localizer = _localizerHelper.GetAppropriateLocalizer(p.PostLocalizers, culture);
+                var pp = PostBaseInfo.GetFromModel(p, localizer, _storage.GetImageInBase64(p.ImagePath));
                 return pp;
             });
             return Json(publishedPosts);
@@ -184,10 +186,12 @@ namespace ContestSystem.Areas.Workspace.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetPostsRequests()
         {
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
             var posts = await _dbContext.Posts.Where(p => p.ApprovalStatus == ApproveType.NotModeratedYet).ToListAsync();
             var requests = posts.ConvertAll(p =>
             {
-                ConstructedPost pr = ConstructedPost.GetFromModel(p, _storage.GetImageInBase64(p.ImagePath));
+                var localizer = _localizerHelper.GetAppropriateLocalizer(p.PostLocalizers, currentUser.Culture);
+                var pr = PostBaseInfo.GetFromModel(p, localizer, _storage.GetImageInBase64(p.ImagePath));
                 return pr;
             });
             return Json(requests);
@@ -203,7 +207,8 @@ namespace ContestSystem.Areas.Workspace.Controllers
                                                 .ToListAsync();
             var requests = posts.ConvertAll(p =>
             {
-                ConstructedPost pr = ConstructedPost.GetFromModel(p, _storage.GetImageInBase64(p.ImagePath));
+                var localizer = _localizerHelper.GetAppropriateLocalizer(p.PostLocalizers, currentUser.Culture);
+                var pr = PostBaseInfo.GetFromModel(p, localizer, _storage.GetImageInBase64(p.ImagePath));
                 return pr;
             });
             return Json(requests);
@@ -219,7 +224,8 @@ namespace ContestSystem.Areas.Workspace.Controllers
                                                 .ToListAsync();
             var requests = posts.ConvertAll(p =>
             {
-                ConstructedPost pr = ConstructedPost.GetFromModel(p, _storage.GetImageInBase64(p.ImagePath));
+                var localizer = _localizerHelper.GetAppropriateLocalizer(p.PostLocalizers, currentUser.Culture);
+                var pr = PostBaseInfo.GetFromModel(p, localizer, _storage.GetImageInBase64(p.ImagePath));
                 return pr;
             });
             return Json(requests);

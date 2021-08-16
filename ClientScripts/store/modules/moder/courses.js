@@ -49,7 +49,8 @@ export default {
             if (!force && +getters.currentModeratingCourse?.id === +course_id) {
                 return
             }
-            commit('setCurrentModeratingCourse', _.find(getters.allCourses, (el) => +el.id === +course_id))
+            let course = await dispatch('getWorkspaceCourse', course_id, { root: true })
+            commit('setCurrentModeratingCourse', course)
         },
         async fetchCoursesToModerate({commit, state, dispatch, getters}, force = false) {
             if (!force && state.courses_to_moderate && state.courses_to_moderate.length > 0) {

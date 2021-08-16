@@ -56,16 +56,13 @@ export default {
     })
   },
   methods: {
-    ...mapActions(['getSolution', 'changeCurrentContest']),
-    getProblemName(problem) {
-      return _.find((problem?.localizers || []), (l) => l.culture === 'ru')?.name
-    }
+    ...mapActions(['getSolution', 'changeCurrentContest'])
   },
   computed: {
     ...mapGetters(['getFormattedFullDateTime', 'getLastTestNumber',
       'getFormattedMemory', 'getFormattedTime']),
     problemName() {
-      return _.find((this.solution?.problem?.localizers || []), (l) => l.culture === 'ru')?.name
+      return this.solution?.problem?.localizedName || ''
     },
     isSuccess() {
       return (+this.actualResult(this.solution)?.verdict === +TestResultVerdicts.Accepted) || (+this.actualResult(this.solution)?.verdict === +TestResultVerdicts.PartialSolution)

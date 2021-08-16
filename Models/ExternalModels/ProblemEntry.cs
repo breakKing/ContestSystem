@@ -5,6 +5,6 @@
         public long ContestId { get; set; }
         public long ProblemId { get; set; }
         public char Letter { get; set; }
-        public PublishedProblem Problem { get; set; }
+        public ProblemLocalizedModel Problem { get; set; }
     }
 }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace ContestSystem.Models.ExternalModels
 {
-    public class ConstructedProblem
+    public class ProblemWorkspaceModel
     {
         public long Id { get; set; }
         public object Creator { get; set; }
@@ -14,15 +14,20 @@ namespace ContestSystem.Models.ExternalModels
         public string ModerationMessage { get; set; }
         public bool IsPublic { get; set; }
         public bool IsArchieved { get; set; }
-        public ConstructedChecker Checker { get; set; }
+        public CheckerBaseInfo Checker { get; set; }
         public ApproveType ApprovalStatus { get; set; }
         public object ApprovingModerator { get; set; }
         public List<Test> Tests { get; set; }
         public List<Example> Examples { get; set; }
 
-        public static ConstructedProblem GetFromModel(Problem problem)
+        public static ProblemWorkspaceModel GetFromModel(Problem problem)
         {
-            return new ConstructedProblem
+            if (problem == null)
+            {
+                return null;
+            }
+
+            return new ProblemWorkspaceModel
             {
                 Id = problem.Id,
                 MemoryLimitInBytes = problem.MemoryLimitInBytes,
@@ -31,7 +36,7 @@ namespace ContestSystem.Models.ExternalModels
                 ModerationMessage = problem.ModerationMessage,
                 ApprovalStatus = problem.ApprovalStatus,
                 ApprovingModerator = problem.ApprovingModerator?.ResponseStructure,
-                Checker = ConstructedChecker.GetFromModel(problem.Checker),
+                Checker = CheckerBaseInfo.GetFromModel(problem.Checker),
                 IsPublic = problem.IsPublic,
                 IsArchieved = problem.IsArchieved,
                 Localizers = problem.ProblemLocalizers?.ConvertAll(ProblemLocalizerExternalModel.GetFromModel),

@@ -30,6 +30,11 @@ namespace ContestSystem.Models.ExternalModels
 
         public static SolutionActualResultExternalModel GetFromModel(Solution solution)
         {
+            if (solution == null)
+            {
+                return null;
+            }
+
             short lastRunTestResultNumber = 0;
             TestResult lastRunTestResult = null;
             if (solution.TestResults != null && solution.TestResults.Count > 0)

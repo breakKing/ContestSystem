@@ -52,7 +52,8 @@ export default {
             if (!force && +getters.currentModeratingContest?.id === +contest_id) {
                 return
             }
-            commit('setCurrentModeratingContest', _.find(getters.allContests, (el) => +el.id === +contest_id))
+            let contest = await dispatch('getContestById', contest_id, { root: true })
+            commit('setCurrentModeratingContest', contest)
         },
         async fetchContestsToModerate({commit, state, dispatch, getters}, force = false) {
             if (!force && state.contests_to_moderate && state.contests_to_moderate.length > 0) {

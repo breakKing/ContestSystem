@@ -3,7 +3,7 @@ using ContestSystemDbStructure.Models;
 
 namespace ContestSystem.Models.ExternalModels
 {
-    public class ConstructedRulesSet
+    public class RulesSetWorkspaceModel
     {
         public long Id { get; set; }
         public string Name { get; set; }
@@ -21,9 +21,14 @@ namespace ContestSystem.Models.ExternalModels
         public bool IsPublic { get; set; }
         public bool IsArchieved { get; set; }
 
-        public static ConstructedRulesSet GetFromModel(RulesSet rules)
+        public static RulesSetWorkspaceModel GetFromModel(RulesSet rules)
         {
-            return new ConstructedRulesSet
+            if (rules == null)
+            {
+                return null;
+            }
+
+            return new RulesSetWorkspaceModel
             {
                 Id = rules.Id,
                 Name = rules.Name,

@@ -291,7 +291,7 @@ export default {
     shouldCheckerBeRemarked(checker) {
       let remark = false
       if (checker) {
-        if ((checker.author?.id != this.currentUser.id && !checker.isPublic) || checker.isArchieved) {
+        if ((checker.author?.id != this.currentUser?.id && !checker.isPublic) || checker.isArchieved) {
           remark = true
         }
       }

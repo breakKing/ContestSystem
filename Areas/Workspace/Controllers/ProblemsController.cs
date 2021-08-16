@@ -6,6 +6,7 @@ using ContestSystem.Models.Dictionaries;
 using ContestSystem.Models.ExternalModels;
 using ContestSystem.Models.FormModels;
 using ContestSystem.Models.Misc;
+using ContestSystem.Services;
 using ContestSystemDbStructure.Enums;
 using ContestSystemDbStructure.Models;
 using Microsoft.AspNetCore.Http;
@@ -28,17 +29,19 @@ namespace ContestSystem.Areas.Workspace.Controllers
         private readonly ILogger<ProblemsController> _logger;
         private readonly UserManager<User> _userManager;
         private readonly WorkspaceManagerService _workspace;
+        private readonly LocalizerHelperService _localizerHelper;
 
         private readonly string _entityName = Constants.ProblemEntityName;
         private readonly Dictionary<string, string> _errorCodes;
 
         public ProblemsController(MainDbContext dbContext, ILogger<ProblemsController> logger, UserManager<User> userManager,
-            WorkspaceManagerService workspace)
+            WorkspaceManagerService workspace, LocalizerHelperService localizerHelper)
         {
             _dbContext = dbContext;
             _logger = logger;
             _userManager = userManager;
             _workspace = workspace;
+            _localizerHelper = localizerHelper;
 
             _errorCodes = Constants.ErrorCodes[_entityName];
         }
@@ -50,8 +53,8 @@ namespace ContestSystem.Areas.Workspace.Controllers
             var problems = await _dbContext.Problems.Where(p => p.CreatorId == userId && !p.IsArchieved).ToListAsync();
             var publishedProblems = problems.ConvertAll(p =>
             {
-                var localizer = p.ProblemLocalizers.FirstOrDefault(pl => pl.Culture == culture);
-                var pp = PublishedProblem.GetFromModel(p, localizer);
+                var localizer = _localizerHelper.GetAppropriateLocalizer(p.ProblemLocalizers, culture);
+                var pp = ProblemBaseInfo.GetFromModel(p, localizer);
                 return pp;
             });
             return Json(publishedProblems);
@@ -67,8 +70,8 @@ namespace ContestSystem.Areas.Workspace.Controllers
                 .ToListAsync();
             var publishedProblems = problems.ConvertAll(p =>
             {
-                var localizer = p.ProblemLocalizers.FirstOrDefault(pl => pl.Culture == culture);
-                var pp = PublishedProblem.GetFromModel(p, localizer);
+                var localizer = _localizerHelper.GetAppropriateLocalizer(p.ProblemLocalizers, culture);
+                var pp = ProblemBaseInfo.GetFromModel(p, localizer);
                 return pp;
             });
             return Json(publishedProblems);
@@ -81,7 +84,7 @@ namespace ContestSystem.Areas.Workspace.Controllers
             var problem = await _dbContext.Problems.FirstOrDefaultAsync(p => p.Id == id && !p.IsArchieved);
             if (problem != null)
             {
-                var constructedProblem = ConstructedProblem.GetFromModel(problem);
+                var constructedProblem = ProblemWorkspaceModel.GetFromModel(problem);
                 return Json(constructedProblem);
             }
 
@@ -215,9 +218,10 @@ namespace ContestSystem.Areas.Workspace.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
         public async Task<IActionResult> GetProblemsRequests()
         {
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
             var problems = await _dbContext.Problems
                 .Where(p => p.ApprovalStatus == ApproveType.NotModeratedYet && !p.IsArchieved).ToListAsync();
-            var requests = problems.ConvertAll(ConstructedProblem.GetFromModel);
+            var requests = problems.ConvertAll(p => ProblemBaseInfo.GetFromModel(p, _localizerHelper.GetAppropriateLocalizer(p.ProblemLocalizers, currentUser.Culture)));
             return Json(requests);
         }
 
@@ -230,7 +234,7 @@ namespace ContestSystem.Areas.Workspace.Controllers
                 .Where(p => p.ApprovalStatus == ApproveType.Accepted && !p.IsArchieved
                             && p.ApprovingModeratorId.GetValueOrDefault(-1) == currentUser.Id)
                 .ToListAsync();
-            var requests = problems.ConvertAll(ConstructedProblem.GetFromModel);
+            var requests = problems.ConvertAll(p => ProblemBaseInfo.GetFromModel(p, _localizerHelper.GetAppropriateLocalizer(p.ProblemLocalizers, currentUser.Culture)));
             return Json(requests);
         }
 
@@ -243,7 +247,7 @@ namespace ContestSystem.Areas.Workspace.Controllers
                 .Where(p => p.ApprovalStatus == ApproveType.Rejected && !p.IsArchieved
                             && p.ApprovingModeratorId.GetValueOrDefault(-1) == currentUser.Id)
                 .ToListAsync();
-            var requests = problems.ConvertAll(ConstructedProblem.GetFromModel);
+            var requests = problems.ConvertAll(p => ProblemBaseInfo.GetFromModel(p, _localizerHelper.GetAppropriateLocalizer(p.ProblemLocalizers, currentUser.Culture)));
             return Json(requests);
         }
 

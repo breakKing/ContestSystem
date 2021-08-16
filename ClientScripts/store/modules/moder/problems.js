@@ -52,7 +52,8 @@ export default {
             if (!force && +getters.currentModeratingProblem?.id === +problem_id) {
                 return
             }
-            commit('setCurrentModeratingProblem', _.find(getters.allProblems, (el) => +el.id === +problem_id))
+            let problem = await dispatch('getTask', problem_id, {root: true})
+            commit('setCurrentModeratingProblem', problem)
         },
         async fetchProblemsToModerate({commit, state, dispatch, getters}, force = false) {
             if (!force && state.problems_to_moderate && state.problems_to_moderate.length > 0) {

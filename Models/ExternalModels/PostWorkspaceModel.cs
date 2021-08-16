@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace ContestSystem.Models.ExternalModels
 {
-    public class ConstructedPost
+    public class PostWorkspaceModel
     {
         public long Id { get; set; }
         public object Author { get; set; }
@@ -17,9 +17,14 @@ namespace ContestSystem.Models.ExternalModels
         public object ApprovingModerator { get; set; }
         public string ModerationMessage { get; set; }
 
-        public static ConstructedPost GetFromModel(Post post, string imageInBase64)
+        public static PostWorkspaceModel GetFromModel(Post post, string imageInBase64)
         {
-            return new ConstructedPost
+            if (post == null)
+            {
+                return null;
+            }
+
+            return new PostWorkspaceModel
             {
                 Id = post.Id,
                 Author = post.Author?.ResponseStructure,

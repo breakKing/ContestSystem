@@ -47,7 +47,7 @@ namespace ContestSystem.Areas.Workspace.Controllers
         public async Task<IActionResult> GetUserRules(long userId)
         {
             var rules = await _dbContext.RulesSets.Where(r => r.AuthorId == userId && !r.IsArchieved).ToListAsync();
-            var publishedRules = rules.ConvertAll(ConstructedRulesSet.GetFromModel);
+            var publishedRules = rules.ConvertAll(RulesSetBaseInfo.GetFromModel);
             return Json(publishedRules);
         }
 
@@ -57,7 +57,7 @@ namespace ContestSystem.Areas.Workspace.Controllers
         {
             var rules = await _dbContext.RulesSets.Where(rs => (rs.AuthorId == userId || rs.IsPublic)
                                                                && !rs.IsArchieved).ToListAsync();
-            var publishedRules = rules.ConvertAll(ConstructedRulesSet.GetFromModel);
+            var publishedRules = rules.ConvertAll(RulesSetBaseInfo.GetFromModel);
             return Json(publishedRules);
         }
 
@@ -68,7 +68,7 @@ namespace ContestSystem.Areas.Workspace.Controllers
             var rules = await _dbContext.RulesSets.FirstOrDefaultAsync(r => r.Id == id && !r.IsArchieved);
             if (rules != null)
             {
-                var publishedRules = ConstructedRulesSet.GetFromModel(rules);
+                var publishedRules = RulesSetWorkspaceModel.GetFromModel(rules);
                 return Json(publishedRules);
             }
 

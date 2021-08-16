@@ -20,15 +20,18 @@ namespace ContestSystem.Areas.Blog.Controllers
         private readonly MainDbContext _dbContext;
         private readonly ILogger<PostsController> _logger;
         private readonly FileStorageService _storage;
+        private readonly LocalizerHelperService _localizerHelper;
 
         private readonly string _entityName = Constants.PostEntityName;
         private readonly Dictionary<string, string> _errorCodes;
 
-        public PostsController(MainDbContext dbContext, ILogger<PostsController> logger, FileStorageService storage)
+        public PostsController(MainDbContext dbContext, ILogger<PostsController> logger, FileStorageService storage,
+            LocalizerHelperService localizerHelper)
         {
             _dbContext = dbContext;
             _logger = logger;
             _storage = storage;
+            _localizerHelper = localizerHelper;
 
             _errorCodes = Constants.ErrorCodes[_entityName];
         }
@@ -37,11 +40,11 @@ namespace ContestSystem.Areas.Blog.Controllers
         public async Task<IActionResult> GetLocalizedPosts(string culture) //TODO: ulong? offset = null, ulong? count = null
         {
             var posts = await _dbContext.Posts.Where(p => p.ApprovalStatus == ApproveType.Accepted).ToListAsync();
-            var localizers = posts.ConvertAll(post => post.PostLocalizers.FirstOrDefault(pl => pl.Culture == culture));
-            var publishedPosts = new List<PublishedPost>();
+            var localizers = posts.ConvertAll(p => _localizerHelper.GetAppropriateLocalizer(p.PostLocalizers, culture));
+            var publishedPosts = new List<PostLocalizedModel>();
             for (int i = 0; i < posts.Count; i++)
             {
-                var pp = PublishedPost.GetFromModel(posts[i], localizers[i], _storage.GetImageInBase64(posts[i].ImagePath));
+                var pp = PostLocalizedModel.GetFromModel(posts[i], localizers[i], _storage.GetImageInBase64(posts[i].ImagePath));
                 publishedPosts.Add(pp);
             }
 
@@ -52,10 +55,10 @@ namespace ContestSystem.Areas.Blog.Controllers
         public async Task<IActionResult> GetUserLocalizedPosts(long userId, string culture)
         {
             var posts = await _dbContext.Posts.Where(p => p.AuthorId == userId).ToListAsync();
-            List<PublishedPost> publishedPosts = posts.ConvertAll(p =>
+            List<PostBaseInfo> publishedPosts = posts.ConvertAll(p =>
             {
-                var localizer = p.PostLocalizers.FirstOrDefault(pl => pl.Culture == culture);
-                var pp = PublishedPost.GetFromModel(p, localizer, _storage.GetImageInBase64(p.ImagePath));
+                var localizer = _localizerHelper.GetAppropriateLocalizer(p.PostLocalizers, culture);
+                var pp = PostBaseInfo.GetFromModel(p, localizer, _storage.GetImageInBase64(p.ImagePath));
                 return pp;
             });
             return Json(publishedPosts);
@@ -67,13 +70,13 @@ namespace ContestSystem.Areas.Blog.Controllers
             var post = await _dbContext.Posts.FirstOrDefaultAsync(p => p.Id == postId);
             if (post != null)
             {
-                var localizer = post.PostLocalizers.FirstOrDefault(pl => pl.Culture == culture);
+                var localizer = _localizerHelper.GetAppropriateLocalizer(post.PostLocalizers, culture);
                 if (localizer == null)
                 {
                     return NotFound(_errorCodes[Constants.EntityLocalizerDoesntExistErrorName]);
                 }
 
-                var publishedPost = PublishedPost.GetFromModel(post, localizer, _storage.GetImageInBase64(post.ImagePath));
+                var publishedPost = PostLocalizedModel.GetFromModel(post, localizer, _storage.GetImageInBase64(post.ImagePath));
                 return Json(publishedPost);
             }
 

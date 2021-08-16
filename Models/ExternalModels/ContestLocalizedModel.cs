@@ -1,12 +1,10 @@
-﻿using ContestSystemDbStructure.Enums;
-using ContestSystemDbStructure.Models;
+﻿using ContestSystemDbStructure.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace ContestSystem.Models.ExternalModels
 {
-    public class PublishedContest
+    public class ContestLocalizedModel
     {
         public long Id { get; set; }
         public object Creator { get; set; }
@@ -17,28 +15,29 @@ namespace ContestSystem.Models.ExternalModels
         public DateTime EndDateTimeUTC { get; set; }
         public int ParticipantsCount { get; set; }
         public short DurationInMinutes { get; set; }
-        public string ModerationMessage { get; set; }
-        public ApproveType ApprovalStatus { get; set; }
-        public ConstructedRulesSet Rules { get; set; }
+        public RulesSetBaseInfo Rules { get; set; }
         public List<ProblemEntry> Problems { get; set; }
         public bool AreVirtualContestsAvailable { get; set; }
 
-        public static PublishedContest GetFromModel(Contest contest, ContestLocalizer localizer, int participantsCount, string imageInBase64)
+        public static ContestLocalizedModel GetFromModel(Contest contest, ContestLocalizer localizer, string imageInBase64, Func<Problem, ProblemLocalizer> localizerPredicate)
         {
-            return new PublishedContest
+            if (contest == null)
+            {
+                return null;
+            }
+
+            return new ContestLocalizedModel
             {
                 Id = contest.Id,
                 Creator = contest.Creator?.ResponseStructure,
-                LocalizedDescription = localizer.Description,
-                LocalizedName = localizer.Name,
+                LocalizedDescription = localizer?.Description,
+                LocalizedName = localizer?.Name,
                 StartDateTimeUTC = contest.StartDateTimeUTC,
                 EndDateTimeUTC = contest.EndDateTimeUTC,
                 Image = imageInBase64,
-                ParticipantsCount = participantsCount,
-                ApprovalStatus = contest.ApprovalStatus,
-                Rules = ConstructedRulesSet.GetFromModel(contest.RulesSet),
+                ParticipantsCount = contest.ContestParticipants?.Count ?? 0,
+                Rules = RulesSetBaseInfo.GetFromModel(contest.RulesSet),
                 AreVirtualContestsAvailable = contest.AreVirtualContestsAvailable,
-                ModerationMessage = contest.ModerationMessage,
                 DurationInMinutes = contest.DurationInMinutes,
                 Problems = contest.ContestProblems.ConvertAll(cp =>
                 {
@@ -47,8 +46,8 @@ namespace ContestSystem.Models.ExternalModels
                         Letter = cp.Letter,
                         ProblemId = cp.ProblemId,
                         ContestId = cp.ContestId,
-                        Problem = PublishedProblem.GetFromModel(cp.Problem,
-                            cp.Problem.ProblemLocalizers.First(pl => pl.Culture == localizer.Culture)),
+                        Problem = ProblemLocalizedModel.GetFromModel(cp.Problem,
+                            localizerPredicate(cp.Problem))
                     };
                 })
             };

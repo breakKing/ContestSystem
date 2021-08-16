@@ -27,16 +27,19 @@ namespace ContestSystem.Areas.Contests.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly FileStorageService _storage;
         private readonly UserManager<User> _userManager;
+        private readonly LocalizerHelperService _localizerHelper;
 
         private readonly string _entityName = Constants.ContestEntityName;
         private readonly Dictionary<string, string> _errorCodes;
 
-        public HomeController(MainDbContext dbContext, ILogger<HomeController> logger, FileStorageService storage, UserManager<User> userManager)
+        public HomeController(MainDbContext dbContext, ILogger<HomeController> logger, FileStorageService storage, UserManager<User> userManager,
+            LocalizerHelperService localizerHelper)
         {
             _dbContext = dbContext;
             _logger = logger;
             _storage = storage;
             _userManager = userManager;
+            _localizerHelper = localizerHelper;
 
             _errorCodes = Constants.ErrorCodes[_entityName];
         }
@@ -55,14 +58,13 @@ namespace ContestSystem.Areas.Contests.Controllers
                                                                 && c.ContestLocalModerators.All(cp =>
                                                                     cp.LocalModeratorId != currentUser.Id))
                 .ToListAsync();
-            var localizers = contests.ConvertAll(c => c.ContestLocalizers.FirstOrDefault(cl => cl.Culture == culture));
-            var publishedContests = new List<PublishedContest>();
+            var localizers = contests.ConvertAll(c => _localizerHelper.GetAppropriateLocalizer(c.ContestLocalizers, culture));
+            var publishedContests = new List<ContestBaseInfo>();
             for (int i = 0; i < contests.Count; i++)
             {
                 int participantsCount =
                     await _dbContext.ContestsParticipants.CountAsync(cp => cp.ContestId == contests[i].Id);
-                publishedContests.Add(PublishedContest.GetFromModel(contests[i], localizers[i], participantsCount,
-                    _storage.GetImageInBase64(contests[i].ImagePath)));
+                publishedContests.Add(ContestBaseInfo.GetFromModel(contests[i], localizers[i], _storage.GetImageInBase64(contests[i].ImagePath)));
             }
 
             return Json(publishedContests);
@@ -79,14 +81,13 @@ namespace ContestSystem.Areas.Contests.Controllers
                                                                 now
                                                                 && c.RulesSet.PublicMonitor)
                 .ToListAsync();
-            var localizers = contests.ConvertAll(c => c.ContestLocalizers.FirstOrDefault(cl => cl.Culture == culture));
-            var publishedContests = new List<PublishedContest>();
+            var localizers = contests.ConvertAll(c => _localizerHelper.GetAppropriateLocalizer(c.ContestLocalizers, culture));
+            var publishedContests = new List<ContestBaseInfo>();
             for (int i = 0; i < contests.Count; i++)
             {
                 int participantsCount =
                     await _dbContext.ContestsParticipants.CountAsync(cp => cp.ContestId == contests[i].Id);
-                publishedContests.Add(PublishedContest.GetFromModel(contests[i], localizers[i], participantsCount,
-                    _storage.GetImageInBase64(contests[i].ImagePath)));
+                publishedContests.Add(ContestBaseInfo.GetFromModel(contests[i], localizers[i], _storage.GetImageInBase64(contests[i].ImagePath)));
             }
 
             return Json(publishedContests);
@@ -105,14 +106,13 @@ namespace ContestSystem.Areas.Contests.Controllers
                                                                     cp.ParticipantId == currentUser.Id))
                 .OrderBy(c => c.StartDateTimeUTC)
                 .ToListAsync();
-            var localizers = contests.ConvertAll(c => c.ContestLocalizers.FirstOrDefault(cl => cl.Culture == culture));
-            var publishedContests = new List<PublishedContest>();
+            var localizers = contests.ConvertAll(c => _localizerHelper.GetAppropriateLocalizer(c.ContestLocalizers, culture));
+            var publishedContests = new List<ContestBaseInfo>();
             for (int i = 0; i < contests.Count; i++)
             {
                 int participantsCount =
                     await _dbContext.ContestsParticipants.CountAsync(cp => cp.ContestId == contests[i].Id);
-                publishedContests.Add(PublishedContest.GetFromModel(contests[i], localizers[i], participantsCount,
-                    _storage.GetImageInBase64(contests[i].ImagePath)));
+                publishedContests.Add(ContestBaseInfo.GetFromModel(contests[i], localizers[i], _storage.GetImageInBase64(contests[i].ImagePath)));
             }
 
             return Json(publishedContests);
@@ -125,7 +125,7 @@ namespace ContestSystem.Areas.Contests.Controllers
             var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == id);
             if (contest != null)
             {
-                var localizer = contest.ContestLocalizers.FirstOrDefault(pl => pl.Culture == culture);
+                var localizer = _localizerHelper.GetAppropriateLocalizer(contest.ContestLocalizers, culture);
                 if (localizer == null)
                 {
                     return NotFound(_errorCodes[Constants.EntityLocalizerDoesntExistErrorName]);
@@ -133,8 +133,8 @@ namespace ContestSystem.Areas.Contests.Controllers
 
                 int participantsCount =
                     await _dbContext.ContestsParticipants.CountAsync(cp => cp.ContestId == contest.Id);
-                var publishedContest = PublishedContest.GetFromModel(contest, localizer, participantsCount,
-                    _storage.GetImageInBase64(contest.ImagePath));
+                var publishedContest = ContestLocalizedModel.GetFromModel(contest, localizer, _storage.GetImageInBase64(contest.ImagePath),
+                                                                            p => _localizerHelper.GetAppropriateLocalizer(p.ProblemLocalizers, culture));
                 return Json(publishedContest);
             }
 
@@ -274,8 +274,7 @@ namespace ContestSystem.Areas.Contests.Controllers
             var solutions = await _dbContext.Solutions.Where(s => s.ContestId == contestId && s.ParticipantId == userId)
                 .ToListAsync();
             return Json(solutions.ConvertAll(s =>
-                ConstructedSolution.GetFromModel(s, s.Contest.ContestProblems,
-                    _storage.GetImageInBase64(s.Contest.ImagePath))));
+                SolutionBaseInfo.GetFromModel(s, _localizerHelper.GetAppropriateLocalizer(s.Problem.ProblemLocalizers, currentUser.Culture))));
         }
 
         // TODO: перепелить метод

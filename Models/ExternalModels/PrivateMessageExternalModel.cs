@@ -14,6 +14,11 @@ namespace ContestSystem.Models.ExternalModels
 
         public static PrivateMessageExternalModel GetFromModel(PrivateMessage message, PrivateMessage messageToReply, bool stopRecursion = false)
         {
+            if (message == null)
+            {
+                return null;
+            }
+
             return new PrivateMessageExternalModel
             {
                 Id = message.Id,

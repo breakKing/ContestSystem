@@ -31,13 +31,14 @@ namespace ContestSystem.Areas.Solutions.Controllers
         private readonly FileStorageService _storage;
         private readonly ILogger<HomeController> _logger;
         private readonly NotifierService _notifier;
+        private readonly LocalizerHelperService _localizerHelper;
 
         private readonly string _entityName = Constants.SolutionEntityName;
         private readonly Dictionary<string, string> _errorCodes;
 
         public HomeController(MainDbContext dbContext, UserManager<User> userManager,
             SolutionsManagerService solutionsManager, ILogger<HomeController> logger, FileStorageService storage,
-            NotifierService notifier)
+            NotifierService notifier, LocalizerHelperService localizerHelper)
         {
             _dbContext = dbContext;
             _userManager = userManager;
@@ -45,6 +46,7 @@ namespace ContestSystem.Areas.Solutions.Controllers
             _storage = storage;
             _logger = logger;
             _notifier = notifier;
+            _localizerHelper = localizerHelper;
 
             _errorCodes = Constants.ErrorCodes[_entityName];
         }
@@ -53,6 +55,8 @@ namespace ContestSystem.Areas.Solutions.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
         public async Task<IActionResult> GetConstructedSolution(long id)
         {
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
+
             var solution = await _dbContext.Solutions.FirstOrDefaultAsync(s => s.Id == id);
             if (solution == null)
             {
@@ -61,8 +65,10 @@ namespace ContestSystem.Areas.Solutions.Controllers
 
             var problemsInContest = await _dbContext.ContestsProblems.Where(cp => cp.ContestId == solution.ContestId)
                 .ToListAsync();
-            var constructedSolution = ConstructedSolution.GetFromModel(solution, problemsInContest,
-                _storage.GetImageInBase64(solution.Contest.ImagePath));
+            var constructedSolution = SolutionExternalModel.GetFromModel(solution,
+                _storage.GetImageInBase64(solution.Contest.ImagePath),
+                _localizerHelper.GetAppropriateLocalizer(solution.Contest.ContestLocalizers, currentUser.Culture),
+                _localizerHelper.GetAppropriateLocalizer(solution.Problem.ProblemLocalizers, currentUser.Culture));
             return Json(constructedSolution);
         }
 

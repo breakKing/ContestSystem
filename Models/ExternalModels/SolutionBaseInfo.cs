@@ -1,42 +1,37 @@
-﻿using ContestSystemDbStructure.Enums;
-using ContestSystemDbStructure.Models;
+﻿using ContestSystemDbStructure.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ContestSystem.Models.ExternalModels
 {
-    public class PublishedSolution
+    public class SolutionBaseInfo
     {
         public long Id { get; set; }
-        public PublishedProblem Problem { get; set; }
+        public ProblemBaseInfo Problem { get; set; }
         public object Participant { get; set; }
         public long ContestId { get; set; }
-        public string Code { get; set; }
         public string CompilerGUID { get; set; }
         public string CompilerName { get; set; }
         public DateTime SubmitTimeUTC { get; set; }
-        public string ErrorsMessage { get; set; }
         public short Points { get; set; }
-        public List<TestResultExternalModel> TestResults { get; set; } = new List<TestResultExternalModel>();
         public SolutionActualResultExternalModel ActualResult { get; set; }
 
-        public static PublishedSolution GetFromModel(Solution solution, ProblemLocalizer problemLocalizer)
+        public static SolutionBaseInfo GetFromModel(Solution solution, ProblemLocalizer problemLocalizer)
         {
-            return new PublishedSolution
+            if (solution == null)
+            {
+                return null;
+            }
+
+            return new SolutionBaseInfo
             {
                 Id = solution.Id,
-                Problem = PublishedProblem.GetFromModel(solution.Problem, problemLocalizer),
+                Problem = ProblemBaseInfo.GetFromModel(solution.Problem, problemLocalizer),
                 Participant = solution.Participant?.ResponseStructure,
                 ContestId = solution.ContestId,
-                Code = solution.Code,
                 CompilerGUID = solution.CompilerGUID,
                 CompilerName = solution.CompilerName,
                 SubmitTimeUTC = solution.SubmitTimeUTC,
-                ErrorsMessage = solution.ErrorsMessage,
                 Points = solution.Points,
-                TestResults = solution.TestResults?.ConvertAll(tr => TestResultExternalModel.GetFromModel(tr)),
                 ActualResult = SolutionActualResultExternalModel.GetFromModel(solution)
             };
         }
