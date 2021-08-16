@@ -68,7 +68,7 @@ export default createStore({
                     let seconds = ((+millis - mls) % 60000) / 1000
                     let minutes = ((+millis - mls - seconds * 1000) / 60000) % 60
                     let hours = (+millis - mls - seconds * 1000 - minutes * 60000) / 3600000
-                    result = (+hours > 9 ? hours.toFixed(0) : '0' + hours.toFixed(0)) + ':' + minutes.toFixed(0)
+                    result = (+hours > 9 ? hours.toFixed(0) : '0' + hours.toFixed(0)) + ':' + (+minutes > 9 ? minutes.toFixed(0) : '0' + minutes.toFixed(0))
                 }
                 result = result.replace('.0', '')
             }
