@@ -1,4 +1,5 @@
-﻿using ContestSystem.Extensions;
+﻿using ContestSystem.Areas.Contests.Services;
+using ContestSystem.Extensions;
 using ContestSystem.Models.Attributes;
 using ContestSystem.Models.DbContexts;
 using ContestSystem.Models.Dictionaries;
@@ -28,18 +29,20 @@ namespace ContestSystem.Areas.Contests.Controllers
         private readonly FileStorageService _storage;
         private readonly UserManager<User> _userManager;
         private readonly LocalizerHelperService _localizerHelper;
+        private readonly ContestsManagerService _contestsManager;
 
         private readonly string _entityName = Constants.ContestEntityName;
         private readonly Dictionary<string, string> _errorCodes;
 
         public HomeController(MainDbContext dbContext, ILogger<HomeController> logger, FileStorageService storage, UserManager<User> userManager,
-            LocalizerHelperService localizerHelper)
+            LocalizerHelperService localizerHelper, ContestsManagerService contestsManager)
         {
             _dbContext = dbContext;
             _logger = logger;
             _storage = storage;
             _userManager = userManager;
             _localizerHelper = localizerHelper;
+            _contestsManager = contestsManager;
 
             _errorCodes = Constants.ErrorCodes[_entityName];
         }
@@ -150,96 +153,7 @@ namespace ContestSystem.Areas.Contests.Controllers
                 return NotFound(_errorCodes[Constants.EntityDoesntExistErrorName]);
             }
 
-            DateTime now = DateTime.UtcNow;
-            var contestParticipants =
-                await _dbContext.ContestsParticipants.Where(cp => cp.ContestId == contestId).ToListAsync();
-            var solutions = await _dbContext.Solutions.Where(s => s.ContestId == contestId
-                                                                  && (s.SubmitTimeUTC <
-                                                                      contest.EndDateTimeUTC.AddMinutes(-contest
-                                                                          .RulesSet
-                                                                          .MonitorFreezeTimeBeforeFinishInMinutes)
-                                                                      || contest.EndDateTimeUTC <= now))
-                .ToListAsync();
-            var monitorEntries = new List<MonitorEntry>();
-            var problems = contest.ContestProblems.OrderBy(cp => cp.Letter).ToList();
-            foreach (var cp in contestParticipants)
-            {
-                var participantSolutions = solutions.Where(s => s.ParticipantId == cp.ParticipantId).ToList();
-                var monitorEntry = new MonitorEntry
-                {
-                    ContestId = contestId,
-                    UserId = cp.ParticipantId,
-                    Alias = cp.Alias,
-                    Position = 0,
-                    Result = cp.Result,
-                    ProblemsSolvedCount = 0,
-                    ProblemTries = new List<ProblemTriesEntry>()
-                };
-                foreach (var problem in problems)
-                {
-                    var participantProblemSolutions = participantSolutions
-                        .Where(ps => ps.ProblemId == problem.ProblemId)
-                        .OrderBy(ps => ps.SubmitTimeUTC)
-                        .ToList();
-                    var problemTriesEntry = new ProblemTriesEntry
-                    {
-                        ContestId = contestId,
-                        UserId = cp.ParticipantId,
-                        ProblemId = problem.ProblemId,
-                        Letter = problem.Letter,
-                        TriesCount = participantProblemSolutions.Count,
-                    };
-                    if (participantProblemSolutions == null || participantProblemSolutions.Count == 0)
-                    {
-                        problemTriesEntry.LastTryMinutesAfterStart = 0;
-                        problemTriesEntry.Solved = false;
-                        problemTriesEntry.GotPoints = 0;
-                    }
-                    else
-                    {
-                        problemTriesEntry.LastTryMinutesAfterStart =
-                            (short)(participantProblemSolutions.Last().SubmitTimeUTC - contest.StartDateTimeUTC)
-                            .TotalMinutes;
-                        problemTriesEntry.Solved = participantProblemSolutions.Any(pps =>
-                            pps.Verdict == VerdictType.Accepted || pps.Verdict == VerdictType.PartialSolution);
-
-                        if (problemTriesEntry.Solved)
-                        {
-                            monitorEntry.ProblemsSolvedCount++;
-                        }
-
-                        if (contest.RulesSet.PointsForBestSolution)
-                        {
-                            problemTriesEntry.GotPoints = participantProblemSolutions.Max(pps => pps.Points);
-                        }
-                        else
-                        {
-                            problemTriesEntry.GotPoints = participantProblemSolutions.Last().Points;
-                        }
-                    }
-
-                    monitorEntry.ProblemTries.Add(problemTriesEntry);
-                }
-
-                monitorEntries.Add(monitorEntry);
-            }
-
-            if (contest.RulesSet.CountMode == RulesCountMode.CountPenalty)
-            {
-                monitorEntries = monitorEntries.OrderByDescending(me => me.ProblemsSolvedCount).ThenBy(me => me.Result)
-                    .ToList();
-            }
-            else
-            {
-                monitorEntries = monitorEntries.OrderByDescending(me => me.Result).ToList();
-            }
-
-            for (int i = 0; i < monitorEntries.Count; i++)
-            {
-                monitorEntries[i].Position = i + 1;
-            }
-
-            return Json(monitorEntries);
+            return Json(await _contestsManager.GetContestMonitorAsync(_dbContext, contest));
         }
 
         [HttpGet("{contestId}/solutions/{userId}")]
@@ -309,6 +223,19 @@ namespace ContestSystem.Areas.Contests.Controllers
 
             return Json(ProblemLocalizedModel.GetFromModel(contestProblem.Problem, 
                 _localizerHelper.GetAppropriateLocalizer(contestProblem.Problem.ProblemLocalizers, currentUser.Culture)));
+        }
+
+        [HttpGet("{contestId}/rules")]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
+        public async Task<IActionResult> GetRulesSet(long contestId)
+        {
+            var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == contestId);
+            if (contest == null)
+            {
+                return NotFound(_errorCodes[Constants.EntityDoesntExistErrorName]);
+            }
+
+            return Json(RulesSetWorkspaceModel.GetFromModel(contest.RulesSet));
         }
     }
 }

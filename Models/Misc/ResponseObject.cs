@@ -230,6 +230,19 @@ namespace ContestSystem.Models.Misc
                 case FormCheckStatus.ExistentSolution:
                     response = Fail(Constants.ErrorCodes[Constants.SolutionEntityName][Constants.EntityAlreadyExistsErrorName]);
                     break;
+                case FormCheckStatus.LimitExceeded:
+                    string error = string.Empty;
+                    if (Constants.ErrorCodes.TryGetValue(entityName, out Dictionary<string, string> codes))
+                    {
+                        error = codes.GetValueOrDefault(Constants.CreationLimitExceededErrorName,
+                                                        Constants.ErrorCodes[Constants.CommonSectionName][Constants.UndefinedErrorName]);
+                    }
+                    else
+                    {
+                        error = Constants.ErrorCodes[Constants.CommonSectionName][Constants.UndefinedErrorName];
+                    }
+                    response = Fail(error);
+                    break;
                 default:
                     response = Fail(Constants.ErrorCodes[Constants.CommonSectionName][Constants.UndefinedErrorName]);
                     break;

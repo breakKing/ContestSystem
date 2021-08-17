@@ -71,7 +71,19 @@ namespace ContestSystem.Areas.Solutions.Services
                             }
                             else
                             {
-                                status = FormCheckStatus.Correct;
+                                var contestProblem = await dbContext.ContestsProblems.FirstOrDefaultAsync(cp => cp.ContestId == form.ContestId
+                                                                                                            && cp.ProblemId == form.ProblemId);
+                                var solutionsCount = await CountUserSolutionsForProblemAsync(dbContext, contestProblem.Contest, contestProblem.Problem, form.UserId);
+
+                                bool isLimitExceeded = solutionsCount >= contestProblem.Contest.RulesSet.MaxTriesForOneProblem;
+                                if (isLimitExceeded)
+                                {
+                                    status = FormCheckStatus.LimitExceeded;
+                                }
+                                else
+                                {
+                                    status = FormCheckStatus.Correct;
+                                }
                             }
                         }
                         else
@@ -198,7 +210,6 @@ namespace ContestSystem.Areas.Solutions.Services
                                                                                     && s.Id != solution.Id)
                                                                         .ToListAsync();
 
-                        contestParticipant.Result += GetAdditionalResultForSolutionSubmit(otherSolutions, solution, solution.Contest.RulesSet);
                         dbContext.ContestsParticipants.Update(contestParticipant);
 
                         saveSuccess = await dbContext.SecureSaveAsync();
@@ -333,7 +344,7 @@ namespace ContestSystem.Areas.Solutions.Services
             return verdict;
         }
 
-        public long GetAdditionalResultForSolutionSubmit(List<Solution> previousSolutions, Solution newSolution, RulesSet rules)
+        /*public long GetAdditionalResultForSolutionSubmit(List<Solution> previousSolutions, Solution newSolution, RulesSet rules)
         {
             long result = 0;
             if (previousSolutions == null || newSolution == null || rules == null)
@@ -375,6 +386,107 @@ namespace ContestSystem.Areas.Solutions.Services
                     default:
                         break;
                 }
+            }
+            return result;
+        }*/
+
+        public async Task<int> CountUserSolutionsForProblemAsync(MainDbContext dbContext, Contest contest, Problem problem, long userId)
+        {
+            if (contest == null || problem == null)
+            {
+                return 0;
+            }
+
+            var rulesSet = contest.RulesSet;
+            bool penaltyForCompilationError = rulesSet.CountMode == RulesCountMode.CountPenalty
+                                                && rulesSet.PenaltyForCompilationError;
+
+            return await dbContext.Solutions.CountAsync(s => s.ContestId == contest.Id
+                                                                && s.ParticipantId == userId
+                                                                && s.ProblemId == problem.Id
+                                                                && (!penaltyForCompilationError || s.Verdict != VerdictType.CompilationError));
+        }
+
+        public long GetResultForAllSolutions(List<Solution> solutions, Contest contest)
+        {
+            long result = 0;
+
+            if (solutions == null || solutions.Count == 0 || contest == null)
+            {
+                return result;
+            }
+
+            contest.ContestProblems.ForEach(cp =>
+            {
+                var solutionsForProblem = solutions.Where(s => s.ProblemId == cp.ProblemId).ToList();
+                result += GetResultForProblem(solutionsForProblem, contest.RulesSet);
+            });
+
+            return result;
+        }
+
+        public short GetPointsForProblem(List<Solution> solutions, RulesSet rulesSet)
+        {
+            short points = 0;
+            if (solutions == null || solutions.Count == 0 || rulesSet == null)
+            {
+                return points;
+            }
+
+            solutions = solutions.OrderBy(s => s.SubmitTimeUTC).ToList();
+            switch (rulesSet.CountMode)
+            {
+                case RulesCountMode.CountPoints:
+                    if (rulesSet.PointsForBestSolution)
+                    {
+                        points = solutions.Max(s => s.Points);
+                    }
+                    else
+                    {
+                        points = solutions.Last().Points;
+                    }
+                    break;
+                case RulesCountMode.CountPenalty:
+                    points = (short)(solutions.Any(s => GetVerdictForSolution(s, rulesSet) == VerdictType.Accepted) ? 100 : 0);
+                    break;
+                case RulesCountMode.CountPointsMinusPenalty:
+                    points = solutions.Max(s => s.Points);
+                    break;
+                default:
+                    break;
+            }
+
+            return points;
+        }
+
+        private long GetResultForProblem(List<Solution> solutions, RulesSet rulesSet)
+        {
+            long result = 0;
+            if (solutions == null || solutions.Count == 0 || rulesSet == null)
+            {
+                return result;
+            }
+            solutions = solutions.OrderBy(s => s.SubmitTimeUTC).ToList();
+            switch (rulesSet.CountMode)
+            {
+                case RulesCountMode.CountPoints:
+                    if (rulesSet.PointsForBestSolution)
+                    {
+                        result = solutions.Max(s => s.Points);
+                    }
+                    else
+                    {
+                        result = solutions.Last().Points;
+                    }
+                    break;
+                case RulesCountMode.CountPenalty:
+                    solutions.ForEach(s => result += GetResultForSolution(s, rulesSet));
+                    break;
+                case RulesCountMode.CountPointsMinusPenalty:
+                    result = -solutions.Select(s => GetTimePenaltyForSolution(s)).Sum() + solutions.Max(s => s.Points);
+                    break;
+                default:
+                    break;
             }
             return result;
         }

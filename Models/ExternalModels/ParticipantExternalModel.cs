@@ -1,4 +1,6 @@
 ﻿using ContestSystemDbStructure.Models;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ContestSystem.Models.ExternalModels
 {
@@ -19,7 +21,7 @@ namespace ContestSystem.Models.ExternalModels
             {
                 ContestId = contestParticipant.ContestId,
                 UserId = contestParticipant.ParticipantId,
-                Alias = contestParticipant.Alias
+                Alias = contestParticipant.Alias,
             };
         }
     }

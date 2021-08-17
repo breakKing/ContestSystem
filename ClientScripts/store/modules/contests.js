@@ -8,6 +8,8 @@ export default {
         current_contest: null,
         current_contest_participants: [],
         current_contest_monitor_entries: [],
+        current_contest_user_stats: null,
+        current_contest_rules_set: null,
 
         currently_running_contests: [],
         available_for_user_contests: [],
@@ -35,16 +37,25 @@ export default {
         setCurrentContest(state, val) {
             state.current_contest = val
         },
+        setCurrentContestRulesSet(state, val) {
+            state.current_contest_rules_set = val
+        },
         setCurrentContestParticipants(state, val) {
             state.current_contest_participants = (val || [])
         },
         setCurrentContestMonitor(state, val) {
             state.current_contest_monitor_entries = (val || [])
         },
+        setCurrentContestUserStats(state, val) {
+            state.current_contest_user_stats = val
+        }
     },
     getters: {
         currentContest(state, getters) {
             return state.current_contest
+        },
+        currentContestRulesSet(state, getters) {
+            return state.current_contest_rules_set
         },
         currentContestParticipants(state, getters) {
             return state.current_contest_participants
@@ -54,6 +65,9 @@ export default {
         },
         currentContestMonitorEntries(state, getters) {
             return _.sortBy((state.current_contest_monitor_entries || []), ['position'])
+        },
+        currentContestUserStats(state, getters) {
+            return state.current_contest_user_stats
         },
         currentUserIsOwnerOfCurrentContest(state, getters) {
             if (!getters.currentUser || !getters.currentContest?.creator) {
@@ -114,10 +128,12 @@ export default {
                 return
             }
             let contest = await dispatch('getLocalizedContest', contest_id)
+            let rulesSet = await dispatch('getContestRulesSet', contest_id)
             let participants = await dispatch('getContestParticipants', contest_id)
             let monitor = await dispatch('getContestMonitor', contest_id)
 
             commit('setCurrentContest', contest)
+            commit('setCurrentContestRulesSet', rulesSet)
             commit('setCurrentContestParticipants', participants)
             commit('setCurrentContestMonitor', monitor)
 
@@ -127,7 +143,12 @@ export default {
                     contest_id,
                     user_id: rootGetters.currentUser?.id
                 })
+                let stats = await dispatch('getUserStatsInContest', {
+                    contest_id,
+                    user_id: rootGetters.currentUser?.id
+                })
                 commit('setCurrentContestSolutionsForCurrentUser', solutions)
+                commit('setCurrentContestUserStats', stats)
             }
         },
         async getContestParticipants({commit, state, dispatch, getters}, contest_id) {
@@ -152,6 +173,30 @@ export default {
             } catch (e) {
                 console.error(e)
                 return []
+            }
+        },
+        async getContestRulesSet({ commit, state, dispatch, getters }, contest_id) {
+            if (!contest_id) {
+                return null
+            }
+            try {
+                let {data} = await axios.get(`/api/contests/${contest_id}/rules`)
+                return data
+            } catch (e) {
+                console.error(e)
+                return null
+            }
+        },
+        async getUserStatsInContest({ commit, state, dispatch, getters }, { contest_id, user_id }) {
+            if (!contest_id || !user_id) {
+                return null
+            }
+            try {
+                let {data} = await axios.get(`/api/contests/participants/${contest_id}/stats/${user_id}`)
+                return data
+            } catch (e) {
+                console.error(e)
+                return null
             }
         },
         async getContestProblem({ commit, state, dispatch, getters }, { contest_id, letter }) {

@@ -97,6 +97,8 @@ namespace ContestSystem
 
             services.AddCheckerSystemConnector();
 
+            services.AddContestsManager();
+
             services.AddSolutionsManager();
 
             services.AddFileStorage();

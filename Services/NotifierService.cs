@@ -58,6 +58,21 @@ namespace ContestSystem.Services
             await SignalRSendAsync(usersIds, "UpdateOnChatEvents", historyEntry);
         }
 
+        public async Task UpdateOnUserStatsAsync(MonitorEntry monitorEntry)
+        {
+            if (monitorEntry == null)
+            {
+                return;
+            }
+
+            var userIds = new List<string>
+            {
+                monitorEntry.UserId.ToString()
+            };
+
+            await SignalRSendAsync(userIds, "UpdateOnUserStats", monitorEntry);
+        }
+
         private async Task SignalRSendAsync(List<string> usersIds, string method, params object[] data)
         {
             try

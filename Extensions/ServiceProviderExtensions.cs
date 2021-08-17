@@ -1,4 +1,5 @@
-﻿using ContestSystem.Areas.Messenger.Services;
+﻿using ContestSystem.Areas.Contests.Services;
+using ContestSystem.Areas.Messenger.Services;
 using ContestSystem.Areas.Solutions.Services;
 using ContestSystem.Areas.Workspace.Services;
 using ContestSystem.Providers;
@@ -48,6 +49,11 @@ namespace ContestSystem.Extensions
         public static void AddLocalizers(this IServiceCollection services)
         {
             services.AddSingleton<LocalizerHelperService>();
+        }
+
+        public static void AddContestsManager(this IServiceCollection services)
+        {
+            services.AddSingleton<ContestsManagerService>();
         }
     }
 }

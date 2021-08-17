@@ -1,4 +1,5 @@
-﻿using ContestSystem.Extensions;
+﻿using ContestSystem.Areas.Contests.Services;
+using ContestSystem.Extensions;
 using ContestSystem.Models.Attributes;
 using ContestSystem.Models.DbContexts;
 using ContestSystem.Models.Dictionaries;
@@ -25,15 +26,18 @@ namespace ContestSystem.Areas.Contests.Controllers
         private readonly MainDbContext _dbContext;
         private readonly ILogger<ParticipantsController> _logger;
         private readonly UserManager<User> _userManager;
+        private readonly ContestsManagerService _contestsManager;
 
         private readonly string _entityName = Constants.ContestEntityName;
         private readonly Dictionary<string, string> _errorCodes;
 
-        public ParticipantsController(MainDbContext dbContext, ILogger<ParticipantsController> logger, UserManager<User> userManager)
+        public ParticipantsController(MainDbContext dbContext, ILogger<ParticipantsController> logger, UserManager<User> userManager,
+            ContestsManagerService contestsManager)
         {
             _dbContext = dbContext;
             _logger = logger;
             _userManager = userManager;
+            _contestsManager = contestsManager;
 
             _errorCodes = Constants.ErrorCodes[_entityName];
         }
@@ -50,8 +54,51 @@ namespace ContestSystem.Areas.Contests.Controllers
 
             var contestParticipants =
                 await _dbContext.ContestsParticipants.Where(cp => cp.ContestId == contestId).ToListAsync();
-            var participants = contestParticipants.ConvertAll(ParticipantExternalModel.GetFromModel);
-            return Json(participants);
+
+            return Json(contestParticipants.ConvertAll(ParticipantExternalModel.GetFromModel));
+        }
+
+        [HttpGet("{contestId}/stats/{userId}")]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
+        public async Task<IActionResult> GetParticipantStats(long contestId, long userId)
+        {
+            var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == contestId);
+            if (contest == null)
+            {
+                return NotFound(_errorCodes[Constants.EntityDoesntExistErrorName]);
+            }
+
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
+
+            if (currentUser.Id != userId
+                && !await _contestsManager.IsUserContestLocalModeratorAsync(_dbContext, contestId, currentUser.Id)
+                && !await _userManager.IsInRoleAsync(currentUser, RolesContainer.Moderator))
+            {
+                _logger.LogWarning($"Попытка от пользователя с идентификатором {currentUser.Id} получить статистику " +
+                    $"участника с идентификатором {userId} в рамках соревнования с идентификатором {contestId}, не имеющего прав на данное действие");
+
+                return BadRequest(Constants.ErrorCodes[Constants.UserEntityName][Constants.UserInsufficientRightsErrorName]);
+            }
+
+            if (!await _contestsManager.IsUserContestParticipantAsync(_dbContext, contestId, userId))
+            {
+                _logger.LogWarning($"Попытка от пользователя с идентификатором {currentUser.Id} получить статистику " +
+                    $"участника с идентификатором {userId} в рамках соревнования с идентификатором {contestId}, когда такого участника в соревновании нет");
+
+                return NotFound(Constants.ErrorCodes[Constants.UserEntityName][Constants.UserNotInContestErrorName]);
+            }
+
+            var contestParticipant = await _dbContext.ContestsParticipants.FirstOrDefaultAsync(cp => cp.ParticipantId == userId
+                                                                                                        && cp.ContestId == contestId);
+
+            var contestProblems = await _dbContext.ContestsProblems.Where(cp => cp.ContestId == contestId)
+                                                                    .ToListAsync();
+
+            var solutions = await _dbContext.Solutions.Where(s => s.ContestId == contestId
+                                                                    && s.ParticipantId == userId)
+                                                        .ToListAsync();
+
+            return Json(_contestsManager.GetMonitorEntryForParticipant(contestParticipant, contestProblems, solutions));
         }
 
         [HttpPost("{contestId}")]
@@ -103,7 +150,6 @@ namespace ContestSystem.Areas.Contests.Controllers
                                     ParticipantId = participantForm.UserId,
                                     ContestId = participantForm.ContestId,
                                     Alias = participantForm.Alias,
-                                    Result = 0,
                                     ConfirmedByParticipant = true, // TODO: сделать нормальные проверки на инвайты и прочую чепухню
                                     ConfirmedByLocalModerator = true,
                                     ConfirmingLocalModeratorId = contest.CreatorId

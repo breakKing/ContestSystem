@@ -35,6 +35,9 @@ export default {
                     connection.on("UpdateOnSolutionActualResult", async (actualResult) => {
                         await dispatch("addSolutionActualResult", actualResult)
                     })
+                    connection.on("UpdateOnUserStats", async (stats) => {
+                        await dispatch("updateUserStats", stats)
+                    })
                     await connection.start()
                     commit('setHubConnection', connection)
                 }
@@ -70,5 +73,14 @@ export default {
             }
             commit('setCurrentContestSolutionsForCurrentUser', solutions)
         },
+        async updateUserStats({ commit, state, dispatch, getters, rootGetters }, stats) {
+            if (!stats || !rootGetters.currentUser || !rootGetters.currentContest) {
+                return
+            }
+
+            if (rootGetters.currentContest.id == stats.contestId) {
+                commit('setCurrentContestUserStats', stats)
+            }
+        }
     }
 }

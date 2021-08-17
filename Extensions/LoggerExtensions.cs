@@ -16,7 +16,7 @@ namespace ContestSystem.Extensions
         public static void LogCreationFailedBecauseOfLimits(this ILogger logger, string entityName, long userId)
         {
             logger.LogInformation(
-                $"Попытка пользователя с идентификатором {userId} создать сущность \"{entityName}\" при наличии у пользователя ограничений на одновременное наличие нескольких таких немодерированных сущностей");
+                $"Попытка пользователя с идентификатором {userId} создать сущность \"{entityName}\", когда он исчерпал лимит создания таких сущностей");
         }
 
         public static void LogCreationSuccessful(this ILogger logger, string entityName, long createdEntityId,
@@ -341,6 +341,9 @@ namespace ContestSystem.Extensions
                     break;
                 case FormCheckStatus.ExistentSolution:
                     logger.LogExistentEntityInForm(entityName, Constants.CompilerEntityName, userId);
+                    break;
+                case FormCheckStatus.LimitExceeded:
+                    logger.LogCreationFailedBecauseOfLimits(entityName, userId);
                     break;
                 default:
                     break;

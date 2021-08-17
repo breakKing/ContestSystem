@@ -1,4 +1,5 @@
-﻿using ContestSystem.Areas.Solutions.Services;
+﻿using ContestSystem.Areas.Contests.Services;
+using ContestSystem.Areas.Solutions.Services;
 using ContestSystem.Extensions;
 using ContestSystem.Models.Attributes;
 using ContestSystem.Models.DbContexts;
@@ -28,6 +29,7 @@ namespace ContestSystem.Areas.Solutions.Controllers
         private readonly MainDbContext _dbContext;
         private readonly UserManager<User> _userManager;
         private readonly SolutionsManagerService _solutionsManager;
+        private readonly ContestsManagerService _contestsManager;
         private readonly FileStorageService _storage;
         private readonly ILogger<HomeController> _logger;
         private readonly NotifierService _notifier;
@@ -38,7 +40,7 @@ namespace ContestSystem.Areas.Solutions.Controllers
 
         public HomeController(MainDbContext dbContext, UserManager<User> userManager,
             SolutionsManagerService solutionsManager, ILogger<HomeController> logger, FileStorageService storage,
-            NotifierService notifier, LocalizerHelperService localizerHelper)
+            NotifierService notifier, LocalizerHelperService localizerHelper, ContestsManagerService contestsManager)
         {
             _dbContext = dbContext;
             _userManager = userManager;
@@ -47,6 +49,7 @@ namespace ContestSystem.Areas.Solutions.Controllers
             _logger = logger;
             _notifier = notifier;
             _localizerHelper = localizerHelper;
+            _contestsManager = contestsManager;
 
             _errorCodes = Constants.ErrorCodes[_entityName];
         }
@@ -112,6 +115,14 @@ namespace ContestSystem.Areas.Solutions.Controllers
                         var statusData = await _solutionsManager.CreateSolutionAsync(_dbContext, solutionForm);
                         _logger.LogCreationStatus(statusData.Status, _entityName, statusData.Id, currentUser.Id);
                         response = ResponseObject<long>.FormResponseObjectForCreation(statusData.Status, _entityName, statusData.Id.GetValueOrDefault(-1));
+
+                        var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == solutionForm.ContestId);
+                        var contestParticipant = contest.ContestParticipants.FirstOrDefault(cp => cp.ContestId == contest.Id
+                                                                                                    && cp.ParticipantId == currentUser.Id);
+                        var solutions = await _dbContext.Solutions.Where(s => s.ParticipantId == currentUser.Id
+                                                                                && s.ContestId == contest.Id)
+                                                                    .ToListAsync();
+                        await _notifier.UpdateOnUserStatsAsync(_contestsManager.GetMonitorEntryForParticipant(contestParticipant, contest.ContestProblems, solutions));
                     }
                 }
                 else
@@ -164,10 +175,17 @@ namespace ContestSystem.Areas.Solutions.Controllers
                         {
                             _logger.LogInformation($"Решение с идентификатором {solution.Id} прошло процедуру компиляции");
                         }
-                        var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == solution.ContestId);
-                        await _notifier.UpdateOnSolutionActualResultAsync(contest, solution);
+                        
                         response = ResponseObject<long>.Success(solutionId);
                     }
+                    var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == solution.ContestId);
+                    var contestParticipant = contest.ContestParticipants.FirstOrDefault(cp => cp.ContestId == contest.Id
+                                                                                                && cp.ParticipantId == currentUser.Id);
+                    var solutions = await _dbContext.Solutions.Where(s => s.ParticipantId == currentUser.Id
+                                                                            && s.ContestId == contest.Id)
+                                                                .ToListAsync();
+                    await _notifier.UpdateOnSolutionActualResultAsync(contest, solution);
+                    await _notifier.UpdateOnUserStatsAsync(_contestsManager.GetMonitorEntryForParticipant(contestParticipant, contest.ContestProblems, solutions));
                 }
             }
 
@@ -225,6 +243,16 @@ namespace ContestSystem.Areas.Solutions.Controllers
                         if (solution != null)
                         {
                             await _notifier.UpdateOnSolutionActualResultAsync(solution.Contest, solution);
+
+                            var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == solution.ContestId);
+                            var contestParticipant = contest.ContestParticipants.FirstOrDefault(cp => cp.ContestId == contest.Id
+                                                                                                        && cp.ParticipantId == currentUser.Id);
+                            var solutions = await _dbContext.Solutions.Where(s => s.ParticipantId == currentUser.Id
+                                                                                    && s.ContestId == contest.Id)
+                                                                        .ToListAsync();
+                            await _notifier.UpdateOnSolutionActualResultAsync(contest, solution);
+                            await _notifier.UpdateOnUserStatsAsync(_contestsManager.GetMonitorEntryForParticipant(contestParticipant, contest.ContestProblems, solutions));
+
                             _logger.LogInformation($"Решение с идентификатором {solution.Id} успешно протестировано");
                             response = ResponseObject<long>.Success(solutionId);
                         }

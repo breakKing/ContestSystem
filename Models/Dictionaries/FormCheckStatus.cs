@@ -11,6 +11,7 @@
         NonExistentChecker = 6,
         NonExistentUser = 7,
         ExistentSolution = 8,
-        Undefined = 9
+        LimitExceeded = 9,
+        Undefined = 10
     }
 }

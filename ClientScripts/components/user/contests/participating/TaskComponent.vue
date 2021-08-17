@@ -48,6 +48,9 @@
           </v-field>
           <error-message name="compiler"></error-message>
         </div>
+        <div>
+            <p>Попыток осталось: {{ triesLeft }}</p>
+        </div>
         <div class="form-group mt-3">
           <button class="btn btn-primary" :disabled="loading" type="submit">Отправить</button>
         </div>
@@ -97,6 +100,8 @@ export default {
     ...mapGetters([
       'currentUser',
       'currentContest',
+      'currentContestRulesSet',
+      'currentContestUserStats',
       'currentContestSolutionsForCurrentUser', // тут инфа о попытках каждого таска(для навигатора)
       'availableCompilers',
       'currentContestIsInPast',
@@ -137,6 +142,10 @@ export default {
     },
     bread_crumb_routes() {
       return ContestParticipatingTaskBreads(this.contest_id, this.task_id)
+    },
+    triesLeft() {
+      let triesCount = _.find(this.currentContestUserStats?.problemTries || [], (pt) => pt.problemId == this.actualTaskId)?.triesCount || 0
+      return (this.currentContestRulesSet?.maxTriesForOneProblem || 0) - triesCount
     }
   },
   methods: {
