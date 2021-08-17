@@ -154,6 +154,18 @@ export default {
                 return []
             }
         },
+        async getContestProblem({ commit, state, dispatch, getters }, { contest_id, letter }) {
+            if (!contest_id || !letter) {
+                return null
+            }
+            try {
+                let {data} = await axios.get(`/api/contests/${contest_id}/problems/${letter}`)
+                return data
+            } catch (e) {
+                console.error(e)
+                return null
+            }
+        },
         async getUserSolutionsInContest({commit, state, dispatch, getters}, {contest_id, user_id}) {
             if (!contest_id || !user_id) {
                 return []

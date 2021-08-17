@@ -59,15 +59,15 @@ namespace ContestSystem.Areas.Contests.Controllers
                                                                     cp.LocalModeratorId != currentUser.Id))
                 .ToListAsync();
             var localizers = contests.ConvertAll(c => _localizerHelper.GetAppropriateLocalizer(c.ContestLocalizers, culture));
-            var publishedContests = new List<ContestBaseInfo>();
+            var contestsInfo = new List<ContestBaseInfo>();
             for (int i = 0; i < contests.Count; i++)
             {
                 int participantsCount =
                     await _dbContext.ContestsParticipants.CountAsync(cp => cp.ContestId == contests[i].Id);
-                publishedContests.Add(ContestBaseInfo.GetFromModel(contests[i], localizers[i], _storage.GetImageInBase64(contests[i].ImagePath)));
+                contestsInfo.Add(ContestBaseInfo.GetFromModel(contests[i], localizers[i], _storage.GetImageInBase64(contests[i].ImagePath)));
             }
 
-            return Json(publishedContests);
+            return Json(contestsInfo);
         }
 
         [HttpGet("running/{culture}")]
@@ -82,15 +82,15 @@ namespace ContestSystem.Areas.Contests.Controllers
                                                                 && c.RulesSet.PublicMonitor)
                 .ToListAsync();
             var localizers = contests.ConvertAll(c => _localizerHelper.GetAppropriateLocalizer(c.ContestLocalizers, culture));
-            var publishedContests = new List<ContestBaseInfo>();
+            var contestsInfo = new List<ContestBaseInfo>();
             for (int i = 0; i < contests.Count; i++)
             {
                 int participantsCount =
                     await _dbContext.ContestsParticipants.CountAsync(cp => cp.ContestId == contests[i].Id);
-                publishedContests.Add(ContestBaseInfo.GetFromModel(contests[i], localizers[i], _storage.GetImageInBase64(contests[i].ImagePath)));
+                contestsInfo.Add(ContestBaseInfo.GetFromModel(contests[i], localizers[i], _storage.GetImageInBase64(contests[i].ImagePath)));
             }
 
-            return Json(publishedContests);
+            return Json(contestsInfo);
         }
 
         [HttpGet("participating/{culture}")]
@@ -107,15 +107,15 @@ namespace ContestSystem.Areas.Contests.Controllers
                 .OrderBy(c => c.StartDateTimeUTC)
                 .ToListAsync();
             var localizers = contests.ConvertAll(c => _localizerHelper.GetAppropriateLocalizer(c.ContestLocalizers, culture));
-            var publishedContests = new List<ContestBaseInfo>();
+            var contestsInfos = new List<ContestBaseInfo>();
             for (int i = 0; i < contests.Count; i++)
             {
                 int participantsCount =
                     await _dbContext.ContestsParticipants.CountAsync(cp => cp.ContestId == contests[i].Id);
-                publishedContests.Add(ContestBaseInfo.GetFromModel(contests[i], localizers[i], _storage.GetImageInBase64(contests[i].ImagePath)));
+                contestsInfos.Add(ContestBaseInfo.GetFromModel(contests[i], localizers[i], _storage.GetImageInBase64(contests[i].ImagePath)));
             }
 
-            return Json(publishedContests);
+            return Json(contestsInfos);
         }
 
         [HttpGet("{id}/{culture}")]
@@ -133,9 +133,9 @@ namespace ContestSystem.Areas.Contests.Controllers
 
                 int participantsCount =
                     await _dbContext.ContestsParticipants.CountAsync(cp => cp.ContestId == contest.Id);
-                var publishedContest = ContestLocalizedModel.GetFromModel(contest, localizer, _storage.GetImageInBase64(contest.ImagePath),
+                var localizedContest = ContestLocalizedModel.GetFromModel(contest, localizer, _storage.GetImageInBase64(contest.ImagePath),
                                                                             p => _localizerHelper.GetAppropriateLocalizer(p.ProblemLocalizers, culture));
-                return Json(publishedContest);
+                return Json(localizedContest);
             }
 
             return NotFound(_errorCodes[Constants.EntityDoesntExistErrorName]);
@@ -277,25 +277,38 @@ namespace ContestSystem.Areas.Contests.Controllers
                 SolutionBaseInfo.GetFromModel(s, _localizerHelper.GetAppropriateLocalizer(s.Problem.ProblemLocalizers, currentUser.Culture))));
         }
 
-        // TODO: перепелить метод
-        /*[HttpGet("published/{id}/{culture}")]
-        [AuthorizeByJwt(Roles = RolesContainer.User)]
-        public async Task<IActionResult> GetPublishedProblem(long id, string culture) 
+        [HttpGet("{contestId}/problems/{letter}")]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
+        public async Task<IActionResult> GetProblem(long contestId, char letter)
         {
-            var problem = await _dbContext.Problems.FirstOrDefaultAsync(p => p.Id == id && !p.IsArchieved);
-            if (problem != null)
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
+            var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == contestId);
+            if (contest == null)
             {
-                var localizer = problem.ProblemLocalizers.FirstOrDefault(pl => pl.Culture == culture);
-                if (localizer == null)
-                {
-                    return NotFound(Constants.ErrorCodes[Constants.ProblemEntityName][Constants.EntityLocalizerDoesntExistErrorName]);
-                }
-
-                var publishedProblem = PublishedProblem.GetFromModel(problem, localizer);
-                return Json(publishedProblem);
+                _logger.LogWarning(
+                    $"Попытка от пользователя с идентификатором {currentUser.Id} получить задачу {letter} в рамках несуществующего соревнования с идентификатором {contestId}");
+                return BadRequest(_errorCodes[Constants.EntityDoesntExistErrorName]);
             }
 
-            return NotFound(Constants.ErrorCodes[Constants.ProblemEntityName][Constants.EntityDoesntExistErrorName]);
-        }*/
+            if (!await _dbContext.ContestsParticipants.AnyAsync(cp => cp.ContestId == contestId && cp.ParticipantId == currentUser.Id) 
+                && !await _dbContext.ContestsLocalModerators.AnyAsync(clm => clm.ContestId == contestId && clm.LocalModeratorId == currentUser.Id))
+            {
+                _logger.LogWarning(
+                    $"Попытка от пользователя с идентификатором {currentUser.Id} получить задачу {letter} в рамках соревнования с идентификатором {contestId} при отсутствии прав на её получение");
+                return BadRequest(Constants.ErrorCodes[Constants.UserEntityName][Constants.UserInsufficientRightsErrorName]);
+            }
+
+            var contestProblem = await _dbContext.ContestsProblems.FirstOrDefaultAsync(cp => cp.ContestId == contestId
+                                                                                        && cp.Letter == letter);
+            if (contestProblem == null)
+            {
+                _logger.LogWarning(
+                    $"Попытка от пользователя с идентификатором {currentUser.Id} получить несуществующую задачу {letter} в рамках соревнования с идентификатором {contestId}");
+                return NotFound(Constants.ErrorCodes[Constants.ProblemEntityName][Constants.EntityDoesntExistErrorName]);
+            }
+
+            return Json(ProblemLocalizedModel.GetFromModel(contestProblem.Problem, 
+                _localizerHelper.GetAppropriateLocalizer(contestProblem.Problem.ProblemLocalizers, currentUser.Culture)));
+        }
     }
 }

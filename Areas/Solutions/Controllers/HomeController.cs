@@ -65,11 +65,11 @@ namespace ContestSystem.Areas.Solutions.Controllers
 
             var problemsInContest = await _dbContext.ContestsProblems.Where(cp => cp.ContestId == solution.ContestId)
                 .ToListAsync();
-            var constructedSolution = SolutionExternalModel.GetFromModel(solution,
+            var solutionForReturn = SolutionExternalModel.GetFromModel(solution,
                 _storage.GetImageInBase64(solution.Contest.ImagePath),
                 _localizerHelper.GetAppropriateLocalizer(solution.Contest.ContestLocalizers, currentUser.Culture),
                 _localizerHelper.GetAppropriateLocalizer(solution.Problem.ProblemLocalizers, currentUser.Culture));
-            return Json(constructedSolution);
+            return Json(solutionForReturn);
         }
 
         [HttpGet("compilers")]

@@ -55,8 +55,8 @@ namespace ContestSystem.Areas.Workspace.Controllers
             var post = await _dbContext.Posts.FirstOrDefaultAsync(p => p.Id == id);
             if (post != null)
             {
-                var constructedPost = PostWorkspaceModel.GetFromModel(post, _storage.GetImageInBase64(post.ImagePath));
-                return Json(constructedPost);
+                var workspacePost = PostWorkspaceModel.GetFromModel(post, _storage.GetImageInBase64(post.ImagePath));
+                return Json(workspacePost);
             }
             return NotFound(_errorCodes[Constants.EntityDoesntExistErrorName]);
         }
@@ -66,13 +66,13 @@ namespace ContestSystem.Areas.Workspace.Controllers
         public async Task<IActionResult> GetUserPosts(long userId, string culture)
         {
             var posts = await _dbContext.Posts.Where(p => p.AuthorId == userId).ToListAsync();
-            List<PostBaseInfo> publishedPosts = posts.ConvertAll(p =>
+            List<PostBaseInfo> postsInfo = posts.ConvertAll(p =>
             {
                 var localizer = _localizerHelper.GetAppropriateLocalizer(p.PostLocalizers, culture);
-                var pp = PostBaseInfo.GetFromModel(p, localizer, _storage.GetImageInBase64(p.ImagePath));
-                return pp;
+                var pi = PostBaseInfo.GetFromModel(p, localizer, _storage.GetImageInBase64(p.ImagePath));
+                return pi;
             });
-            return Json(publishedPosts);
+            return Json(postsInfo);
         }
 
         [AuthorizeByJwt(Roles = RolesContainer.User)]

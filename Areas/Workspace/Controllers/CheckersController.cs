@@ -46,9 +46,9 @@ namespace ContestSystem.Areas.Workspace.Controllers
         [AuthorizeByJwt(Roles = RolesContainer.User)]
         public async Task<IActionResult> GetUserCheckers(long userId)
         {
-            var checkers = await _dbContext.Checkers.Where(p => p.AuthorId == userId && !p.IsArchieved).ToListAsync();
-            var publishedCheckers = checkers.ConvertAll(CheckerBaseInfo.GetFromModel);
-            return Json(publishedCheckers);
+            var checkers = await _dbContext.Checkers.Where(c => c.AuthorId == userId && !c.IsArchieved).ToListAsync();
+            var checkersInfo = checkers.ConvertAll(CheckerBaseInfo.GetFromModel);
+            return Json(checkersInfo);
         }
 
         [HttpGet("available/{userId}")]
@@ -59,22 +59,22 @@ namespace ContestSystem.Areas.Workspace.Controllers
                                                                 && !c.IsArchieved
                                                                 && c.ApprovalStatus == ApproveType.Accepted)
                 .ToListAsync();
-            var publishedCheckers = checkers.ConvertAll(CheckerBaseInfo.GetFromModel);
-            return Json(publishedCheckers);
+            var checkersInfo = checkers.ConvertAll(CheckerBaseInfo.GetFromModel);
+            return Json(checkersInfo);
         }
 
         [HttpGet("{id}")]
         [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
         public async Task<IActionResult> GetChecker(long id)
         {
-            var checker = await _dbContext.Checkers.FirstOrDefaultAsync(ch => ch.Id == id && !ch.IsArchieved);
+            var checker = await _dbContext.Checkers.FirstOrDefaultAsync(c => c.Id == id && !c.IsArchieved);
             if (checker == null)
             {
                 return NotFound(_errorCodes[Constants.EntityDoesntExistErrorName]);
             }
 
-            var constructedChecker = CheckerWorkspaceModel.GetFromModel(checker);
-            return Json(constructedChecker);
+            var workspaceChecker = CheckerWorkspaceModel.GetFromModel(checker);
+            return Json(workspaceChecker);
         }
 
         [HttpPost("")]

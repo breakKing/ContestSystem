@@ -41,27 +41,27 @@ namespace ContestSystem.Areas.Blog.Controllers
         {
             var posts = await _dbContext.Posts.Where(p => p.ApprovalStatus == ApproveType.Accepted).ToListAsync();
             var localizers = posts.ConvertAll(p => _localizerHelper.GetAppropriateLocalizer(p.PostLocalizers, culture));
-            var publishedPosts = new List<PostLocalizedModel>();
+            var localizedPosts = new List<PostLocalizedModel>();
             for (int i = 0; i < posts.Count; i++)
             {
-                var pp = PostLocalizedModel.GetFromModel(posts[i], localizers[i], _storage.GetImageInBase64(posts[i].ImagePath));
-                publishedPosts.Add(pp);
+                var lp = PostLocalizedModel.GetFromModel(posts[i], localizers[i], _storage.GetImageInBase64(posts[i].ImagePath));
+                localizedPosts.Add(lp);
             }
 
-            return Json(publishedPosts);
+            return Json(localizedPosts);
         }
 
         [HttpGet("user/{userId}/{culture}")]
         public async Task<IActionResult> GetUserLocalizedPosts(long userId, string culture)
         {
             var posts = await _dbContext.Posts.Where(p => p.AuthorId == userId).ToListAsync();
-            List<PostBaseInfo> publishedPosts = posts.ConvertAll(p =>
+            List<PostBaseInfo> localizedPosts = posts.ConvertAll(p =>
             {
                 var localizer = _localizerHelper.GetAppropriateLocalizer(p.PostLocalizers, culture);
-                var pp = PostBaseInfo.GetFromModel(p, localizer, _storage.GetImageInBase64(p.ImagePath));
-                return pp;
+                var lp = PostBaseInfo.GetFromModel(p, localizer, _storage.GetImageInBase64(p.ImagePath));
+                return lp;
             });
-            return Json(publishedPosts);
+            return Json(localizedPosts);
         }
 
         [HttpGet("{postId}/{culture}")]
@@ -76,8 +76,8 @@ namespace ContestSystem.Areas.Blog.Controllers
                     return NotFound(_errorCodes[Constants.EntityLocalizerDoesntExistErrorName]);
                 }
 
-                var publishedPost = PostLocalizedModel.GetFromModel(post, localizer, _storage.GetImageInBase64(post.ImagePath));
-                return Json(publishedPost);
+                var localizedPost = PostLocalizedModel.GetFromModel(post, localizer, _storage.GetImageInBase64(post.ImagePath));
+                return Json(localizedPost);
             }
 
             return NotFound(_errorCodes[Constants.EntityDoesntExistErrorName]);

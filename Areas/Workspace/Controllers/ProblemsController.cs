@@ -51,13 +51,13 @@ namespace ContestSystem.Areas.Workspace.Controllers
         public async Task<IActionResult> GetUserProblems(long userId, string culture)
         {
             var problems = await _dbContext.Problems.Where(p => p.CreatorId == userId && !p.IsArchieved).ToListAsync();
-            var publishedProblems = problems.ConvertAll(p =>
+            var problemsInfo = problems.ConvertAll(p =>
             {
                 var localizer = _localizerHelper.GetAppropriateLocalizer(p.ProblemLocalizers, culture);
                 var pp = ProblemBaseInfo.GetFromModel(p, localizer);
                 return pp;
             });
-            return Json(publishedProblems);
+            return Json(problemsInfo);
         }
 
         [HttpGet("available/{userId}/{culture}")]
@@ -68,13 +68,13 @@ namespace ContestSystem.Areas.Workspace.Controllers
                                                                 && p.ApprovalStatus == ApproveType.Accepted
                                                                 && !p.IsArchieved)
                 .ToListAsync();
-            var publishedProblems = problems.ConvertAll(p =>
+            var problemsInfo = problems.ConvertAll(p =>
             {
                 var localizer = _localizerHelper.GetAppropriateLocalizer(p.ProblemLocalizers, culture);
                 var pp = ProblemBaseInfo.GetFromModel(p, localizer);
                 return pp;
             });
-            return Json(publishedProblems);
+            return Json(problemsInfo);
         }
         
         [HttpGet("{id}")]
@@ -84,8 +84,8 @@ namespace ContestSystem.Areas.Workspace.Controllers
             var problem = await _dbContext.Problems.FirstOrDefaultAsync(p => p.Id == id && !p.IsArchieved);
             if (problem != null)
             {
-                var constructedProblem = ProblemWorkspaceModel.GetFromModel(problem);
-                return Json(constructedProblem);
+                var workspaceProblem = ProblemWorkspaceModel.GetFromModel(problem);
+                return Json(workspaceProblem);
             }
 
             return NotFound(_errorCodes[Constants.EntityDoesntExistErrorName]);

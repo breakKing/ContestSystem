@@ -53,14 +53,14 @@ namespace ContestSystem.Areas.Workspace.Controllers
         public async Task<IActionResult> GetContest(long id)
         {
             var currentUser = await HttpContext.GetCurrentUser(_userManager);
-            var contest = await _dbContext.Contests.FirstOrDefaultAsync(p => p.Id == id);
+            var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == id);
             if (contest != null)
             {
                 var problems = await _dbContext.ContestsProblems.Where(cp => cp.ContestId == contest.Id).ToListAsync();
-                var constructedContest =
+                var workspaceContest =
                     ContestWorkspaceModel.GetFromModel(contest, _storage.GetImageInBase64(contest.ImagePath), 
                     p => _localizerHelper.GetAppropriateLocalizer(p.ProblemLocalizers, currentUser.Culture));
-                return Json(constructedContest);
+                return Json(workspaceContest);
             }
 
             return NotFound(_errorCodes[Constants.EntityDoesntExistErrorName]);
@@ -71,13 +71,13 @@ namespace ContestSystem.Areas.Workspace.Controllers
         public async Task<IActionResult> GetUserContests(long userId, string culture)
         {
             var contests = await _dbContext.Contests.Where(c => c.CreatorId == userId).ToListAsync();
-            var publishedContests = contests.ConvertAll(c =>
+            var contestsInfo = contests.ConvertAll(c =>
             {
                 var localizer = _localizerHelper.GetAppropriateLocalizer(c.ContestLocalizers, culture);
-                var pc = ContestBaseInfo.GetFromModel(c, localizer, _storage.GetImageInBase64(c.ImagePath));
-                return pc;
+                var ci = ContestBaseInfo.GetFromModel(c, localizer, _storage.GetImageInBase64(c.ImagePath));
+                return ci;
             });
-            return Json(publishedContests);
+            return Json(contestsInfo);
         }
 
         [HttpPost("")]
