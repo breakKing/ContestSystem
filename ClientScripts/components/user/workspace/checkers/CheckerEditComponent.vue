@@ -23,7 +23,7 @@
     </div>
     <div>
       <label class="fs-4">Код</label>
-      <v-field v-model="code" name="code" type="hidden"/>
+      <v-field name="code" type="hidden"/>
       <prism-editor v-model="code" 
                       :highlight="highlighter" 
                       :tabSize="4" 
@@ -43,8 +43,10 @@ import axios from "axios";
 import {QuillEditor} from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
 import code_editor_mixin from '../../../mixins/code_editor_mixin';
+import $ from 'jquery'
 
 export default {
+
   name: "CheckerEditComponent",
   components: {
     VForm: Form,
@@ -123,8 +125,15 @@ export default {
     next(async vm => {
       await vm.updateFields()
     })
-  },
+        },
+    mounted() {
+        $(".code-editor").click(function () {
+            $(".prism-editor__textarea").focus();
+        });
+    }
 }
+
+    
 </script>
 
 <style lang="scss" scoped>
