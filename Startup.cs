@@ -1,4 +1,3 @@
-using ContestSystemDbStructure.Models;
 using ContestSystem.Extensions;
 using ContestSystem.Models;
 using ContestSystem.Models.DbContexts;
@@ -14,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using ContestSystem.Hubs;
 using System.Threading.Tasks;
+using ContestSystemDbStructure.Models.Auth;
 
 namespace ContestSystem
 {

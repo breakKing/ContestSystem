@@ -3,7 +3,7 @@ using ContestSystem.Models;
 using ContestSystem.Models.Attributes;
 using ContestSystem.Models.Dictionaries;
 using ContestSystem.Models.FormModels;
-using ContestSystemDbStructure.Models;
+using ContestSystemDbStructure.Models.Auth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

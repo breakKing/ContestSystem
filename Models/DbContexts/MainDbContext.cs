@@ -1,5 +1,6 @@
 ﻿using ContestSystemDbStructure.Configurations;
 using ContestSystemDbStructure.Models;
+using ContestSystemDbStructure.Models.Auth;
 using ContestSystemDbStructure.Models.Messenger;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
