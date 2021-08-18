@@ -1,7 +1,7 @@
 ﻿<template>
   <header-component></header-component>
-  <div class="container" style="min-height: 62.2vh">
-    <div class="row">
+  <div class="container" style="min-height: inherit;">
+    <div class="row" style="min-height: inherit;">
       <div class="col-4">
         <admin-side-bar-component></admin-side-bar-component>
       </div>

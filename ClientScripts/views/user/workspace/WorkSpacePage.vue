@@ -1,6 +1,6 @@
 ﻿<template>
-  <div class="row ">
-    <div class="col-3">
+  <div class="row" style="min-height: inherit;">
+    <div class="col-lg-3 col-12">
       <work-space-side-bar-component></work-space-side-bar-component>
     </div>
     <div class="col mt-3">
