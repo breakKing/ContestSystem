@@ -1,11 +1,11 @@
 using System;
 using System.Threading.Tasks;
-using ContestSystemDbStructure.Models;
 using ContestSystem.Models.DbContexts;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using ContestSystemDbStructure.Models.Auth;
 
 namespace ContestSystem
 {

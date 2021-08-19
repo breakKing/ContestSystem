@@ -1,5 +1,5 @@
 ﻿using ContestSystem.Models.Attributes;
-using ContestSystemDbStructure.Models;
+using ContestSystemDbStructure.Models.Auth;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 

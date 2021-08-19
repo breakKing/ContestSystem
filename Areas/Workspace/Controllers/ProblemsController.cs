@@ -8,7 +8,7 @@ using ContestSystem.Models.FormModels;
 using ContestSystem.Models.Misc;
 using ContestSystem.Services;
 using ContestSystemDbStructure.Enums;
-using ContestSystemDbStructure.Models;
+using ContestSystemDbStructure.Models.Auth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
