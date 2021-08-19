@@ -23,7 +23,7 @@
     </div>
     <div>
       <label class="fs-4">Код</label>
-      <v-field name="code" type="hidden"/>
+      <v-field name="code" type="hidden" v-model="code"/>
       <prism-editor v-model="code" 
                       :highlight="highlighter" 
                       :tabSize="4" 
