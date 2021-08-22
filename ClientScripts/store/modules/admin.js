@@ -1,4 +1,4 @@
-﻿import axios from 'axios'
+﻿import api from '../../services/api-configurator'
 import * as _ from 'lodash'
 
 export default {
@@ -18,20 +18,20 @@ export default {
         }
     },
     actions: {
-        async fetchAllUsers({commit, state, dispatch, getters}, force = false) {
+        async fetchAllUsers({commit, state, dispatch, getters, rootGetters}, force = false) {
             if (!force && state.all_users && state.all_users.length > 0) {
                 return
             }
             try {
-                let {data} = await axios.post('/api/auth/users/get-all-users', {})
+                let {data} = await rootGetters.api.post('/auth/users/get-all-users', {})
                 commit('setAllUsers', data.users)
             } catch (e) {
                 console.error(e)
             }
         },
-        async updateUser({commit, state, dispatch, getters}, params) {
+        async updateUser({commit, state, dispatch, getters, rootGetters}, params) {
             try {
-                let {data} = await axios.post('/api/auth/users/update-user', params)
+                let {data} = await rootGetters.api.post('/auth/users/update-user', params)
                 if (data.success) {
                     await dispatch('fetchAllUsers', true)
                 } else if (data.errors) {

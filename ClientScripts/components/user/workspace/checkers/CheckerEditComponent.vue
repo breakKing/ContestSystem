@@ -39,8 +39,7 @@
 import {Field, Form, ErrorMessage} from "vee-validate";
 import * as Yup from 'yup';
 import {mapActions, mapGetters} from "vuex";
-import axios from "axios";
-import {QuillEditor} from '@vueup/vue-quill'
+import {QuillEditor} from '@vueup/vue-quill';
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
 import code_editor_mixin from '../../../mixins/code_editor_mixin';
 import $ from 'jquery'
@@ -71,7 +70,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['currentUser']),
+    ...mapGetters(['currentUser', 'api']),
   },
   methods: {
     ...mapActions(['getWorkspaceChecker', 'fetchCurrentUserCheckers', 'fetchAvailableCheckers']),
@@ -101,11 +100,11 @@ export default {
       let result = {};
       try {
         if (this.id) {
-          let {data} = await axios.put(`/api/workspace/checkers/${this.id}`, request)
+          let {data} = await this.api.put(`/workspace/checkers/${this.id}`, request)
           result = data
         } else {
           request.id = null
-          let {data} = await axios.post(`/api/workspace/checkers`, request)
+          let {data} = await this.api.post(`/workspace/checkers`, request)
           result = data
         }
       } catch (e) {

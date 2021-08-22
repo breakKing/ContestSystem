@@ -34,7 +34,18 @@ export default createStore({
         moder_courses,
         moder_problems,
     },
+    state: {
+        api: null
+    },
+    mutations: {
+        setApi(state, val) {
+            state.api = val
+        }
+    },
     getters: {
+        api(state, getters) {
+            return state.api
+        },
         approvalStatuses(state, getters) {
             return ApproveTypes
         },

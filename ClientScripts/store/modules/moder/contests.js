@@ -1,5 +1,4 @@
-import axios from 'axios'
-import ApproveTypes from "../../../dictionaries/ApproveTypes";
+import api from "../../../services/api-configurator";
 import * as _ from "lodash";
 
 export default {
@@ -55,42 +54,42 @@ export default {
             let contest = await dispatch('getWorkspaceContest', contest_id, { root: true })
             commit('setCurrentModeratingContest', contest)
         },
-        async fetchContestsToModerate({commit, state, dispatch, getters}, force = false) {
+        async fetchContestsToModerate({commit, state, dispatch, getters, rootGetters}, force = false) {
             if (!force && state.contests_to_moderate && state.contests_to_moderate.length > 0) {
                 return
             }
             try {
-                let {data} = await axios.get('/api/workspace/contests/requests')
+                let {data} = await rootGetters.api.get('/workspace/contests/requests')
                 commit('setContestsToModerate', data)
             } catch (e) {
                 console.error(e)
             }
         },
-        async fetchApprovedContests({commit, state, dispatch, getters}, force = false) {
+        async fetchApprovedContests({commit, state, dispatch, getters, rootGetters}, force = false) {
             if (!force && state.approved_contests && state.approved_contests.length > 0) {
                 return
             }
             try {
-                let {data} = await axios.get('/api/workspace/contests/accepted')
+                let {data} = await rootGetters.api.get('/workspace/contests/accepted')
                 commit('setApprovedContests', data)
             } catch (e) {
                 console.error(e)
             }
         },
-        async fetchRejectedContests({commit, state, dispatch, getters}, force = false) {
+        async fetchRejectedContests({commit, state, dispatch, getters, rootGetters}, force = false) {
             if (!force && state.rejected_contests && state.rejected_contests.length > 0) {
                 return
             }
             try {
-                let {data} = await axios.get('/api/workspace/contests/rejected')
+                let {data} = await rootGetters.api.get('/workspace/contests/rejected')
                 commit('setRejectedContests', data)
             } catch (e) {
                 console.error(e)
             }
         },
-        async moderateContest({commit, state, dispatch, getters}, {contest_id, request_body}) {
+        async moderateContest({commit, state, dispatch, getters, rootGetters}, {contest_id, request_body}) {
             try {
-                let {data} = await axios.put(`/api/workspace/contests/${contest_id}/moderate`, request_body)
+                let {data} = await rootGetters.api.put(`/workspace/contests/${contest_id}/moderate`, request_body)
                 return data
             } catch (e) {
                 console.error(e)

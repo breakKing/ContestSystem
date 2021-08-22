@@ -1,5 +1,4 @@
-import axios from 'axios'
-import ApproveTypes from "../../../dictionaries/ApproveTypes";
+import api from "../../../services/api-configurator";
 import * as _ from "lodash";
 
 export default {
@@ -52,42 +51,42 @@ export default {
             let course = await dispatch('getWorkspaceCourse', course_id, { root: true })
             commit('setCurrentModeratingCourse', course)
         },
-        async fetchCoursesToModerate({commit, state, dispatch, getters}, force = false) {
+        async fetchCoursesToModerate({commit, state, dispatch, getters, rootGetters}, force = false) {
             if (!force && state.courses_to_moderate && state.courses_to_moderate.length > 0) {
                 return
             }
             try {
-                let {data} = await axios.get('/api/workspace/courses/requests')
+                let {data} = await rootGetters.api.get('/workspace/courses/requests')
                 commit('setCoursesToModerate', data)
             } catch (e) {
                 console.error(e)
             }
         },
-        async fetchApprovedCourses({commit, state, dispatch, getters}, force = false) {
+        async fetchApprovedCourses({commit, state, dispatch, getters, rootGetters}, force = false) {
             if (!force && state.approved_courses && state.approved_courses.length > 0) {
                 return
             }
             try {
-                let {data} = await axios.get('/api/workspace/courses/accepted')
+                let {data} = await rootGetters.api.get('/workspace/courses/accepted')
                 commit('setApprovedCourses', data)
             } catch (e) {
                 console.error(e)
             }
         },
-        async fetchRejectedCourses({commit, state, dispatch, getters}, force = false) {
+        async fetchRejectedCourses({commit, state, dispatch, getters, rootGetters}, force = false) {
             if (!force && state.rejected_courses && state.rejected_courses.length > 0) {
                 return
             }
             try {
-                let {data} = await axios.get('/api/workspace/courses/rejected')
+                let {data} = await rootGetters.api.get('/workspace/courses/rejected')
                 commit('setRejectedCourses', data)
             } catch (e) {
                 console.error(e)
             }
         },
-        async moderateCourse({commit, state, dispatch, getters}, {course_id, request_body}) {
+        async moderateCourse({commit, state, dispatch, getters, rootGetters}, {course_id, request_body}) {
             try {
-                let {data} = await axios.put(`/api/workspace/courses/${course_id}/moderate`, request_body)
+                let {data} = await rootGetters.api.put(`/workspace/courses/${course_id}/moderate`, request_body)
                 return data
             } catch (e) {
                 console.error(e)

@@ -1,4 +1,4 @@
-﻿import axios from 'axios'
+﻿import api from '../../services/api-configurator'
 import * as _ from 'lodash'
 import $ from "jquery";
 import ApproveTypes from "../../dictionaries/ApproveTypes";
@@ -38,35 +38,35 @@ export default {
         },
     },
     actions: {
-        async fetchPostsList({commit, state, dispatch, getters}, force = false) {
+        async fetchPostsList({commit, state, dispatch, getters, rootGetters}, force = false) {
             if (!force && state.posts_list && state.posts_list.length > 0) {
                 return
             }
             try {
-                let {data} = await axios.get('/api/blog/posts/ru')
+                let {data} = await rootGetters.api.get('/blog/posts/ru')
                 commit('setPostsList', data)
             } catch (e) {
                 console.error(e)
             }
         },
-        async getWorkspacePost({ commit, state, dispatch, getters }, post_id) {
+        async getWorkspacePost({ commit, state, dispatch, getters, rootGetters }, post_id) {
             if (!post_id) {
                 return null
             }
             try {
-                let { data } = await axios.get(`/api/workspace/posts/${post_id}`)
+                let { data } = await rootGetters.api.get(`/workspace/posts/${post_id}`)
                 return data
             } catch (e) {
                 console.error(e)
                 return null
             }
         },
-        async getLocalizedPost({commit, state, dispatch, getters}, blog_id) {
+        async getLocalizedPost({commit, state, dispatch, getters, rootGetters}, blog_id) {
             if (!blog_id) {
                 return null
             }
             try {
-                let {data} = await axios.get(`/api/blog/posts/${blog_id}/ru`)
+                let {data} = await rootGetters.api.get(`/blog/posts/${blog_id}/ru`)
                 return data
             } catch (e) {
                 console.error(e)
@@ -77,7 +77,7 @@ export default {
             try {
                 if (post_id) {
                     return await $.ajax({
-                        url: `/api/workspace/posts/${post_id}`,
+                        url: `/workspace/posts/${post_id}`,
                         data: request_data,
                         processData: false,
                         contentType: false,
@@ -85,7 +85,7 @@ export default {
                     })
                 } else {
                     return await $.ajax({
-                        url: `/api/workspace/posts`,
+                        url: `/workspace/posts`,
                         data: request_data,
                         processData: false,
                         contentType: false,
@@ -105,7 +105,7 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.get(`/api/workspace/posts/user/${rootGetters.currentUser.id}/ru`)
+                let {data} = await rootGetters.api.get(`/workspace/posts/user/${rootGetters.currentUser.id}/ru`)
                 commit('setCurrentUserPosts', data)
             } catch (e) {
                 console.error(e)
@@ -116,16 +116,16 @@ export default {
                 return []
             }
             try {
-                let {data} = await axios.get(`/api/blog/posts/user/${user_id}/ru`)
+                let {data} = await rootGetters.api.get(`/blog/posts/user/${user_id}/ru`)
                 return data
             } catch (e) {
                 console.error(e)
             }
             return []
         },
-        async deletePost({commit, state, dispatch, getters}, post_id) {
+        async deletePost({commit, state, dispatch, getters, rootGetters}, post_id) {
             try {
-                let {data} = await axios.delete(`/api/workspace/posts/${post_id}`)
+                let {data} = await rootGetters.api.delete(`/workspace/posts/${post_id}`)
                 return data
             } catch (e) {
                 console.error(e)

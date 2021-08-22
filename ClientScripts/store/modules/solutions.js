@@ -1,4 +1,4 @@
-﻿import axios from 'axios'
+﻿import api from '../../services/api-configurator'
 import * as _ from 'lodash'
 
 export default {
@@ -22,50 +22,50 @@ export default {
         },
     },
     actions: {
-        async getSolution({commit, state, dispatch, getters}, solution_id) {
+        async getSolution({commit, state, dispatch, getters, rootGetters}, solution_id) {
             if (!solution_id) {
                 return null
             }
             try {
-                let {data} = await axios.get(`/api/solutions/${solution_id}`)
+                let {data} = await rootGetters.api.get(`/solutions/${solution_id}`)
                 return data
             } catch (e) {
                 console.error(e)
                 return null
             }
         },
-        async fetchAvailableCompilers({commit, state, dispatch, getters}, force = false) {
+        async fetchAvailableCompilers({commit, state, dispatch, getters, rootGetters}, force = false) {
             if (!force && state.available_compilers && state.available_compilers.length > 0) {
                 return
             }
             try {
-                let {data} = await axios.get('/api/solutions/compilers')
+                let {data} = await rootGetters.api.get('/solutions/compilers')
                 commit('setAvailableCompilers', data)
             } catch (e) {
                 console.error(e)
             }
         },
-        async sendSolution({commit, state, dispatch, getters}, request) {
+        async sendSolution({commit, state, dispatch, getters, rootGetters}, request) {
             try {
-                let {data} = await axios.post(`/api/solutions`, request)
+                let {data} = await rootGetters.api.post(`/solutions`, request)
                 return data
             } catch (e) {
                 console.error(e)
                 return null
             }
         },
-        async compileSolution({commit, state, dispatch, getters}, solution_id) {
+        async compileSolution({commit, state, dispatch, getters, rootGetters}, solution_id) {
             try {
-                let {status, errors} = await axios.post(`/api/solutions/${solution_id}/compile`)
+                let {status, errors} = await rootGetters.api.post(`/solutions/${solution_id}/compile`)
                 return status
             } catch (e) {
                 console.error(e)
                 return null
             }
         },
-        async runSolutionTests({commit, state, dispatch, getters}, solution_id) {
+        async runSolutionTests({commit, state, dispatch, getters, rootGetters}, solution_id) {
             try {
-                let {data} = await axios.post(`/api/solutions/${solution_id}/run`)
+                let {data} = await rootGetters.api.post(`/solutions/${solution_id}/run`)
                 return data
             } catch (e) {
                 console.error(e)

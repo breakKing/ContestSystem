@@ -1,10 +1,12 @@
-﻿import axios from 'axios'
+﻿import api from '../../services/api-configurator'
 import * as _ from 'lodash'
 import $ from "jquery";
+import generateFingerprint from '../../services/fingerprint-loader';
 
 export default {
     state: () => ({
-        token: localStorage.getItem('auth-token') || null,
+        token: null,
+        fingerprint: null,
         user_roles: [],
         all_roles: [],
         current_user: null,
@@ -26,13 +28,11 @@ export default {
         setAuthError(state, val) {
             state.auth_error = val
         },
-        setToken(state, newValue) {
-            if (!newValue) {
-                localStorage.removeItem('auth-token')
-            } else {
-                localStorage.setItem('auth-token', newValue)
-            }
-            state.token = newValue
+        setToken(state, val) {
+            state.token = val
+        },
+        setFingerprint(state, val) {
+            state.fingerprint = val
         },
         setUserRoles(state, val) {
             state.user_roles = val
@@ -42,6 +42,12 @@ export default {
         }
     },
     getters: {
+        accessToken(state, getters) {
+            return state.token
+        },
+        fingerprint(state, getters) {
+            return state.fingerprint
+        },
         userName(state, getters) {
             return getters.currentUser?.fullName
         },
@@ -84,11 +90,13 @@ export default {
         },
     },
     actions: {
+        async getFingerprint({commit}) {
+            let print = String(await generateFingerprint())
+            commit('setFingerprint', print)
+        },
         async updateTokenAndHeaders({commit, state, dispatch, getters}, token) {
             commit('setToken', token)
             await dispatch('initHub', {token, recreate: true})
-
-            axios.defaults.headers.common = getters.getHeaders
 
             $.ajaxSetup({
                 beforeSend: function (xhr) {
@@ -98,29 +106,40 @@ export default {
         },
         async initAuth({commit, state, dispatch, getters}) {
             if (!state.auth_initialized) {
-                if (state.token) {
-                    // возможно авторизован
-                    axios.defaults.headers.common = getters.getHeaders
-                    try {
-                        let {data} = await axios.post('/api/auth/session/verify-token', {})
-                        if (data.token) {
-                            await dispatch('updateTokenAndHeaders', data.token)
-                            commit('setCurrentUser', data.user)
-                            commit('setUserRoles', data.roles)
-                        }
-                    } catch (e) {
-                        console.error(e)
-                        await dispatch('logout')
-                    }
-                }
+                // возможно авторизован
+                await dispatch('refreshToken')
+
                 commit('setAuthInitializationStatus', true)
             }
         },
-        async sendLoginRequest({commit, state, dispatch, getters}, {username, password}) {
+        async refreshToken({commit, state, dispatch, getters, rootGetters}) {
             try {
-                let {data} = await axios.post('/api/auth/session/login', {
+                if (!getters.fingerprint) {
+                    await dispatch('getFingerprint')
+                }
+                let {data} = await rootGetters.api.post('/auth/session/verify-token', {fingerprint: getters.fingerprint})
+                if (data.token) {
+                    await dispatch('updateTokenAndHeaders', data.token)
+                    commit('setCurrentUser', data.user)
+                    commit('setUserRoles', data.roles)
+                }
+            }
+            catch (e) {
+                console.error(e)
+                await dispatch('logout')
+            }
+        },
+        async sendLoginRequest({commit, state, dispatch, getters, rootGetters}, {username, password}) {
+            try {
+                if (!getters.fingerprint) {
+                    await dispatch('getFingerprint')
+                }
+                // TODO реализовать кнопку "запомнить меня"
+                let {data} = await rootGetters.api.post('/auth/session/login', {
                     username,
-                    password
+                    password,
+                    remember: false,
+                    fingerprint: getters.fingerprint
                 })
                 if (data.status) {
                     await dispatch('updateTokenAndHeaders', data.token)
@@ -141,9 +160,9 @@ export default {
                 return false
             }
         },
-        async sendRegistrationRequest({commit, state, dispatch, getters}, request_data) {
+        async sendRegistrationRequest({commit, state, dispatch, getters, rootGetters}, request_data) {
             try {
-                let {data} = await axios.post('/api/auth/session/register', request_data)
+                let {data} = await rootGetters.api.post('/auth/session/register', request_data)
                 if (data.status) {
                     await dispatch('updateTokenAndHeaders', data.token)
                     commit('setCurrentUser', data.user)
@@ -163,8 +182,10 @@ export default {
                 return false
             }
         },
-        async logout({commit, state, dispatch, getters,}) {
+        async logout({ commit, state, dispatch, getters, rootGetters }) {
+            await rootGetters.api.post('/auth/session/logout', { fingerprint: getters.fingerprint })
             await dispatch('updateTokenAndHeaders', null)
+
             commit('setCurrentUser', null)
             commit('setUserRoles', null)
 
@@ -181,12 +202,12 @@ export default {
             await dispatch('closeHub', null, {root: true})
             await dispatch('changeCurrentContest', {force: true, contest_id: null}, {root: true})
         },
-        async fetchAllRoles({commit, state, dispatch, getters}, force = false) {
+        async fetchAllRoles({commit, state, dispatch, getters, rootGetters}, force = false) {
             if (!force && state.all_roles && state.all_roles.length > 0) {
                 return
             }
             try {
-                let {data} = await axios.post('/api/auth/session/get-all-roles', {})
+                let {data} = await rootGetters.api.post('/auth/session/get-all-roles', {})
                 commit('setAllRolesArray', data.roles)
             } catch (e) {
                 console.error(e)

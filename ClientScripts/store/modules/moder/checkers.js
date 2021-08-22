@@ -1,5 +1,3 @@
-import axios from 'axios'
-import ApproveTypes from "../../../dictionaries/ApproveTypes";
 import * as _ from "lodash";
 
 export default {
@@ -52,42 +50,42 @@ export default {
             let checker = await dispatch('getWorkspaceChecker', checker_id, { root: true })
             commit('setCurrentModeratingChecker', checker)
         },
-        async fetchCheckersToModerate({commit, state, dispatch, getters}, force = false) {
+        async fetchCheckersToModerate({commit, state, dispatch, getters, rootGetters}, force = false) {
             if (!force && state.checkers_to_moderate && state.checkers_to_moderate.length > 0) {
                 return
             }
             try {
-                let {data} = await axios.get('/api/workspace/checkers/requests')
+                let {data} = await rootGetters.api.get('/workspace/checkers/requests')
                 commit('setCheckersToModerate', data)
             } catch (e) {
                 console.error(e)
             }
         },
-        async fetchApprovedCheckers({commit, state, dispatch, getters}, force = false) {
+        async fetchApprovedCheckers({commit, state, dispatch, getters, rootGetters}, force = false) {
             if (!force && state.approved_checkers && state.approved_checkers.length > 0) {
                 return
             }
             try {
-                let {data} = await axios.get('/api/workspace/checkers/accepted')
+                let {data} = await rootGetters.api.get('/workspace/checkers/accepted')
                 commit('setApprovedCheckers', data)
             } catch (e) {
                 console.error(e)
             }
         },
-        async fetchRejectedCheckers({commit, state, dispatch, getters}, force = false) {
+        async fetchRejectedCheckers({commit, state, dispatch, getters, rootGetters}, force = false) {
             if (!force && state.rejected_checkers && state.rejected_checkers.length > 0) {
                 return
             }
             try {
-                let {data} = await axios.get('/api/workspace/checkers/rejected')
+                let {data} = await rootGetters.api.get('/workspace/checkers/rejected')
                 commit('setRejectedCheckers', data)
             } catch (e) {
                 console.error(e)
             }
         },
-        async moderateChecker({commit, state, dispatch, getters}, {checker_id, request_body}) {
+        async moderateChecker({commit, state, dispatch, getters, rootGetters}, {checker_id, request_body}) {
             try {
-                let {data} = await axios.put(`/api/workspace/checkers/${checker_id}/moderate`, request_body)
+                let {data} = await rootGetters.api.put(`/workspace/checkers/${checker_id}/moderate`, request_body)
                 return data
             } catch (e) {
                 console.error(e)

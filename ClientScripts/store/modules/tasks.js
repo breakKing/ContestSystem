@@ -1,4 +1,4 @@
-﻿import axios from 'axios'
+﻿import api from '../../services/api-configurator'
 import * as _ from 'lodash'
 
 export default {
@@ -40,7 +40,7 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.get(`/api/workspace/problems/user/${rootGetters.currentUser.id}/ru`)
+                let {data} = await rootGetters.api.get(`/workspace/problems/user/${rootGetters.currentUser.id}/ru`)
                 commit('setCurrentUserTasks', data)
             } catch (e) {
                 console.error(e)
@@ -54,7 +54,7 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.get(`/api/workspace/problems/available/${rootGetters.currentUser.id}/ru`)
+                let {data} = await rootGetters.api.get(`/workspace/problems/available/${rootGetters.currentUser.id}/ru`)
                 commit('setAvailableTasks', data)
             } catch (e) {
                 console.error(e)
@@ -65,7 +65,7 @@ export default {
                 return null
             }
             try {
-                let {data} = await axios.get(`/api/workspace/problems/${task_id}`)
+                let {data} = await rootGetters.api.get(`/workspace/problems/${task_id}`)
                 return data
             } catch (e) {
                 console.error(e)
@@ -74,7 +74,7 @@ export default {
         },
         async deleteTask({commit, state, dispatch, getters, rootGetters}, task_id) {
             try {
-                let {data} = await axios.delete(`/api/workspace/problems/${task_id}`)
+                let {data} = await rootGetters.api.delete(`/workspace/problems/${task_id}`)
                 return data
             } catch (e) {
                 console.error(e)

@@ -11,6 +11,13 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'vue-prism-editor/dist/prismeditor.min.css';
 import 'prismjs/themes/prism-tomorrow.css'; 
 import '../../styles/style.scss';
+import generateFingerprint from '../../services/fingerprint-loader';
+import { configureApi, createApi } from '../../services/api-configurator';
+
+generateFingerprint(store)
+
+let apiAxios = createApi()
+apiAxios = configureApi(apiAxios, store)
 
 const app = createApp({
     components: {
@@ -18,7 +25,7 @@ const app = createApp({
     },
     template: '<main-component></main-component>'
 })
-app.use(VueAxios, axios)
+app.use(VueAxios, apiAxios)
 app.use(store)
 app.use(router)
 app.use(Breadcrumb)

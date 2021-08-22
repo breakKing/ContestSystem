@@ -73,7 +73,6 @@
 </template>
 
 <script>
-import axios from "axios";
 import {Field, Form, ErrorMessage} from "vee-validate";
 import * as Yup from 'yup';
 import {mapActions, mapGetters} from "vuex";
@@ -123,7 +122,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['availableCheckers', 'currentUser']),
+    ...mapGetters(['availableCheckers', 'currentUser', 'api']),
     availableCheckersForProblem() {
       if (!this.startedChecker) {
         return this.availableCheckers
@@ -172,11 +171,11 @@ export default {
       let url;
       let method;
       if (this.task_id) {
-        url = `/api/workspace/problems/${this.task_id}`
+        url = `/workspace/problems/${this.task_id}`
         method = 'put'
 
       } else {
-        url = `/api/workspace/problems`
+        url = `/workspace/problems`
         method = 'post'
       }
       let data = {
@@ -200,7 +199,7 @@ export default {
       }
       let result = false
       try {
-        result = await axios[method](url, data)
+        result = await this.api[method](url, data)
       } catch (e) {
         console.error(e)
         this.error_msg = 'Не удалось сохранить'

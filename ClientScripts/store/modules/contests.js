@@ -1,4 +1,4 @@
-﻿import axios from 'axios'
+﻿import api from '../../services/api-configurator'
 import moment from 'moment'
 import 'moment-timezone';
 import * as _ from 'lodash'
@@ -151,72 +151,72 @@ export default {
                 commit('setCurrentContestUserStats', stats)
             }
         },
-        async getContestParticipants({commit, state, dispatch, getters}, contest_id) {
+        async getContestParticipants({commit, state, dispatch, getters, rootGetters}, contest_id) {
             if (!contest_id) {
                 return []
             }
             try {
-                let {data} = await axios.get(`/api/contests/participants/${contest_id}`)
+                let {data} = await rootGetters.api.get(`/contests/participants/${contest_id}`)
                 return data
             } catch (e) {
                 console.error(e)
                 return []
             }
         },
-        async getContestMonitor({commit, state, dispatch, getters}, contest_id) {
+        async getContestMonitor({commit, state, dispatch, getters, rootGetters}, contest_id) {
             if (!contest_id) {
                 return []
             }
             try {
-                let {data} = await axios.get(`/api/contests/${contest_id}/monitor`)
+                let {data} = await rootGetters.api.get(`/contests/${contest_id}/monitor`)
                 return data
             } catch (e) {
                 console.error(e)
                 return []
             }
         },
-        async getContestRulesSet({ commit, state, dispatch, getters }, contest_id) {
+        async getContestRulesSet({ commit, state, dispatch, getters, rootGetters }, contest_id) {
             if (!contest_id) {
                 return null
             }
             try {
-                let {data} = await axios.get(`/api/contests/${contest_id}/rules`)
+                let {data} = await rootGetters.api.get(`/contests/${contest_id}/rules`)
                 return data
             } catch (e) {
                 console.error(e)
                 return null
             }
         },
-        async getUserStatsInContest({ commit, state, dispatch, getters }, { contest_id, user_id }) {
+        async getUserStatsInContest({ commit, state, dispatch, getters, rootGetters }, { contest_id, user_id }) {
             if (!contest_id || !user_id) {
                 return null
             }
             try {
-                let {data} = await axios.get(`/api/contests/participants/${contest_id}/stats/${user_id}`)
+                let {data} = await rootGetters.api.get(`/contests/participants/${contest_id}/stats/${user_id}`)
                 return data
             } catch (e) {
                 console.error(e)
                 return null
             }
         },
-        async getContestProblem({ commit, state, dispatch, getters }, { contest_id, letter }) {
+        async getContestProblem({ commit, state, dispatch, getters, rootGetters }, { contest_id, letter }) {
             if (!contest_id || !letter) {
                 return null
             }
             try {
-                let {data} = await axios.get(`/api/contests/${contest_id}/problems/${letter}`)
+                let {data} = await rootGetters.api.get(`/contests/${contest_id}/problems/${letter}`)
                 return data
             } catch (e) {
                 console.error(e)
                 return null
             }
         },
-        async getUserSolutionsInContest({commit, state, dispatch, getters}, {contest_id, user_id}) {
+        async getUserSolutionsInContest({commit, state, dispatch, getters, rootGetters}, {contest_id, user_id}) {
             if (!contest_id || !user_id) {
                 return []
             }
             try {
-                let {data} = await axios.get(`/api/contests/${contest_id}/solutions/${user_id}`)
+                let {data} = await rootGetters.api.get(`/contests/${contest_id}/solutions/${user_id}`)
                 return data
             } catch (e) {
                 console.error(e)
@@ -231,7 +231,7 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.get('/api/contests/running/ru')
+                let {data} = await rootGetters.api.get('/contests/running/ru')
                 commit('setRunningContests', data)
             } catch (e) {
                 console.error(e)
@@ -245,7 +245,7 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.get('/api/contests/upcoming/ru')
+                let {data} = await rootGetters.api.get('/contests/upcoming/ru')
                 commit('setAvailableContests', data)
             } catch (e) {
                 console.error(e)
@@ -259,7 +259,7 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.get('/api/contests/participating/ru')
+                let {data} = await rootGetters.api.get('/contests/participating/ru')
                 commit('setParticipatingContests', data)
             } catch (e) {
                 console.error(e)
@@ -273,39 +273,39 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.get(`/api/workspace/contests/user/${rootGetters.currentUser.id}/ru`)
+                let {data} = await rootGetters.api.get(`/workspace/contests/user/${rootGetters.currentUser.id}/ru`)
                 commit('setCurrentUserContests', data)
             } catch (e) {
                 console.error(e)
             }
         },
-        async getLocalizedContest({commit, state, dispatch, getters}, contest_id) {
+        async getLocalizedContest({commit, state, dispatch, getters, rootGetters}, contest_id) {
             if (!contest_id) {
                 return null
             }
             try {
-                let {data} = await axios.get(`/api/contests/${contest_id}/ru`)
+                let {data} = await rootGetters.api.get(`/contests/${contest_id}/ru`)
                 return data
             } catch (e) {
                 console.error(e)
             }
             return null
         },  
-        async getWorkspaceContest({commit, state, dispatch, getters}, contest_id) {
+        async getWorkspaceContest({commit, state, dispatch, getters, rootGetters}, contest_id) {
             if (!contest_id) {
                 return null
             }
             try {
-                let {data} = await axios.get(`/api/workspace/contests/${contest_id}`)
+                let {data} = await rootGetters.api.get(`/workspace/contests/${contest_id}`)
                 return data
             } catch (e) {
                 console.error(e)
             }
             return null
         },
-        async addUserToContest({commit, state, dispatch, getters}, {user_name, user_id, contest_id}) {
+        async addUserToContest({commit, state, dispatch, getters, rootGetters}, {user_name, user_id, contest_id}) {
             try {
-                let {data} = await axios.post(`/api/contests/participants/${contest_id}`, {
+                let {data} = await rootGetters.api.post(`/contests/participants/${contest_id}`, {
                     userId: user_id,
                     contestId: contest_id,
                     alias: user_name,
@@ -316,21 +316,21 @@ export default {
             }
             return {}
         },
-        async removeUserFromContest({commit, state, dispatch, getters}, {user_id, contest_id}) {
+        async removeUserFromContest({commit, state, dispatch, getters, rootGetters}, {user_id, contest_id}) {
             if (!user_id || !contest_id) {
                 return {}
             }
             try {
-                let {data} = await axios.delete(`/api/contests/participants/${contest_id}/${user_id}`)
+                let {data} = await rootGetters.api.delete(`/contests/participants/${contest_id}/${user_id}`)
                 return data
             } catch (e) {
                 console.error(e)
             }
             return {}
         },
-        async deleteContest({commit, state, dispatch, getters}, contest_id) {
+        async deleteContest({commit, state, dispatch, getters, rootGetters}, contest_id) {
             try {
-                let {data} = await axios.delete(`/api/workspace/contests/${contest_id}`)
+                let {data} = await rootGetters.api.delete(`/workspace/contests/${contest_id}`)
                 return data
             } catch (e) {
                 console.error(e)

@@ -1,5 +1,4 @@
-import axios from 'axios'
-import ApproveTypes from "../../../dictionaries/ApproveTypes";
+import api from "../../../services/api-configurator";
 import * as _ from "lodash";
 
 export default {
@@ -55,42 +54,42 @@ export default {
             let problem = await dispatch('getWorkspaceTask', problem_id, {root: true})
             commit('setCurrentModeratingProblem', problem)
         },
-        async fetchProblemsToModerate({commit, state, dispatch, getters}, force = false) {
+        async fetchProblemsToModerate({commit, state, dispatch, getters, rootGetters}, force = false) {
             if (!force && state.problems_to_moderate && state.problems_to_moderate.length > 0) {
                 return
             }
             try {
-                let {data} = await axios.get('/api/workspace/problems/requests')
+                let {data} = await rootGetters.api.get('/workspace/problems/requests')
                 commit('setProblemsToModerate', data)
             } catch (e) {
                 console.error(e)
             }
         },
-        async fetchApprovedProblems({commit, state, dispatch, getters}, force = false) {
+        async fetchApprovedProblems({commit, state, dispatch, getters, rootGetters}, force = false) {
             if (!force && state.approved_problems && state.approved_problems.length > 0) {
                 return
             }
             try {
-                let {data} = await axios.get('/api/workspace/problems/accepted')
+                let {data} = await rootGetters.api.get('/workspace/problems/accepted')
                 commit('setApprovedProblems', data)
             } catch (e) {
                 console.error(e)
             }
         },
-        async fetchRejectedProblems({commit, state, dispatch, getters}, force = false) {
+        async fetchRejectedProblems({commit, state, dispatch, getters, rootGetters}, force = false) {
             if (!force && state.rejected_problems && state.rejected_problems.length > 0) {
                 return
             }
             try {
-                let {data} = await axios.get('/api/workspace/problems/rejected')
+                let {data} = await rootGetters.api.get('/workspace/problems/rejected')
                 commit('setRejectedProblems', data)
             } catch (e) {
                 console.error(e)
             }
         },
-        async moderateProblem({commit, state, dispatch, getters}, {problem_id, request_body}) {
+        async moderateProblem({commit, state, dispatch, getters, rootGetters}, {problem_id, request_body}) {
             try {
-                let {data} = await axios.put(`/api/workspace/problems/${problem_id}/moderate`, request_body)
+                let {data} = await rootGetters.api.put(`/workspace/problems/${problem_id}/moderate`, request_body)
                 return data
             } catch (e) {
                 console.error(e)

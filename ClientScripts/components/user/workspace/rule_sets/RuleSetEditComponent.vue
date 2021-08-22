@@ -103,7 +103,6 @@
 import {Field, Form, ErrorMessage} from "vee-validate";
 import * as Yup from 'yup';
 import {mapActions, mapGetters} from "vuex";
-import axios from 'axios'
 import CountModes from "../../../../dictionaries/CountModes";
 import $ from "jquery";
 import {QuillEditor} from "@vueup/vue-quill";
@@ -118,7 +117,7 @@ export default {
   },
   props: ['set_id'],
   computed: {
-    ...mapGetters(['currentUser']),
+    ...mapGetters(['currentUser', 'api']),
     countModes() {
       return CountModes
     }
@@ -171,10 +170,10 @@ export default {
       let url;
       let method;
       if (this.ruleSet) {
-        url = `/api/workspace/rules${this.ruleSet.id}`
+        url = `/workspace/rules${this.ruleSet.id}`
         method = 'put'
       } else {
-        url = `/api/workspace/rules`
+        url = `/workspace/rules`
         method = 'post'
       }
       let request = {
@@ -194,7 +193,7 @@ export default {
         showFullTestsResults: this.showFullTestsResults,
       }
       try {
-        let {data} = await axios[method](url, request)
+        let {data} = await this.api[method](url, request)
         if (data.status) {
           this.error_msg = ''
           await this.fetchAvailableRuleSets(true)

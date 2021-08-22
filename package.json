@@ -8,6 +8,7 @@
     "watch": "cross-env NODE_ENV=development WATCH=true webpack"
   },
   "dependencies": {
+    "@fingerprintjs/fingerprintjs": "^3.3.0",
     "@hennge/vue3-pagination": "1.0.17",
     "@microsoft/signalr": "^5.0.8",
     "@popperjs/core": "^2.9.2",

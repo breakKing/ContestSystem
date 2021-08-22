@@ -1,4 +1,4 @@
-import axios from 'axios'
+import api from '../../services/api-configurator'
 import * as _ from 'lodash'
 
 export default {
@@ -31,7 +31,7 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.get(`/api/workspace/rules/available/${rootGetters.currentUser.id}`)
+                let {data} = await rootGetters.api.get(`/workspace/rules/available/${rootGetters.currentUser.id}`)
                 commit('setAvailableRuleSets', data)
             } catch (e) {
                 console.error(e)
@@ -45,27 +45,27 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.get(`/api/workspace/rules/user/${rootGetters.currentUser.id}`)
+                let {data} = await rootGetters.api.get(`/workspace/rules/user/${rootGetters.currentUser.id}`)
                 commit('setCurrentUserRuleSets', data)
             } catch (e) {
                 console.error(e)
             }
         },
-        async getWorkspaceRulesSet({getters, dispatch}, ruleset_id) {
+        async getWorkspaceRulesSet({getters, dispatch, rootGetters}, ruleset_id) {
             if (!set_id) {
                 return null
             }
             try {
-                let {data} = await axios.get(`/api/workspace/rules/${ruleset_id}`)
+                let {data} = await rootGetters.api.get(`/workspace/rules/${ruleset_id}`)
                 return data
             } catch (e) {
                 console.error(e)
             }
             return null
         },
-        async deleteRuleSet({getters, dispatch}, ruleset_id) {
+        async deleteRuleSet({getters, dispatch, rootGetters}, ruleset_id) {
             try {
-                let {data} = await axios.delete(`/api/workspace/rules/${ruleset_id}`)
+                let {data} = await rootGetters.api.delete(`/workspace/rules/${ruleset_id}`)
                 return data
             } catch (e) {
                 console.error(e)

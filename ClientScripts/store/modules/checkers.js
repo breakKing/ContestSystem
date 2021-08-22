@@ -1,4 +1,4 @@
-﻿import axios from 'axios'
+﻿import api from '../../services/api-configurator'
 import * as _ from 'lodash'
 
 export default {
@@ -40,7 +40,7 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.get(`/api/workspace/checkers/user/${rootGetters.currentUser.id}`)
+                let {data} = await rootGetters.api.get(`/workspace/checkers/user/${rootGetters.currentUser.id}`)
                 commit('setCurrentUserCheckers', data)
             } catch (e) {
                 console.error(e)
@@ -54,7 +54,7 @@ export default {
                 return
             }
             try {
-                let {data} = await axios.get(`/api/workspace/checkers/available/${rootGetters.currentUser.id}`)
+                let {data} = await rootGetters.api.get(`/workspace/checkers/available/${rootGetters.currentUser.id}`)
                 commit('setAvailableCheckers', data)
             } catch (e) {
                 console.error(e)
@@ -65,7 +65,7 @@ export default {
                 return null
             }
             try {
-                let {data} = await axios.get(`/api/workspace/checkers/${checker_id}`)
+                let {data} = await rootGetters.api.get(`/workspace/checkers/${checker_id}`)
                 return data
             } catch (e) {
                 console.error(e)
@@ -74,7 +74,7 @@ export default {
         },
         async deleteChecker({commit, state, dispatch, getters, rootGetters}, checker_id) {
             try {
-                let {data} = await axios.delete(`/api/workspace/checkers/${checker_id}`)
+                let {data} = await rootGetters.api.delete(`/workspace/checkers/${checker_id}`)
                 return data
             } catch (e) {
                 console.error(e)
