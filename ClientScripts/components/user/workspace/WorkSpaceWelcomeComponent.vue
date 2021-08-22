@@ -25,9 +25,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .container{
-    height: 77vh;
-  }
   p, ul{
     font-size: 20px;
   }

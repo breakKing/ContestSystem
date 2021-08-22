@@ -1,8 +1,8 @@
 ﻿<template>
   <header-component></header-component>
-  <div class="container">
-    <div class="row">
-      <div class="col-3" v-if="!$route.meta.hide_sidebar">
+  <div class="container" style="min-height: inherit;">
+    <div class="row" style="min-height: inherit;">
+      <div class="col-lg-3 col-12" v-if="!$route.meta.hide_sidebar">
         <moder-side-bar-component></moder-side-bar-component>
       </div>
       <div class="col">

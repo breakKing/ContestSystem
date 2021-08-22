@@ -1,6 +1,6 @@
 ﻿<template>
   <header-component></header-component>
-  <div class="container" style="min-height: 62.2vh">
+  <div class="container" style="min-height: inherit;">
     <router-view></router-view>
   </div>
   <!-- eslint-disable-next-line -->
