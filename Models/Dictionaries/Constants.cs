@@ -17,11 +17,10 @@ namespace ContestSystem.Models.Dictionaries
         public static readonly int ChatDefaultCount = 50;
 
         // Некоторые "настройки" аутентификации
-        public static readonly int ShortTermRefreshTokenLifeTimeInHours = 1;
+        public static readonly int ShortTermRefreshTokenLifeTimeInHours = 5;
         public static readonly int LongTermRefreshTokenLifeTimeInHours = 720; // 30 дней
         public static readonly int MaxUserSessionsCount = 5;
         public static readonly string RefreshTokenCookieName = "ContestSystemRT";
-        public static readonly int MinutesBeforeExpForTokensRefresh = 10;
 
         // Названия сущностей
         public static readonly string ContestEntityName = "Contest";
