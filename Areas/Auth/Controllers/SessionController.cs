@@ -93,6 +93,22 @@ namespace ContestSystem.Areas.Auth.Controllers
             return Json(ResponseObject<long>.Fail(_errorCodes[Constants.AuthFailedErrorName]));
         }
 
+        [HttpPost("logout")]
+        [AuthorizeByJwt]
+        public async Task<IActionResult> Logout([FromBody] RefreshTokenForm form)
+        {
+            var user = await HttpContext.GetCurrentUser(_userManager);
+
+            var session = await _userManager.GetSessionByUserAndFingerprintAsync(_dbContext, user.Id, form.Fingerprint);
+
+            if (session != null)
+            {
+                await _userManager.RemoveUserSessionAsync(_dbContext, user.Id, session.RefreshToken.ToString());
+            }
+
+            return Ok();
+        }
+
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] UserRegistrationModel userModel)
         {
@@ -166,54 +182,24 @@ namespace ContestSystem.Areas.Auth.Controllers
         }
 
         [HttpPost("verify-token")]
-        [AuthorizeByJwt]
-        public async Task<IActionResult> VerifyToken()
+        public async Task<IActionResult> VerifyToken([FromBody] RefreshTokenForm form)
         {
-            var user = await HttpContext.GetCurrentUser(_userManager);
-
-            bool canRefresh = HttpContext.Request.Cookies.TryGetValue(Constants.RefreshTokenCookieName, out string refreshToken);
+            bool canRefresh = HttpContext.Request.Cookies.TryGetValue(Constants.RefreshTokenCookieName, out string refreshToken)
+                                || !string.IsNullOrWhiteSpace(form.RefreshToken);
 
             if (canRefresh)
             {
-                var session = await _userManager.GetUserSessionByRefreshTokenAsync(_dbContext, user.Id, refreshToken);
-
-                if (session != null)
+                if (string.IsNullOrWhiteSpace(refreshToken))
                 {
-                    var newRefreshToken = await _userManager.UpdateRefreshTokenAsync(_dbContext, user.Id, refreshToken);
-
-                    if (newRefreshToken != null)
-                    {
-                        HttpContext.SetRefreshTokenCookie(newRefreshToken, session.ExpiresInHours);
-
-                        return Json(
-                           new
-                           {
-                               user = user?.ResponseStructure,
-                               roles = await _userManager.GetRolesAsync(user),
-                               token = _jwtSettingsService.GenerateTokenString(user, _userManager),
-                               refresh = refreshToken
-                           });
-                    }
+                    refreshToken = form.RefreshToken;
                 }
-            }
 
-            return Json(ResponseObject<long>.Fail(_errorCodes[Constants.VerifyTokenFailedErrorName]));
-        }
-
-        [HttpPost("verify-token-from-phone/{refreshToken}")]
-        [AuthorizeByJwt]
-        public async Task<IActionResult> VerifyToken(string refreshToken)
-        {
-            var user = await HttpContext.GetCurrentUser(_userManager);
-
-            bool canRefresh = !string.IsNullOrWhiteSpace(refreshToken);
-
-            if (canRefresh)
-            {
-                var session = await _userManager.GetUserSessionByRefreshTokenAsync(_dbContext, user.Id, refreshToken);
+                var session = await _userManager.GetSessionByRefreshTokenAndFingerprintAsync(_dbContext, refreshToken, form.Fingerprint);
 
                 if (session != null)
                 {
+                    var user = session.User;
+
                     var newRefreshToken = await _userManager.UpdateRefreshTokenAsync(_dbContext, user.Id, refreshToken);
 
                     if (newRefreshToken != null)

@@ -82,6 +82,23 @@ namespace ContestSystem.Extensions
             return await dbContext.Sessions.FirstOrDefaultAsync(s => s.UserId == userId && s.RefreshToken.ToString() == refreshToken);
         }
 
+        public static async Task<Session> GetSessionByRefreshTokenAndFingerprintAsync(this UserManager<User> userManager, MainDbContext dbContext,
+            string refreshToken, string fingerprint)
+        {
+            return await dbContext.Sessions.FirstOrDefaultAsync(s => s.Fingerprint == fingerprint && s.RefreshToken.ToString() == refreshToken);
+        }
+
+        public static async Task<Session> GetSessionByUserAndFingerprintAsync(this UserManager<User> userManager, MainDbContext dbContext,
+            long userId, string fingerprint)
+        {
+            if (await userManager.FindByIdAsync(userId.ToString()) == null)
+            {
+                return null;
+            }
+
+            return await dbContext.Sessions.FirstOrDefaultAsync(s => s.Fingerprint == fingerprint && s.UserId == userId);
+        }
+
         public static async Task<string> CreateUserSessionAsync(this UserManager<User> userManager, MainDbContext dbContext, long userId, 
             int durationInHours, string fingerprint)
         {

@@ -4,14 +4,16 @@ using ContestSystem.Models.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ContestSystem.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    partial class MainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210822193129_Adding sessions")]
+    partial class Addingsessions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -56,14 +58,14 @@ namespace ContestSystem.Migrations
                     b.Property<long>("UserId")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("Fingerprint")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("RefreshToken")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("ExpiresInHours")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("RefreshToken")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Fingerprint")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("StartTimeUTC")
                         .HasColumnType("datetime2");
@@ -73,9 +75,12 @@ namespace ContestSystem.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
 
-                    b.HasKey("UserId", "Fingerprint")
+                    b.HasKey("UserId", "RefreshToken")
                         .HasName("PK_Sessions")
                         .IsClustered();
+
+                    b.HasIndex("RefreshToken")
+                        .IsUnique();
 
                     b.HasIndex("UserId");
 
