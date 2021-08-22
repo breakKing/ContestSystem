@@ -10,6 +10,7 @@ namespace ContestSystem.Models.DbContexts
 {
     public class MainDbContext : IdentityDbContext<User, Role, long>
     {
+        public DbSet<Session> Sessions { get; set; }
         public DbSet<Contest> Contests { get; set; }
         public DbSet<Course> Courses { get; set; }
         public DbSet<CoursePage> CoursesPages { get; set; }
@@ -55,6 +56,7 @@ namespace ContestSystem.Models.DbContexts
 
             // Конфигурация обычных сущностей через Fluent API
             builder.ApplyConfiguration(new ExampleConfiguration());
+            builder.ApplyConfiguration(new SessionConfiguration());
             builder.ApplyConfiguration(new TestConfiguration());
             builder.ApplyConfiguration(new TestResultConfiguration());
             builder.ApplyConfiguration(new UserConfiguration());

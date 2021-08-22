@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using ContestSystemDbStructure.Models.Auth;
@@ -70,6 +71,29 @@ namespace ContestSystem.Models
 
             var handler = new JwtSecurityTokenHandler();
             return handler.WriteToken(handler.CreateToken(this.GetJwtSecurityTokenDescriptor(user, userManager)));
+        }
+
+        public JwtSecurityToken ValidateJwtToken(string token)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            try
+            {
+                tokenHandler.ValidateToken(token, new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = GetSymmetricSecurityKey(),
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ClockSkew = TimeSpan.Zero
+                }, out SecurityToken validatedToken);
+
+                var jwtToken = (JwtSecurityToken)validatedToken;
+                return jwtToken;
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }

@@ -59,7 +59,8 @@
         AuthFailed: "ERR_USER_AUTH_FAILED",
         TokenGenerationFailed: "ERR_USER_TOKEN_GENERATION_FAILED",
         UserRegisterFailed: "ERR_USER_REGISTER_FAILED",
-        UserAlreadyInvited: "ERR_USER_ALREADY_INVITED"
+        UserAlreadyInvited: "ERR_USER_ALREADY_INVITED",
+        VerifyTokenFailedErrorName: "ERR_USER_VERIFY_TOKEN_FAILED"
     },
     Solution: {
         ValidationFailed: "ERR_SOLUTION_VALIDATION_FAILED",

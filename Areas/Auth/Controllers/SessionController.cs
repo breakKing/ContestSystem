@@ -1,8 +1,10 @@
 ﻿using ContestSystem.Extensions;
 using ContestSystem.Models;
 using ContestSystem.Models.Attributes;
+using ContestSystem.Models.DbContexts;
 using ContestSystem.Models.Dictionaries;
 using ContestSystem.Models.FormModels;
+using ContestSystem.Models.Misc;
 using ContestSystemDbStructure.Models.Auth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -10,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ContestSystem.Areas.Auth.Controllers
@@ -19,6 +22,7 @@ namespace ContestSystem.Areas.Auth.Controllers
     [ApiController]
     public class SessionController : Controller
     {
+        private readonly MainDbContext _dbContext;
         private readonly ILogger<SessionController> _logger;
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<Role> _roleManager;
@@ -28,8 +32,10 @@ namespace ContestSystem.Areas.Auth.Controllers
         private readonly string _entityName = Constants.UserEntityName;
         private readonly Dictionary<string, string> _errorCodes;
 
-        public SessionController(ILogger<SessionController> logger, UserManager<User> userManager, RoleManager<Role> roleManager, SignInManager<User> signInManager, JwtSettingsService jwtSettingsService)
+        public SessionController(MainDbContext dbContext, ILogger<SessionController> logger, UserManager<User> userManager,
+            RoleManager<Role> roleManager, SignInManager<User> signInManager, JwtSettingsService jwtSettingsService)
         {
+            _dbContext = dbContext;
             _logger = logger;
             _userManager = userManager;
             _roleManager = roleManager;
@@ -42,24 +48,49 @@ namespace ContestSystem.Areas.Auth.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginForm form)
         {
-            User user = await _userManager.FindByNameAsync(form.username);
+            User user = await _userManager.FindByNameAsync(form.Username);
             if (user is not null &&
-                (await _signInManager.CheckPasswordSignInAsync(user, form.password, false)).Succeeded)
+                (await _signInManager.CheckPasswordSignInAsync(user, form.Password, false)).Succeeded)
             {
+                var sessions = await _userManager.GetUserSessionsAsync(_dbContext, user.Id);
+
+                var session = sessions.FirstOrDefault(s => s.Fingerprint == form.Fingerprint);
+
+                if (session != null)
+                {
+                    await _userManager.RemoveUserSessionAsync(_dbContext, user.Id, session.RefreshToken.ToString());
+                }
+
+                if (sessions.Count >= Constants.MaxUserSessionsCount)
+                {
+                    await _userManager.DropAllUserSessionsAsync(_dbContext, user.Id);
+                }
+
+                int refreshTokenDuration = form.Remember ? Constants.LongTermRefreshTokenLifeTimeInHours : Constants.ShortTermRefreshTokenLifeTimeInHours;
+
+                string refreshToken = await _userManager.CreateUserSessionAsync(_dbContext, user.Id, refreshTokenDuration, form.Fingerprint);
+
+                if (refreshToken == null)
+                {
+                    _logger.LogWarning($"Попытка входа под пользователем с идентификатором {user.Id} с устройства с отпечатком " +
+                        $"\"{form.Fingerprint}\" закончилась ошибкой генерации refresh-токена");
+
+                    return Json(ResponseObject<long>.Fail(_errorCodes[Constants.AuthFailedErrorName]));
+                }
+
+                HttpContext.SetRefreshTokenCookie(refreshToken, refreshTokenDuration);
+
                 _logger.LogInformation($"Пользователем с идентификатором {user.Id} был выполнен успешный вход в систему");
                 return Json(new
                 {
                     status = true,
                     user = user.ResponseStructure,
                     roles = await _userManager.GetRolesAsync(user),
-                    token = _jwtSettingsService.GenerateTokenString(user, _userManager)
+                    token = _jwtSettingsService.GenerateTokenString(user, _userManager),
+                    refresh = refreshToken
                 });
             }
-            return Json(new
-            {
-                status = false,
-                message = _errorCodes[Constants.AuthFailedErrorName],
-            });
+            return Json(ResponseObject<long>.Fail(_errorCodes[Constants.AuthFailedErrorName]));
         }
 
         [HttpPost("register")]
@@ -111,10 +142,15 @@ namespace ContestSystem.Areas.Auth.Controllers
                         });
                     }
 
+                    string refreshToken = await _userManager.CreateUserSessionAsync(_dbContext, user.Id, Constants.ShortTermRefreshTokenLifeTimeInHours, userModel.Fingerprint);
+
+                    HttpContext.SetRefreshTokenCookie(refreshToken, Constants.ShortTermRefreshTokenLifeTimeInHours);
+
                     return Json(new
                     {
                         status = true,
                         token,
+                        refresh = refreshToken,
                         user = user?.ResponseStructure,
                         roles = await _userManager.GetRolesAsync(user),
                     });
@@ -134,13 +170,69 @@ namespace ContestSystem.Areas.Auth.Controllers
         public async Task<IActionResult> VerifyToken()
         {
             var user = await HttpContext.GetCurrentUser(_userManager);
-            return Json(
-                new
+
+            bool canRefresh = HttpContext.Request.Cookies.TryGetValue(Constants.RefreshTokenCookieName, out string refreshToken);
+
+            if (canRefresh)
+            {
+                var session = await _userManager.GetUserSessionByRefreshTokenAsync(_dbContext, user.Id, refreshToken);
+
+                if (session != null)
                 {
-                    user = user?.ResponseStructure,
-                    roles = await _userManager.GetRolesAsync(user),
-                    token = _jwtSettingsService.GenerateTokenString(user, _userManager)
-                });
+                    var newRefreshToken = await _userManager.UpdateRefreshTokenAsync(_dbContext, user.Id, refreshToken);
+
+                    if (newRefreshToken != null)
+                    {
+                        HttpContext.SetRefreshTokenCookie(newRefreshToken, session.ExpiresInHours);
+
+                        return Json(
+                           new
+                           {
+                               user = user?.ResponseStructure,
+                               roles = await _userManager.GetRolesAsync(user),
+                               token = _jwtSettingsService.GenerateTokenString(user, _userManager),
+                               refresh = refreshToken
+                           });
+                    }
+                }
+            }
+
+            return Json(ResponseObject<long>.Fail(_errorCodes[Constants.VerifyTokenFailedErrorName]));
+        }
+
+        [HttpPost("verify-token-from-phone/{refreshToken}")]
+        [AuthorizeByJwt]
+        public async Task<IActionResult> VerifyToken(string refreshToken)
+        {
+            var user = await HttpContext.GetCurrentUser(_userManager);
+
+            bool canRefresh = !string.IsNullOrWhiteSpace(refreshToken);
+
+            if (canRefresh)
+            {
+                var session = await _userManager.GetUserSessionByRefreshTokenAsync(_dbContext, user.Id, refreshToken);
+
+                if (session != null)
+                {
+                    var newRefreshToken = await _userManager.UpdateRefreshTokenAsync(_dbContext, user.Id, refreshToken);
+
+                    if (newRefreshToken != null)
+                    {
+                        HttpContext.SetRefreshTokenCookie(newRefreshToken, session.ExpiresInHours);
+
+                        return Json(
+                           new
+                           {
+                               user = user?.ResponseStructure,
+                               roles = await _userManager.GetRolesAsync(user),
+                               token = _jwtSettingsService.GenerateTokenString(user, _userManager),
+                               refresh = refreshToken
+                           });
+                    }
+                }
+            }
+
+            return Json(ResponseObject<long>.Fail(_errorCodes[Constants.VerifyTokenFailedErrorName]));
         }
 
         [AuthorizeByJwt]

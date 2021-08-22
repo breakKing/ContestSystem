@@ -14,6 +14,7 @@ using Microsoft.OpenApi.Models;
 using ContestSystem.Hubs;
 using System.Threading.Tasks;
 using ContestSystemDbStructure.Models.Auth;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace ContestSystem
 {
@@ -129,7 +130,7 @@ namespace ContestSystem
                         Type = ReferenceType.SecurityScheme,
                         Id = "JWT-Auth"
                     }
-                };                
+                };
                 c.AddSecurityDefinition("JWT-Auth", securityScheme);
                 c.AddSecurityRequirement(new OpenApiSecurityRequirement
                 {
@@ -160,7 +161,14 @@ namespace ContestSystem
                 .AllowAnyHeader()
                 .AllowAnyMethod()
             );
+
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
+
             app.UseWebSockets();
+
             app.UseAuthentication();
             app.UseAuthorization();
 
@@ -171,7 +179,7 @@ namespace ContestSystem
                 endpoints.MapControllerRoute(
                     name: "CatchAll",
                     pattern: "{*url}",
-                    defaults: new {controller = "Home", action = "Index"}
+                    defaults: new { controller = "Home", action = "Index" }
                 );
             });
         }

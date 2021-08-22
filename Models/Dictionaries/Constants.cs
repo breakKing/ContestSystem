@@ -16,6 +16,13 @@ namespace ContestSystem.Models.Dictionaries
         public static readonly int ChatDefaultOffset = 0;
         public static readonly int ChatDefaultCount = 50;
 
+        // Некоторые "настройки" аутентификации
+        public static readonly int ShortTermRefreshTokenLifeTimeInHours = 1;
+        public static readonly int LongTermRefreshTokenLifeTimeInHours = 720; // 30 дней
+        public static readonly int MaxUserSessionsCount = 5;
+        public static readonly string RefreshTokenCookieName = "ContestSystemRT";
+        public static readonly int MinutesBeforeExpForTokensRefresh = 10;
+
         // Названия сущностей
         public static readonly string ContestEntityName = "Contest";
         public static readonly string CourseEntityName = "Course";
@@ -49,6 +56,7 @@ namespace ContestSystem.Models.Dictionaries
         public static readonly string AuthFailedErrorName = "AuthFailed";
         public static readonly string TokenGenerationFailedErrorName = "TokenGenerationFailed";
         public static readonly string UserRegisterFailedErrorName = "UserRegisterFailed";
+        public static readonly string VerifyTokenFailedErrorName = "VerifyTokenFailed";
         public static readonly string ChatDoenstExistErrorName = "ChatDoenstExist";
         public static readonly string UserKickedFromChatErrorName = "UserKickedFromChat";
         public static readonly string LockedErrorName = "Locked";
@@ -126,7 +134,8 @@ namespace ContestSystem.Models.Dictionaries
                 { AuthFailedErrorName, "ERR_USER_AUTH_FAILED" },
                 { TokenGenerationFailedErrorName, "ERR_USER_TOKEN_GENERATION_FAILED" },
                 { UserRegisterFailedErrorName, "ERR_USER_REGISTER_FAILED" },
-                { UserAlreadyInvitedErrorName, "ERR_USER_ALREADY_INVITED" }
+                { UserAlreadyInvitedErrorName, "ERR_USER_ALREADY_INVITED" },
+                { VerifyTokenFailedErrorName, "ERR_USER_VERIFY_TOKEN_FAILED" }
             },
             [SolutionEntityName] = new Dictionary<string, string>
             {

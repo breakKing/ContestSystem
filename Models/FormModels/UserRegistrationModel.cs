@@ -14,5 +14,6 @@ namespace ContestSystem.Models.FormModels
         public string Patronymic { get; set; }
         [Required] public DateTime DateOfBirth { get; set; }
         public string Culture { get; set; }
+        [Required] public string Fingerprint { get; set; }
     }
 }
