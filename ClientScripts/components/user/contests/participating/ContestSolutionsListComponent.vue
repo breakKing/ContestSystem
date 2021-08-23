@@ -62,9 +62,7 @@ export default {
         return ''
       }
       let letter = _.find(this.currentContest?.problems || [], (p) => +p.problemId === +problem.id)?.letter + '. ' || ''
-      let result = letter + (problem.localizedName || '')
-
-      return result
+      return letter + (problem.localizedName || '')
     },
   },
   beforeRouteEnter(to, from, next) {
