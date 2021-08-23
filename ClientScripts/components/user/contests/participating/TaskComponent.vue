@@ -15,9 +15,9 @@
       </div>
       <h2>{{ problem_name }}</h2>
       <p><i>({{ getFormattedTime(problem?.timeLimitInMilliseconds || 0) }}, {{ getFormattedMemory(problem?.memoryLimitInBytes || 0) }})</i></p>
-      <p>{{ problem_description }}</p>
-      <p>{{ problem_input }}</p>
-      <p>{{ problem_output }}</p>
+      <p v-html="problem_description" v-if="problem_description"></p>
+      <p v-html="problem_input" v-if="problem_input"></p>
+      <p v-html="problem_output" v-if="problem_output"></p>
       <template v-if="sortedExamples.length > 0">
         <div class="row">
           <div class="col">Вход</div>

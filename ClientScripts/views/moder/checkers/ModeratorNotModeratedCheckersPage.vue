@@ -1,5 +1,5 @@
 <template>
-  <checker-preview-component v-for="checker of checkersToModerate" :checker="checker"></checker-preview-component>
+  <checker-preview-component v-for="checker of checkersToModerate" :encode_html="true" :checker="checker"></checker-preview-component>
 </template>
 
 <script>

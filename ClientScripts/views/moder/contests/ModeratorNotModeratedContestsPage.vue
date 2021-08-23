@@ -1,5 +1,5 @@
 <template>
-  <contest-preview-component v-for="contest of contestsToModerate" :contest="contest"></contest-preview-component>
+  <contest-preview-component v-for="contest of contestsToModerate" :encode_html="true" :contest="contest"></contest-preview-component>
 </template>
 
 <script>

@@ -78,7 +78,7 @@ export default {
                 return
             }
 
-            if (rootGetters.currentContest.id == stats.contestId) {
+            if (+rootGetters.currentContest.id === +stats.contestId) {
                 commit('setCurrentContestUserStats', stats)
             }
         }

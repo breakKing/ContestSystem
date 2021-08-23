@@ -6,7 +6,7 @@
         <div class="col"><h2>{{ currentContest && currentContest.localizedName }}</h2></div>
         <div class="col">{{ currentContest && currentContest.creator && currentContest.creator.fullName }}</div>
       </div>
-      <p>{{ currentContest && currentContest.localizedDescription }}</p>
+      <p v-html="currentContest && currentContest.localizedDescription"></p>
 
       <div class="row"
            v-if="currentUserIsOwnerOfCurrentContest || currentUserIsParticipantOfCurrentContest || (currentContest && currentContest.rules && currentContest.rules.publicMonitor)">

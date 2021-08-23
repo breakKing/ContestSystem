@@ -28,7 +28,8 @@ namespace ContestSystem.Areas.Messenger.Controllers
         private readonly string _entityName = Constants.ChatEntityName;
         private readonly Dictionary<string, string> _errorCodes = Constants.ErrorCodes[Constants.MessengerSectionName];
 
-        public ChatsController(MainDbContext dbContext, FileStorageService fileStorage, MessengerService messenger, ILogger<ChatsController> logger, NotifierService notifier)
+        public ChatsController(MainDbContext dbContext, FileStorageService fileStorage, MessengerService messenger,
+            ILogger<ChatsController> logger, NotifierService notifier)
         {
             _dbContext = dbContext;
             _fileStorage = fileStorage;
@@ -73,17 +74,21 @@ namespace ContestSystem.Areas.Messenger.Controllers
             {
                 if (!await _dbContext.Users.AnyAsync(u => u.Id == userId))
                 {
-                    _logger.LogWarning($"Главный локальный модератор чата \"{link}\" (пользователь с идентификатором {currentUser.Id}) " +
+                    _logger.LogWarning(
+                        $"Главный локальный модератор чата \"{link}\" (пользователь с идентификатором {currentUser.Id}) " +
                         $"попытался пригласить несуществующего пользователя с идентификатором {userId}");
-                    response = ResponseObject<bool>.Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.EntityDoesntExistErrorName]);
+                    response = ResponseObject<bool>.Fail(
+                        Constants.ErrorCodes[Constants.UserEntityName][Constants.EntityDoesntExistErrorName]);
                 }
                 else
                 {
                     if (!await _messenger.IsUserChatAdminAsync(_dbContext, currentUser.Id, link))
                     {
-                        _logger.LogWarning($"Пользователь с идентификатором {currentUser.Id} попытался пригласить пользователя с идентификатором {userId} в чат " +
+                        _logger.LogWarning(
+                            $"Пользователь с идентификатором {currentUser.Id} попытался пригласить пользователя с идентификатором {userId} в чат " +
                             $"\"{link}\", однако он не является главным локальным модератором чата");
-                        response = ResponseObject<bool>.Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.UserInsufficientRightsErrorName]);
+                        response = ResponseObject<bool>.Fail(
+                            Constants.ErrorCodes[Constants.UserEntityName][Constants.UserInsufficientRightsErrorName]);
                     }
                     else
                     {
@@ -118,36 +123,43 @@ namespace ContestSystem.Areas.Messenger.Controllers
                 if (await _messenger.IsUserInChatAsync(_dbContext, currentUser.Id, link))
                 {
                     _logger.LogWarning($"Пользователь с идентификатором {currentUser.Id} попытался войти в чат " +
-                        $"\"{link}\", когда он уже в нём есть");
-                    response = ResponseObject<bool>.Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.EntityAlreadyExistsErrorName]);
+                                       $"\"{link}\", когда он уже в нём есть");
+                    response = ResponseObject<bool>.Fail(
+                        Constants.ErrorCodes[Constants.UserEntityName][Constants.EntityAlreadyExistsErrorName]);
                 }
                 else
                 {
-                    if (!await _messenger.IsChatJoinableAsync(_dbContext, link) && !await _messenger.IsUserInvitedInChatAsync(_dbContext, currentUser.Id, link))
+                    if (!await _messenger.IsChatJoinableAsync(_dbContext, link) &&
+                        !await _messenger.IsUserInvitedInChatAsync(_dbContext, currentUser.Id, link))
                     {
                         _logger.LogWarning($"Пользователь с идентификатором {currentUser.Id} попытался войти в чат " +
-                            $"\"{link}\", однако в чат можно войти только по приглашению");
-                        response = ResponseObject<bool>.Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.UserInsufficientRightsErrorName]);
+                                           $"\"{link}\", однако в чат можно войти только по приглашению");
+                        response = ResponseObject<bool>.Fail(
+                            Constants.ErrorCodes[Constants.UserEntityName][Constants.UserInsufficientRightsErrorName]);
                     }
                     else
                     {
                         if (await _messenger.IsUserKickedFromChatAsync(_dbContext, currentUser.Id, link))
                         {
-                            _logger.LogWarning($"Пользователь с идентификатором {currentUser.Id} попытался войти в чат " +
+                            _logger.LogWarning(
+                                $"Пользователь с идентификатором {currentUser.Id} попытался войти в чат " +
                                 $"\"{link}\", однако ранее он был исключён главным локальным модератором чата");
                             response = ResponseObject<bool>.Fail(_errorCodes[Constants.UserKickedFromChatErrorName]);
                         }
                         else
                         {
-                            bool additionSuccess = await _messenger.AddUserToChatAsync(_dbContext, currentUser.Id, link);
+                            bool additionSuccess =
+                                await _messenger.AddUserToChatAsync(_dbContext, currentUser.Id, link);
                             if (!additionSuccess)
                             {
                                 _logger.LogDbSaveError(_entityName, link);
-                                response = ResponseObject<bool>.Fail(Constants.ErrorCodes[Constants.CommonSectionName][Constants.DbSaveErrorName]);
+                                response = ResponseObject<bool>.Fail(
+                                    Constants.ErrorCodes[Constants.CommonSectionName][Constants.DbSaveErrorName]);
                             }
                             else
                             {
-                                _logger.LogInformation($"Пользователь с идентификатором {currentUser.Id} добавлен в чат \"{link}\"");
+                                _logger.LogInformation(
+                                    $"Пользователь с идентификатором {currentUser.Id} добавлен в чат \"{link}\"");
                                 response = ResponseObject<bool>.Success(additionSuccess);
                             }
                         }
@@ -188,7 +200,8 @@ namespace ContestSystem.Areas.Messenger.Controllers
 
         [HttpPut("{link}/messages/{messageId}")]
         [AuthorizeByJwt]
-        public async Task<IActionResult> EditMessage(string link, long messageId, [FromBody] ChatMessageForm chatMessageForm)
+        public async Task<IActionResult> EditMessage(string link, long messageId,
+            [FromBody] ChatMessageForm chatMessageForm)
         {
             return null;
         }

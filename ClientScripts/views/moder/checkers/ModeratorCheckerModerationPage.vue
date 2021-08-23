@@ -4,7 +4,7 @@
       <h2>{{ currentModeratingChecker && currentModeratingChecker.name }} {{
           currentModeratingChecker && currentModeratingChecker.author && currentModeratingChecker.author.fullName
         }}</h2>
-      <p v-html="currentModeratingChecker && currentModeratingChecker.description"></p>
+      <p>{{currentModeratingChecker && currentModeratingChecker.description}}</p>
       <prism-editor v-model="checkerCode" 
                       :highlight="highlighter" 
                       :tabSize="4" 
