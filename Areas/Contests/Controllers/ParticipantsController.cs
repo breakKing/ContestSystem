@@ -157,6 +157,8 @@ namespace ContestSystem.Areas.Contests.Controllers
                                 };
                                 await _dbContext.ContestsParticipants.AddAsync(contestParticipant);
                                 await _dbContext.SaveChangesAsync();
+
+                                await _contestsManager.AddParticipantToChatsAsync(_dbContext, contestParticipant);
                                 _logger.LogInformation(
                                     $"В соревнование с идентификатором {contest.Id} успешно добавлен участник с идентификатором {participantForm.UserId} пользователем с идентификатором {currentUser.Id}");
                                 response = ResponseObject<long>.Success(contestId);
@@ -198,6 +200,7 @@ namespace ContestSystem.Areas.Contests.Controllers
                 }
                 else
                 {
+                    await _contestsManager.RemoveParticipantFromChatsAsync(_dbContext, contestParticipant);
                     _dbContext.ContestsParticipants.Remove(contestParticipant);
                     await _dbContext.SaveChangesAsync();
                     _logger.LogInformation(

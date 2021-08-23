@@ -1,4 +1,5 @@
-﻿using ContestSystem.Models.DbContexts;
+﻿using ContestSystem.Areas.Contests.Services;
+using ContestSystem.Models.DbContexts;
 using ContestSystem.Models.Dictionaries;
 using ContestSystem.Models.FormModels;
 using ContestSystem.Models.Misc;
@@ -18,6 +19,7 @@ namespace ContestSystem.Areas.Workspace.Services
     {
         private readonly CheckerSystemService _checkerSystem;
         private readonly FileStorageService _storage;
+        private readonly ContestsManagerService _contestsManager;
 
         private enum EntityInLockedContestStatus
         {
@@ -27,10 +29,11 @@ namespace ContestSystem.Areas.Workspace.Services
             Undefined = 3
         }
 
-        public WorkspaceManagerService(CheckerSystemService checkerSystem, FileStorageService storage)
+        public WorkspaceManagerService(CheckerSystemService checkerSystem, FileStorageService storage, ContestsManagerService contestsManager)
         {
             _checkerSystem = checkerSystem;
             _storage = storage;
+            _contestsManager = contestsManager;
         }
 
         public async Task<CreationStatusData<long?>> CreateContestAsync(MainDbContext dbContext, ContestForm form, bool checkForLimit = false)
@@ -119,6 +122,7 @@ namespace ContestSystem.Areas.Workspace.Services
                         if (contest.ApprovalStatus == ApproveType.Accepted)
                         {
                             statusData.Status = CreationStatus.SuccessWithAutoAccept;
+                            await _contestsManager.CreateContestInitialChatsAsync(dbContext, contest);
                         }
                         else
                         {
@@ -922,6 +926,7 @@ namespace ContestSystem.Areas.Workspace.Services
             else
             {
                 _storage.DeleteFileAsync(contest.ImagePath);
+                await _contestsManager.RemoveAllContestChatsAsync(dbContext, contest.Id);
                 dbContext.Contests.Remove(contest);
                 bool saveSuccess = await dbContext.SecureSaveAsync();
                 if (!saveSuccess)
@@ -1097,6 +1102,11 @@ namespace ContestSystem.Areas.Workspace.Services
                 else
                 {
                     status = (contest.ApprovalStatus == ApproveType.Accepted) ? ModerationStatus.Accepted : ModerationStatus.Rejected;
+
+                    if (!await _contestsManager.InitialChatsExistAsync(dbContext, contest.Id))
+                    {
+                        await _contestsManager.CreateContestInitialChatsAsync(dbContext, contest);
+                    }
                 }
             }
             return status;

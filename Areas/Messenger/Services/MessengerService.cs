@@ -269,7 +269,8 @@ namespace ContestSystem.Areas.Messenger.Services
             return status;
         }
 
-        public async Task<CreationStatusData<string>> CreateChatAsync(MainDbContext dbContext, ChatForm form)
+        public async Task<CreationStatusData<string>> CreateChatAsync(MainDbContext dbContext, ChatForm form, 
+            ChatType type = ChatType.Custom, long? contestId = null)
         {
             var statusData = new CreationStatusData<string>
             {
@@ -289,9 +290,16 @@ namespace ContestSystem.Areas.Messenger.Services
                 Name = form.Name,
                 AnyoneCanJoin = form.AnyoneCanJoin,
                 AdminId = form.AdminId,
-                Type = ChatType.Custom,
-                IsCreatedBySystem = false
+                Type = type,
+                IsCreatedBySystem = (type != ChatType.Custom)
             };
+
+            if (type == ChatType.ContestAnnouncements || 
+                type == ChatType.ContestParticipant || 
+                type == ChatType.ContestModerator)
+            {
+                chat.ContestId = contestId;
+            }
 
             await dbContext.Chats.AddAsync(chat);
 
@@ -330,7 +338,6 @@ namespace ContestSystem.Areas.Messenger.Services
 
             return statusData;
         }
-
         public async Task<FormCheckStatus> CheckChatMessageFormAsync(MainDbContext dbContext, ChatMessageForm form)
         {
             var status = FormCheckStatus.Correct;
@@ -408,6 +415,38 @@ namespace ContestSystem.Areas.Messenger.Services
             return statusData;
         }
 
+        public async Task<DeletionStatus> RemoveUserFromChatAsync(MainDbContext dbContext, Chat chat, long userId)
+        {
+            var status = DeletionStatus.Undefined;
+            if (chat == null)
+            {
+                status = DeletionStatus.NotExistentEntity;
+            }
+            else
+            {
+                var chatUser = chat.ChatUsers.FirstOrDefault(cu => cu.UserId == userId);
+                if (chatUser == null)
+                {
+                    status = DeletionStatus.NotExistentEntity;
+                }
+                else
+                {
+                    dbContext.ChatsUsers.Remove(chatUser);
+                    bool saveSuccess = await dbContext.SecureSaveAsync();
+
+                    if (!saveSuccess)
+                    {
+                        status = DeletionStatus.DbSaveError;
+                    }
+                    else
+                    {
+                        status = DeletionStatus.Success;
+                    }
+                }
+            }
+            return status;
+        }
+
         public async Task<DeletionStatus> DeleteChatAsync(MainDbContext dbContext, Chat chat)
         {
             var status = DeletionStatus.Undefined;
@@ -465,6 +504,54 @@ namespace ContestSystem.Areas.Messenger.Services
         {
             return await dbContext.ChatsUsers.FirstOrDefaultAsync(cu => cu.UserId == userId
                                                                         && cu.Chat.Link == link);
+        }
+
+        private async Task<ChatUserExternalModel> GetChatUserAsync(MainDbContext dbContext, ChatUser chatUser)
+        {
+            var user = new ChatUserExternalModel();
+
+            if (chatUser != null)
+            {
+                user = new ChatUserExternalModel
+                {
+                    ChatLink = chatUser.Chat.Link,
+                    UserId = chatUser.UserId,
+                    Name = string.Empty
+                };
+
+                string name = string.Empty;
+
+                if (chatUser.Chat.Type == ChatType.ContestAnnouncements ||
+                    chatUser.Chat.Type == ChatType.ContestParticipant)
+                {
+                    var contestId = chatUser.Chat.ContestId.GetValueOrDefault(-1);
+
+                    if (await _contestsManager.IsUserContestLocalModeratorAsync(dbContext, contestId, chatUser.UserId))
+                    {
+                        name = (await dbContext.ContestsLocalModerators.FirstOrDefaultAsync(clm => clm.ContestId == contestId
+                                                                                                && clm.LocalModeratorId == chatUser.UserId))
+                                                                        .Alias;
+                    }
+                    else if (await _contestsManager.IsUserContestParticipantAsync(dbContext, contestId, chatUser.UserId))
+                    {
+                        name = (await dbContext.ContestsParticipants.FirstOrDefaultAsync(cp => cp.ContestId == contestId
+                                                                                                && cp.ParticipantId == chatUser.UserId))
+                                                                        .Alias;
+                    }
+                    else
+                    {
+                        name = chatUser.User.FullName;
+                    }
+                }
+                else
+                {
+                    name = chatUser.User.FullName;
+                }
+
+                user.Name = name;
+            }
+
+            return user;
         }
 
         private ChatUser UserParametersForInvite(ChatUser chatUser)
@@ -545,54 +632,6 @@ namespace ContestSystem.Areas.Messenger.Services
             }
 
             return link;
-        }
-
-        private async Task<ChatUserExternalModel> GetChatUserAsync(MainDbContext dbContext, ChatUser chatUser)
-        {
-            var user = new ChatUserExternalModel();
-
-            if (chatUser != null)
-            {
-                user = new ChatUserExternalModel
-                {
-                    ChatLink = chatUser.Chat.Link,
-                    UserId = chatUser.UserId,
-                    Name = string.Empty
-                };
-
-                string name = string.Empty;
-
-                if (chatUser.Chat.Type == ChatType.ContestAnnouncements ||
-                    chatUser.Chat.Type == ChatType.ContestParticipant)
-                {
-                    var contestId = chatUser.Chat.ContestId.GetValueOrDefault(-1);
-
-                    if (await _contestsManager.IsUserContestLocalModeratorAsync(dbContext, contestId, chatUser.UserId))
-                    {
-                        name = (await dbContext.ContestsLocalModerators.FirstOrDefaultAsync(clm => clm.ContestId == contestId
-                                                                                                && clm.LocalModeratorId == chatUser.UserId))
-                                                                        .Alias;
-                    }
-                    else if (await _contestsManager.IsUserContestParticipantAsync(dbContext, contestId, chatUser.UserId))
-                    {
-                        name = (await dbContext.ContestsParticipants.FirstOrDefaultAsync(cp => cp.ContestId == contestId
-                                                                                                && cp.ParticipantId == chatUser.UserId))
-                                                                        .Alias;
-                    }
-                    else
-                    {
-                        name = chatUser.User.FullName;
-                    }
-                }
-                else
-                {
-                    name = chatUser.User.FullName;
-                }
-
-                user.Name = name;
-            }
-
-            return user;
         }
     }
 }

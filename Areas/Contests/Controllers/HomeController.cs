@@ -238,5 +238,31 @@ namespace ContestSystem.Areas.Contests.Controllers
 
             return Json(RulesSetWorkspaceModel.GetFromModel(contest.RulesSet));
         }
+
+        [HttpGet("{contestId}/chats")]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
+        public async Task<IActionResult> GetChats(long contestId)
+        {
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
+            var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == contestId);
+            if (contest == null)
+            {
+                _logger.LogWarning(
+                    $"Попытка от пользователя с идентификатором {currentUser.Id} получить чаты несуществующего соревнования с идентификатором {contestId}");
+                return BadRequest(_errorCodes[Constants.EntityDoesntExistErrorName]);
+            }
+
+            if (!await _dbContext.ContestsParticipants.AnyAsync(cp => cp.ContestId == contestId && cp.ParticipantId == currentUser.Id)
+                && !await _dbContext.ContestsLocalModerators.AnyAsync(clm => clm.ContestId == contestId && clm.LocalModeratorId == currentUser.Id))
+            {
+                _logger.LogWarning(
+                    $"Попытка от пользователя с идентификатором {currentUser.Id} получить чаты соревнования с идентификатором {contestId} при отсутствии прав на их получение");
+                return BadRequest(Constants.ErrorCodes[Constants.UserEntityName][Constants.UserInsufficientRightsErrorName]);
+            }
+
+            var chats = await _contestsManager.GetUserContestChatsAsync(_dbContext, contestId, currentUser.Id);
+
+            return Json(chats);
+        }
     }
 }
