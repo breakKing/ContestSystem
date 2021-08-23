@@ -43,22 +43,6 @@ namespace ContestSystem.Extensions
             httpContext.Response.Cookies.Append(Constants.RefreshTokenCookieName, refreshToken, options);
         }
 
-        /*public static string GenerateClientFingerprint(this HttpContext httpContext)
-        {
-            StringValues val = string.Empty;
-
-            httpContext.Request.Headers.TryGetValue("User-Agent", out val);
-
-            val += httpContext.Connection.RemoteIpAddress?.ToString() ?? "";
-
-            if (string.IsNullOrWhiteSpace(val))
-            {
-                val = Guid.NewGuid().ToString();
-            }
-
-            return Convert.ToBase64String(Encoding.Unicode.GetBytes(val));
-        }*/
-
         public static async Task<List<Session>> GetUserSessionsAsync(this UserManager<User> userManager, MainDbContext dbContext, long userId)
         {
             if (await userManager.FindByIdAsync(userId.ToString()) == null)
@@ -66,9 +50,31 @@ namespace ContestSystem.Extensions
                 return new List<Session>();
             }
 
-            return await dbContext.Sessions.Where(s => s.UserId == userId)
+            var sessions = await dbContext.Sessions.Where(s => s.UserId == userId)
                                             .OrderBy(s => s.StartTimeUTC)
                                             .ToListAsync();
+
+            bool needToReload = false;
+            for (int i = 0; i < sessions.Count; i++)
+            {
+                Session session = sessions[i];
+                if (session.StartTimeUTC.AddHours(session.ExpiresInHours) >= DateTime.UtcNow)
+                {
+                    needToReload = true; 
+                    dbContext.Sessions.Remove(session);
+                }
+            }
+
+            if (needToReload)
+            {
+                await dbContext.SecureSaveAsync();
+
+                sessions = await dbContext.Sessions.Where(s => s.UserId == userId)
+                                                    .OrderBy(s => s.StartTimeUTC)
+                                                    .ToListAsync();
+            }
+
+            return sessions;
         }
 
         public static async Task<Session> GetUserSessionByRefreshTokenAsync(this UserManager<User> userManager, MainDbContext dbContext, long userId,
@@ -79,13 +85,19 @@ namespace ContestSystem.Extensions
                 return null;
             }
 
-            return await dbContext.Sessions.FirstOrDefaultAsync(s => s.UserId == userId && s.RefreshToken.ToString() == refreshToken);
+            var now = DateTime.UtcNow;
+
+            return await dbContext.Sessions.FirstOrDefaultAsync(s => s.UserId == userId && s.RefreshToken.ToString() == refreshToken
+                                                                        && s.StartTimeUTC.AddHours(s.ExpiresInHours) < now);
         }
 
         public static async Task<Session> GetSessionByRefreshTokenAndFingerprintAsync(this UserManager<User> userManager, MainDbContext dbContext,
             string refreshToken, string fingerprint)
         {
-            return await dbContext.Sessions.FirstOrDefaultAsync(s => s.Fingerprint == fingerprint && s.RefreshToken.ToString() == refreshToken);
+            var now = DateTime.UtcNow;
+
+            return await dbContext.Sessions.FirstOrDefaultAsync(s => s.Fingerprint == fingerprint && s.RefreshToken.ToString() == refreshToken
+                                                                        && s.StartTimeUTC.AddHours(s.ExpiresInHours) < now);
         }
 
         public static async Task<Session> GetSessionByUserAndFingerprintAsync(this UserManager<User> userManager, MainDbContext dbContext,
@@ -96,7 +108,10 @@ namespace ContestSystem.Extensions
                 return null;
             }
 
-            return await dbContext.Sessions.FirstOrDefaultAsync(s => s.Fingerprint == fingerprint && s.UserId == userId);
+            var now = DateTime.UtcNow;
+
+            return await dbContext.Sessions.FirstOrDefaultAsync(s => s.Fingerprint == fingerprint && s.UserId == userId
+                                                                        && s.StartTimeUTC.AddHours(s.ExpiresInHours) < now);
         }
 
         public static async Task<string> CreateUserSessionAsync(this UserManager<User> userManager, MainDbContext dbContext, long userId, 
@@ -110,7 +125,7 @@ namespace ContestSystem.Extensions
             var session = new Session
             {
                 UserId = userId,
-                RefreshToken = Guid.NewGuid(),
+                RefreshToken = GenereteRefreshToken(),
                 Fingerprint = fingerprint,
                 StartTimeUTC = DateTime.UtcNow,
                 ExpiresInHours = durationInHours
@@ -141,7 +156,7 @@ namespace ContestSystem.Extensions
                 return null;
             }
 
-            session.RefreshToken = Guid.NewGuid();
+            session.RefreshToken = GenereteRefreshToken();
             session.StartTimeUTC = DateTime.UtcNow;
 
             dbContext.Sessions.Update(session);
@@ -191,6 +206,11 @@ namespace ContestSystem.Extensions
             }
 
             return true;
+        }
+
+        private static Guid GenereteRefreshToken()
+        {
+            return Guid.NewGuid();
         }
     }
 }
