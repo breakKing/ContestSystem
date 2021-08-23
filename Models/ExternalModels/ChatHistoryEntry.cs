@@ -8,7 +8,8 @@ namespace ContestSystem.Models.ExternalModels
     {
         public long Id { get; set; }
         public string ChatLink { get; set; }
-        public object User { get; set; }
+        public object AffectedUser { get; set; }
+        public object Initiator { get; set; }
         public DateTime DateTimeUTC { get; set; }
         public ChatEventType Type { get; set; } // Имеет значение, если эта "entry" - НЕ сообщение, иначе ChatEventType.Undefined
         public string Text { get; set; } // Имеет значение, если эта "entry" - сообщение, иначе null
@@ -24,7 +25,8 @@ namespace ContestSystem.Models.ExternalModels
             {
                 Id = chatEvent.Id,
                 ChatLink = chatEvent.Chat?.Link,
-                User = chatEvent.User?.ResponseStructure,
+                Initiator = chatEvent.Initiator?.ResponseStructure,
+                AffectedUser = chatEvent.AffectedUser?.ResponseStructure,
                 DateTimeUTC = chatEvent.DateTimeUTC,
                 Type = chatEvent.Type,
                 Text = null
@@ -42,7 +44,8 @@ namespace ContestSystem.Models.ExternalModels
             {
                 Id = chatMessage.Id,
                 ChatLink = chatMessage.Chat?.Link,
-                User = chatMessage.Sender?.ResponseStructure,
+                Initiator = chatMessage.Sender?.ResponseStructure,
+                AffectedUser = null,
                 DateTimeUTC = chatMessage.SentDateTimeUTC,
                 Type = ChatEventType.Undefined,
                 Text = chatMessage.Text

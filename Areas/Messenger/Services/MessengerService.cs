@@ -470,11 +470,14 @@ namespace ContestSystem.Areas.Messenger.Services
         }
 
         private async Task<bool> GenerateChatEventAsync(MainDbContext dbContext, long chatId, ChatEventType type,
-            long userId)
+            long? userId)
         {
+            var chat = await dbContext.Chats.FirstOrDefaultAsync(c => c.Id == chatId);
+
             var chatEvent = new ChatEvent
             {
-                UserId = userId,
+                AffectedUserId = userId,
+                InitiatorId = chat?.AdminId ?? null,
                 ChatId = chatId,
                 DateTimeUTC = DateTime.UtcNow,
                 Type = type
