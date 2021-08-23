@@ -65,7 +65,7 @@ namespace ContestSystem.Areas.Messenger.Controllers
 
             var currentUser = await HttpContext.GetCurrentUser();
 
-            if (!await _messenger.ChatExistsAsync(_dbContext, link))
+            if (!await _messenger.ChatExistsAsync(_dbContext, link, false))
             {
                 _logger.LogNonExistentEntityInForm("ChatUser", _entityName, currentUser.Id);
                 response = ResponseObject<bool>.Fail(_errorCodes[Constants.ChatDoenstExistErrorName]);
@@ -113,7 +113,7 @@ namespace ContestSystem.Areas.Messenger.Controllers
 
             var currentUser = await HttpContext.GetCurrentUser();
 
-            if (!await _messenger.ChatExistsAsync(_dbContext, link))
+            if (!await _messenger.ChatExistsAsync(_dbContext, link, false))
             {
                 _logger.LogNonExistentEntityInForm("ChatUser", _entityName, currentUser.Id);
                 response = ResponseObject<bool>.Fail(_errorCodes[Constants.ChatDoenstExistErrorName]);
@@ -172,16 +172,66 @@ namespace ContestSystem.Areas.Messenger.Controllers
 
         [HttpPost("")]
         [AuthorizeByJwt]
-        public async Task<IActionResult> CreateChat(string link, [FromBody] ChatForm chatForm)
+        public async Task<IActionResult> CreateChat([FromBody] ChatForm chatForm)
         {
-            return null;
+            var response = new ResponseObject<string>();
+
+            if (ModelState.IsValid)
+            {
+                var currentUser = await HttpContext.GetCurrentUser();
+
+                var formStatus = await _messenger.CheckChatFormAsync(_dbContext, chatForm);
+                
+                if (formStatus != FormCheckStatus.Correct)
+                {
+                    _logger.LogFormCheckStatus(formStatus, _entityName, currentUser.Id);
+                    response = ResponseObject<string>.FormResponseObjectForFormCheck(formStatus, _entityName);
+                }
+                else
+                {
+                    var statusData = await _messenger.CreateChatAsync(_dbContext, chatForm);
+                    _logger.LogCreationStatus(statusData.Status, _entityName, statusData.Id, currentUser.Id);
+                    response = ResponseObject<string>.FormResponseObjectForCreation(statusData.Status, _entityName, statusData.Id);
+                }
+            }
+            else
+            {
+                response = ResponseObject<string>.Fail(ModelState, _entityName);
+            }
+
+            return Json(response);
         }
 
         [HttpPost("{link}/messages")]
         [AuthorizeByJwt]
         public async Task<IActionResult> SendMessage(string link, [FromBody] ChatMessageForm chatMessageForm)
         {
-            return null;
+            var response = new ResponseObject<long?>();
+
+            if (ModelState.IsValid)
+            {
+                var currentUser = await HttpContext.GetCurrentUser();
+
+                var formStatus = await _messenger.CheckChatMessageFormAsync(_dbContext, chatMessageForm);
+
+                if (formStatus != FormCheckStatus.Correct)
+                {
+                    _logger.LogFormCheckStatus(formStatus, "ChatMessage", currentUser.Id);
+                    response = ResponseObject<long?>.FormResponseObjectForFormCheck(formStatus, "ChatMessage");
+                }
+                else
+                {
+                    var statusData = await _messenger.SendChatMessageAsync(_dbContext, chatMessageForm);
+                    _logger.LogCreationStatus(statusData.Status, "ChatMessage", statusData.Id.GetValueOrDefault(-1).ToString(), currentUser.Id);
+                    response = ResponseObject<long?>.FormResponseObjectForCreation(statusData.Status, "ChatMessage", statusData.Id);
+                }
+            }
+            else
+            {
+                response = ResponseObject<long?>.Fail(ModelState, "ChatMessage");
+            }
+
+            return Json(response);
         }
 
         [HttpPut("{link}/users/{userId}")]

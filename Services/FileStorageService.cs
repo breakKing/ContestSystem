@@ -14,12 +14,14 @@ namespace ContestSystem.Services
         private readonly string _imagesDirectory = @"Images";
         private readonly string _contestsDirectory = @"Contests";
         private readonly string _postsDirectory = @"Posts";
+        private readonly string _chatsDirectory = @"Chats";
         private readonly ILogger<FileStorageService> _logger;
 
         private string StorageDirectory => Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, _storageDirectory));
         private string ImagesDirectory => Path.GetFullPath(Path.Combine(StorageDirectory, _imagesDirectory));
         private string ContestsImagesDirectory => Path.GetFullPath(Path.Combine(ImagesDirectory, _contestsDirectory));
         private string PostsImagesDirectory => Path.GetFullPath(Path.Combine(ImagesDirectory, _postsDirectory));
+        private string ChatsImagesDirectory => Path.GetFullPath(Path.Combine(ImagesDirectory, _chatsDirectory));
 
         private List<string> AllowedImageTypes => new List<string>
         {
@@ -83,6 +85,33 @@ namespace ContestSystem.Services
                 if (AllowedImageTypes.Contains(imageType))
                 {
                     string imagePath = Path.Combine(PostsImagesDirectory, $"{postId}.{imageType}");
+                    try
+                    {
+                        using (var fileStream = new FileStream(imagePath, FileMode.Create))
+                        {
+                            await formFileForImage.CopyToAsync(fileStream);
+                        }
+                        result = imagePath;
+                        _logger.LogFileWritingSuccessful(imagePath);
+                    }
+                    catch
+                    {
+                        _logger.LogFileWritingFailed(imagePath);
+                    }
+                }
+            }
+            return result;
+        }
+
+        public async Task<string> SaveChatImageAsync(long chatId, IFormFile formFileForImage)
+        {
+            string result = "";
+            if (formFileForImage != null)
+            {
+                string imageType = formFileForImage.FileName.Substring(formFileForImage.FileName.LastIndexOf('.') + 1).ToLower();
+                if (AllowedImageTypes.Contains(imageType))
+                {
+                    string imagePath = Path.Combine(ChatsImagesDirectory, $"{chatId}.{imageType}");
                     try
                     {
                         using (var fileStream = new FileStream(imagePath, FileMode.Create))

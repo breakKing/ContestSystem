@@ -55,7 +55,21 @@ namespace ContestSystem.Services
 
             var historyEntry = ChatHistoryEntry.GetFromModel(chatEvent);
 
-            await SignalRSendAsync(usersIds, "UpdateOnChatEvents", historyEntry);
+            await SignalRSendAsync(usersIds, "UpdateOnChatHistory", historyEntry);
+        }
+
+        public async Task UpdateOnChatMessagesAsync(ChatMessage chatMessage, List<ChatUser> chatUsers)
+        {
+            if (chatMessage == null || chatUsers == null || chatUsers.Count == 0)
+            {
+                return;
+            }
+
+            var usersIds = chatUsers.Select(cu => cu.UserId.ToString()).ToList();
+
+            var historyEntry = ChatHistoryEntry.GetFromModel(chatMessage);
+
+            await SignalRSendAsync(usersIds, "UpdateOnChatHistory", historyEntry);
         }
 
         public async Task UpdateOnUserStatsAsync(MonitorEntry monitorEntry)

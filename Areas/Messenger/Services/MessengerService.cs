@@ -4,12 +4,13 @@ using ContestSystem.Models.ExternalModels;
 using ContestSystem.Services;
 using ContestSystemDbStructure.Models.Messenger;
 using ContestSystemDbStructure.Enums;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ContestSystem.Models.FormModels;
+using ContestSystem.Models.Misc;
+using System.Collections.Generic;
 
 namespace ContestSystem.Areas.Messenger.Services
 {
@@ -24,7 +25,12 @@ namespace ContestSystem.Areas.Messenger.Services
             _storage = storage;
         }
 
-        public async Task<bool> ChatExistsAsync(MainDbContext dbContext, string link, bool isSystemChat = false)
+        public async Task<bool> ChatExistsAsync(MainDbContext dbContext, string link)
+        {
+            return await dbContext.Chats.AnyAsync(ch => ch.Link == link);
+        }
+
+        public async Task<bool> ChatExistsAsync(MainDbContext dbContext, string link, bool isSystemChat)
         {
             return await dbContext.Chats.AnyAsync(ch => ch.Link == link
                                                         && ch.IsCreatedBySystem == isSystemChat);
@@ -58,7 +64,7 @@ namespace ContestSystem.Areas.Messenger.Services
 
                 var messagesExpression = dbContext.ChatsMessages.Where(cm => cm.ChatId == chat.Id)
                     .OrderByDescending(cm => cm.SentDateTimeUTC)
-                    .Select(cm => ChatHistoryEntry.GetFromModel(cm, false));
+                    .Select(cm => ChatHistoryEntry.GetFromModel(cm));
 
                 var eventsExpression = dbContext.ChatsEvents.Where(ce => ce.ChatId == chat.Id)
                     .OrderByDescending(ce => ce.DateTimeUTC)
@@ -97,12 +103,11 @@ namespace ContestSystem.Areas.Messenger.Services
             return chat.AnyoneCanJoin;
         }
 
-        public async Task<InviteStatus> InviteUserToChatAsync(MainDbContext dbContext, long userId, string link,
-            bool isSystemChat = false)
+        public async Task<InviteStatus> InviteUserToChatAsync(MainDbContext dbContext, long userId, string link)
         {
             var status = InviteStatus.Undefined;
 
-            if (await ChatExistsAsync(dbContext, link, isSystemChat))
+            if (await ChatExistsAsync(dbContext, link, false))
             {
                 if (await IsUserInChatAsync(dbContext, userId, link))
                 {
@@ -231,6 +236,194 @@ namespace ContestSystem.Areas.Messenger.Services
             return status;
         }
 
+        public async Task<FormCheckStatus> CheckChatFormAsync(MainDbContext dbContext, ChatForm form)
+        {
+            var status = FormCheckStatus.Undefined;
+
+            bool allUserExist = true;
+
+            foreach (var userId in form.InitialUsers)
+            {
+                if (!await dbContext.Users.AnyAsync(u => u.Id == userId))
+                {
+                    allUserExist = false;
+                    break;
+                }
+            }
+
+            if (!allUserExist)
+            {
+                status = FormCheckStatus.NonExistentUser;
+            }
+            else
+            {
+                status = FormCheckStatus.Correct;
+            }
+
+            return status;
+        }
+
+        public async Task<CreationStatusData<string>> CreateChatAsync(MainDbContext dbContext, ChatForm form)
+        {
+            var statusData = new CreationStatusData<string>
+            {
+                Status = CreationStatus.Undefined,
+                Id = null
+            };
+
+            form.InitialUsers ??= new List<long>();
+
+            if (form.InitialUsers.Count > 0 && !form.InitialUsers.Contains(form.AdminId))
+            {
+                form.InitialUsers.Add(form.AdminId);
+            }
+
+            var chat = new Chat
+            {
+                Name = form.Name,
+                AnyoneCanJoin = form.AnyoneCanJoin,
+                AdminId = form.AdminId,
+                Type = ChatType.Custom,
+                IsCreatedBySystem = false
+            };
+
+            await dbContext.Chats.AddAsync(chat);
+
+            bool saveSuccess = await dbContext.SecureSaveAsync();
+            if (!saveSuccess)
+            {
+                statusData.Status = CreationStatus.DbSaveError;
+            }
+            else
+            {
+                chat.ImagePath = await _storage.SaveChatImageAsync(chat.Id, form.Image);
+                chat.Link = GenerateChatLink(chat);
+                form.InitialUsers.ForEach(u => chat.ChatUsers.Add(new ChatUser
+                {
+                    ChatId = chat.Id,
+                    UserId = u,
+                    ConfirmedByChatAdmin = true,
+                    ConfirmedByThemselves = false,
+                    MutedChat = false
+                }));
+
+                dbContext.Chats.Update(chat);
+
+                saveSuccess = await dbContext.SecureSaveAsync();
+                if (!saveSuccess)
+                {
+                    statusData.Status = CreationStatus.DbSaveError;
+                    await DeleteChatAsync(dbContext, chat);
+                }
+                else
+                {
+                    statusData.Status = CreationStatus.Success;
+                    statusData.Id = chat.Link;
+                }
+            }
+
+            return statusData;
+        }
+
+        public async Task<FormCheckStatus> CheckChatMessageFormAsync(MainDbContext dbContext, ChatMessageForm form)
+        {
+            var status = FormCheckStatus.Correct;
+
+            bool userExist = await dbContext.Users.AnyAsync(u => u.Id == form.UserId);
+
+            if (!userExist)
+            {
+                status = FormCheckStatus.NonExistentUser;
+            }
+            else
+            {
+                bool isUserInChat = await IsUserInChatAsync(dbContext, form.UserId, form.ChatLink);
+
+                if (!isUserInChat)
+                {
+                    status = FormCheckStatus.NotExistentChatUser;
+                }
+                else
+                {
+                    status = FormCheckStatus.Correct;
+                }
+            }
+
+            return status;
+        }
+
+        public async Task<CreationStatusData<long?>> SendChatMessageAsync(MainDbContext dbContext, ChatMessageForm form)
+        {
+            var statusData = new CreationStatusData<long?>
+            {
+                Status = CreationStatus.Undefined,
+                Id = null
+            };
+
+            var chat = await dbContext.Chats.FirstOrDefaultAsync(c => c.Link == form.ChatLink);
+
+            if (chat != null)
+            {
+                var now = DateTime.UtcNow;
+
+                var chatMessage = new ChatMessage
+                {
+                    ChatId = chat.Id,
+                    SenderId = form.UserId,
+                    Text = form.Text,
+                    SentDateTimeUTC = now,
+                    UpdateDateTimeUTC = now
+                };
+
+                await dbContext.ChatsMessages.AddAsync(chatMessage);
+
+                bool saveSuccess = await dbContext.SecureSaveAsync();
+                if (!saveSuccess)
+                {
+                    statusData.Status = CreationStatus.DbSaveError;
+                }
+                else
+                {
+                    statusData.Status = CreationStatus.Success;
+                    statusData.Id = chatMessage.Id;
+
+                    var chatUsers = await dbContext.ChatsUsers.Where(cu => cu.ChatId == chat.Id)
+                                                                .ToListAsync();
+                    await _notifier.UpdateOnChatMessagesAsync(chatMessage, chatUsers);
+                }
+            }
+            else
+            {
+                statusData.Status = CreationStatus.Undefined;
+            }
+
+            return statusData;
+        }
+
+        public async Task<DeletionStatus> DeleteChatAsync(MainDbContext dbContext, Chat chat)
+        {
+            var status = DeletionStatus.Undefined;
+            if (chat == null)
+            {
+                status = DeletionStatus.NotExistentEntity;
+            }
+            else
+            {
+                _storage.DeleteFileAsync(chat.ImagePath);
+                dbContext.Chats.Remove(chat);
+                bool saveSuccess = await dbContext.SecureSaveAsync();
+                if (!saveSuccess)
+                {
+                    status = DeletionStatus.DbSaveError;
+                }
+                else
+                {
+                    status = DeletionStatus.Success;
+                }
+            }
+            return status;
+        }
+
         public async Task<bool> IsUserInvitedInChatAsync(MainDbContext dbContext, long userId, string link)
         {
             return await dbContext.ChatsUsers.AnyAsync(cu => cu.UserId == userId
@@ -299,6 +492,11 @@ namespace ContestSystem.Areas.Messenger.Services
             }
 
             return status;
+        }
+
+        private string GenerateChatLink(Chat chat)
+        {
+            throw new NotImplementedException();
         }
     }
 }

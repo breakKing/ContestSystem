@@ -243,6 +243,9 @@ namespace ContestSystem.Models.Misc
                     }
                     response = Fail(error);
                     break;
+                case FormCheckStatus.NotExistentChatUser:
+                    response = Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.UserNotInChatErrorName]);
+                    break;
                 default:
                     response = Fail(Constants.ErrorCodes[Constants.CommonSectionName][Constants.UndefinedErrorName]);
                     break;

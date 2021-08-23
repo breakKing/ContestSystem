@@ -10,8 +10,9 @@
         NonExistentRulesSet = 5,
         NonExistentChecker = 6,
         NonExistentUser = 7,
-        ExistentSolution = 8,
-        LimitExceeded = 9,
-        Undefined = 10
+        NotExistentChatUser = 8,
+        ExistentSolution = 9,
+        LimitExceeded = 10,
+        Undefined = 11
     }
 }

@@ -8,11 +8,10 @@ namespace ContestSystem.Models.ExternalModels
     {
         public long Id { get; set; }
         public string ChatLink { get; set; }
-        public long? UserId { get; set; }
+        public object User { get; set; }
         public DateTime DateTimeUTC { get; set; }
         public ChatEventType Type { get; set; } // Имеет значение, если эта "entry" - НЕ сообщение, иначе ChatEventType.Undefined
         public string Text { get; set; } // Имеет значение, если эта "entry" - сообщение, иначе null
-        public ChatHistoryEntry MessageToReply { get; set; } // Имеет значение, если эта "entry" - сообщение, и при этом оно является ответом, иначе null
 
         public static ChatHistoryEntry GetFromModel(ChatEvent chatEvent)
         {
@@ -25,15 +24,14 @@ namespace ContestSystem.Models.ExternalModels
             {
                 Id = chatEvent.Id,
                 ChatLink = chatEvent.Chat?.Link,
-                UserId = chatEvent.UserId,
+                User = chatEvent.User?.ResponseStructure,
                 DateTimeUTC = chatEvent.DateTimeUTC,
                 Type = chatEvent.Type,
-                Text = null,
-                MessageToReply = null
+                Text = null
             };
         }
 
-        public static ChatHistoryEntry GetFromModel(ChatMessage chatMessage, bool stopRecursion = false)
+        public static ChatHistoryEntry GetFromModel(ChatMessage chatMessage)
         {
             if (chatMessage == null)
             {
@@ -44,11 +42,10 @@ namespace ContestSystem.Models.ExternalModels
             {
                 Id = chatMessage.Id,
                 ChatLink = chatMessage.Chat?.Link,
-                UserId = chatMessage.SenderId,
+                User = chatMessage.Sender?.ResponseStructure,
                 DateTimeUTC = chatMessage.SentDateTimeUTC,
                 Type = ChatEventType.Undefined,
-                Text = chatMessage.Text,
-                MessageToReply = stopRecursion ? null : GetFromModel(chatMessage.MessageToReply, true)
+                Text = chatMessage.Text
             };
         }
     }
