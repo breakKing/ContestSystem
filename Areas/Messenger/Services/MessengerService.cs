@@ -12,7 +12,6 @@ using ContestSystem.Models.FormModels;
 using ContestSystem.Models.Misc;
 using System.Collections.Generic;
 using ContestSystemDbStructure.Models;
-using ContestSystem.Areas.Contests.Services;
 
 namespace ContestSystem.Areas.Messenger.Services
 {
@@ -20,14 +19,11 @@ namespace ContestSystem.Areas.Messenger.Services
     {
         private readonly NotifierService _notifier;
         private readonly FileStorageService _storage;
-        private readonly ContestsManagerService _contestsManager;
 
-        public MessengerService(NotifierService notifier, FileStorageService storage,
-            ContestsManagerService contestsManager)
+        public MessengerService(NotifierService notifier, FileStorageService storage)
         {
             _notifier = notifier;
             _storage = storage;
-            _contestsManager = contestsManager;
         }
 
         public async Task<bool> ChatExistsAsync(MainDbContext dbContext, string link)
@@ -526,13 +522,13 @@ namespace ContestSystem.Areas.Messenger.Services
                 {
                     var contestId = chatUser.Chat.ContestId.GetValueOrDefault(-1);
 
-                    if (await _contestsManager.IsUserContestLocalModeratorAsync(dbContext, contestId, chatUser.UserId))
+                    if (await dbContext.ContestsLocalModerators.AnyAsync(clm => clm.ContestId == contestId && clm.LocalModeratorId == chatUser.UserId))
                     {
                         name = (await dbContext.ContestsLocalModerators.FirstOrDefaultAsync(clm => clm.ContestId == contestId
                                                                                                 && clm.LocalModeratorId == chatUser.UserId))
                                                                         .Alias;
                     }
-                    else if (await _contestsManager.IsUserContestParticipantAsync(dbContext, contestId, chatUser.UserId))
+                    else if (await dbContext.ContestsParticipants.AnyAsync(cp => cp.ContestId == contestId && cp.ParticipantId == chatUser.UserId && cp.ConfirmedByParticipant && cp.ConfirmedByLocalModerator))
                     {
                         name = (await dbContext.ContestsParticipants.FirstOrDefaultAsync(cp => cp.ContestId == contestId
                                                                                                 && cp.ParticipantId == chatUser.UserId))
