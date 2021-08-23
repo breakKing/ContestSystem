@@ -117,8 +117,6 @@ namespace ContestSystem.Areas.Solutions.Services
                 Id = null
             };
 
-            // TODO: проверка ограничений отправки решений
-
             var solution = new Solution
             {
                 Code = form.Code,
@@ -343,52 +341,6 @@ namespace ContestSystem.Areas.Solutions.Services
             }
             return verdict;
         }
-
-        /*public long GetAdditionalResultForSolutionSubmit(List<Solution> previousSolutions, Solution newSolution, RulesSet rules)
-        {
-            long result = 0;
-            if (previousSolutions == null || newSolution == null || rules == null)
-            {
-                return result;
-            }
-            if (previousSolutions.Count == 0)
-            {
-                result = GetResultForSolution(newSolution, rules);
-            }
-            else
-            {
-                previousSolutions = previousSolutions.OrderBy(s => s.SubmitTimeUTC).ToList();
-                switch (rules.CountMode)
-                {
-                    case RulesCountMode.CountPoints:
-                        short newPoints = newSolution.Points;
-                        short oldPoints;
-                        if (rules.PointsForBestSolution)
-                        {
-                            oldPoints = previousSolutions.Max(s => s.Points);
-                            result = newPoints > oldPoints ? newPoints - oldPoints : 0;
-                        }
-                        else
-                        {
-                            oldPoints = previousSolutions.Last().Points;
-                            result = newPoints - oldPoints;
-                        }
-                        break;
-                    case RulesCountMode.CountPenalty:
-                        result = GetResultForSolution(newSolution, rules);
-                        break;
-                    case RulesCountMode.CountPointsMinusPenalty:
-                        newPoints = newSolution.Points;
-                        oldPoints = previousSolutions.Max(s => s.Points);
-                        result = newPoints > oldPoints ? newPoints - oldPoints : 0;
-                        result -= GetTimePenaltyForSolution(newSolution);
-                        break;
-                    default:
-                        break;
-                }
-            }
-            return result;
-        }*/
 
         public async Task<int> CountUserSolutionsForProblemAsync(MainDbContext dbContext, Contest contest, Problem problem, long userId)
         {
