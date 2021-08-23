@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using ContestSystem.Models.FormModels;
 using ContestSystem.Models.Misc;
 using System.Collections.Generic;
+using ContestSystemDbStructure.Models;
 
 namespace ContestSystem.Areas.Messenger.Services
 {
@@ -297,7 +298,7 @@ namespace ContestSystem.Areas.Messenger.Services
             else
             {
                 chat.ImagePath = await _storage.SaveChatImageAsync(chat.Id, form.Image);
-                chat.Link = GenerateChatLink(chat);
+                chat.Link = GenerateCustomChatLink(chat);
                 form.InitialUsers.ForEach(u => chat.ChatUsers.Add(new ChatUser
                 {
                     ChatId = chat.Id,
@@ -494,9 +495,44 @@ namespace ContestSystem.Areas.Messenger.Services
             return status;
         }
 
-        private string GenerateChatLink(Chat chat)
+        private string GenerateCustomChatLink(Chat chat)
         {
-            throw new NotImplementedException();
+            var link = "";
+
+            if (chat != null && chat.Type == ChatType.Custom)
+            {
+                link = $"users-{chat.Id}";
+            }
+
+            return link;
+        }
+
+        private string GenerateContestChatLink(Chat chat, Contest contest, ContestParticipant participant)
+        {
+            var link = "";
+
+            if (chat != null && contest != null)
+            {
+                switch (chat.Type)
+                {
+                    case ChatType.ContestParticipant:
+                        if (participant != null && participant.ContestId == contest.Id)
+                        {
+                            link = $"contest-participant-{contest.Id}-{participant.ParticipantId}";
+                        }
+                        break;
+                    case ChatType.ContestAnnouncements:
+                        link = $"contest-announcements-{contest.Id}";
+                        break;
+                    case ChatType.ContestModerator:
+                        link = $"contest-moderator-{contest.Id}";
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            return link;
         }
     }
 }
