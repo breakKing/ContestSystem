@@ -58,7 +58,7 @@ namespace ContestSystem.Extensions
             for (int i = 0; i < sessions.Count; i++)
             {
                 Session session = sessions[i];
-                if (session.StartTimeUTC.AddHours(session.ExpiresInHours) >= DateTime.UtcNow)
+                if (session.StartTimeUTC.AddHours(session.ExpiresInHours) <= DateTime.UtcNow)
                 {
                     needToReload = true; 
                     dbContext.Sessions.Remove(session);
@@ -88,7 +88,7 @@ namespace ContestSystem.Extensions
             var now = DateTime.UtcNow;
 
             return await dbContext.Sessions.FirstOrDefaultAsync(s => s.UserId == userId && s.RefreshToken.ToString() == refreshToken
-                                                                        && s.StartTimeUTC.AddHours(s.ExpiresInHours) < now);
+                                                                        && s.StartTimeUTC.AddHours(s.ExpiresInHours) > now);
         }
 
         public static async Task<Session> GetSessionByRefreshTokenAndFingerprintAsync(this UserManager<User> userManager, MainDbContext dbContext,
@@ -97,7 +97,7 @@ namespace ContestSystem.Extensions
             var now = DateTime.UtcNow;
 
             return await dbContext.Sessions.FirstOrDefaultAsync(s => s.Fingerprint == fingerprint && s.RefreshToken.ToString() == refreshToken
-                                                                        && s.StartTimeUTC.AddHours(s.ExpiresInHours) < now);
+                                                                        && s.StartTimeUTC.AddHours(s.ExpiresInHours) > now);
         }
 
         public static async Task<Session> GetSessionByUserAndFingerprintAsync(this UserManager<User> userManager, MainDbContext dbContext,
@@ -111,7 +111,7 @@ namespace ContestSystem.Extensions
             var now = DateTime.UtcNow;
 
             return await dbContext.Sessions.FirstOrDefaultAsync(s => s.Fingerprint == fingerprint && s.UserId == userId
-                                                                        && s.StartTimeUTC.AddHours(s.ExpiresInHours) < now);
+                                                                        && s.StartTimeUTC.AddHours(s.ExpiresInHours) > now);
         }
 
         public static async Task<string> CreateUserSessionAsync(this UserManager<User> userManager, MainDbContext dbContext, long userId, 

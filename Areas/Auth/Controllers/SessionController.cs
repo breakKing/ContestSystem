@@ -53,8 +53,12 @@ namespace ContestSystem.Areas.Auth.Controllers
                 (await _signInManager.CheckPasswordSignInAsync(user, form.Password, false)).Succeeded)
             {
                 var sessions = await _userManager.GetUserSessionsAsync(_dbContext, user.Id);
+                Session session = null;
 
-                var session = sessions.FirstOrDefault(s => s.Fingerprint == form.Fingerprint);
+                if (sessions.Count > 0)
+                {
+                    session = sessions.FirstOrDefault(s => s.Fingerprint == form.Fingerprint);
+                }
 
                 if (session != null)
                 {
