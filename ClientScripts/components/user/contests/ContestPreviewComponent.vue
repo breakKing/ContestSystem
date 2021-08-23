@@ -4,7 +4,10 @@
       <img v-if="!!dataUrl" :src="dataUrl" class="card-img-top" alt="...">
       <div class="card-body d-flex flex-column justify-content-between">
         <h5 class="card-title">{{ contest && contest.localizedName }}</h5>
-        <p v-html="contest && contest.localizedDescription"></p>
+        <template v-if="contest && contest.localizedDescription">
+          <p v-if="encode_html">{{ contest.localizedDescription }}</p>
+          <p v-html="contest.localizedDescription" v-else></p>
+        </template>
         <p> Участников: {{ (contest && contest.participantsCount) || 0 }}</p>
         <p> Автор: {{ contest && contest.creator && contest.creator.fullName }}</p>
         <div class="row d-flex justify-content-center">
@@ -38,7 +41,11 @@ import {mapActions, mapGetters} from "vuex";
 export default {
   name: "ContestPreviewComponent",
   props: {
-    contest: Object
+    contest: Object,
+    encode_html: {
+      type: Boolean,
+      default: false
+    },
   },
   methods: {
     ...mapActions(['deleteContest',

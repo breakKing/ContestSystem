@@ -26,19 +26,20 @@ namespace ContestSystem.Areas.Messenger.Services
 
         public async Task<bool> ChatExistsAsync(MainDbContext dbContext, string link, bool isSystemChat = false)
         {
-            return await dbContext.Chats.AnyAsync(ch => ch.Link == link 
+            return await dbContext.Chats.AnyAsync(ch => ch.Link == link
                                                         && ch.IsCreatedBySystem == isSystemChat);
         }
 
         public async Task<bool> IsUserInChatAsync(MainDbContext dbContext, long userId, string link)
         {
             return await dbContext.ChatsUsers.AnyAsync(cu => cu.UserId == userId
-                                                                && cu.Chat.Link == link
-                                                                && cu.ConfirmedByChatAdmin
-                                                                && cu.ConfirmedByThemselves);
+                                                             && cu.Chat.Link == link
+                                                             && cu.ConfirmedByChatAdmin
+                                                             && cu.ConfirmedByThemselves);
         }
 
-        public async Task<ChatExternalModel> GetChatHistoryAsync(MainDbContext dbContext, string link, int? offset, int? count, bool isSystemChat = false)
+        public async Task<ChatExternalModel> GetChatHistoryAsync(MainDbContext dbContext, string link, int? offset,
+            int? count, bool isSystemChat = false)
         {
             var result = new ChatExternalModel();
 
@@ -52,20 +53,20 @@ namespace ContestSystem.Areas.Messenger.Services
                 count ??= Constants.ChatDefaultCount;
 
                 var chat = await dbContext.Chats.Include(ch => ch.ChatUsers)
-                                                .FirstOrDefaultAsync(ch => ch.Link == link
-                                                                            && ch.IsCreatedBySystem == isSystemChat);
+                    .FirstOrDefaultAsync(ch => ch.Link == link
+                                               && ch.IsCreatedBySystem == isSystemChat);
 
                 var messagesExpression = dbContext.ChatsMessages.Where(cm => cm.ChatId == chat.Id)
-                                                                .OrderByDescending(cm => cm.SentDateTimeUTC)
-                                                                .Select(cm => ChatHistoryEntry.GetFromModel(cm, false));
+                    .OrderByDescending(cm => cm.SentDateTimeUTC)
+                    .Select(cm => ChatHistoryEntry.GetFromModel(cm, false));
 
                 var eventsExpression = dbContext.ChatsEvents.Where(ce => ce.ChatId == chat.Id)
-                                                            .OrderByDescending(ce => ce.DateTimeUTC)
-                                                            .Select(ce => ChatHistoryEntry.GetFromModel(ce));
+                    .OrderByDescending(ce => ce.DateTimeUTC)
+                    .Select(ce => ChatHistoryEntry.GetFromModel(ce));
 
                 var finalExpression = messagesExpression.Concat(eventsExpression)
-                                                        .Skip(offset.Value)
-                                                        .Take(count.Value);
+                    .Skip(offset.Value)
+                    .Take(count.Value);
 
                 var entries = await finalExpression.ToListAsync();
                 entries = entries.OrderBy(e => e.DateTimeUTC).ToList();
@@ -87,7 +88,7 @@ namespace ContestSystem.Areas.Messenger.Services
         public async Task<bool> IsChatJoinableAsync(MainDbContext dbContext, string link)
         {
             var chat = await dbContext.Chats.FirstOrDefaultAsync(ch => ch.Link == link);
-
+            
             if (chat == null)
             {
                 return false;
@@ -96,7 +97,8 @@ namespace ContestSystem.Areas.Messenger.Services
             return chat.AnyoneCanJoin;
         }
 
-        public async Task<InviteStatus> InviteUserToChatAsync(MainDbContext dbContext, long userId, string link, bool isSystemChat = false)
+        public async Task<InviteStatus> InviteUserToChatAsync(MainDbContext dbContext, long userId, string link,
+            bool isSystemChat = false)
         {
             var status = InviteStatus.Undefined;
 
@@ -166,7 +168,8 @@ namespace ContestSystem.Areas.Messenger.Services
                                 }
                                 else
                                 {
-                                    bool genSuccess = await GenerateChatEventAsync(dbContext, chat.Id, ChatEventType.Invited, userId);
+                                    bool genSuccess = await GenerateChatEventAsync(dbContext, chat.Id,
+                                        ChatEventType.Invited, userId);
                                     if (!genSuccess)
                                     {
                                         status = InviteStatus.DbSaveError;
@@ -192,7 +195,7 @@ namespace ContestSystem.Areas.Messenger.Services
             var chat = await dbContext.Chats.FirstOrDefaultAsync(ch => ch.Link == link);
 
             var chatUser = await dbContext.ChatsUsers.FirstOrDefaultAsync(cu => cu.UserId == userId
-                                                                                && cu.Chat.Link == link);
+                && cu.Chat.Link == link);
 
             if (chat != null)
             {
@@ -231,25 +234,25 @@ namespace ContestSystem.Areas.Messenger.Services
         public async Task<bool> IsUserInvitedInChatAsync(MainDbContext dbContext, long userId, string link)
         {
             return await dbContext.ChatsUsers.AnyAsync(cu => cu.UserId == userId
-                                                            && cu.Chat.Link == link
-                                                            && cu.ConfirmedByChatAdmin
-                                                            && !cu.ConfirmedByThemselves);
+                                                             && cu.Chat.Link == link
+                                                             && cu.ConfirmedByChatAdmin
+                                                             && !cu.ConfirmedByThemselves);
         }
 
         public async Task<bool> IsUserKickedFromChatAsync(MainDbContext dbContext, long userId, string link)
         {
             return await dbContext.ChatsUsers.AnyAsync(cu => cu.UserId == userId
-                                                            && cu.Chat.Link == link
-                                                            && !cu.ConfirmedByChatAdmin
-                                                            && !cu.ConfirmedByThemselves);
+                                                             && cu.Chat.Link == link
+                                                             && !cu.ConfirmedByChatAdmin
+                                                             && !cu.ConfirmedByThemselves);
         }
 
         private async Task<bool> UserRequestedJoinToChatAsync(MainDbContext dbContext, long userId, string link)
         {
             return await dbContext.ChatsUsers.AnyAsync(cu => cu.UserId == userId
-                                                            && cu.Chat.Link == link
-                                                            && !cu.ConfirmedByChatAdmin
-                                                            && cu.ConfirmedByThemselves);
+                                                             && cu.Chat.Link == link
+                                                             && !cu.ConfirmedByChatAdmin
+                                                             && cu.ConfirmedByThemselves);
         }
 
         private async Task<Chat> GetChatByLinkAsync(MainDbContext dbContext, string link)
@@ -272,7 +275,8 @@ namespace ContestSystem.Areas.Messenger.Services
             return chatUser;
         }
 
-        private async Task<bool> GenerateChatEventAsync(MainDbContext dbContext, long chatId, ChatEventType type, long userId)
+        private async Task<bool> GenerateChatEventAsync(MainDbContext dbContext, long chatId, ChatEventType type,
+            long userId)
         {
             var chatEvent = new ChatEvent
             {
@@ -289,7 +293,7 @@ namespace ContestSystem.Areas.Messenger.Services
             if (status)
             {
                 var chatUsers = await dbContext.ChatsUsers.Where(cu => cu.ChatId == chatId)
-                                                            .ToListAsync();
+                    .ToListAsync();
 
                 await _notifier.UpdateOnChatEventsAsync(chatEvent, chatUsers);
             }
