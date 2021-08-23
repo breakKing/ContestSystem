@@ -1,5 +1,6 @@
 ﻿using ContestSystem.Hubs;
 using ContestSystem.Models.ExternalModels;
+using ContestSystemDbStructure.Enums;
 using ContestSystemDbStructure.Models;
 using ContestSystemDbStructure.Models.Messenger;
 using Microsoft.AspNetCore.SignalR;
@@ -44,7 +45,8 @@ namespace ContestSystem.Services
             await SignalRSendAsync(usersIds, "UpdateOnSolutionActualResult", actualResult);
         }
 
-        public async Task UpdateOnChatEventsAsync(ChatEvent chatEvent, List<ChatUser> chatUsers)
+        public async Task UpdateOnChatEventsAsync(ChatEvent chatEvent, List<ChatUser> chatUsers,
+            ChatUserExternalModel initiator, ChatUserExternalModel affectedUser)
         {
             if (chatEvent == null || chatUsers == null || chatUsers.Count == 0)
             {
@@ -53,12 +55,13 @@ namespace ContestSystem.Services
 
             var usersIds = chatUsers.Select(cu => cu.UserId.ToString()).ToList();
 
-            var historyEntry = ChatHistoryEntry.GetFromModel(chatEvent);
+            var historyEntry = ChatHistoryEntry.GetFromModel(chatEvent, affectedUser, initiator);
 
             await SignalRSendAsync(usersIds, "UpdateOnChatHistory", historyEntry);
         }
 
-        public async Task UpdateOnChatMessagesAsync(ChatMessage chatMessage, List<ChatUser> chatUsers)
+        public async Task UpdateOnChatMessagesAsync(ChatMessage chatMessage, List<ChatUser> chatUsers,
+            ChatUserExternalModel initiator)
         {
             if (chatMessage == null || chatUsers == null || chatUsers.Count == 0)
             {
@@ -67,7 +70,7 @@ namespace ContestSystem.Services
 
             var usersIds = chatUsers.Select(cu => cu.UserId.ToString()).ToList();
 
-            var historyEntry = ChatHistoryEntry.GetFromModel(chatMessage);
+            var historyEntry = ChatHistoryEntry.GetFromModel(chatMessage, initiator);
 
             await SignalRSendAsync(usersIds, "UpdateOnChatHistory", historyEntry);
         }

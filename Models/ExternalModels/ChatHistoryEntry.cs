@@ -8,13 +8,14 @@ namespace ContestSystem.Models.ExternalModels
     {
         public long Id { get; set; }
         public string ChatLink { get; set; }
-        public object AffectedUser { get; set; }
-        public object Initiator { get; set; }
+        public ChatUserExternalModel AffectedUser { get; set; }
+        public ChatUserExternalModel Initiator { get; set; }
         public DateTime DateTimeUTC { get; set; }
         public ChatEventType Type { get; set; } // Имеет значение, если эта "entry" - НЕ сообщение, иначе ChatEventType.Undefined
         public string Text { get; set; } // Имеет значение, если эта "entry" - сообщение, иначе null
 
-        public static ChatHistoryEntry GetFromModel(ChatEvent chatEvent)
+        public static ChatHistoryEntry GetFromModel(ChatEvent chatEvent, ChatUserExternalModel affectedUser, 
+            ChatUserExternalModel initiator)
         {
             if (chatEvent == null)
             {
@@ -25,15 +26,15 @@ namespace ContestSystem.Models.ExternalModels
             {
                 Id = chatEvent.Id,
                 ChatLink = chatEvent.Chat?.Link,
-                Initiator = chatEvent.Initiator?.ResponseStructure,
-                AffectedUser = chatEvent.AffectedUser?.ResponseStructure,
+                Initiator = affectedUser,
+                AffectedUser = initiator,
                 DateTimeUTC = chatEvent.DateTimeUTC,
                 Type = chatEvent.Type,
                 Text = null
             };
         }
 
-        public static ChatHistoryEntry GetFromModel(ChatMessage chatMessage)
+        public static ChatHistoryEntry GetFromModel(ChatMessage chatMessage, ChatUserExternalModel sender)
         {
             if (chatMessage == null)
             {
@@ -44,7 +45,7 @@ namespace ContestSystem.Models.ExternalModels
             {
                 Id = chatMessage.Id,
                 ChatLink = chatMessage.Chat?.Link,
-                Initiator = chatMessage.Sender?.ResponseStructure,
+                Initiator = sender,
                 AffectedUser = null,
                 DateTimeUTC = chatMessage.SentDateTimeUTC,
                 Type = ChatEventType.Undefined,
