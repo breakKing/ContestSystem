@@ -1,8 +1,7 @@
 ﻿export default {
-    Custom: 0,
-    ContestParticipant: 1,
-    ContestAnnouncements: 2,
-    ContestModerator: 3,
-    // Значения 4-9 резервируются для будущих целей
-    Undefined: 10
+    Undefined: 0,
+    Custom: 1,
+    ContestParticipant: 2,
+    ContestAnnouncements: 3,
+    ContestModerator: 4
 }

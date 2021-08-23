@@ -1,4 +1,5 @@
 ﻿export default {
+    Undefined: 0,
     KickedByAdmin: 1,
     Left: 2,
     Renamed: 3,
@@ -6,6 +7,5 @@
     Created: 5,
     AdminChanged: 6,
     Invited: 7,
-    Joined: 8,
-    Undefined: 9
+    Joined: 8
 }
