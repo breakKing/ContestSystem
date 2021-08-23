@@ -7,6 +7,7 @@ namespace ContestSystem.Models.ExternalModels
     public class ChatHistoryEntry
     {
         public long Id { get; set; }
+        public long ChatId { get; set; }
         public string ChatLink { get; set; }
         public ChatUserExternalModel AffectedUser { get; set; }
         public ChatUserExternalModel Initiator { get; set; }
@@ -25,6 +26,7 @@ namespace ContestSystem.Models.ExternalModels
             return new ChatHistoryEntry
             {
                 Id = chatEvent.Id,
+                ChatId = chatEvent.ChatId,
                 ChatLink = chatEvent.Chat?.Link,
                 Initiator = affectedUser,
                 AffectedUser = initiator,

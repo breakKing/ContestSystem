@@ -4,6 +4,7 @@ namespace ContestSystem.Models.ExternalModels
 {
     public class ChatUserExternalModel
     {
+        public long ChatId { get; set; }
         public string ChatLink { get; set; }
         public long UserId { get; set; }
         public string Name { get; set; }
@@ -17,6 +18,7 @@ namespace ContestSystem.Models.ExternalModels
 
             return new ChatUserExternalModel
             {
+                ChatId = chatUser.ChatId,
                 ChatLink = chatUser.Chat.Link,
                 UserId = chatUser.UserId,
                 Name = name
