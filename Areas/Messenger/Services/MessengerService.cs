@@ -85,7 +85,7 @@ namespace ContestSystem.Areas.Messenger.Services
 
                 var image = _storage.GetImageInBase64(chat.ImagePath);
 
-                result = ChatExternalModel.GetFromModel(chat, chat.ChatUsers, entries, image);
+                result = ChatExternalModel.GetFromModel(chat, chat.ChatUsers.ConvertAll(cu => GetChatUserAsync(dbContext, cu).GetAwaiter().GetResult()), entries, image);
             }
 
             return result;

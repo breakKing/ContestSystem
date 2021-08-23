@@ -9,10 +9,10 @@ namespace ContestSystem.Models.ExternalModels
         public string Name { get; set; }
         public string Image { get; set; }
         public long AdminId { get; set; }
-        public List<object> Users { get; set; }
+        public List<ChatUserExternalModel> Users { get; set; }
         public List<ChatHistoryEntry> HistoryEntries { get; set; } = new List<ChatHistoryEntry>();
 
-        public static ChatExternalModel GetFromModel(Chat chat, List<ChatUser> users, List<ChatHistoryEntry> historyEntries, string imageInBase64)
+        public static ChatExternalModel GetFromModel(Chat chat, List<ChatUserExternalModel> users, List<ChatHistoryEntry> historyEntries, string imageInBase64)
         {
             if (chat == null)
             {
@@ -25,7 +25,7 @@ namespace ContestSystem.Models.ExternalModels
                 Name = chat.Name,
                 Image = imageInBase64,
                 AdminId = chat.AdminId.GetValueOrDefault(),
-                Users = users.ConvertAll(u => u.User?.ResponseStructure),
+                Users = users,
                 HistoryEntries = historyEntries
             };
         }
