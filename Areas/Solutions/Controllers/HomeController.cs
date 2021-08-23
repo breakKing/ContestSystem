@@ -113,7 +113,7 @@ namespace ContestSystem.Areas.Solutions.Controllers
                     else
                     {
                         var statusData = await _solutionsManager.CreateSolutionAsync(_dbContext, solutionForm);
-                        _logger.LogCreationStatus(statusData.Status, _entityName, statusData.Id, currentUser.Id);
+                        _logger.LogCreationStatus(statusData.Status, _entityName, statusData.Id.GetValueOrDefault(-1).ToString(), currentUser.Id);
                         response = ResponseObject<long>.FormResponseObjectForCreation(statusData.Status, _entityName, statusData.Id.GetValueOrDefault(-1));
 
                         var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == solutionForm.ContestId);

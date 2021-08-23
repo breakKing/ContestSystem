@@ -33,9 +33,9 @@ namespace ContestSystem.Areas.Workspace.Services
             _storage = storage;
         }
 
-        public async Task<CreationStatusData> CreateContestAsync(MainDbContext dbContext, ContestForm form, bool checkForLimit = false)
+        public async Task<CreationStatusData<long?>> CreateContestAsync(MainDbContext dbContext, ContestForm form, bool checkForLimit = false)
         {
-            var statusData = new CreationStatusData
+            var statusData = new CreationStatusData<long?>
             {
                 Status = CreationStatus.Undefined,
                 Id = null
@@ -131,9 +131,9 @@ namespace ContestSystem.Areas.Workspace.Services
             return statusData;
         }
 
-        public async Task<CreationStatusData> CreateProblemAsync(MainDbContext dbContext, ProblemForm form, bool checkForLimit = false)
+        public async Task<CreationStatusData<long?>> CreateProblemAsync(MainDbContext dbContext, ProblemForm form, bool checkForLimit = false)
         {
-            var statusData = new CreationStatusData
+            var statusData = new CreationStatusData<long?>
             {
                 Status = CreationStatus.Undefined,
                 Id = null
@@ -234,9 +234,9 @@ namespace ContestSystem.Areas.Workspace.Services
             return statusData;
         }
 
-        public async Task<CreationStatusData> CreateCheckerAsync(MainDbContext dbContext, CheckerForm form)
+        public async Task<CreationStatusData<long?>> CreateCheckerAsync(MainDbContext dbContext, CheckerForm form)
         {
-            var statusData = new CreationStatusData
+            var statusData = new CreationStatusData<long?>
             {
                 Status = CreationStatus.Undefined,
                 Id = null
@@ -268,9 +268,9 @@ namespace ContestSystem.Areas.Workspace.Services
             return statusData;
         }
 
-        public async Task<CreationStatusData> CreateRulesSetAsync(MainDbContext dbContext, RulesSetForm form)
+        public async Task<CreationStatusData<long?>> CreateRulesSetAsync(MainDbContext dbContext, RulesSetForm form)
         {
-            var statusData = new CreationStatusData
+            var statusData = new CreationStatusData<long?>
             {
                 Status = CreationStatus.Undefined,
                 Id = null
@@ -315,9 +315,9 @@ namespace ContestSystem.Areas.Workspace.Services
             throw new NotImplementedException();
         }*/
 
-        public async Task<CreationStatusData> CreatePostAsync(MainDbContext dbContext, PostForm form, bool checkForLimit = false)
+        public async Task<CreationStatusData<long?>> CreatePostAsync(MainDbContext dbContext, PostForm form, bool checkForLimit = false)
         {
-            var statusData = new CreationStatusData
+            var statusData = new CreationStatusData<long?>
             {
                 Status = CreationStatus.Undefined,
                 Id = null

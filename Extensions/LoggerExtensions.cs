@@ -19,7 +19,7 @@ namespace ContestSystem.Extensions
                 $"Попытка пользователя с идентификатором {userId} создать сущность \"{entityName}\", когда он исчерпал лимит создания таких сущностей");
         }
 
-        public static void LogCreationSuccessful(this ILogger logger, string entityName, long createdEntityId,
+        public static void LogCreationSuccessful(this ILogger logger, string entityName, string createdEntityId,
             long userId)
         {
             logger.LogInformation(
@@ -27,14 +27,14 @@ namespace ContestSystem.Extensions
         }
 
         public static void LogCreationSuccessfulWithAutoAccept(this ILogger logger, string entityName,
-            long createdEntityId, long userId)
+            string createdEntityId, long userId)
         {
             logger.LogInformation(
                 $"Пользователем с идентификатором {userId} создана сущность \"{entityName}\" с идентификатором {createdEntityId}, которая автоматически одобрена по причине доверенного статуса автора");
         }
 
         public static void LogCreationUndefinedStatus(this ILogger logger, string entityName,
-            long? createdEntityId, long userId)
+            string createdEntityId, long userId)
         {
             logger.LogWarning(
                 $"При создании сущности \"{entityName}\" пользователем с идентификатором {userId} был получен статус \"Undefined\" и идентификатор {createdEntityId}");
@@ -220,15 +220,15 @@ namespace ContestSystem.Extensions
                    $"не осуществлено, так как она заблокирована для редактирования");
         }
 
-        public static void LogCreationStatus(this ILogger logger, CreationStatus status, string entityName, long? entityId, long userId)
+        public static void LogCreationStatus(this ILogger logger, CreationStatus status, string entityName, string entityId, long userId)
         {
             switch (status)
             {
                 case CreationStatus.Success:
-                    logger.LogCreationSuccessful(entityName, entityId.GetValueOrDefault(-1), userId);
+                    logger.LogCreationSuccessful(entityName, entityId, userId);
                     break;
                 case CreationStatus.SuccessWithAutoAccept:
-                    logger.LogCreationSuccessfulWithAutoAccept(entityName, entityId.GetValueOrDefault(-1), userId);
+                    logger.LogCreationSuccessfulWithAutoAccept(entityName, entityId, userId);
                     break;
                 case CreationStatus.LimitExceeded:
                     logger.LogCreationFailedBecauseOfLimits(entityName, userId);

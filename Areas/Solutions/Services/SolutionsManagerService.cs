@@ -109,9 +109,9 @@ namespace ContestSystem.Areas.Solutions.Services
             return status;
         }
 
-        public async Task<CreationStatusData> CreateSolutionAsync(MainDbContext dbContext, SolutionForm form)
+        public async Task<CreationStatusData<long?>> CreateSolutionAsync(MainDbContext dbContext, SolutionForm form)
         {
-            var statusData = new CreationStatusData
+            var statusData = new CreationStatusData<long?>
             {
                 Status = CreationStatus.Undefined,
                 Id = null

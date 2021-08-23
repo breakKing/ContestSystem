@@ -94,8 +94,8 @@ namespace ContestSystem.Areas.Workspace.Controllers
                 }
                 else
                 {
-                    CreationStatusData statusData = await _workspace.CreateCheckerAsync(_dbContext, checkerForm);
-                    _logger.LogCreationStatus(statusData.Status, _entityName, statusData.Id, currentUser.Id);
+                    var statusData = await _workspace.CreateCheckerAsync(_dbContext, checkerForm);
+                    _logger.LogCreationStatus(statusData.Status, _entityName, statusData.Id.GetValueOrDefault(-1).ToString(), currentUser.Id);
                     response = ResponseObject<long>.FormResponseObjectForCreation(statusData.Status, _entityName, statusData.Id.GetValueOrDefault(-1));
                 }
             }

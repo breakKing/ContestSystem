@@ -121,8 +121,8 @@ namespace ContestSystem.Areas.Workspace.Controllers
                     }
                     else
                     {
-                        CreationStatusData statusData = await _workspace.CreateProblemAsync(_dbContext, problemForm, currentUser.IsLimitedInProblems);
-                        _logger.LogCreationStatus(statusData.Status, _entityName, statusData.Id, currentUser.Id);
+                        var statusData = await _workspace.CreateProblemAsync(_dbContext, problemForm, currentUser.IsLimitedInProblems);
+                        _logger.LogCreationStatus(statusData.Status, _entityName, statusData.Id.GetValueOrDefault(-1).ToString(), currentUser.Id);
                         response = ResponseObject<long>.FormResponseObjectForCreation(statusData.Status, _entityName, statusData.Id.GetValueOrDefault(-1));
                     }
                 }
