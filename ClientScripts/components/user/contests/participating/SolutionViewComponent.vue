@@ -13,12 +13,12 @@
       <span>{{ solution && solution.compilerName }}</span>
     </div>
     <div>
-        <prism-editor v-model="code" 
-                      :highlight="highlighter" 
-                      :tabSize="4" 
-                      line-numbers
-                      readonly
-                      class="code-editor"/>
+      <prism-editor v-model="code"
+                    :highlight="highlighter"
+                    :tabSize="4"
+                    line-numbers
+                    readonly
+                    class="code-editor"/>
     </div>
   </div>
 </template>

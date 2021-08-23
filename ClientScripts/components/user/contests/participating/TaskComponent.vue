@@ -119,7 +119,7 @@ export default {
       else {
         id = +_.first(this.orderedTasks)?.problemId || null
       }
-      this.problem = _.find(this.orderedTasks || [], (t) => t.problemId == id)?.problem || null
+      this.problem = _.find(this.orderedTasks || [], (t) => +t.problemId === +id)?.problem || null
       return id
     },
     problem_name() {
@@ -144,7 +144,7 @@ export default {
       return ContestParticipatingTaskBreads(this.contest_id, this.task_id)
     },
     triesLeft() {
-      let triesCount = _.find(this.currentContestUserStats?.problemTries || [], (pt) => pt.problemId == this.actualTaskId)?.triesCount || 0
+      let triesCount = _.find(this.currentContestUserStats?.problemTries || [], (pt) => +pt.problemId === +this.actualTaskId)?.triesCount || 0
       return (this.currentContestRulesSet?.maxTriesForOneProblem || 0) - triesCount
     }
   },
@@ -156,7 +156,7 @@ export default {
       let {data, status, errors} = await this.sendSolution({
         code: this.code,
         compilerGUID: this.compiler,
-        compilerName: _.find(this.availableCompilers || [], (c, i) => c.guid == this.compiler)?.name,
+        compilerName: _.find(this.availableCompilers || [], (c, i) => c.guid === this.compiler)?.name,
         contestId: this.contest_id,
         userId: this.currentUser.id,
         problemId: this.actualTaskId,

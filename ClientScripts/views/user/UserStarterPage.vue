@@ -1,5 +1,4 @@
 ﻿<template>
-<!-- TODO контесты  -->
   <posts-list-component :max-posts="5"></posts-list-component>
 </template>
 
