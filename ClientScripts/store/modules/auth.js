@@ -199,6 +199,9 @@ export default {
             commit('setCurrentUserContests', [], {root: true})
             commit('setCurrentUserRuleSets', [], {root: true})
             commit('setCurrentUserTasks', [], {root: true})
+            
+            commit('setCurrentUserChats', [], {root: true})
+            
             await dispatch('closeHub', null, {root: true})
             await dispatch('changeCurrentContest', {force: true, contest_id: null}, {root: true})
         },

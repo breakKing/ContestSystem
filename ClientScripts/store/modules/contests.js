@@ -150,6 +150,7 @@ export default {
                 commit('setCurrentContestSolutionsForCurrentUser', solutions)
                 commit('setCurrentContestUserStats', stats)
             }
+            await dispatch('fetchUserChatsFromContest', {contest_id})
         },
         async getContestParticipants({commit, state, dispatch, getters, rootGetters}, contest_id) {
             if (!contest_id) {

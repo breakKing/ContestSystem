@@ -31,12 +31,18 @@ export default {
                     let connection = new HubConnectionBuilder().withUrl('/api/real_time_hub', {
                         accessTokenFactory: () => token
                     }).withAutomaticReconnect()
-                      .build()
+                        .build()
                     connection.on("UpdateOnSolutionActualResult", async (actualResult) => {
                         await dispatch("addSolutionActualResult", actualResult)
                     })
                     connection.on("UpdateOnUserStats", async (stats) => {
                         await dispatch("updateUserStats", stats)
+                    })
+                    connection.on("UpdateOnChatHistory", async (history_entry) => {
+                        if (history_entry) {
+                            let chat_id = history_entry.chatId
+                            commit('updateHistoryEntriesInChat', {chat_id, history_entry})
+                        }
                     })
                     await connection.start()
                     commit('setHubConnection', connection)
@@ -63,17 +69,16 @@ export default {
             let index = _.findIndex(solutions, (s) => +s.id === +actual_result.solutionId)
             if (+index > -1) {
                 solutions[index].actualResult = actual_result
-            } 
-            else {
+            } else {
                 let newSolution = await dispatch('getSolution', +actual_result.solutionId)
                 if (newSolution) {
                     solutions = _.concat(solutions, newSolution)
-                    solutions[solutions.length-1].actualResult = actual_result
+                    solutions[solutions.length - 1].actualResult = actual_result
                 }
             }
             commit('setCurrentContestSolutionsForCurrentUser', solutions)
         },
-        async updateUserStats({ commit, state, dispatch, getters, rootGetters }, stats) {
+        async updateUserStats({commit, state, dispatch, getters, rootGetters}, stats) {
             if (!stats || !rootGetters.currentUser || !rootGetters.currentContest) {
                 return
             }

@@ -15,6 +15,7 @@ import moder_courses from './modules/moder/courses'
 import moder_problems from './modules/moder/problems'
 import ApproveTypes from "../dictionaries/ApproveTypes";
 import moment from "moment";
+import chats from "./modules/chats";
 
 export default createStore({
     strict: process.env.NODE_ENV !== 'production',
@@ -28,6 +29,7 @@ export default createStore({
         rulesets,
         solutions,
         hub,
+        chats,
         moder_posts,
         moder_checkers,
         moder_contests,

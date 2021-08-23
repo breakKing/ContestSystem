@@ -1,7 +1,7 @@
 <template>
   <div class="row-wrapper d-flex mb-3" :class="{'justify-content-end': isOwn}">
     <div class="message-wrapper">
-      <div class="message-up-block">{{ message.dateTimeUTC }} {{ isOwn ? 'Вы' : message.user}}</div>
+      <div class="message-up-block">{{ message.dateTimeUTC }} {{ isOwn ? 'Вы' : user_alias }}</div>
       <div class="message" :class="{'my-own-message': isOwn}">{{ message.text }}</div>
     </div>
   </div>
@@ -14,11 +14,15 @@ export default {
   name: "ChatMessageComponent",
   props: {
     message: Object,
+    chat_users: Array,
   },
   computed: {
     ...mapGetters(['currentUser']),
     isOwn() {
       return +this.currentUser?.id === +this.message?.userId
+    },
+    user_alias() {
+      return this.message?.initiator?.name
     }
   }
 }
