@@ -2,14 +2,14 @@
   <div class="row">
     <div class="col-12">
       <div class="messages-block p-2">
-        <button v-if="chat_rows && chat_rows.length >= 50" @click="loadMoreMessages">Загрузить ещё</button>
+        <button v-if="chat_rows && chat_rows.length >= 50" @click.prevent="loadMoreMessages">Загрузить ещё</button>
         <chat-row-component :row_instance="row" v-for="row of chat_rows"></chat-row-component>
       </div>
     </div>
     <div class="col-12">
-      <textarea class="form-control" placeholder="Введите сообщение" rows="3"></textarea>
+      <textarea v-model="message" class="form-control" placeholder="Введите сообщение" rows="3"></textarea>
       <div class="d-flex justify-content-end mt-4">
-        <button class="btn btn-primary" @click="sendNewMessage">Отправить</button>
+        <button class="btn btn-primary" @click.prevent="sendNewMessage">Отправить</button>
       </div>
     </div>
   </div>
@@ -17,6 +17,7 @@
 
 <script>
 import ChatRowComponent from "./ChatRowComponent";
+import {mapActions} from "vuex";
 
 export default {
   name: "ChatWindowComponent",
@@ -24,17 +25,36 @@ export default {
   props: {
     chat: Object
   },
+  data() {
+    return {
+      message: '',
+    }
+  },
   computed: {
     chat_rows() {
       return (this.chat?.historyEntries || [])
     }
   },
   methods: {
-    loadMoreMessages() {
-
+    ...mapActions(['sendMessageToChat', 'fetchChatInfo']),
+    async loadMoreMessages() {
+      if (this.chat) {
+        let link = this.chat.link;
+        let offset = this.chat.historyEntries.length;
+        await this.fetchChatInfo({
+          link,
+          offset
+        })
+      }
     },
-    sendNewMessage() {
-      
+    async sendNewMessage() {
+      let text = this.message.strip()
+      if (text) {
+        await this.sendMessageToChat({
+          chat: this.chat,
+          text
+        })
+      }
     }
   }
 }
