@@ -5,31 +5,31 @@
     <h4 class="fw-bold m-2 mb-5 text-light">Панель модератора</h4>
 
     <ul class="list-unstyled ps-0 ">
-      <li class="mb-1">
-        <button class="btn btn-toggle align-items-center rounded collapsed text-light" data-bs-toggle="collapse"
-                data-bs-target="#courses-collapse" aria-expanded="false">
-          Курсы
-        </button>
-        <div class="collapse"
-             :class="{show: ['ModeratorNotModeratedCoursesPage','ModeratorApprovedCoursesPage','ModeratorRejectedCoursesPage'].includes($route.name)}"
-             id="courses-collapse">
-          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-            <li>
-              <router-link class="link-light rounded" :to="{name: 'ModeratorNotModeratedCoursesPage'}">Ожидающие
-                модерации
-              </router-link>
-            </li>
-            <li>
-              <router-link class="link-light rounded" :to="{name: 'ModeratorApprovedCoursesPage'}">Одобренные
-              </router-link>
-            </li>
-            <li>
-              <router-link class="link-light rounded" :to="{name: 'ModeratorRejectedCoursesPage'}">Отклонённые
-              </router-link>
-            </li>
-          </ul>
-        </div>
-      </li>
+<!--      <li class="mb-1">-->
+<!--        <button class="btn btn-toggle align-items-center rounded collapsed text-light" data-bs-toggle="collapse"-->
+<!--                data-bs-target="#courses-collapse" aria-expanded="false">-->
+<!--          Курсы-->
+<!--        </button>-->
+<!--        <div class="collapse"-->
+<!--             :class="{show: ['ModeratorNotModeratedCoursesPage','ModeratorApprovedCoursesPage','ModeratorRejectedCoursesPage'].includes($route.name)}"-->
+<!--             id="courses-collapse">-->
+<!--          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">-->
+<!--            <li>-->
+<!--              <router-link class="link-light rounded" :to="{name: 'ModeratorNotModeratedCoursesPage'}">Ожидающие-->
+<!--                модерации-->
+<!--              </router-link>-->
+<!--            </li>-->
+<!--            <li>-->
+<!--              <router-link class="link-light rounded" :to="{name: 'ModeratorApprovedCoursesPage'}">Одобренные-->
+<!--              </router-link>-->
+<!--            </li>-->
+<!--            <li>-->
+<!--              <router-link class="link-light rounded" :to="{name: 'ModeratorRejectedCoursesPage'}">Отклонённые-->
+<!--              </router-link>-->
+<!--            </li>-->
+<!--          </ul>-->
+<!--        </div>-->
+<!--      </li>-->
       <li class="mb-1">
         <button class="btn btn-toggle align-items-center rounded collapsed text-light" data-bs-toggle="collapse"
                 data-bs-target="#posts-collapse" aria-expanded="false">

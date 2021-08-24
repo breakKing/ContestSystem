@@ -10,28 +10,28 @@
           Мой профиль
         </button>
       </li>
-      <li class="mb-1">
-        <button class="btn btn-toggle align-items-center rounded collapsed text-light" data-bs-toggle="collapse"
-                data-bs-target="#courses-collapse" aria-expanded="false">
-          Курсы
-        </button>
-        <div class="collapse" id="courses-collapse">
-          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-            <li>
-              <a href="#" class="link-light rounded">Ожидающие модерации</a>
-            </li>
-            <li>
-              <a href="#" class="link-light rounded">Одобренные</a>
-            </li>
-            <li>
-              <a href="#" class="link-light rounded">Отклонённые</a>
-            </li>
-            <li>
-              <a href="#" class="link-light rounded">Все</a>
-            </li>
-          </ul>
-        </div>
-      </li>
+<!--      <li class="mb-1">-->
+<!--        <button class="btn btn-toggle align-items-center rounded collapsed text-light" data-bs-toggle="collapse"-->
+<!--                data-bs-target="#courses-collapse" aria-expanded="false">-->
+<!--          Курсы-->
+<!--        </button>-->
+<!--        <div class="collapse" id="courses-collapse">-->
+<!--          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">-->
+<!--            <li>-->
+<!--              <a href="#" class="link-light rounded">Ожидающие модерации</a>-->
+<!--            </li>-->
+<!--            <li>-->
+<!--              <a href="#" class="link-light rounded">Одобренные</a>-->
+<!--            </li>-->
+<!--            <li>-->
+<!--              <a href="#" class="link-light rounded">Отклонённые</a>-->
+<!--            </li>-->
+<!--            <li>-->
+<!--              <a href="#" class="link-light rounded">Все</a>-->
+<!--            </li>-->
+<!--          </ul>-->
+<!--        </div>-->
+<!--      </li>-->
       <li class="mb-1">
         <button class="btn btn-toggle align-items-center rounded collapsed text-light" data-bs-toggle="collapse"
                 data-bs-target="#posts-collapse" aria-expanded="false">
