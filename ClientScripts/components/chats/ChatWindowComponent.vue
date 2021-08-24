@@ -48,7 +48,7 @@ export default {
       }
     },
     async sendNewMessage() {
-      let text = this.message.strip()
+      let text = this.message.trim()
       if (text) {
         await this.sendMessageToChat({
           chat: this.chat,
