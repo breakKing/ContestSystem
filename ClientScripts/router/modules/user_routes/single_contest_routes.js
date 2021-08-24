@@ -1,8 +1,8 @@
 import ContestPage from "../../../views/user/contests/single_contest/ContestPage";
 import ContestInformationComponent from "../../../components/user/contests/ContestInformationComponent";
 import TaskComponent from "../../../components/user/contests/participating/TaskComponent";
-import ContestSolutionsListComponent
-    from "../../../components/user/contests/participating/ContestSolutionsListComponent";
+import ContestMySolutionsListComponent
+    from "../../../components/user/contests/participating/ContestMySolutionsListComponent";
 import ContestMonitoringComponent from "../../../components/user/contests/participating/ContestMonitoringComponent";
 import SolutionViewComponent from "../../../components/user/contests/participating/SolutionViewComponent";
 import ContestChatComponent from "../../../components/user/contests/participating/ContestChatComponent";
@@ -54,7 +54,7 @@ export default {
         {
             path: ':contest_id/my-solutions',
             name: 'ContestMySolutionsPage',
-            component: ContestSolutionsListComponent,
+            component: ContestMySolutionsListComponent,
             props: true,
             meta: {
                 authorize: ['user']

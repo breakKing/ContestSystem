@@ -1,5 +1,4 @@
 <template>
-  <bread-crumbs-component :routes="bread_crumb_routes"></bread-crumbs-component>
   <table class="table">
     <thead>
     <tr>
@@ -15,64 +14,58 @@
     </thead>
     <tbody>
     <tr v-for="solution of sortedSolutions">
-      <td><router-link :to="{name: 'ContestParticipatingPage', params: {task_id: solution.problem.id}}">{{ problemName(solution.problem) }}</router-link></td>
+      <td>
+        <span v-if="organizer_mode"> {{ problemName(solution.problem) }}</span>
+        <router-link v-else :to="{name: 'ContestParticipatingPage', params: {task_id: solution.problem.id}}">
+          {{ problemName(solution.problem) }}
+        </router-link>
+      </td>
       <td>{{ solution.compilerName }}</td>
       <td>{{ getFormattedFullDateTime(solution.submitTimeUTC) }}</td>
       <td>{{ verdictInfo(actualResult(solution)) }}</td>
       <td v-if="pointsAreCounted">{{ (actualResult(solution) && actualResult(solution).points) || 0 }}</td>
       <td>{{ getFormattedTime((actualResult(solution) && actualResult(solution).usedTimeInMillis) || 0) }}</td>
       <td>{{ getFormattedMemory((actualResult(solution) && actualResult(solution).usedMemoryInBytes) || 0) }}</td>
-      <td><router-link :to="{name: 'SolutionViewPage', params: {solution_id: solution.id}}">Перейти</router-link></td>
+      <td>
+        <router-link :to="{name: 'SolutionViewPage', params: {solution_id: solution.id}}">Перейти</router-link>
+      </td>
     </tr>
     </tbody>
   </table>
 </template>
 
 <script>
-import {mapActions, mapGetters, mapMutations} from "vuex";
+import {mapGetters} from "vuex";
 import * as _ from 'lodash'
 import CountModes from "../../../../dictionaries/CountModes";
-import BreadCrumbsComponent from "../../../BreadCrumbsComponent";
-import ContestMySolutionsBreads from "../../../../dictionaries/bread_crumbs/contest/ContestMySolutionsBreads";
 import solution_verdict_readable_presentation from "../../../mixins/solution_verdict_readable_presentation";
 
 export default {
   name: "ContestSolutionsListComponent",
-  components: {BreadCrumbsComponent},
   mixins: [solution_verdict_readable_presentation],
-  props: ['contest_id'],
+  props: {
+    solutions: Array,
+    contest: Object,
+    organizer_mode: Boolean,
+  },
   computed: {
-    ...mapGetters(['currentUser', 'currentContestSolutionsForCurrentUser', 'currentContest']),
     ...mapGetters(['getFormattedFullDateTime', 'getFormattedMemory', 'getFormattedTime']),
     sortedSolutions() {
-      return _.sortBy(this.currentContestSolutionsForCurrentUser, (s) => -s.id)
+      return _.sortBy(this.solutions, (s) => -s.id)
     },
     pointsAreCounted() {
-      return +this.currentContest?.rules?.countMode !== +CountModes.CountPenalty
+      return +this.contest?.rules?.countMode !== +CountModes.CountPenalty
     },
-    bread_crumb_routes() {
-      return ContestMySolutionsBreads(this.contest_id)
-    }
   },
   methods: {
-    ...mapActions(['getUserSolutionsInContest', 'changeCurrentContest']),
-    ...mapMutations(['setCurrentContestSolutionsForCurrentUser', 'setCurrentContest']),
     problemName(problem) {
       if (!problem) {
         return ''
       }
-      let letter = _.find(this.currentContest?.problems || [], (p) => +p.problemId === +problem.id)?.letter + '. ' || ''
+      let letter = _.find(this.contest?.problems || [], (p) => +p.problemId === +problem.id)?.letter + '. ' || ''
       return letter + (problem.localizedName || '')
     },
   },
-  beforeRouteEnter(to, from, next) {
-    next(async vm => {
-      await vm.changeCurrentContest({force: false, contest_id: vm.contest_id})
-      if (vm.currentContest && vm.currentContestIsInPast) {
-        return await vm.$router.replace({name: 'ContestPage', params: {contest_id: vm.currentContest.id}})
-      }
-    })
-  }
 }
 </script>
 
