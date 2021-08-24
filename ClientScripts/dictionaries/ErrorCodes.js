@@ -67,7 +67,8 @@
         UserIdMismatch: "ERR_SOLUTION_USER_ID_MISMATCH",
         EntityDoesntExist: "ERR_SOLUTION_DOESNT_EXIST",
         CreationLimitExceeded: "ERR_SOLUTION_CREATION_LIMIT_EXCEEDED",
-        EntityAlreadyExists: "ERR_SOLUTION_ALREADY_EXISTS"
+        EntityAlreadyExists: "ERR_SOLUTION_ALREADY_EXISTS",
+        WrongMomentForEditingErrorName: "ERR_SOLUTION_CANT_BE_EDITED_NOW"
     },
     Compiler: {
         EntityDoesntExist: "ERR_COMPILER_DOESNT_EXIST"

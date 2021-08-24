@@ -367,7 +367,7 @@ namespace ContestSystem.Areas.Messenger.Services
 
                 if (!isUserInChat)
                 {
-                    status = FormCheckStatus.NotExistentChatUser;
+                    status = FormCheckStatus.NonExistentChatUser;
                 }
                 else
                 {

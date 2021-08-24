@@ -243,8 +243,24 @@ namespace ContestSystem.Models.Misc
                     }
                     response = Fail(error);
                     break;
-                case FormCheckStatus.NotExistentChatUser:
+                case FormCheckStatus.NonExistentChatUser:
                     response = Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.UserNotInChatErrorName]);
+                    break;
+                case FormCheckStatus.NonExistentSolution:
+                    response = Fail(Constants.ErrorCodes[Constants.SolutionEntityName][Constants.UserNotInChatErrorName]);
+                    break;
+                case FormCheckStatus.WrongMoment:
+                    error = string.Empty;
+                    if (Constants.ErrorCodes.TryGetValue(entityName, out codes))
+                    {
+                        error = codes.GetValueOrDefault(Constants.WrongMomentForEditingErrorName,
+                                                        Constants.ErrorCodes[Constants.CommonSectionName][Constants.UndefinedErrorName]);
+                    }
+                    else
+                    {
+                        error = Constants.ErrorCodes[Constants.CommonSectionName][Constants.UndefinedErrorName];
+                    }
+                    response = Fail(error);
                     break;
                 default:
                     response = Fail(Constants.ErrorCodes[Constants.CommonSectionName][Constants.UndefinedErrorName]);

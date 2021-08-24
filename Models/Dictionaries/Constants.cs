@@ -58,6 +58,7 @@ namespace ContestSystem.Models.Dictionaries
         public static readonly string VerifyTokenFailedErrorName = "VerifyTokenFailed";
         public static readonly string ChatDoenstExistErrorName = "ChatDoenstExist";
         public static readonly string UserKickedFromChatErrorName = "UserKickedFromChat";
+        public static readonly string WrongMomentForEditingErrorName = "WrongMomentForEditing";
         public static readonly string LockedErrorName = "Locked";
         public static readonly string DbSaveErrorName = "DbSaveError";
         public static readonly string CheckerServersUnavailableErrorName = "CheckerServersUnavailable";
@@ -142,7 +143,8 @@ namespace ContestSystem.Models.Dictionaries
                 { UserIdMismatchErrorName, "ERR_SOLUTION_USER_ID_MISMATCH" },
                 { EntityDoesntExistErrorName, "ERR_SOLUTION_DOESNT_EXIST" },
                 { CreationLimitExceededErrorName, "ERR_SOLUTION_CREATION_LIMIT_EXCEEDED" },
-                { EntityAlreadyExistsErrorName, "ERR_SOLUTION_ALREADY_EXISTS" }
+                { EntityAlreadyExistsErrorName, "ERR_SOLUTION_ALREADY_EXISTS" },
+                { WrongMomentForEditingErrorName, "ERR_SOLUTION_CANT_BE_EDITED_NOW" }
             },
             [CompilerEntityName] = new Dictionary<string, string>
             {

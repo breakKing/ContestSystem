@@ -345,9 +345,17 @@ namespace ContestSystem.Extensions
                 case FormCheckStatus.LimitExceeded:
                     logger.LogCreationFailedBecauseOfLimits(entityName, userId);
                     break;
-                case FormCheckStatus.NotExistentChatUser:
+                case FormCheckStatus.NonExistentChatUser:
                     logger.LogWarning($"При проверке формы для сущности \"{entityName}\" от пользователя с идентификатором {userId} было обнаружено " +
                    $"использование несуществующего участника чата");
+                    break;
+                case FormCheckStatus.NonExistentSolution:
+                    logger.LogWarning($"При проверке формы для сущности \"{entityName}\" от пользователя с идентификатором {userId} было обнаружено " +
+                   $"использование несуществующего решения");
+                    break;
+                case FormCheckStatus.WrongMoment:
+                    logger.LogWarning($"При проверке формы \"{entityName}\" от пользователя с идентификатором {userId} было обнаружена " +
+                   $"невозможность обновить соответствующую сущность в данный момент");
                     break;
                 default:
                     break;

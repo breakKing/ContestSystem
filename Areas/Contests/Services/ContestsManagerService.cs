@@ -4,6 +4,7 @@ using ContestSystem.Models.DbContexts;
 using ContestSystem.Models.Dictionaries;
 using ContestSystem.Models.ExternalModels;
 using ContestSystem.Models.FormModels;
+using ContestSystem.Services;
 using ContestSystemDbStructure.Enums;
 using ContestSystemDbStructure.Models;
 using Microsoft.EntityFrameworkCore;
@@ -18,11 +19,13 @@ namespace ContestSystem.Areas.Contests.Services
     {
         private readonly SolutionsManagerService _solutionsManager;
         private readonly MessengerService _messenger;
+        private readonly NotifierService _notifier;
 
-        public ContestsManagerService(SolutionsManagerService solutionsManager, MessengerService messenger)
+        public ContestsManagerService(SolutionsManagerService solutionsManager, MessengerService messenger, NotifierService notifier)
         {
             _solutionsManager = solutionsManager;
             _messenger = messenger;
+            _notifier = notifier;
         }
 
         public async Task<List<MonitorEntry>> GetContestMonitorAsync(MainDbContext dbContext, Contest contest)
@@ -152,6 +155,102 @@ namespace ContestSystem.Areas.Contests.Services
             }
 
             return solutions;
+        }
+
+        public async Task<FormCheckStatus> CheckSolutionManualVerdictFormAsync(MainDbContext dbContext, SolutionManualVerdictForm form)
+        {
+            var status = FormCheckStatus.Undefined;
+
+            var solution = await dbContext.Solutions.FirstOrDefaultAsync(s => s.Id == form.SolutionId);
+
+            if (solution == null)
+            {
+                status = FormCheckStatus.NonExistentSolution;
+            }
+            else
+            {
+                bool canSetManualVerdict = solution.Verdict != VerdictType.TestInProgress
+                                        && solution.Verdict != VerdictType.CompilationError
+                                        && solution.Verdict != VerdictType.CompilationSucceed
+                                        && solution.Verdict != VerdictType.Undefined;
+
+                if (!canSetManualVerdict)
+                {
+                    status = FormCheckStatus.WrongMoment;
+                }
+                else
+                {
+                    status = FormCheckStatus.Correct;
+                }
+            }
+
+            return status;
+        }
+
+        public async Task<EditionStatus> SetSolutionManualVerdictAsync(MainDbContext dbContext, SolutionManualVerdictForm form)
+        {
+            var status = EditionStatus.Undefined;
+
+            var solution = await dbContext.Solutions.FirstOrDefaultAsync(s => s.Id == form.SolutionId);
+
+            if (solution != null)
+            {
+                bool changed = true;
+                var rulesSet = solution.Contest.RulesSet;
+
+                switch (form.Verdict)
+                {
+                    case VerdictType.WrongAnswer:
+                        solution.Verdict = VerdictType.WrongAnswer;
+                        solution.Points = 0;
+                        break;
+                    case VerdictType.PartialSolution:
+                        if (rulesSet?.CountMode == RulesCountMode.CountPenalty)
+                        {
+                            solution.Verdict = VerdictType.Accepted;
+                            solution.Points = 100;
+                        }
+                        else
+                        {
+                            solution.Verdict = VerdictType.PartialSolution;
+                            solution.Points = form.Points;
+                        }
+                        break;
+                    case VerdictType.Accepted:
+                        solution.Verdict = VerdictType.Accepted;
+                        solution.Points = 100;
+                        break;
+                    default:
+                        changed = false;
+                        break;
+                }
+
+                if (!changed)
+                {
+                    status = EditionStatus.Undefined;
+                }
+                else
+                {
+                    dbContext.Solutions.Update(solution);
+
+                    bool saveSuccess = await dbContext.SecureSaveAsync();
+                    if (!saveSuccess)
+                    {
+                        status = EditionStatus.DbSaveError;
+                    }
+                    else
+                    {
+                        status = EditionStatus.Success;
+                        await _notifier.UpdateOnSolutionActualResultAsync(solution.Contest, solution);
+                    }
+                }
+            }
+            else
+            {
+                status = EditionStatus.NotExistentEntity;
+            }
+
+            return status;
         }
 
         public async Task<bool> IsUserContestLocalModeratorAsync(MainDbContext dbContext, long contestId, long userId)

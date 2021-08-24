@@ -2,17 +2,19 @@
 {
     public enum FormCheckStatus
     {
-        Correct = 0,
-        NonExistentCompiler = 1,
-        NonExistentParticipant = 2,
-        NonExistentContest = 3,
-        NonExistentProblem = 4,
-        NonExistentRulesSet = 5,
-        NonExistentChecker = 6,
-        NonExistentUser = 7,
-        NotExistentChatUser = 8,
-        ExistentSolution = 9,
-        LimitExceeded = 10,
-        Undefined = 11
+        Undefined = 0,
+        Correct = 1,
+        NonExistentCompiler = 2,
+        NonExistentParticipant = 3,
+        NonExistentContest = 4,
+        NonExistentProblem = 5,
+        NonExistentRulesSet = 6,
+        NonExistentChecker = 7,
+        NonExistentUser = 8,
+        NonExistentChatUser = 9,
+        NonExistentSolution = 10,
+        ExistentSolution = 11,
+        LimitExceeded = 12,
+        WrongMoment = 13
     }
 }
