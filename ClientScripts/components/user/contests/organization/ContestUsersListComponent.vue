@@ -31,7 +31,7 @@ export default {
     ...mapMutations(['setCurrentContestParticipants']),
     async kickUser(user) {
       let {status, errors} = await this.removeUserFromContest({
-        user_id: user.id,
+        user_id: user.userId,
         contest_id: this.contest.id
       })
       if (status) {
