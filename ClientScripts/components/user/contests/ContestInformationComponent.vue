@@ -56,6 +56,13 @@
       </template>
     </div>
   </div>
+  <div v-else class="row">
+    <div class="col">
+      <contest-organizer-interface-main-component
+          :contest="currentContest"
+      ></contest-organizer-interface-main-component>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -64,10 +71,12 @@ import {ErrorMessage, Field, Form} from "vee-validate";
 import * as Yup from "yup";
 import BreadCrumbsComponent from "../../BreadCrumbsComponent";
 import ContestPageBreads from "../../../dictionaries/bread_crumbs/contest/ContestPageBreads";
+import ContestOrganizerInterfaceMainComponent from "./ContestOrganizerInterfaceMainComponent";
 
 export default {
   name: "ContestInformationComponent",
   components: {
+    ContestOrganizerInterfaceMainComponent,
     BreadCrumbsComponent,
     VForm: Form,
     VField: Field,
