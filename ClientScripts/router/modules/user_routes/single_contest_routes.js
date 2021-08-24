@@ -25,7 +25,7 @@ export default {
             },
         },
         {
-            path: ':contest_id/participate/:chat_id',
+            path: ':contest_id/participate/chatting/:chat_id',
             name: 'ContestParticipatingChattingPage',
             component: ContestChatComponent,
             props: true,
