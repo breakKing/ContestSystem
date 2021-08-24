@@ -111,6 +111,7 @@ export default {
         Surname: this.surname,
         Patronymic: this.patronymic,
         DateOfBirth: this.date_of_birth,
+        Fingerprint: this.fingerprint
       })
       if (result) {
         await this.$router.push({name: 'Home'})
@@ -123,7 +124,8 @@ export default {
   computed: {
     ...mapState({
       authError: state => state.auth.auth_error
-    })
+    }),
+    ...mapGetters(["fingerprint"])
   },
 }
 </script>

@@ -5,7 +5,7 @@ namespace ContestSystem.Models.ExternalModels
     public class ContestOrganizerExternalModel
     {
         public long ContestId { get; set; }
-        public long UserId { get; set; }
+        public long Id { get; set; }
         public string Alias { get; set; }
 
         public static ContestOrganizerExternalModel GetFromModel(ContestLocalModerator localModerator)
@@ -18,7 +18,7 @@ namespace ContestSystem.Models.ExternalModels
             return new ContestOrganizerExternalModel
             {
                 ContestId = localModerator.ContestId,
-                UserId = localModerator.LocalModeratorId,
+                Id = localModerator.LocalModeratorId,
                 Alias = localModerator.Alias
             };
         }

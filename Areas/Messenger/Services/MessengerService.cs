@@ -67,13 +67,13 @@ namespace ContestSystem.Areas.Messenger.Services
                 var messagesExpression = dbContext.ChatsMessages.Where(cm => cm.ChatId == chat.Id)
                     .OrderByDescending(cm => cm.SentDateTimeUTC)
                     .AsEnumerable()
-                    .Select(cm => ChatHistoryEntry.GetFromModel(cm, extenalChatUsers.FirstOrDefault(ecu => ecu.UserId == cm.SenderId)));
+                    .Select(cm => ChatHistoryEntry.GetFromModel(cm, extenalChatUsers.FirstOrDefault(ecu => ecu.Id == cm.SenderId)));
 
                 var eventsExpression = dbContext.ChatsEvents.Where(ce => ce.ChatId == chat.Id)
                     .OrderByDescending(ce => ce.DateTimeUTC)
                     .AsEnumerable()
-                    .Select(ce => ChatHistoryEntry.GetFromModel(ce, extenalChatUsers.FirstOrDefault(ecu => ecu.UserId == ce.AffectedUserId),
-                                                                    extenalChatUsers.FirstOrDefault(ecu => ecu.UserId == ce.InitiatorId)));
+                    .Select(ce => ChatHistoryEntry.GetFromModel(ce, extenalChatUsers.FirstOrDefault(ecu => ecu.Id == ce.AffectedUserId),
+                                                                    extenalChatUsers.FirstOrDefault(ecu => ecu.Id == ce.InitiatorId)));
 
                 var finalExpression = messagesExpression.Concat(eventsExpression)
                     .Skip(offset.Value)
@@ -529,7 +529,7 @@ namespace ContestSystem.Areas.Messenger.Services
                 {
                     ChatId = chatUser.ChatId,
                     ChatLink = chatUser.Chat.Link,
-                    UserId = chatUser.UserId,
+                    Id = chatUser.UserId,
                     Name = string.Empty
                 };
 
