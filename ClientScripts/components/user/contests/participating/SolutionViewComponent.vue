@@ -95,8 +95,8 @@ export default {
       let solution_data = await this.changeSolution({
         contestId: this.contest_id,
         solutionId: this.solution.id,
-        verdict: this.verdict,
-        points: this.points
+        verdict: +this.verdict,
+        points: +this.points
       })
       if (solution_data) {
         Object.assign(this.solution, solution_data)
