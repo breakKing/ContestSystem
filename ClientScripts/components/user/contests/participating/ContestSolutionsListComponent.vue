@@ -57,9 +57,6 @@ export default {
     },
     pointsAreCounted() {
       return +this.contest?.rules?.countMode !== +CountModes.CountPenalty
-    },
-    lastCheckerOutput(solution) {
-      return +solution?.testResults?.length > 0 ? (solution?.testResults[solution?.testResults.length-1].checkerOutput || '') : ''
     }
   },
   methods: {
@@ -70,6 +67,9 @@ export default {
       let letter = _.find(this.contest?.problems || [], (p) => +p.problemId === +problem.id)?.letter + '. ' || ''
       return letter + (problem.localizedName || '')
     },
+    lastCheckerOutput(solution) {
+      return +solution?.testResults?.length > 0 ? (solution?.testResults[solution?.testResults.length-1].checkerOutput || '') : ''
+    }
   },
 }
 </script>
