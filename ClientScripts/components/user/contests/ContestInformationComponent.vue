@@ -71,7 +71,7 @@ import {ErrorMessage, Field, Form} from "vee-validate";
 import * as Yup from "yup";
 import BreadCrumbsComponent from "../../BreadCrumbsComponent";
 import ContestPageBreads from "../../../dictionaries/bread_crumbs/contest/ContestPageBreads";
-import ContestOrganizerInterfaceMainComponent from "./ContestOrganizerInterfaceMainComponent";
+import ContestOrganizerInterfaceMainComponent from "./organization/ContestOrganizerInterfaceMainComponent";
 
 export default {
   name: "ContestInformationComponent",
