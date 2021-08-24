@@ -46,6 +46,9 @@ export default {
             }
         },
         async fetchUserChatsFromContest({commit, state, dispatch, getters, rootGetters}, {contest_id}) {
+            if (!contest_id) {
+                commit('setCurrentUserChats', [])
+            }
             try {
                 let {data} = await rootGetters.api.get(`/contests/${contest_id}/chats`)
                 for (let chat of data) {
