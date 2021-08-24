@@ -52,7 +52,7 @@ export default {
         },
         setCurrentContestAllSolutions(state, val) {
             state.current_contest_all_solutions = (val || [])
-        }, 
+        },
         updateCurrentContestAllSolutions(state, {index, props}) {
             if (!state.current_contest_all_solutions[index]) {
                 state.current_contest_all_solutions[index] = {}
@@ -181,7 +181,11 @@ export default {
                 commit('setCurrentContestSolutionsForCurrentUser', solutions)
                 commit('setCurrentContestUserStats', stats)
             }
-            commit('setCurrentContestAllSolutions', await dispatch('getAllSolutionsInContest', {contest_id}))
+            let all_solutions = [];
+            if (getters.currentUserIsOrganizerOfCurrentContest) {
+                all_solutions = await dispatch('getAllSolutionsInContest', {contest_id});
+            }
+            commit('setCurrentContestAllSolutions', all_solutions)
 
             await dispatch('fetchUserChatsFromContest', {contest_id})
         },
