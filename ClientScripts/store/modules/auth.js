@@ -183,6 +183,9 @@ export default {
             }
         },
         async logout({ commit, state, dispatch, getters, rootGetters }) {
+            if (!getters.currentUser) {
+                return;
+            }
             await rootGetters.api.post('/auth/session/logout', { fingerprint: getters.fingerprint })
             await dispatch('updateTokenAndHeaders', null)
 
