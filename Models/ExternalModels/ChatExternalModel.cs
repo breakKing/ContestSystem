@@ -10,6 +10,7 @@ namespace ContestSystem.Models.ExternalModels
         public string Name { get; set; }
         public string Image { get; set; }
         public long AdminId { get; set; }
+        public long? ContestId { get; set; }
         public List<ChatUserExternalModel> Users { get; set; }
         public List<ChatHistoryEntry> HistoryEntries { get; set; } = new List<ChatHistoryEntry>();
 
@@ -23,6 +24,7 @@ namespace ContestSystem.Models.ExternalModels
             return new ChatExternalModel
             {
                 Id = chat.Id,
+                ContestId = chat.ContestId,
                 Link = chat.Link,
                 Name = chat.Name,
                 Image = imageInBase64,
