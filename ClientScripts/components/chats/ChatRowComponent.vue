@@ -1,6 +1,8 @@
 <template>
-  <chat-event-component :event="row_instance"
-                        v-if="show_events && isEvent"></chat-event-component>
+  <template v-if="isEvent">
+    <chat-event-component :event="row_instance"
+                          v-if="show_events"></chat-event-component>
+  </template>
   <chat-message-component :message="row_instance" v-else></chat-message-component>
 </template>
 
