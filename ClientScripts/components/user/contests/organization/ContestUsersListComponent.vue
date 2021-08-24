@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import {mapActions, mapMutations} from "vuex";
+import {mapActions, mapGetters, mapMutations} from "vuex";
 
 export default {
   name: "ContestUsersListComponent",
@@ -27,8 +27,8 @@ export default {
     contest: Object
   },
   methods: {
-    ...mapActions(['removeUserFromContest', 'getContestParticipants']),
-    ...mapMutations(['setCurrentContestParticipants']),
+    ...mapActions(['removeUserFromContest', 'getContestParticipants', 'getChatsFromContest']),
+    ...mapMutations(['setCurrentContestParticipants', 'setCurrentUserChats']),
     async kickUser(user) {
       let {status, errors} = await this.removeUserFromContest({
         user_id: user.id,
@@ -37,10 +37,17 @@ export default {
       if (status) {
         let participants = await this.getContestParticipants(this.contest.id)
         this.setCurrentContestParticipants(participants)
+
+        let user_chats = _.filter(this.currentUserChats, (c) => +c.contestId !== +this.contest.id)
+        let contest_chats = this.getChatsFromContest({contest_id: this.contest.id})
+        this.setCurrentUserChats(_.concat(user_chats, contest_chats))
       } else {
         console.error(errors)
       }
     }
+  },
+  computed: {
+    ...mapGetters(['currentUserChats']),
   }
 }
 </script>
