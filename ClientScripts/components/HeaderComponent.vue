@@ -22,9 +22,9 @@
             <router-link class="nav-link text-light" :to="{name: 'PostsPage'}">Блог</router-link>
           </li>
           <template v-if="isAuthenticated && currentRole === 'user'">
-          <li class="nav-item me-2 fs-5" >
-            <router-link class="nav-link text-light" :to="{name: 'CoursePage'}">Учебные курсы</router-link>
-          </li>
+<!--          <li class="nav-item me-2 fs-5" >-->
+<!--            <router-link class="nav-link text-light" :to="{name: 'CoursePage'}">Учебные курсы</router-link>-->
+<!--          </li>-->
           <li class="nav-item fs-5">
             <router-link class="nav-link text-light" :to="{name: 'WorkSpaceWelcomeComponent'}">Личный кабинет</router-link>
           </li>
