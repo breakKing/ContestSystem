@@ -30,6 +30,7 @@
       <div class="col-12 col-md-3">
         <chat-list-component
             @chat_selected="active_chat_id = $event"
+            :chats="currentChats"
         ></chat-list-component>
       </div>
       <div class="col">
