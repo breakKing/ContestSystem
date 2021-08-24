@@ -1,4 +1,5 @@
-﻿using ContestSystemDbStructure.Models.Messenger;
+﻿using ContestSystemDbStructure.Enums;
+using ContestSystemDbStructure.Models.Messenger;
 using System.Collections.Generic;
 
 namespace ContestSystem.Models.ExternalModels
@@ -10,6 +11,7 @@ namespace ContestSystem.Models.ExternalModels
         public string Name { get; set; }
         public string Image { get; set; }
         public long AdminId { get; set; }
+        public ChatType Type { get; set; }
         public long? ContestId { get; set; }
         public List<ChatUserExternalModel> Users { get; set; }
         public List<ChatHistoryEntry> HistoryEntries { get; set; } = new List<ChatHistoryEntry>();
@@ -29,6 +31,7 @@ namespace ContestSystem.Models.ExternalModels
                 Name = chat.Name,
                 Image = imageInBase64,
                 AdminId = chat.AdminId.GetValueOrDefault(),
+                Type = chat.Type,
                 Users = users,
                 HistoryEntries = historyEntries
             };
