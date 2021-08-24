@@ -2,7 +2,9 @@
   <div class="row">
     <div class="col-12">
       <div class="messages-block p-2">
-        <button v-if="chat_rows && chat_rows.length >= 50" @click.prevent="loadMoreMessages">Загрузить ещё</button>
+        <div class="d-flex justify-content-center">
+          <button class="btn btn-primary" v-if="chat_rows && chat_rows.length >= 50" @click.prevent="loadMoreMessages">Загрузить ещё</button>
+        </div>
         <chat-row-component :row_instance="row" v-for="row of chat_rows"></chat-row-component>
       </div>
     </div>

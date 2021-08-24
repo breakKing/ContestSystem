@@ -1,7 +1,10 @@
 <template>
   <div class="row-wrapper d-flex mb-3" :class="{'justify-content-end': isOwn}">
     <div class="message-wrapper">
-      <div class="message-up-block">{{ message.dateTimeUTC }} {{ isOwn ? 'Вы' : user_alias }}</div>
+      <div class="message-up-block">{{ getFormattedFullDateTime(message.dateTimeUTC) }} {{
+          isOwn ? 'Вы' : user_alias
+        }}
+      </div>
       <div class="message" :class="{'my-own-message': isOwn}">{{ message.text }}</div>
     </div>
   </div>
@@ -17,7 +20,7 @@ export default {
     chat_users: Array,
   },
   computed: {
-    ...mapGetters(['currentUser']),
+    ...mapGetters(['currentUser', 'getFormattedFullDateTime']),
     isOwn() {
       return +this.currentUser?.id === +this.message?.initiator?.userId
     },
@@ -30,7 +33,7 @@ export default {
 
 <style lang="scss" scoped>
 .message-wrapper {
-  width: 85%;
+  width: 60%;
 }
 
 .message {
