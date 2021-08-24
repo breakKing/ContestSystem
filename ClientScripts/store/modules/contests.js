@@ -186,8 +186,10 @@ export default {
                 all_solutions = await dispatch('getAllSolutionsInContest', {contest_id});
             }
             commit('setCurrentContestAllSolutions', all_solutions)
-
-            await dispatch('fetchUserChatsFromContest', {contest_id})
+            
+            if (getters.currentUserIsOrganizerOfCurrentContest || getters.currentUserIsParticipantOfCurrentContest) {
+                await dispatch('fetchUserChatsFromContest', {contest_id})
+            }
         },
         async getContestParticipants({commit, state, dispatch, getters, rootGetters}, contest_id) {
             if (!contest_id) {
