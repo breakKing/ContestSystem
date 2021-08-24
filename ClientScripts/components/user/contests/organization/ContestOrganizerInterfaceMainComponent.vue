@@ -31,6 +31,7 @@
         <chat-list-component
             @chat_selected="active_chat_id = $event"
             :chats="currentChats"
+            :enable_event_mode="true"
         ></chat-list-component>
       </div>
       <div class="col">
@@ -65,7 +66,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['currentUser', 'currentContest']),
+    ...mapGetters(['currentUser', 'currentContest', 'getContestChats']),
     currentChats() {
       return this.getContestChats(this.currentContest?.id)
     },

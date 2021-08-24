@@ -26,7 +26,7 @@
   <div class="row" v-if="!currentUserIsOrganizerOfCurrentContest">
     <div class="col">
       <template v-if="!currentUserIsParticipantOfCurrentContest">
-        <button v-if="!wants_participate" @click.prevent="wants_participate=true">
+        <button class="btn btn-success" v-if="!wants_participate" @click.prevent="wants_participate=true">
           Хочу участвовать
         </button>
         <template v-else>
