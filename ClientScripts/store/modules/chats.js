@@ -67,9 +67,9 @@ export default {
                             userId: rootGetters.currentUser.id,
                             text
                         })
-                    for (let chat of data) {
+                    /*for (let chat of data) {
                         commit('updateCurrentUserChats', chat)
-                    }
+                    }*/
                     return true
                 }
                 return false

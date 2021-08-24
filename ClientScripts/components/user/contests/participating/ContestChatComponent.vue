@@ -56,7 +56,7 @@ export default {
       return _.sortBy((this.currentContest?.problems || []), ['letter'])
     },
     currentChats() {
-      return this.getContestChats(this.currentContest.id)
+      return this.getContestChats(this.currentContest?.id)
     },
     currentChat() {
       return _.find(this.currentChats, (c) => +c.id === +this.chat_id)

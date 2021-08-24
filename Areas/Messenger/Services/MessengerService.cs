@@ -331,7 +331,7 @@ namespace ContestSystem.Areas.Messenger.Services
                     ChatId = chat.Id,
                     UserId = u,
                     ConfirmedByChatAdmin = true,
-                    ConfirmedByThemselves = false,
+                    ConfirmedByThemselves = chat.IsCreatedBySystem,
                     MutedChat = false
                 }));
 
@@ -528,6 +528,7 @@ namespace ContestSystem.Areas.Messenger.Services
             {
                 user = new ChatUserExternalModel
                 {
+                    ChatId = chatUser.ChatId,
                     ChatLink = chatUser.Chat.Link,
                     UserId = chatUser.UserId,
                     Name = string.Empty

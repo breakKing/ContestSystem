@@ -54,6 +54,7 @@ export default {
           chat: this.chat,
           text
         })
+        this.message = ''
       }
     }
   }

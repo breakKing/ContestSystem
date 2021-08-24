@@ -19,7 +19,7 @@ export default {
   computed: {
     ...mapGetters(['currentUser']),
     isOwn() {
-      return +this.currentUser?.id === +this.message?.userId
+      return +this.currentUser?.id === +this.message?.initiator?.userId
     },
     user_alias() {
       return this.message?.initiator?.name

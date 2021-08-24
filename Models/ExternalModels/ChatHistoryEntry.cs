@@ -46,6 +46,7 @@ namespace ContestSystem.Models.ExternalModels
             return new ChatHistoryEntry
             {
                 Id = chatMessage.Id,
+                ChatId = chatMessage.ChatId,
                 ChatLink = chatMessage.Chat?.Link,
                 Initiator = sender,
                 AffectedUser = null,

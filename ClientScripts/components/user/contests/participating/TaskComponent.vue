@@ -6,7 +6,7 @@
           :mapped_solutions="mappedSolutionsForCurrentContest"
           :active_task_id="actualTaskId"
           :tasks="orderedTasks"
-          :chats="getContestChats(currentContest.id)"
+          :chats="getContestChats(currentContest?.id)"
       ></contest-side-bar-component>
     </div>
     <div class="col">
