@@ -6,7 +6,6 @@ using ContestSystem.Models.Dictionaries;
 using ContestSystem.Models.ExternalModels;
 using ContestSystem.Services;
 using ContestSystemDbStructure.Enums;
-using ContestSystemDbStructure.Models;
 using ContestSystemDbStructure.Models.Auth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -263,6 +262,24 @@ namespace ContestSystem.Areas.Contests.Controllers
             var chats = await _contestsManager.GetUserContestChatsAsync(_dbContext, contestId, currentUser.Id);
 
             return Json(chats);
+        }
+
+        [HttpGet("{contestId}/organizers")]
+        [AuthorizeByJwt]
+        public async Task<IActionResult> GetOrganizers(long contestId)
+        {
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
+            var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == contestId);
+            if (contest == null)
+            {
+                _logger.LogWarning(
+                    $"Попытка от пользователя с идентификатором {currentUser.Id} получить организаторов несуществующего соревнования с идентификатором {contestId}");
+                return BadRequest(_errorCodes[Constants.EntityDoesntExistErrorName]);
+            }
+
+            var organizers = contest.ContestLocalModerators.ConvertAll(ContestOrganizerExternalModel.GetFromModel);
+
+            return Json(organizers);
         }
     }
 }
