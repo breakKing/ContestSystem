@@ -24,7 +24,7 @@
       <td>{{ solution.compilerName }}</td>
       <td>{{ getFormattedFullDateTime(solution.submitTimeUTC) }}</td>
       <td>{{ verdictInfo(actualResult(solution)) }}</td>
-      <td v-if="organizer_mode">{{ solution && solution.checkerOutput }}</td>
+      <td v-if="organizer_mode">{{ lastCheckerOutput(solution) }}</td>
       <td v-if="pointsAreCounted">{{ (actualResult(solution) && actualResult(solution).points) || 0 }}</td>
       <td>{{ getFormattedTime((actualResult(solution) && actualResult(solution).usedTimeInMillis) || 0) }}</td>
       <td>{{ getFormattedMemory((actualResult(solution) && actualResult(solution).usedMemoryInBytes) || 0) }}</td>
@@ -59,6 +59,9 @@ export default {
     pointsAreCounted() {
       return +this.contest?.rules?.countMode !== +CountModes.CountPenalty
     },
+    lastCheckerOutput(solution) {
+      return solution?.testResults.length > 0 ? (solution?.testResults[solution?.testResults.length-1].checkerOutput || '') : ''
+    }
   },
   methods: {
     problemName(problem) {
