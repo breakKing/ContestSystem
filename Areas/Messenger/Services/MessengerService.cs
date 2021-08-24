@@ -46,11 +46,11 @@ namespace ContestSystem.Areas.Messenger.Services
         }
 
         public async Task<ChatExternalModel> GetChatHistoryAsync(MainDbContext dbContext, string link, int? offset,
-            int? count, bool isSystemChat = false)
+            int? count)
         {
             var result = new ChatExternalModel();
 
-            if (!await ChatExistsAsync(dbContext, link, isSystemChat))
+            if (!await ChatExistsAsync(dbContext, link))
             {
                 result = null;
             }
@@ -60,8 +60,7 @@ namespace ContestSystem.Areas.Messenger.Services
                 count ??= Constants.ChatDefaultCount;
 
                 var chat = await dbContext.Chats.Include(ch => ch.ChatUsers)
-                    .FirstOrDefaultAsync(ch => ch.Link == link
-                                               && ch.IsCreatedBySystem == isSystemChat);
+                    .FirstOrDefaultAsync(ch => ch.Link == link);
 
                 var extenalChatUsers = chat.ChatUsers.ConvertAll(cu => GetChatUserAsync(dbContext, cu).GetAwaiter().GetResult());
 

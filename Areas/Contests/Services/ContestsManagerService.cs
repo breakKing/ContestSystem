@@ -302,7 +302,7 @@ namespace ContestSystem.Areas.Contests.Services
                                                             && c.ChatUsers.Any(cu => cu.UserId == userId))
                                                 .ToListAsync();
 
-            return chats.ConvertAll(c => _messenger.GetChatHistoryAsync(dbContext, c.Link, null, null, true).GetAwaiter().GetResult());
+            return chats.ConvertAll(c => _messenger.GetChatHistoryAsync(dbContext, c.Link, null, null).GetAwaiter().GetResult());
         }
     }
 }
