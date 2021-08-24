@@ -1,6 +1,7 @@
 ﻿using ContestSystemDbStructure.Enums;
 using ContestSystemDbStructure.Models;
 using System;
+using System.Collections.Generic;
 
 namespace ContestSystem.Models.ExternalModels
 {
@@ -17,6 +18,7 @@ namespace ContestSystem.Models.ExternalModels
         public short DurationInMinutes { get; set; }
         public bool AreVirtualContestsAvailable { get; set; }
         public ApproveType ApprovalStatus { get; set; }
+        public List<ContestOrganizerExternalModel> Organizers { get; set; }
 
         public static ContestBaseInfo GetFromModel(Contest contest, ContestLocalizer localizer, string imageInBase64)
         {
@@ -37,7 +39,8 @@ namespace ContestSystem.Models.ExternalModels
                 ParticipantsCount = contest.ContestParticipants?.Count ?? 0,
                 AreVirtualContestsAvailable = contest.AreVirtualContestsAvailable,
                 DurationInMinutes = contest.DurationInMinutes,
-                ApprovalStatus = contest.ApprovalStatus
+                ApprovalStatus = contest.ApprovalStatus,
+                Organizers = contest.ContestLocalModerators.ConvertAll(ContestOrganizerExternalModel.GetFromModel)
             };
         }
     }

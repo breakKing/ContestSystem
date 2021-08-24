@@ -18,6 +18,7 @@ namespace ContestSystem.Models.ExternalModels
         public RulesSetBaseInfo Rules { get; set; }
         public List<ProblemEntry> Problems { get; set; }
         public bool AreVirtualContestsAvailable { get; set; }
+        public List<ContestOrganizerExternalModel> Organizers { get; set; }
 
         public static ContestLocalizedModel GetFromModel(Contest contest, ContestLocalizer localizer, string imageInBase64, Func<Problem, ProblemLocalizer> localizerPredicate)
         {
@@ -49,7 +50,8 @@ namespace ContestSystem.Models.ExternalModels
                         Problem = ProblemLocalizedModel.GetFromModel(cp.Problem,
                             localizerPredicate(cp.Problem))
                     };
-                })
+                }),
+                Organizers = contest.ContestLocalModerators.ConvertAll(ContestOrganizerExternalModel.GetFromModel)
             };
         }
     }
