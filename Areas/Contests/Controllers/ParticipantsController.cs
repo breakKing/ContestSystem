@@ -204,7 +204,7 @@ namespace ContestSystem.Areas.Contests.Controllers
                     {
                         _logger.LogWarning(
                             $"Попытка от пользователя с идентификатором {currentUser.Id} удалить из списка участников соревнования с идентификатором {contestId} участника с идентификатором {userId}, не имея на это прав");
-                        response = ResponseObject<long>.Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.EntityDoesntExistErrorName]);
+                        response = ResponseObject<long>.Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.UserInsufficientRightsErrorName]);
                     }
                     else
                     {

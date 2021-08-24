@@ -141,6 +141,19 @@ namespace ContestSystem.Areas.Contests.Services
             return monitorEntry;
         }
 
+        public async Task<List<Solution>> GetAllContestsSolutionsAsync(MainDbContext dbContext, Contest contest)
+        {
+            var solutions = new List<Solution>();
+
+            if (contest != null)
+            {
+                solutions = await dbContext.Solutions.Where(s => s.ContestId == contest.Id)
+                                                        .ToListAsync();
+            }
+
+            return solutions;
+        }
+
         public async Task<bool> IsUserContestLocalModeratorAsync(MainDbContext dbContext, long contestId, long userId)
         {
             return await dbContext.ContestsLocalModerators.AnyAsync(clm => clm.ContestId == contestId
