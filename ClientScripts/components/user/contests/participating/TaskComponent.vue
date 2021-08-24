@@ -160,7 +160,7 @@ export default {
     }
   },
   methods: {
-    ...mapMutations(['setCurrentContestSolutionsForCurrentUser']),
+    ...mapMutations(['updateCurrentContestSolutionForCurrentUser']),
     ...mapActions(['changeCurrentContest', 'fetchAvailableCompilers', 'getSolution', 'sendSolution', 'compileSolution', 'runSolutionTests', 'getUserSolutionsInContest']),
     async onSubmitSolution() {
       this.loading = true
@@ -177,10 +177,11 @@ export default {
         let solutionId = data
         this.compileSolution(solutionId).then(async () => {
           let newSolution = await this.getSolution(solutionId)
-          let solutions = _.cloneDeep(this.currentContestSolutionsForCurrentUser)
           if (newSolution) {
-            solutions = _.concat(solutions, newSolution)
-            this.setCurrentContestSolutionsForCurrentUser(solutions)
+            this.updateCurrentContestSolutionForCurrentUser({
+              index: this.currentContestSolutionsForCurrentUser.length,
+              props: newSolution
+            })
             if (+newSolution.actualResult?.verdict === TestResultVerdicts.CompilationSucceed) {
               this.runSolutionTests(solutionId)
             }

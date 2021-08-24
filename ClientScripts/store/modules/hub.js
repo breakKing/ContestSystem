@@ -61,22 +61,50 @@ export default {
             }
             commit('invokeInHubConnection', {method, data})
         },
+
         async addSolutionActualResult({commit, state, dispatch, getters, rootGetters}, actual_result) {
             if (!actual_result || !rootGetters.currentUser) {
                 return
             }
-            let solutions = _.cloneDeep(rootGetters.currentContestSolutionsForCurrentUser || [])
-            let index = _.findIndex(solutions, (s) => +s.id === +actual_result.solutionId)
+            let solutionFromDB;
+            // Обновление решений текущего пользователя
+            let index = _.findIndex(rootGetters.currentContestSolutionsForCurrentUser, (s) => +s.id === +actual_result.solutionId)
+            let props, solution_user_id;
             if (+index > -1) {
-                solutions[index].actualResult = actual_result
+                solution_user_id = rootGetters.currentContestSolutionsForCurrentUser[index].participant.id
+                props = {actualResult: actual_result}
             } else {
-                let newSolution = await dispatch('getSolution', +actual_result.solutionId)
-                if (newSolution) {
-                    solutions = _.concat(solutions, newSolution)
-                    solutions[solutions.length - 1].actualResult = actual_result
+                let solutionFromDB = await dispatch('getSolution', +actual_result.solutionId)
+                if (solutionFromDB) {
+                    index = rootGetters.currentContestSolutionsForCurrentUser.length;
+                    props = solutionFromDB;
+                    solution_user_id = solutionFromDB.participant.id
                 }
             }
-            commit('setCurrentContestSolutionsForCurrentUser', solutions)
+            if (index && solution_user_id && +solution_user_id === +rootGetters.currentUser.id) {
+                commit('updateCurrentContestSolutionForCurrentUser', {index, props})
+            }
+
+            // обновление решений для организатора
+            props = {}
+            solution_user_id = null
+            index = _.findIndex(rootGetters.currentContestAllSolutions, (s) => +s.id === +actual_result.solutionId)
+            if (+index > -1) {
+                solution_user_id = rootGetters.currentContestAllSolutions[index].participant.id
+                props = {actualResult: actual_result}
+            } else {
+                if (!solutionFromDB) {
+                    solutionFromDB = await dispatch('getSolution', +actual_result.solutionId)
+                }
+                if (solutionFromDB) {
+                    index = rootGetters.currentContestAllSolutions.length;
+                    props = solutionFromDB;
+                    solution_user_id = solutionFromDB.participant.id
+                }
+            }
+            if (index) {
+                commit('updateCurrentContestAllSolutions', {index, props})
+            }
         },
         async updateUserStats({commit, state, dispatch, getters, rootGetters}, stats) {
             if (!stats || !rootGetters.currentUser || !rootGetters.currentContest) {

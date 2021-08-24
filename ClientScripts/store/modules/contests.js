@@ -8,6 +8,7 @@ export default {
         current_contest: null,
         current_contest_participants: [],
         current_contest_monitor_entries: [],
+        current_contest_all_solutions: [],
         current_contest_user_stats: null,
         current_contest_rules_set: null,
 
@@ -34,6 +35,12 @@ export default {
         setCurrentContestSolutionsForCurrentUser(state, val) {
             state.current_contest_solutions_for_current_user = (val || [])
         },
+        updateCurrentContestSolutionForCurrentUser(state, {index, props}) {
+            if (!state.current_contest_solutions_for_current_user[index]) {
+                state.current_contest_solutions_for_current_user[index] = {}
+            }
+            Object.assign(state.current_contest_solutions_for_current_user[index], props)
+        },
         setCurrentContest(state, val) {
             state.current_contest = val
         },
@@ -42,6 +49,15 @@ export default {
         },
         setCurrentContestParticipants(state, val) {
             state.current_contest_participants = (val || [])
+        },
+        setCurrentContestAllSolutions(state, val) {
+            state.current_contest_all_solutions = (val || [])
+        }, 
+        updateCurrentContestAllSolutions(state, {index, props}) {
+            if (!state.current_contest_all_solutions[index]) {
+                state.current_contest_all_solutions[index] = {}
+            }
+            Object.assign(state.current_contest_all_solutions[index], props)
         },
         setCurrentContestMonitor(state, val) {
             state.current_contest_monitor_entries = (val || [])
@@ -56,6 +72,9 @@ export default {
         },
         currentContestOrganizers(state, getters) {
             return (state.current_contest?.organizers || [])
+        },
+        currentContestAllSolutions(state, getters) {
+            return (state.current_contest_all_solutions || [])
         },
         currentContestRulesSet(state, getters) {
             return state.current_contest_rules_set
@@ -162,6 +181,8 @@ export default {
                 commit('setCurrentContestSolutionsForCurrentUser', solutions)
                 commit('setCurrentContestUserStats', stats)
             }
+            commit('setCurrentContestAllSolutions', await dispatch('getAllSolutionsInContest', {contest_id}))
+
             await dispatch('fetchUserChatsFromContest', {contest_id})
         },
         async getContestParticipants({commit, state, dispatch, getters, rootGetters}, contest_id) {
@@ -230,6 +251,18 @@ export default {
             }
             try {
                 let {data} = await rootGetters.api.get(`/contests/${contest_id}/solutions/${user_id}`)
+                return data
+            } catch (e) {
+                console.error(e)
+                return []
+            }
+        },
+        async getAllSolutionsInContest({commit, state, dispatch, getters, rootGetters}, {contest_id}) {
+            if (!contest_id) {
+                return []
+            }
+            try {
+                let {data} = await rootGetters.api.get(`/contests/management/solutions/${contest_id}`)
                 return data
             } catch (e) {
                 console.error(e)
