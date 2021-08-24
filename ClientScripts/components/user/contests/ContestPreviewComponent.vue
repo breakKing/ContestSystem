@@ -12,15 +12,15 @@
         <p> Автор: {{ contest && contest.creator && contest.creator.fullName }}</p>
         <div class="row d-flex justify-content-center">
           <template v-if="currentRole === 'user'">
-            <button v-if="!currentUserIsOwner" type="button" class="workspace-btn workspace-btn-enter mb-3"
+            <button type="button" class="workspace-btn workspace-btn-enter mb-3"
                     @click.prevent="goToContest">
               Войти
             </button>
             <div class="row d-flex justify-content-between">
-              <button v-if="currentUserIsOwner" type="button" class="workspace-btn" @click.prevent="editContest">
+              <button v-if="currentUserIsOrganizer" type="button" class="workspace-btn" @click.prevent="editContest">
                 Редактировать
               </button>
-              <button v-if="currentUserIsOwner" class="workspace-btn workspace-btn-del"
+              <button v-if="currentUserIsOrganizer" class="workspace-btn workspace-btn-del"
                       @click.prevent="deleteEntity">
                 Удалить
               </button>
@@ -37,6 +37,7 @@
 
 <script>
 import {mapActions, mapGetters} from "vuex";
+import * as _ from "lodash";
 
 export default {
   name: "ContestPreviewComponent",
@@ -85,11 +86,11 @@ export default {
   },
   computed: {
     ...mapGetters(['currentUser', 'currentRole']),
-    currentUserIsOwner() {
-      if (!this.currentUser || !this.contest?.creator) {
+    currentUserIsOrganizer() {
+      if (!this.currentUser) {
         return false
       }
-      return +this.contest.creator.id === +this.currentUser.id
+      return !!_.find((this.contest?.organizers || []), (o) => +o.userId === +this.currentUser.id)
     },
     dataUrl() {
       if (!this.contest || !this.contest?.image) {

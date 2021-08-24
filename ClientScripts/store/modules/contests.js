@@ -34,12 +34,8 @@ export default {
         setCurrentContestSolutionsForCurrentUser(state, val) {
             state.current_contest_solutions_for_current_user = (val || [])
         },
-
         setCurrentContest(state, val) {
             state.current_contest = val
-        },
-        setCurrentContestOrganizers(state, val) {
-            state.current_contest_organizers = (val || [])
         },
         setCurrentContestRulesSet(state, val) {
             state.current_contest_rules_set = val
@@ -59,7 +55,7 @@ export default {
             return state.current_contest
         },
         currentContestOrganizers(state, getters) {
-            return state.current_contest_organizers
+            return (state.current_contest?.organizers || [])
         },
         currentContestRulesSet(state, getters) {
             return state.current_contest_rules_set
@@ -147,13 +143,11 @@ export default {
             let rulesSet = await dispatch('getContestRulesSet', contest_id)
             let participants = await dispatch('getContestParticipants', contest_id)
             let monitor = await dispatch('getContestMonitor', contest_id)
-            let organizers = await dispatch('getContestOrganizers', contest_id)
 
             commit('setCurrentContest', contest)
             commit('setCurrentContestRulesSet', rulesSet)
             commit('setCurrentContestParticipants', participants)
             commit('setCurrentContestMonitor', monitor)
-            commit('setCurrentContestOrganizers', organizers)
 
             let currentUserParticipant = _.find(participants, (p) => +p.userId === +rootGetters.currentUser?.id)
             if (currentUserParticipant) {
