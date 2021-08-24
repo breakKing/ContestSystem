@@ -63,7 +63,7 @@ export default {
         },
 
         async addSolutionActualResult({commit, state, dispatch, getters, rootGetters}, actual_result) {
-            if (!actual_result || !rootGetters.currentUser) {
+            if (!actual_result || !rootGetters.currentUser || !rootGetters.currentContest || +rootGetters.currentContest.id !== +actual_result.contestId) {
                 return
             }
             let solutionFromDB;
@@ -81,16 +81,14 @@ export default {
                     solution_user_id = solutionFromDB.participant.id
                 }
             }
-            if (index && solution_user_id && +solution_user_id === +rootGetters.currentUser.id) {
+            if (+index > -1 && solution_user_id && +solution_user_id === +rootGetters.currentUser.id) {
                 commit('updateCurrentContestSolutionForCurrentUser', {index, props})
             }
 
             // обновление решений для организатора
             props = {}
-            solution_user_id = null
             index = _.findIndex(rootGetters.currentContestAllSolutions, (s) => +s.id === +actual_result.solutionId)
             if (+index > -1) {
-                solution_user_id = rootGetters.currentContestAllSolutions[index].participant.id
                 props = {actualResult: actual_result}
             } else {
                 if (!solutionFromDB) {
@@ -99,10 +97,9 @@ export default {
                 if (solutionFromDB) {
                     index = rootGetters.currentContestAllSolutions.length;
                     props = solutionFromDB;
-                    solution_user_id = solutionFromDB.participant.id
                 }
             }
-            if (index) {
+            if (+index > -1) {
                 commit('updateCurrentContestAllSolutions', {index, props})
             }
         },

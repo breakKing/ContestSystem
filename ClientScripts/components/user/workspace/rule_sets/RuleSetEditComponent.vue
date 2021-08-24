@@ -56,7 +56,7 @@
                    :disabled="+countMode !== countModes.CountPoints"
                    :value="true" :uncheckedValue="false"
                    name="pointsForBestSolution"/>
-          <label class="fs-4" for="pointsForBestSolution">Прибавка к очкам за лучшее решение</label>
+          <label class="fs-4">Прибавка к очкам за лучшее решение</label>
           <error-message name="pointsForBestSolution"></error-message>
         </div>
         <div>

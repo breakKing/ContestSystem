@@ -1,7 +1,7 @@
 import TestResultVerdicts from "../../dictionaries/TestResultVerdicts";
 
 export default {
-    methods:{
+    methods: {
         actualResult(solution) {
             if (!solution || !solution?.actualResult) {
                 return null

@@ -41,7 +41,7 @@
         </div>
         <div>
           <label class="w-50 fs-5">Количество очков</label>
-          <input type="number" :value="test.availablePoints" @change.prevent="$emit('update:tests',{
+          <input type="number" :value="test.availablePoints" @change.prevent="$emit('update:tests', {
             type: 'change',
             index: test_idx,
             value:{

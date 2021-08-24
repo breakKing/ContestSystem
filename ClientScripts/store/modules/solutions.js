@@ -72,5 +72,23 @@ export default {
                 return null
             }
         },
+        async changeSolution({commit, state, dispatch, getters, rootGetters}, {
+            contestId,
+            solutionId,
+            verdict,
+            points
+        }) {
+            try {
+                let {data} = await rootGetters.api.put(`/contests/management/${contestId}/solutions/${solutionId}`, {
+                    solutionId,
+                    verdict,
+                    points
+                })
+                return data
+            } catch (e) {
+                console.error(e)
+                return null
+            }
+        },
     }
 }
