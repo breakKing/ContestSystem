@@ -61,7 +61,7 @@ export default {
             },
         },
         {
-            path: ':contest_id/my-solutions/:solution_id',
+            path: ':contest_id/solutions/:solution_id',
             name: 'SolutionViewPage',
             component: SolutionViewComponent,
             props: true,
