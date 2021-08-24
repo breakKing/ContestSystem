@@ -15,14 +15,15 @@
   </ul>
   <div v-if="active_page === 'solutions'">
     <contest-solutions-list-component
-        :solutions="[]"
+        :solutions="currentContestAllSolutions"
         :contest="currentContest"
         :organizer_mode="true"
     ></contest-solutions-list-component>
   </div>
   <div v-else-if="active_page === 'users'">
     <contest-users-list-component
-        :users="[]"
+        :users="currentContestParticipants"
+        :contest="currentContest"
     ></contest-users-list-component>
   </div>
   <div v-else-if="active_page === 'chats'">
@@ -66,7 +67,13 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['currentUser', 'currentContest', 'getContestChats']),
+    ...mapGetters([
+      'currentUser',
+      'currentContest',
+      'getContestChats',
+      'currentContestParticipants',
+      'currentContestAllSolutions'
+    ]),
     currentChats() {
       return this.getContestChats(this.currentContest?.id)
     },
