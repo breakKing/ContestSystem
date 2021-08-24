@@ -3,9 +3,12 @@
     <div class="col-12">
       <div class="messages-block p-2">
         <div class="d-flex justify-content-center mb-3">
-          <button class="btn btn-primary" v-if="chat_rows && chat_rows.length >= 50" @click.prevent="loadMoreMessages">Загрузить ещё</button>
+          <button class="btn btn-primary" v-if="chat_rows && chat_rows.length >= 50" @click.prevent="loadMoreMessages">
+            Загрузить ещё
+          </button>
         </div>
-        <chat-row-component :row_instance="row" v-for="row of chat_rows"></chat-row-component>
+        <chat-row-component :row_instance="row" :show_events="show_events"
+                            v-for="row of chat_rows"></chat-row-component>
       </div>
     </div>
     <div class="col-12">
@@ -20,6 +23,7 @@
 <script>
 import ChatRowComponent from "./ChatRowComponent";
 import {mapActions} from "vuex";
+import ChatTypes from "../../dictionaries/ChatTypes";
 
 export default {
   name: "ChatWindowComponent",
@@ -35,6 +39,9 @@ export default {
   computed: {
     chat_rows() {
       return (this.chat?.historyEntries || [])
+    },
+    show_events() {
+      return +this.chat?.type === ChatTypes.Custom
     }
   },
   methods: {

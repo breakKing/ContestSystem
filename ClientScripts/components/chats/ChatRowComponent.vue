@@ -1,6 +1,6 @@
 <template>
   <chat-event-component :event="row_instance"
-                        v-if="isEvent"></chat-event-component>
+                        v-if="show_events && isEvent"></chat-event-component>
   <chat-message-component :message="row_instance" v-else></chat-message-component>
 </template>
 
@@ -13,12 +13,13 @@ export default {
   name: "ChatRowComponent",
   components: {ChatMessageComponent, ChatEventComponent},
   props: {
-    row_instance: Object
+    row_instance: Object,
+    show_events: Boolean
   },
   computed: {
     isEvent() {
       return +this.row_instance?.type !== ChatEventTypes.Undefined && !this.row_instance?.text
-    }
+    },
   }
 }
 </script>
