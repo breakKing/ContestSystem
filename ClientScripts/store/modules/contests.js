@@ -63,6 +63,9 @@ export default {
         currentContestSolutionsForCurrentUser(state, getters) {
             return state.current_contest_solutions_for_current_user
         },
+        mappedSolutionsForCurrentContest(state, getters) {
+            return _.groupBy(getters.currentContestSolutionsForCurrentUser, (s) => +s.problem.id)
+        },
         currentContestMonitorEntries(state, getters) {
             return _.sortBy((state.current_contest_monitor_entries || []), ['position'])
         },

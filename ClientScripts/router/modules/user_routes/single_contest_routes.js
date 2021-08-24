@@ -5,6 +5,7 @@ import ContestSolutionsListComponent
     from "../../../components/user/contests/participating/ContestSolutionsListComponent";
 import ContestMonitoringComponent from "../../../components/user/contests/participating/ContestMonitoringComponent";
 import SolutionViewComponent from "../../../components/user/contests/participating/SolutionViewComponent";
+import ContestChatComponent from "../../../components/user/contests/participating/ContestChatComponent";
 
 export default {
     path: 'contest',
@@ -18,6 +19,15 @@ export default {
             path: ':contest_id',
             name: 'ContestPage',
             component: ContestInformationComponent,
+            props: true,
+            meta: {
+                authorize: ['user']
+            },
+        },
+        {
+            path: ':contest_id/participate/:chat_id',
+            name: 'ContestParticipatingChattingPage',
+            component: ContestChatComponent,
             props: true,
             meta: {
                 authorize: ['user']

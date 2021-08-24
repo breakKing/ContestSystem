@@ -23,7 +23,7 @@ export default {
             if (state.current_user_chats) {
                 let chat = _.find(state.current_user_chats, (c) => +c.id === +chat_id)
                 if (chat) {
-                    chat.historyEntries = _.concat((chat.historyEntries || []), [history_entry])
+                    Object.assign(chat, {historyEntries: _.concat((chat.historyEntries || []), [history_entry])})
                 }
             }
         },
@@ -31,6 +31,9 @@ export default {
     getters: {
         currentUserChats(state, getters) {
             return state.current_user_chats
+        },
+        getContestChats: (state, getters) => (contest_id) => {
+            return _.filter(state.current_user_chats, (c) => +c.contestId === +contest_id)
         },
     },
     actions: {

@@ -1,4 +1,6 @@
 <template>
+<div class="d-flex flex-column">
+  <h4>Задачи</h4>
   <ul>
     <li v-for="task of tasks" :class="calcClass(+task.id)">
       <router-link :to="{name: 'ContestParticipatingPage', params: {contest_id: currentContest?.id, task_id: task.problemId}}">
@@ -6,6 +8,7 @@
       </router-link>
     </li>
   </ul>
+</div>
 </template>
 
 <script>
