@@ -104,7 +104,7 @@ export default {
             if (!getters.currentUser || !getters.currentContestOrganizers) {
                 return false
             }
-            return !!_.find(getters.currentContestOrganizers, (o) => +o.userId === +getters.currentUser.id)
+            return !!_.find(getters.currentContestOrganizers, (o) => +o.id === +getters.currentUser.id)
         },
         currentContestIsRunning(state, getters) {
             if (!getters.currentContest) {
@@ -128,7 +128,7 @@ export default {
             if (!getters.currentUser || !getters.currentContest) {
                 return false
             }
-            return !!_.find(getters.currentContestParticipants, (p) => +p.userId === +getters.currentUser.id)
+            return !!_.find(getters.currentContestParticipants, (p) => +p.id === +getters.currentUser.id)
         },
         runningContests(state, getters) {
             return state.currently_running_contests
@@ -168,7 +168,7 @@ export default {
             commit('setCurrentContestParticipants', participants)
             commit('setCurrentContestMonitor', monitor)
 
-            let currentUserParticipant = _.find(participants, (p) => +p.userId === +rootGetters.currentUser?.id)
+            let currentUserParticipant = _.find(participants, (p) => +p.id === +rootGetters.currentUser?.id)
             if (currentUserParticipant) {
                 let solutions = await dispatch('getUserSolutionsInContest', {
                     contest_id,

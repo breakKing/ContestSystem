@@ -22,7 +22,7 @@ export default {
   computed: {
     ...mapGetters(['currentUser', 'getFormattedFullDateTime']),
     isOwn() {
-      return +this.currentUser?.id === +this.message?.initiator?.userId
+      return +this.currentUser?.id === +this.message?.initiator?.id
     },
     user_alias() {
       return this.message?.initiator?.name
