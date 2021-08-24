@@ -16,6 +16,7 @@ export default {
         participating_contests: [],
         current_user_contests: [],
         current_contest_solutions_for_current_user: [],
+        current_contest_organizers: [],
     }),
     mutations: {
         setRunningContests(state, val) {
@@ -37,6 +38,9 @@ export default {
         setCurrentContest(state, val) {
             state.current_contest = val
         },
+        setCurrentContestOrganizers(state, val) {
+            state.current_contest_organizers = (val || [])
+        },
         setCurrentContestRulesSet(state, val) {
             state.current_contest_rules_set = val
         },
@@ -53,6 +57,9 @@ export default {
     getters: {
         currentContest(state, getters) {
             return state.current_contest
+        },
+        currentContestOrganizers(state, getters) {
+            return state.current_contest_organizers
         },
         currentContestRulesSet(state, getters) {
             return state.current_contest_rules_set
@@ -77,6 +84,12 @@ export default {
                 return false
             }
             return +getters.currentContest.creator.id === +getters.currentUser.id
+        },
+        currentUserIsOrganizerOfCurrentContest(state, getters) {
+            if (!getters.currentUser || !getters.currentContestOrganizers) {
+                return false
+            }
+            return !!_.find(getters.currentContestOrganizers, (o) => +o.userId === +getters.currentUser.id)
         },
         currentContestIsRunning(state, getters) {
             if (!getters.currentContest) {
@@ -134,11 +147,13 @@ export default {
             let rulesSet = await dispatch('getContestRulesSet', contest_id)
             let participants = await dispatch('getContestParticipants', contest_id)
             let monitor = await dispatch('getContestMonitor', contest_id)
+            let organizers = await dispatch('getContestOrganizers', contest_id)
 
             commit('setCurrentContest', contest)
             commit('setCurrentContestRulesSet', rulesSet)
             commit('setCurrentContestParticipants', participants)
             commit('setCurrentContestMonitor', monitor)
+            commit('setCurrentContestOrganizers', organizers)
 
             let currentUserParticipant = _.find(participants, (p) => +p.userId === +rootGetters.currentUser?.id)
             if (currentUserParticipant) {
@@ -179,7 +194,7 @@ export default {
                 return []
             }
         },
-        async getContestRulesSet({ commit, state, dispatch, getters, rootGetters }, contest_id) {
+        async getContestRulesSet({commit, state, dispatch, getters, rootGetters}, contest_id) {
             if (!contest_id) {
                 return null
             }
@@ -191,7 +206,7 @@ export default {
                 return null
             }
         },
-        async getUserStatsInContest({ commit, state, dispatch, getters, rootGetters }, { contest_id, user_id }) {
+        async getUserStatsInContest({commit, state, dispatch, getters, rootGetters}, {contest_id, user_id}) {
             if (!contest_id || !user_id) {
                 return null
             }
@@ -203,7 +218,7 @@ export default {
                 return null
             }
         },
-        async getContestProblem({ commit, state, dispatch, getters, rootGetters }, { contest_id, letter }) {
+        async getContestProblem({commit, state, dispatch, getters, rootGetters}, {contest_id, letter}) {
             if (!contest_id || !letter) {
                 return null
             }
@@ -231,7 +246,7 @@ export default {
             if (!force && state.currently_running_contests && state.currently_running_contests.length > 0) {
                 return
             }
-            if (!rootGetters.currentUser){
+            if (!rootGetters.currentUser) {
                 return
             }
             try {
@@ -245,7 +260,7 @@ export default {
             if (!force && state.available_for_user_contests && state.available_for_user_contests.length > 0) {
                 return
             }
-            if (!rootGetters.currentUser){
+            if (!rootGetters.currentUser) {
                 return
             }
             try {
@@ -259,7 +274,7 @@ export default {
             if (!force && state.participating_contests && state.participating_contests.length > 0) {
                 return
             }
-            if (!rootGetters.currentUser){
+            if (!rootGetters.currentUser) {
                 return
             }
             try {
@@ -294,7 +309,7 @@ export default {
                 console.error(e)
             }
             return null
-        },  
+        },
         async getWorkspaceContest({commit, state, dispatch, getters, rootGetters}, contest_id) {
             if (!contest_id) {
                 return null
@@ -341,6 +356,18 @@ export default {
             }
             return {}
 
-        }
+        },
+        async getContestOrganizers({commit, state, dispatch, getters, rootGetters}, contest_id) {
+            if (!contest_id) {
+                return null
+            }
+            try {
+                let {data} = await rootGetters.api.get(`/contests/${contest_id}/organizers`)
+                return data
+            } catch (e) {
+                console.error(e)
+            }
+            return null
+        },
     }
 }

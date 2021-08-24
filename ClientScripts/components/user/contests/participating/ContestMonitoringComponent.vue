@@ -44,7 +44,7 @@ export default {
       'currentUser',
       'currentContest',
       'currentContestMonitorEntries',
-      'currentUserIsOwnerOfCurrentContest',
+      'currentUserIsOrganizerOfCurrentContest',
       'currentUserIsParticipantOfCurrentContest',
       'getFormattedTime'
     ]),
@@ -103,7 +103,7 @@ export default {
   beforeRouteEnter(to, from, next) {
     next(async vm => {
       await vm.changeCurrentContest({force: false, contest_id: vm.contest_id})
-      if (!(vm.currentUserIsOwnerOfCurrentContest || vm.currentUserIsParticipantOfCurrentContest || vm.currentContest?.rules?.publicMonitor)) {
+      if (!(vm.currentUserIsOrganizerOfCurrentContest || vm.currentUserIsParticipantOfCurrentContest || vm.currentContest?.rules?.publicMonitor)) {
         return await vm.$router.replace({name: 'ContestPage', params: {contest_id: vm.contest_id}})
       }
       let monitorEntries = await vm.getContestMonitor(vm.contest_id)

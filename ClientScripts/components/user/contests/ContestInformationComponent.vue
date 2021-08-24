@@ -9,7 +9,7 @@
       <p v-html="currentContest && currentContest.localizedDescription"></p>
 
       <div class="row"
-           v-if="currentUserIsOwnerOfCurrentContest || currentUserIsParticipantOfCurrentContest || (currentContest && currentContest.rules && currentContest.rules.publicMonitor)">
+           v-if="currentUserIsOrganizerOfCurrentContest || currentUserIsParticipantOfCurrentContest || (currentContest && currentContest.rules && currentContest.rules.publicMonitor)">
         <div class="col">
           <router-link class="btn btn-info" :to="{name: 'ContestMonitorPage', params: {contest_id: currentContest.id}}">
             Монитор
@@ -23,7 +23,7 @@
     </div>
   </div>
 
-  <div class="row" v-if="!currentUserIsOwnerOfCurrentContest">
+  <div class="row" v-if="!currentUserIsOrganizerOfCurrentContest">
     <div class="col">
       <template v-if="!currentUserIsParticipantOfCurrentContest">
         <button v-if="!wants_participate" @click.prevent="wants_participate=true">
@@ -99,7 +99,7 @@ export default {
       'currentUser',
       'currentContestParticipants',
       'currentContestMonitorEntries',
-      'currentUserIsOwnerOfCurrentContest',
+      'currentUserIsOrganizerOfCurrentContest',
       'currentUserIsParticipantOfCurrentContest',
       'currentContestIsRunning',
       'currentContestIsInPast',

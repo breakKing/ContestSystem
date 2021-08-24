@@ -41,7 +41,7 @@ export default {
       'currentUser',
       'currentContestParticipants',
       'currentContestMonitorEntries',
-      'currentUserIsOwnerOfCurrentContest',
+      'currentUserIsOrganizerOfCurrentContest',
       'currentUserIsParticipantOfCurrentContest',
       'currentContestIsRunning',
       'currentContestIsInPast',
