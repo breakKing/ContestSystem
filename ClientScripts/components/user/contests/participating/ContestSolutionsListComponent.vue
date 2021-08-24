@@ -28,7 +28,6 @@
       <td v-if="pointsAreCounted">{{ (actualResult(solution) && actualResult(solution).points) || 0 }}</td>
       <td>{{ getFormattedTime((actualResult(solution) && actualResult(solution).usedTimeInMillis) || 0) }}</td>
       <td>{{ getFormattedMemory((actualResult(solution) && actualResult(solution).usedMemoryInBytes) || 0) }}</td>
-      <td>{{ getFormattedMemory((actualResult(solution) && actualResult(solution).usedMemoryInBytes) || 0) }}</td>
       <td>
         <router-link :to="{name: 'SolutionViewPage', params: {solution_id: solution.id}}">Перейти</router-link>
       </td>
@@ -60,7 +59,7 @@ export default {
       return +this.contest?.rules?.countMode !== +CountModes.CountPenalty
     },
     lastCheckerOutput(solution) {
-      return solution?.testResults.length > 0 ? (solution?.testResults[solution?.testResults.length-1].checkerOutput || '') : ''
+      return +solution?.testResults?.length > 0 ? (solution?.testResults[solution?.testResults.length-1].checkerOutput || '') : ''
     }
   },
   methods: {
