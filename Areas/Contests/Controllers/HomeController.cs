@@ -138,6 +138,18 @@ namespace ContestSystem.Areas.Contests.Controllers
                     await _dbContext.ContestsParticipants.CountAsync(cp => cp.ContestId == contest.Id);
                 var localizedContest = ContestLocalizedModel.GetFromModel(contest, localizer, _storage.GetImageInBase64(contest.ImagePath),
                                                                             p => _localizerHelper.GetAppropriateLocalizer(p.ProblemLocalizers, culture));
+
+                // Вдруг чаты не созданы (возможно, в будущем надо убрать)
+                if (!await _contestsManager.InitialChatsExistAsync(_dbContext, id))
+                {
+                    await _contestsManager.CreateContestInitialChatsAsync(_dbContext, contest);
+
+                    foreach (var participant in contest.ContestParticipants)
+                    {
+                        await _contestsManager.AddParticipantToChatsAsync(_dbContext, participant);
+                    }
+                }
+
                 return Json(localizedContest);
             }
 

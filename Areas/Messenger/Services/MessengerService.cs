@@ -63,20 +63,24 @@ namespace ContestSystem.Areas.Messenger.Services
                     .FirstOrDefaultAsync(ch => ch.Link == link
                                                && ch.IsCreatedBySystem == isSystemChat);
 
+                var extenalChatUsers = chat.ChatUsers.ConvertAll(cu => GetChatUserAsync(dbContext, cu).GetAwaiter().GetResult());
+
                 var messagesExpression = dbContext.ChatsMessages.Where(cm => cm.ChatId == chat.Id)
                     .OrderByDescending(cm => cm.SentDateTimeUTC)
-                    .Select(cm => ChatHistoryEntry.GetFromModel(cm, GetChatUserAsync(dbContext, chat.ChatUsers.FirstOrDefault(cu => cu.UserId == cm.SenderId)).GetAwaiter().GetResult()));
+                    .AsEnumerable()
+                    .Select(cm => ChatHistoryEntry.GetFromModel(cm, extenalChatUsers.FirstOrDefault(ecu => ecu.UserId == cm.SenderId)));
 
                 var eventsExpression = dbContext.ChatsEvents.Where(ce => ce.ChatId == chat.Id)
                     .OrderByDescending(ce => ce.DateTimeUTC)
-                    .Select(ce => ChatHistoryEntry.GetFromModel(ce, GetChatUserAsync(dbContext, chat.ChatUsers.FirstOrDefault(cu => cu.UserId == ce.InitiatorId)).GetAwaiter().GetResult(),
-                                                                    GetChatUserAsync(dbContext, chat.ChatUsers.FirstOrDefault(cu => cu.UserId == ce.AffectedUserId)).GetAwaiter().GetResult()));
+                    .AsEnumerable()
+                    .Select(ce => ChatHistoryEntry.GetFromModel(ce, extenalChatUsers.FirstOrDefault(ecu => ecu.UserId == ce.AffectedUserId),
+                                                                    extenalChatUsers.FirstOrDefault(ecu => ecu.UserId == ce.InitiatorId)));
 
                 var finalExpression = messagesExpression.Concat(eventsExpression)
                     .Skip(offset.Value)
                     .Take(count.Value);
 
-                var entries = await finalExpression.ToListAsync();
+                var entries = finalExpression.ToList();
                 entries = entries.OrderBy(e => e.DateTimeUTC).ToList();
 
                 var image = _storage.GetImageInBase64(chat.ImagePath);
@@ -266,7 +270,7 @@ namespace ContestSystem.Areas.Messenger.Services
         }
 
         public async Task<CreationStatusData<string>> CreateChatAsync(MainDbContext dbContext, ChatForm form, 
-            ChatType type = ChatType.Custom, long? contestId = null)
+            ChatType type = ChatType.Custom, long? contestId = null, long? participantId = null)
         {
             var statusData = new CreationStatusData<string>
             {
@@ -307,7 +311,21 @@ namespace ContestSystem.Areas.Messenger.Services
             else
             {
                 chat.ImagePath = await _storage.SaveChatImageAsync(chat.Id, form.Image);
-                chat.Link = GenerateCustomChatLink(chat);
+                if (type == ChatType.ContestAnnouncements ||
+                    type == ChatType.ContestModerator)
+                {
+                    chat.Link = GenerateContestChatLink(chat, chat.Contest);
+                }
+                else if (type == ChatType.ContestParticipant)
+                {
+                    var participant = chat.Contest.ContestParticipants.FirstOrDefault(cp => cp.ParticipantId == participantId.GetValueOrDefault(-1));
+                    chat.Link = GenerateContestChatLink(chat, chat.Contest, participant);
+                }
+                else
+                {
+                    chat.Link = GenerateCustomChatLink(chat);
+                }
+                
                 form.InitialUsers.ForEach(u => chat.ChatUsers.Add(new ChatUser
                 {
                     ChatId = chat.Id,
@@ -602,7 +620,7 @@ namespace ContestSystem.Areas.Messenger.Services
             return link;
         }
 
-        private string GenerateContestChatLink(Chat chat, Contest contest, ContestParticipant participant)
+        private string GenerateContestChatLink(Chat chat, Contest contest, ContestParticipant participant = null)
         {
             var link = "";
 

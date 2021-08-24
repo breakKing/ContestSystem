@@ -200,7 +200,7 @@ namespace ContestSystem.Areas.Contests.Services
                     InitialUsers = contest.ContestLocalModerators.Select(clm => clm.LocalModeratorId).Concat(new List<long> { participant.ParticipantId }).ToList()
                 };
 
-                await _messenger.CreateChatAsync(dbContext, form, ChatType.ContestParticipant, contest.Id);
+                await _messenger.CreateChatAsync(dbContext, form, ChatType.ContestParticipant, contest.Id, participant.ParticipantId);
             }
         }
 
@@ -302,7 +302,7 @@ namespace ContestSystem.Areas.Contests.Services
                                                             && c.ChatUsers.Any(cu => cu.UserId == userId))
                                                 .ToListAsync();
 
-            return chats.ConvertAll(c => _messenger.GetChatHistoryAsync(dbContext, c.Link, null, null).GetAwaiter().GetResult());
+            return chats.ConvertAll(c => _messenger.GetChatHistoryAsync(dbContext, c.Link, null, null, true).GetAwaiter().GetResult());
         }
     }
 }
