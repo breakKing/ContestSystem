@@ -134,7 +134,7 @@ export default {
         id = +_.first(this.orderedTasks)?.problemId || null
       }
       this.problem = _.find(this.orderedTasks || [], (t) => +t.problemId === +id)?.problem || null
-      return id
+      return +id
     },
     problem_name() {
       return this.problem?.localizedName
