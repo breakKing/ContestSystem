@@ -36,6 +36,10 @@ export default {
   width: 60%;
 }
 
+.message-up-block {
+  margin-bottom: 10px;
+}
+
 .message {
   position: relative;
   background-color: #86BB71;
