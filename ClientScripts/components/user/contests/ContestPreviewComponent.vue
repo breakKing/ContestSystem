@@ -90,7 +90,7 @@ export default {
       if (!this.currentUser) {
         return false
       }
-      return !!_.find((this.contest?.organizers || []), (o) => +o.userId === +this.currentUser.id)
+      return !!_.find((this.contest?.organizers || []), (o) => +o.id === +this.currentUser.id)
     },
     dataUrl() {
       if (!this.contest || !this.contest?.image) {

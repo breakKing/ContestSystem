@@ -47,7 +47,6 @@ export default {
         },
         async fetchUserChatsFromContest({commit, state, dispatch, getters, rootGetters}, {contest_id}) {
             if (!contest_id) {
-                commit('setCurrentUserChats', [])
                 return
             }
             try {
