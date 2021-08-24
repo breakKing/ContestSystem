@@ -100,6 +100,7 @@ export default {
       })
       if (solution_data) {
         Object.assign(this.solution, solution_data)
+        await this.$router.push(({name: 'ContestPage', params: {contest_id: this.contest_id}}))
       }
     }
   },
