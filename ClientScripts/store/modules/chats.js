@@ -50,12 +50,24 @@ export default {
                 return
             }
             try {
-                let {data} = await rootGetters.api.get(`/contests/${contest_id}/chats`)
-                for (let chat of data) {
+                let chats = await dispatch('getChatsFromContest', {contest_id})
+                for (let chat of chats) {
                     commit('updateCurrentUserChats', chat)
                 }
             } catch (e) {
                 console.error(e)
+            }
+        },
+        async getChatsFromContest({commit, state, dispatch, getters, rootGetters}, {contest_id}) {
+            if (!contest_id) {
+                return []
+            }
+            try {
+                let {data} = await rootGetters.api.get(`/contests/${contest_id}/chats`)
+                return data
+            } catch (e) {
+                console.error(e)
+                return []
             }
         },
         async sendMessageToChat({commit, state, dispatch, getters, rootGetters}, {chat, text}) {
