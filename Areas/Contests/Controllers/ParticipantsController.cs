@@ -200,12 +200,21 @@ namespace ContestSystem.Areas.Contests.Controllers
                 }
                 else
                 {
-                    await _contestsManager.RemoveParticipantFromChatsAsync(_dbContext, contestParticipant);
-                    _dbContext.ContestsParticipants.Remove(contestParticipant);
-                    await _dbContext.SaveChangesAsync();
-                    _logger.LogInformation(
-                        $"Пользователем с идентификатором {currentUser.Id} из списка участников соревнования с идентификатором {contestId} успешно удалён пользователь с идентификатором {userId}");
-                    response = ResponseObject<long>.Success(userId);
+                    if (currentUser.Id != userId && !contest.ContestLocalModerators.Any(clm => clm.ContestId == contestId && clm.LocalModeratorId == currentUser.Id))
+                    {
+                        _logger.LogWarning(
+                            $"Попытка от пользователя с идентификатором {currentUser.Id} удалить из списка участников соревнования с идентификатором {contestId} участника с идентификатором {userId}, не имея на это прав");
+                        response = ResponseObject<long>.Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.EntityDoesntExistErrorName]);
+                    }
+                    else
+                    {
+                        await _contestsManager.RemoveParticipantFromChatsAsync(_dbContext, contestParticipant);
+                        _dbContext.ContestsParticipants.Remove(contestParticipant);
+                        await _dbContext.SaveChangesAsync();
+                        _logger.LogInformation(
+                            $"Пользователем с идентификатором {currentUser.Id} из списка участников соревнования с идентификатором {contestId} успешно удалён пользователь с идентификатором {userId}");
+                        response = ResponseObject<long>.Success(userId);
+                    }
                 }
             }
             return Json(response);
