@@ -39,7 +39,7 @@ export default {
         this.setCurrentContestParticipants(participants)
 
         let user_chats = _.filter(this.currentUserChats, (c) => +c.contestId !== +this.contest.id)
-        let contest_chats = this.getChatsFromContest({contest_id: this.contest.id})
+        let contest_chats = await this.getChatsFromContest({contest_id: this.contest.id})
         this.setCurrentUserChats(_.concat(user_chats, contest_chats))
       } else {
         console.error(errors)
