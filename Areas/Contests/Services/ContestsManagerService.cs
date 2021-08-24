@@ -353,7 +353,14 @@ namespace ContestSystem.Areas.Contests.Services
 
                 foreach (var chat in chats)
                 {
-                    await _messenger.RemoveUserFromChatAsync(dbContext, chat, participant.ParticipantId);
+                    if (chat.Type == ChatType.ContestParticipant)
+                    {
+                        await _messenger.DeleteChatAsync(dbContext, chat);
+                    }
+                    else
+                    {
+                        await _messenger.RemoveUserFromChatAsync(dbContext, chat, participant.ParticipantId);
+                    }
                 }
             }
         }
