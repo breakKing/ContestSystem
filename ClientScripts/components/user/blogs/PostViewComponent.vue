@@ -1,21 +1,29 @@
 ﻿<template>
-  <bread-crumbs-component :routes="bread_crumb_routes"></bread-crumbs-component>
-  <div class="container">
-    <div class="row">
-      <div class="col-12 col-md-9">
-        <h2>{{ post_info && post_info.localizedName }}</h2>
+  <div class="my-3">
+    <div class="container">
+      <bread-crumbs-component :routes="bread_crumb_routes"></bread-crumbs-component>
+      <div class="row">
+        <div class="col-10 ms-auto me-auto">
+          <div class="row">
+            <div class="col-12 col-md-9">
+              <h2>{{ post_info && post_info.localizedName }}</h2>
+              <hr>
+            </div>
+            <div class="col">
+              <p>{{ post_info && post_info.author && post_info.author.fullName }}</p>
+              <p>{{ formatted_pub_date }}</p>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col">
+              <img class="img-fluid" :src="dataUrl" :alt="post_info && post_info.localizedName">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col" v-html="post_info && post_info.htmlLocalizedText"></div>
+          </div>
+        </div>
       </div>
-      <div class="col">
-        <p>{{ post_info && post_info.author && post_info.author.fullName }} {{ formatted_pub_date }}</p>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col">
-        <img class="img-fluid" :src="dataUrl" :alt="post_info && post_info.localizedName">
-      </div>
-    </div>
-    <div class="row">
-      <div class="col" v-html="post_info && post_info.htmlLocalizedText"></div>
     </div>
   </div>
 </template>

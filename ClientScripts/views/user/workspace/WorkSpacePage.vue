@@ -1,9 +1,7 @@
 ﻿<template>
-  <div class="row">
-    <div class="col-lg-3 col-12">
-      <work-space-side-bar-component></work-space-side-bar-component>
-    </div>
-    <div class="col mt-3">
+  <div class="d-flex flex-row">
+    <work-space-side-bar-component></work-space-side-bar-component>
+    <div class="col gx-0">
       <router-view></router-view>
     </div>
   </div>

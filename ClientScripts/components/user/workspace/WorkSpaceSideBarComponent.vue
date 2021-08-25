@@ -1,39 +1,39 @@
 ﻿<template>
-  <div class="flex-shrink-0 bg-primary d-flex flex-column justify-content-start"
-       style=" height: 100%; padding: 10px">
+  <div class="flex-shrink-0 side-bar-menu d-flex flex-column justify-content-start me-3"
+       style="height: 100%; padding: 10px">
 
-    <h4 class="fw-bold m-2 mb-5 text-light">ContestSystem Workspace</h4>
-
-    <ul class="list-unstyled ps-0 ">
+    <h4 class="fw-bold m-2 mb-5 ">ContestSystem Workspace</h4>
+    <hr>
+    <ul class="list-unstyled underlined_li ps-0 ">
       <li class="mb-1">
-        <button class="btn btn-custom align-items-center text-light">
+        <button class="btn btn-custom align-items-center ">
           Мой профиль
         </button>
       </li>
       <!--      <li class="mb-1">-->
-      <!--        <button class="btn btn-custom btn-toggle align-items-center rounded collapsed text-light" data-bs-toggle="collapse"-->
+      <!--        <button class="btn btn-custom btn-toggle align-items-center rounded collapsed " data-bs-toggle="collapse"-->
       <!--                data-bs-target="#courses-collapse" aria-expanded="false">-->
       <!--          Курсы-->
       <!--        </button>-->
       <!--        <div class="collapse" id="courses-collapse">-->
-      <!--          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">-->
+      <!--          <ul class="btn-toggle-nav underlined_li list-unstyled fw-normal pb-1 small">-->
       <!--            <li>-->
-      <!--              <a href="#" class="link-light rounded">Ожидающие модерации</a>-->
+      <!--              <a href="#" class="no_style_link rounded">Ожидающие модерации</a>-->
       <!--            </li>-->
       <!--            <li>-->
-      <!--              <a href="#" class="link-light rounded">Одобренные</a>-->
+      <!--              <a href="#" class="no_style_link rounded">Одобренные</a>-->
       <!--            </li>-->
       <!--            <li>-->
-      <!--              <a href="#" class="link-light rounded">Отклонённые</a>-->
+      <!--              <a href="#" class="no_style_link rounded">Отклонённые</a>-->
       <!--            </li>-->
       <!--            <li>-->
-      <!--              <a href="#" class="link-light rounded">Все</a>-->
+      <!--              <a href="#" class="no_style_link rounded">Все</a>-->
       <!--            </li>-->
       <!--          </ul>-->
       <!--        </div>-->
       <!--      </li>-->
       <li class="mb-1">
-        <button class="btn btn-custom btn-toggle align-items-center rounded collapsed text-light"
+        <button class="btn btn-custom btn-toggle align-items-center rounded collapsed "
                 data-bs-toggle="collapse"
                 data-bs-target="#posts-collapse" aria-expanded="false">
           Посты
@@ -41,28 +41,28 @@
         <div class="collapse"
              :class="{show: ['WorkSpaceMyPendingPostsPage','WorkSpaceMyApprovedPostsPage','WorkSpaceMyRejectedPostsPage','WorkSpaceMyPostsPage'].includes($route.name)}"
              id="posts-collapse">
-          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+          <ul class="btn-toggle-nav underlined_li list-unstyled fw-normal pb-1 small">
             <li>
-              <router-link class="link-light rounded" :to="{name: 'WorkSpaceMyPendingPostsPage'}">Ожидающие модерации
+              <router-link class="no_style_link rounded" :to="{name: 'WorkSpaceMyPendingPostsPage'}">Ожидающие модерации
               </router-link>
             </li>
             <li>
-              <router-link class="link-light rounded" :to="{name: 'WorkSpaceMyApprovedPostsPage'}">Одобренные
+              <router-link class="no_style_link rounded" :to="{name: 'WorkSpaceMyApprovedPostsPage'}">Одобренные
               </router-link>
             </li>
             <li>
-              <router-link class="link-light rounded" :to="{name: 'WorkSpaceMyRejectedPostsPage'}">Отклонённые
+              <router-link class="no_style_link rounded" :to="{name: 'WorkSpaceMyRejectedPostsPage'}">Отклонённые
               </router-link>
             </li>
             <li>
-              <router-link class="link-light rounded" :to="{name: 'WorkSpaceMyPostsPage'}">Все
+              <router-link class="no_style_link rounded" :to="{name: 'WorkSpaceMyPostsPage'}">Все
               </router-link>
             </li>
           </ul>
         </div>
       </li>
       <li class="mb-1">
-        <button class="btn btn-custom btn-toggle align-items-center rounded collapsed text-light"
+        <button class="btn btn-custom btn-toggle align-items-center rounded collapsed "
                 data-bs-toggle="collapse"
                 data-bs-target="#contests-collapse" aria-expanded="false">
           Соревнования
@@ -70,28 +70,28 @@
         <div class="collapse"
              :class="{show: ['WorkSpaceMyPendingContestsPage','WorkSpaceMyApprovedContestsPage','WorkSpaceMyRejectedContestsPage','WorkSpaceMyContestsPage'].includes($route.name)}"
              id="contests-collapse">
-          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+          <ul class="btn-toggle-nav underlined_li list-unstyled fw-normal pb-1 small">
             <li>
-              <router-link class="link-light rounded" :to="{name: 'WorkSpaceMyPendingContestsPage'}">Ожидающие модерации
+              <router-link class="no_style_link rounded" :to="{name: 'WorkSpaceMyPendingContestsPage'}">Ожидающие модерации
               </router-link>
             </li>
             <li>
-              <router-link class="link-light rounded" :to="{name: 'WorkSpaceMyApprovedContestsPage'}">Одобренные
+              <router-link class="no_style_link rounded" :to="{name: 'WorkSpaceMyApprovedContestsPage'}">Одобренные
               </router-link>
             </li>
             <li>
-              <router-link class="link-light rounded" :to="{name: 'WorkSpaceMyRejectedContestsPage'}">Отклонённые
+              <router-link class="no_style_link rounded" :to="{name: 'WorkSpaceMyRejectedContestsPage'}">Отклонённые
               </router-link>
             </li>
             <li>
-              <router-link class="link-light rounded" :to="{name: 'WorkSpaceMyContestsPage'}">Все
+              <router-link class="no_style_link rounded" :to="{name: 'WorkSpaceMyContestsPage'}">Все
               </router-link>
             </li>
           </ul>
         </div>
       </li>
       <li class="mb-1">
-        <button class="btn btn-custom btn-toggle align-items-center rounded collapsed text-light"
+        <button class="btn btn-custom btn-toggle align-items-center rounded collapsed "
                 data-bs-toggle="collapse"
                 data-bs-target="#tasks-collapse" aria-expanded="false">
           Задачи
@@ -99,28 +99,28 @@
         <div class="collapse"
              :class="{show: ['WorkSpaceMyPendingTasksPage','WorkSpaceMyApprovedTasksPage','WorkSpaceMyRejectedTasksPage','WorkSpaceAllTasksPage'].includes($route.name)}"
              id="tasks-collapse">
-          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+          <ul class="btn-toggle-nav underlined_li list-unstyled fw-normal pb-1 small">
             <li>
-              <router-link class="link-light rounded" :to="{name: 'WorkSpaceMyPendingTasksPage'}">Ожидающие модерации
+              <router-link class="no_style_link rounded" :to="{name: 'WorkSpaceMyPendingTasksPage'}">Ожидающие модерации
               </router-link>
             </li>
             <li>
-              <router-link class="link-light rounded" :to="{name: 'WorkSpaceMyApprovedTasksPage'}">Одобренные
+              <router-link class="no_style_link rounded" :to="{name: 'WorkSpaceMyApprovedTasksPage'}">Одобренные
               </router-link>
             </li>
             <li>
-              <router-link class="link-light rounded" :to="{name: 'WorkSpaceMyRejectedTasksPage'}">Отклонённые
+              <router-link class="no_style_link rounded" :to="{name: 'WorkSpaceMyRejectedTasksPage'}">Отклонённые
               </router-link>
             </li>
             <li>
-              <router-link class="link-light rounded" :to="{name: 'WorkSpaceAllTasksPage'}">Каталог
+              <router-link class="no_style_link rounded" :to="{name: 'WorkSpaceAllTasksPage'}">Каталог
               </router-link>
             </li>
           </ul>
         </div>
       </li>
       <li class="mb-1">
-        <button class="btn btn-custom btn-toggle align-items-center rounded collapsed text-light"
+        <button class="btn btn-custom btn-toggle align-items-center rounded collapsed "
                 data-bs-toggle="collapse"
                 data-bs-target="#checkers-collapse" aria-expanded="false">
           Механизмы проверки
@@ -128,28 +128,28 @@
         <div class="collapse"
              :class="{show: ['WorkSpaceMyPendingCheckersPage','WorkSpaceMyApprovedCheckersPage','WorkSpaceMyRejectedCheckersPage','WorkSpaceAllCheckersPage'].includes($route.name)}"
              id="checkers-collapse">
-          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+          <ul class="btn-toggle-nav underlined_li list-unstyled fw-normal pb-1 small">
             <li>
-              <router-link class="link-light rounded" :to="{name: 'WorkSpaceMyPendingCheckersPage'}">Ожидающие модерации
+              <router-link class="no_style_link rounded" :to="{name: 'WorkSpaceMyPendingCheckersPage'}">Ожидающие модерации
               </router-link>
             </li>
             <li>
-              <router-link class="link-light rounded" :to="{name: 'WorkSpaceMyApprovedCheckersPage'}">Одобренные
+              <router-link class="no_style_link rounded" :to="{name: 'WorkSpaceMyApprovedCheckersPage'}">Одобренные
               </router-link>
             </li>
             <li>
-              <router-link class="link-light rounded" :to="{name: 'WorkSpaceMyRejectedCheckersPage'}">Отклонённые
+              <router-link class="no_style_link rounded" :to="{name: 'WorkSpaceMyRejectedCheckersPage'}">Отклонённые
               </router-link>
             </li>
             <li>
-              <router-link class="link-light rounded" :to="{name: 'WorkSpaceAllCheckersPage'}">Каталог
+              <router-link class="no_style_link rounded" :to="{name: 'WorkSpaceAllCheckersPage'}">Каталог
               </router-link>
             </li>
           </ul>
         </div>
       </li>
       <li style="margin-bottom: 135px">
-        <button class="btn btn-custom btn-toggle align-items-center rounded collapsed text-light"
+        <button class="btn btn-custom btn-toggle align-items-center rounded collapsed "
                 data-bs-toggle="collapse"
                 data-bs-target="#rule-sets-collapse" aria-expanded="false">
           Наборы правил
@@ -157,13 +157,13 @@
         <div class="collapse"
              :class="{show: ['WorkSpaceMyRuleSetsPage','WorkSpaceAllRuleSetsPage'].includes($route.name)}"
              id="rule-sets-collapse">
-          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+          <ul class="btn-toggle-nav underlined_li list-unstyled fw-normal pb-1 small">
             <li>
-              <router-link class="link-light rounded" :to="{name: 'WorkSpaceMyRuleSetsPage'}">Мои
+              <router-link class="no_style_link rounded" :to="{name: 'WorkSpaceMyRuleSetsPage'}">Мои
               </router-link>
             </li>
             <li>
-              <router-link class="link-light rounded" :to="{name: 'WorkSpaceAllRuleSetsPage'}">Каталог
+              <router-link class="no_style_link rounded" :to="{name: 'WorkSpaceAllRuleSetsPage'}">Каталог
               </router-link>
             </li>
           </ul>

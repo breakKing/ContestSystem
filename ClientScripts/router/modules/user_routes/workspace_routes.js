@@ -34,7 +34,8 @@ export default {
     name: 'WorkSpacePage',
     component: WorkSpacePage,
     meta: {
-        authorize: ['user']
+        authorize: ['user'],
+        no_gutters: true
     },
     children: [
         {

@@ -1,8 +1,17 @@
 ﻿<template>
   <header-component></header-component>
-  <div class="container">
+  <template v-if="$route.meta && $route.meta.no_gutters">
     <router-view></router-view>
-  </div>
+  </template>
+  <template v-else>
+    <div class="row g-0">
+      <div class="col side-vertical-line">&nbsp;</div>
+      <div class="col-9 px-md-4">
+        <router-view></router-view>
+      </div>
+      <div class="col side-vertical-line">&nbsp;</div>
+    </div>
+  </template>
   <footer-component></footer-component>
 </template>
 
