@@ -6,7 +6,7 @@
 
     <ul class="list-unstyled ps-0 ">
 <!--      <li class="mb-1">-->
-<!--        <button class="btn btn-toggle align-items-center rounded collapsed text-light" data-bs-toggle="collapse"-->
+<!--        <button class="btn btn-custom btn-toggle align-items-center rounded collapsed text-light" data-bs-toggle="collapse"-->
 <!--                data-bs-target="#courses-collapse" aria-expanded="false">-->
 <!--          Курсы-->
 <!--        </button>-->
@@ -31,7 +31,7 @@
 <!--        </div>-->
 <!--      </li>-->
       <li class="mb-1">
-        <button class="btn btn-toggle align-items-center rounded collapsed text-light" data-bs-toggle="collapse"
+        <button class="btn btn-custom btn-toggle align-items-center rounded collapsed text-light" data-bs-toggle="collapse"
                 data-bs-target="#posts-collapse" aria-expanded="false">
           Посты
         </button>
@@ -55,7 +55,7 @@
         </div>
       </li>
       <li class="mb-1">
-        <button class="btn btn-toggle align-items-center rounded collapsed text-light" data-bs-toggle="collapse"
+        <button class="btn btn-custom btn-toggle align-items-center rounded collapsed text-light" data-bs-toggle="collapse"
                 data-bs-target="#contests-collapse" aria-expanded="false">
           Соревнования
         </button>
@@ -80,7 +80,7 @@
         </div>
       </li>
       <li class="mb-1">
-        <button class="btn btn-toggle align-items-center rounded collapsed text-light" data-bs-toggle="collapse"
+        <button class="btn btn-custom btn-toggle align-items-center rounded collapsed text-light" data-bs-toggle="collapse"
                 data-bs-target="#tasks-collapse" aria-expanded="false">
           Задачи
         </button>
@@ -105,7 +105,7 @@
         </div>
       </li>
       <li class="mb-1">
-        <button class="btn btn-toggle align-items-center rounded collapsed text-light" data-bs-toggle="collapse"
+        <button class="btn btn-custom btn-toggle align-items-center rounded collapsed text-light" data-bs-toggle="collapse"
                 data-bs-target="#checkers-collapse" aria-expanded="false">
           Чекеры
         </button>
@@ -140,58 +140,5 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-h4 {
-  font-family: cursive;
-}
 
-.btn {
-  display: inline-flex;
-  align-items: center;
-  padding: .25rem .5rem;
-  font-weight: 600;
-  font-size: 22px;
-  color: rgba(0, 0, 0, .65);
-  background-color: transparent;
-  border: 0;
-}
-
-.btn:hover,
-.btn:focus,
-li:hover,
-li:focus {
-  color: rgba(0, 0, 0, .85);
-  background-color: rgba(210, 244, 234, 0.188);
-}
-
-.btn-toggle::before {
-  width: 1.25em;
-  line-height: 0;
-  content: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='rgba%280,0,0,.5%29' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M5 14l6-6-6-6'/%3e%3c/svg%3e");
-  transition: transform .35s ease;
-  transform-origin: .5em 50%;
-}
-
-.btn-toggle[aria-expanded="true"] {
-  color: rgba(0, 0, 0, .85);
-}
-
-.btn-toggle[aria-expanded="true"]::before {
-  transform: rotate(90deg);
-}
-
-.btn-toggle-nav a {
-  display: inline-flex;
-  padding: .1875rem .5rem;
-  margin-top: .125rem;
-  margin-left: 1.25rem;
-  text-decoration: none;
-}
-
-.router-link-active {
-  background-color: #0A5BF0;
-}
-
-.link-light {
-  font-size: 18px;
-}
 </style>

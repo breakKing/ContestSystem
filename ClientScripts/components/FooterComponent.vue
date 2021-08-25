@@ -26,23 +26,8 @@ export default {
   margin-top: auto;
 }
 
-.navbar-brand {
-  font-family: cursive;
-  padding: 15px;
-  border-radius: 16px 0 16px 0;
-  background-color: rgb(0, 13, 189, 0.2);
-}
-
 ul {
   list-style-type: none;
   padding-top: 10px;
-
-  li {
-    font-family: cursive;
-
-    h3 {
-      font-family: cursive;
-    }
-  }
 }
 </style>
