@@ -74,7 +74,7 @@ export default {
                 solution_user_id = rootGetters.currentContestSolutionsForCurrentUser[index].participant.id
                 props = {actualResult: actual_result}
             } else {
-                let solutionFromDB = await dispatch('getSolution', +actual_result.solutionId)
+                solutionFromDB = await dispatch('getSolution', +actual_result.solutionId)
                 if (solutionFromDB) {
                     index = rootGetters.currentContestSolutionsForCurrentUser.length;
                     props = solutionFromDB;
