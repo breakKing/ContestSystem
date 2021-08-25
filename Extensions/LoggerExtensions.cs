@@ -283,6 +283,9 @@ namespace ContestSystem.Extensions
                 case DeletionStatus.DbSaveError:
                     logger.LogDbSaveError(entityName, entityId, true);
                     break;
+                case DeletionStatus.Blocked:
+                    logger.LogWarning($"Попытка от пользователя {userId} удалить сущность \"{entityName}\" с идентификатором {entityId}, когда этого нельзя сделать");
+                    break;
                 default:
                     logger.LogDeletingUndefinedStatus(entityName, entityId, userId);
                     break;

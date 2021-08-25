@@ -2,10 +2,11 @@
 {
     public enum DeletionStatus
     {
-        Success = 0,
-        SuccessWithArchiving = 1,
-        NotExistentEntity = 2,
-        DbSaveError = 3,
-        Undefined = 4
+        Undefined = 0,
+        Success = 1,
+        SuccessWithArchiving = 2,
+        NotExistentEntity = 3,
+        DbSaveError = 4,
+        Blocked = 5
     }
 }

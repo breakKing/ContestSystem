@@ -154,6 +154,19 @@ namespace ContestSystem.Models.Misc
                     error = Constants.ErrorCodes[Constants.CommonSectionName][Constants.DbSaveErrorName];
                     response = Fail(error);
                     break;
+                case DeletionStatus.Blocked:
+                    error = string.Empty;
+                    if (Constants.ErrorCodes.TryGetValue(entityName, out codes))
+                    {
+                        error = codes.GetValueOrDefault(Constants.DeleteionBlockedErrorName,
+                                                        Constants.ErrorCodes[Constants.CommonSectionName][Constants.UndefinedErrorName]);
+                    }
+                    else
+                    {
+                        error = Constants.ErrorCodes[Constants.CommonSectionName][Constants.UndefinedErrorName];
+                    }
+                    response = Fail(error);
+                    break;
                 default:
                     error = Constants.ErrorCodes[Constants.CommonSectionName][Constants.UndefinedErrorName];
                     response = Fail(error);

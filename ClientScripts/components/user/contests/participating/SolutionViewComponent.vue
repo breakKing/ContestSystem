@@ -166,6 +166,13 @@ export default {
         TestResultVerdicts.Undefined,
       ].includes(+this.solution?.actualResult?.verdict)
     },
+    can_delete() {
+      return [
+        TestResultVerdicts.CheckerServersUnavailable,
+        TestResultVerdicts.TestlibFail,
+        TestResultVerdicts.UnexpectedError
+      ].includes(+this.solution?.actualResult?.verdict)
+    },
     possible_verdicts() {
       let items = {
         'Полное решение': TestResultVerdicts.Accepted,

@@ -423,5 +423,52 @@ namespace ContestSystem.Areas.Contests.Services
 
             return chats.ConvertAll(c => _messenger.GetChatHistoryAsync(dbContext, c.Link, null, null).GetAwaiter().GetResult());
         }
+
+        public async Task<bool> ContestHasSolutionAsync(MainDbContext dbContext, Contest contest, long solutionId)
+        {
+            if (contest == null)
+            {
+                return false;
+            }
+
+            return await dbContext.Solutions.AnyAsync(s => s.Id == solutionId && s.ContestId == contest.Id);
+        }
+
+        public async Task<DeletionStatus> DeleteSolutionAsync(MainDbContext dbContext, Contest contest, long solutionId)
+        {
+            var status = DeletionStatus.Undefined;
+
+            var solution = await dbContext.Solutions.FirstOrDefaultAsync(s => s.Id == solutionId && s.ContestId == contest.Id);
+
+            if (solution == null)
+            {
+                status = DeletionStatus.NotExistentEntity;
+            }
+            else
+            {
+                if (solution.Verdict != VerdictType.UnexpectedError 
+                    && solution.Verdict != VerdictType.TestlibFail
+                    && solution.Verdict != VerdictType.CheckerServersUnavailable)
+                {
+                    status = DeletionStatus.Blocked;
+                }
+                else
+                {
+                    dbContext.Solutions.Remove(solution);
+                    bool saveSuccess = await dbContext.SecureSaveAsync();
+
+                    if (!saveSuccess)
+                    {
+                        status = DeletionStatus.DbSaveError;
+                    }
+                    else
+                    {
+                        status = DeletionStatus.Success;
+                    }
+                }
+            }
+
+            return status;
+        }
     }
 }

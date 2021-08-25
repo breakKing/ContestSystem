@@ -128,5 +128,48 @@ namespace ContestSystem.Areas.Contests.Controllers
 
             return Json(response);
         }
+
+        [HttpDelete("{contestId}/solutions/{solutionId}")]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
+        public async Task<IActionResult> DeleteSolution(long contestId, long solutionId)
+        {
+            var response = new ResponseObject<long>();
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
+            var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == contestId);
+
+            if (contest == null)
+            {
+                _logger.LogWarning($"Попытка от пользователя с идентификатором {currentUser.Id} удалить решение с идентификатором {solutionId} " +
+                        $"в рамках несуществующего соревнования с идентификатором {contestId}");
+                response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityDoesntExistErrorName]);
+            }
+            else
+            {
+                if (!await _userManager.IsInRoleAsync(currentUser, RolesContainer.Moderator) && !await _contestsManager.IsUserContestLocalModeratorAsync(_dbContext, contestId, currentUser.Id))
+                {
+                    _logger.LogWarning(
+                        $"Попытка от пользователя с идентификатором {currentUser.Id} удалить решение с идентификатором {solutionId} " +
+                        $"в рамках соревнования с идентификатором {contestId} при отсутствии прав на это");
+                    response = ResponseObject<long>.Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.UserInsufficientRightsErrorName]);
+                }
+                else
+                {
+                    if (!await _contestsManager.ContestHasSolutionAsync(_dbContext, contest, solutionId))
+                    {
+                        _logger.LogWarning($"Попытка от пользователя с идентификатором {currentUser.Id} удалить несуществующее решение с идентификатором {solutionId} " +
+                            $"в рамках соревнования с идентификатором {contestId}");
+                        response = ResponseObject<long>.Fail(Constants.ErrorCodes[Constants.SolutionEntityName][Constants.EntityDoesntExistErrorName]);
+                    }
+                    else
+                    {
+                        var status = await _contestsManager.DeleteSolutionAsync(_dbContext, contest, solutionId);
+                        _logger.LogDeletionStatus(status, Constants.SolutionEntityName, solutionId, currentUser.Id);
+                        response = ResponseObject<long>.FormResponseObjectForDeletion(status, Constants.SolutionEntityName, solutionId);
+                    }
+                }
+            }
+
+            return Json(response);
+        }
     }
 }

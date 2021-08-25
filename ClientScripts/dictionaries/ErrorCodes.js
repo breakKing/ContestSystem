@@ -60,7 +60,7 @@
         TokenGenerationFailed: "ERR_USER_TOKEN_GENERATION_FAILED",
         UserRegisterFailed: "ERR_USER_REGISTER_FAILED",
         UserAlreadyInvited: "ERR_USER_ALREADY_INVITED",
-        VerifyTokenFailedErrorName: "ERR_USER_VERIFY_TOKEN_FAILED"
+        VerifyTokenFailed: "ERR_USER_VERIFY_TOKEN_FAILED"
     },
     Solution: {
         ValidationFailed: "ERR_SOLUTION_VALIDATION_FAILED",
@@ -68,7 +68,8 @@
         EntityDoesntExist: "ERR_SOLUTION_DOESNT_EXIST",
         CreationLimitExceeded: "ERR_SOLUTION_CREATION_LIMIT_EXCEEDED",
         EntityAlreadyExists: "ERR_SOLUTION_ALREADY_EXISTS",
-        WrongMomentForEditingErrorName: "ERR_SOLUTION_CANT_BE_EDITED_NOW"
+        WrongMomentForEditing: "ERR_SOLUTION_CANT_BE_EDITED_NOW",
+        DeleteionBlocked: "ERR_SOLUTION_CANT_BE_DELETED"
     },
     Compiler: {
         EntityDoesntExist: "ERR_COMPILER_DOESNT_EXIST"
