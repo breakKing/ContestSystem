@@ -49,7 +49,7 @@ export default {
             return state.fingerprint
         },
         userName(state, getters) {
-            return getters.currentUser?.fullName
+            return getters.currentUser?.userName
         },
         currentUser(state, getters) {
             if (!getters.isAuthenticated) {
