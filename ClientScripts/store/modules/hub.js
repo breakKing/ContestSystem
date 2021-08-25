@@ -66,42 +66,34 @@ export default {
             if (!actual_result || !rootGetters.currentUser || !rootGetters.currentContest || +rootGetters.currentContest.id !== +actual_result.contestId) {
                 return
             }
-            let solutionFromDB;
-            // Обновление решений текущего пользователя
-            let index = _.findIndex(rootGetters.currentContestSolutionsForCurrentUser, (s) => +s.id === +actual_result.solutionId)
-            let props, solution_user_id;
-            if (+index > -1) {
-                solution_user_id = rootGetters.currentContestSolutionsForCurrentUser[index].participant.id
-                props = {actualResult: actual_result}
-            } else {
-                solutionFromDB = await dispatch('getSolution', +actual_result.solutionId)
-                if (solutionFromDB) {
-                    index = rootGetters.currentContestSolutionsForCurrentUser.length;
-                    props = solutionFromDB;
-                    solution_user_id = solutionFromDB.participant.id
+            let solution_data = await dispatch('updateOrAddSolutionToState', {
+                current_solutions_collection: rootGetters.currentContestSolutionsForCurrentUser,
+                solution_data: {actualResult: actual_result},
+                is_solution_data_full: false,
+                update_callback: ({index, props, solution_user_id}) => {
+                    if (+index > -1 && solution_user_id && +solution_user_id === +rootGetters.currentUser.id) {
+                        commit('updateCurrentContestSolutionForCurrentUser', {index, props})
+                    }
+                    return props
                 }
-            }
-            if (+index > -1 && solution_user_id && +solution_user_id === +rootGetters.currentUser.id) {
-                commit('updateCurrentContestSolutionForCurrentUser', {index, props})
-            }
+            })
 
             // обновление решений для организатора
-            props = {}
-            index = _.findIndex(rootGetters.currentContestAllSolutions, (s) => +s.id === +actual_result.solutionId)
-            if (+index > -1) {
-                props = {actualResult: actual_result}
-            } else {
-                if (!solutionFromDB) {
-                    solutionFromDB = await dispatch('getSolution', +actual_result.solutionId)
-                }
-                if (solutionFromDB) {
-                    index = rootGetters.currentContestAllSolutions.length;
-                    props = solutionFromDB;
-                }
+            if (!solution_data || !_.isEmpty(solution_data)) {
+                solution_data = {actualResult: actual_result}
             }
-            if (+index > -1) {
-                commit('updateCurrentContestAllSolutions', {index, props})
-            }
+            await dispatch('updateOrAddSolutionToState', {
+                current_solutions_collection: rootGetters.currentContestAllSolutions,
+                solution_data: solution_data,
+                // если есть что-то кроме поля actualResult, то это реальный объект решения
+                is_solution_data_full: !!solution_data.id,
+                update_callback: ({index, props}) => {
+                    if (+index > -1) {
+                        commit('updateCurrentContestAllSolutions', {index, props})
+                    }
+                    return props
+                }
+            })
         },
         async updateUserStats({commit, state, dispatch, getters, rootGetters}, stats) {
             if (!stats || !rootGetters.currentUser || !rootGetters.currentContest) {

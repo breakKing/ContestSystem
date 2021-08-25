@@ -160,8 +160,16 @@ export default {
     }
   },
   methods: {
-    ...mapMutations(['updateCurrentContestSolutionForCurrentUser']),
-    ...mapActions(['changeCurrentContest', 'fetchAvailableCompilers', 'getSolution', 'sendSolution', 'compileSolution', 'runSolutionTests', 'getUserSolutionsInContest']),
+    ...mapActions([
+      'changeCurrentContest',
+      'fetchAvailableCompilers',
+      'getSolution',
+      'sendSolution',
+      'compileSolution',
+      'runSolutionTests',
+      'getUserSolutionsInContest',
+      'updateOrAddSolutionToState',
+    ]),
     async onSubmitSolution() {
       this.loading = true
       let {data, status, errors} = await this.sendSolution({
@@ -178,9 +186,16 @@ export default {
         this.compileSolution(solutionId).then(async () => {
           let newSolution = await this.getSolution(solutionId)
           if (newSolution) {
-            this.updateCurrentContestSolutionForCurrentUser({
-              index: this.currentContestSolutionsForCurrentUser.length,
-              props: newSolution
+            await this.updateOrAddSolutionToState({
+              current_solutions_collection: this.currentContestSolutionsForCurrentUser,
+              solution_data: newSolution,
+              is_solution_data_full: true,
+              update_callback: ({index, props, solution_user_id}) => {
+                if (+index > -1 && solution_user_id && +solution_user_id === +this.currentUser.id) {
+                  this.updateCurrentContestSolutionForCurrentUser({index, props})
+                }
+                return props
+              }
             })
             if (+newSolution.actualResult?.verdict === TestResultVerdicts.CompilationSucceed) {
               this.runSolutionTests(solutionId)
