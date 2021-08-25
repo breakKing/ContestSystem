@@ -79,7 +79,7 @@ export default {
             })
 
             // обновление решений для организатора
-            if (!solution_data || !_.isEmpty(solution_data)) {
+            if (!solution_data || _.isEmpty(solution_data)) {
                 solution_data = {actualResult: actual_result}
             }
             await dispatch('updateOrAddSolutionToState', {
