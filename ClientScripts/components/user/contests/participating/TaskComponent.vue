@@ -170,6 +170,7 @@ export default {
       'getUserSolutionsInContest',
       'updateOrAddSolutionToState',
     ]),
+    ...mapMutations(['updateCurrentContestSolutionForCurrentUser']),
     async onSubmitSolution() {
       this.loading = true
       let {data, status, errors} = await this.sendSolution({
