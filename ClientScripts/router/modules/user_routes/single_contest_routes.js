@@ -69,5 +69,14 @@ export default {
                 authorize: ['user']
             },
         },
+        {
+            path: 'organizer/:contest_id/solutions/:solution_id',
+            name: 'OrganizerSolutionViewPage',
+            component: SolutionViewComponent,
+            props: true,
+            meta: {
+                authorize: ['user']
+            },
+        },
     ]
 }

@@ -29,7 +29,10 @@
       <td>{{ getFormattedTime((actualResult(solution) && actualResult(solution).usedTimeInMillis) || 0) }}</td>
       <td>{{ getFormattedMemory((actualResult(solution) && actualResult(solution).usedMemoryInBytes) || 0) }}</td>
       <td>
-        <router-link :to="{name: 'SolutionViewPage', params: {solution_id: solution.id}}">Перейти</router-link>
+        <router-link v-if="organizer_mode"
+                     :to="{name: 'OrganizerSolutionViewPage', params: {solution_id: solution.id}}">Перейти
+        </router-link>
+        <router-link v-else :to="{name: 'SolutionViewPage', params: {solution_id: solution.id}}">Перейти</router-link>
       </td>
     </tr>
     </tbody>
@@ -68,7 +71,7 @@ export default {
       return letter + (problem.localizedName || '')
     },
     lastCheckerOutput(solution) {
-      return +solution?.testResults?.length > 0 ? (solution?.testResults[solution?.testResults.length-1].checkerOutput || '') : ''
+      return +solution?.testResults?.length > 0 ? (solution?.testResults[solution?.testResults.length - 1].checkerOutput || '') : ''
     }
   },
 }

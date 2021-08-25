@@ -1,5 +1,6 @@
 <template>
-  <bread-crumbs-component :routes="bread_crumb_routes"></bread-crumbs-component>
+  <bread-crumbs-component v-if="!currentUserIsOrganizerOfCurrentContest"
+                          :routes="bread_crumb_routes"></bread-crumbs-component>
   <h2>Решение {{ problemName }}</h2>
   <p><i>({{ getFormattedTime(problem && problem.timeLimitInMilliseconds) }}, {{
       getFormattedMemory(problem && problem.memoryLimitInBytes)
