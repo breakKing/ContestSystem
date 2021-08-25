@@ -96,7 +96,7 @@ export default {
         }) {
             try {
                 let {data} = await rootGetters.api.delete(`/contests/management/${contestId}/solutions/${solutionId}`)
-                if (data) {
+                if (data && data.status) {
                     commit(
                         'setCurrentContestSolutionsForCurrentUser',
                         _.filter(
@@ -112,7 +112,7 @@ export default {
                         )
                     )
                 }
-                return data
+                return data.status
             } catch (e) {
                 console.error(e)
                 return false
