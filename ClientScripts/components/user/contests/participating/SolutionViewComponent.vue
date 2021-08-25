@@ -116,7 +116,12 @@ export default {
     })
   },
   methods: {
-    ...mapActions(['getSolution', 'changeCurrentContest', 'changeSolution', 'deleteSolution']),
+    ...mapActions([
+        'getSolution',
+      'changeCurrentContest',
+      'changeSolution', 
+      'deleteSolution',
+    ]),
     async saveForm() {
       let solution_data = await this.changeSolution({
         contestId: this.contest_id,

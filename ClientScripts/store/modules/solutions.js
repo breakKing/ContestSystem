@@ -96,6 +96,22 @@ export default {
         }) {
             try {
                 let {data} = await rootGetters.api.delete(`/contests/management/${contestId}/solutions/${solutionId}`)
+                if (data) {
+                    commit(
+                        'setCurrentContestSolutionsForCurrentUser',
+                        _.filter(
+                            rootGetters.currentContestSolutionsForCurrentUser,
+                            (s) => +s.id !== +solutionId
+                        )
+                    )
+                    commit(
+                        'setCurrentContestAllSolutions',
+                        _.filter(
+                            rootGetters.currentContestAllSolutions,
+                            (s) => +s.id !== +solutionId
+                        )
+                    )
+                }
                 return data
             } catch (e) {
                 console.error(e)
