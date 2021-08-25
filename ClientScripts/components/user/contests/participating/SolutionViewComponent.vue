@@ -38,6 +38,31 @@
       </div>
       <button type="submit" class="btn btn-primary">Сохранить</button>
     </v-form>
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete_solution_modal">
+      Удалить
+    </button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="delete_solution_modal" tabindex="-1" aria-labelledby="delete_solution_modal_label"
+         aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="delete_solution_modal_label">Подтвердите</h5>
+            <button type="button" id="delete_solution_modal_close" class="btn-close" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Вы уверены что хотите удалить это решение?
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+            <button type="button" @click.prevent="removeSolution" class="btn btn-primary">Подтвердить</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -91,7 +116,7 @@ export default {
     })
   },
   methods: {
-    ...mapActions(['getSolution', 'changeCurrentContest', 'changeSolution']),
+    ...mapActions(['getSolution', 'changeCurrentContest', 'changeSolution', 'deleteSolution']),
     async saveForm() {
       let solution_data = await this.changeSolution({
         contestId: this.contest_id,
@@ -101,6 +126,19 @@ export default {
       })
       if (solution_data) {
         Object.assign(this.solution, solution_data)
+        await this.$router.push(({name: 'ContestPage', params: {contest_id: this.contest_id}}))
+      }
+    },
+    closeModal() {
+      document.querySelector('#delete_solution_modal_close').click()
+    },
+    async removeSolution() {
+      let result = await this.deleteSolution({
+        contestId: this.contest_id,
+        solutionId: this.solution.id,
+      })
+      if (result) {
+        this.closeModal()
         await this.$router.push(({name: 'ContestPage', params: {contest_id: this.contest_id}}))
       }
     }

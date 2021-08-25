@@ -90,5 +90,17 @@ export default {
                 return null
             }
         },
+        async deleteSolution({commit, state, dispatch, getters, rootGetters}, {
+            contestId,
+            solutionId,
+        }) {
+            try {
+                let {data} = await rootGetters.api.delete(`/contests/management/${contestId}/solutions/${solutionId}`)
+                return data
+            } catch (e) {
+                console.error(e)
+                return false
+            }
+        },
     }
 }
