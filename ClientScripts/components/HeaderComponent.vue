@@ -33,7 +33,10 @@
         </ul>
         <ul>
           <template v-if="isAuthenticated">
-            <li class="nav-item me-2 fs-5 mt-3 auth-item">
+            <li class="nav-item me-2 fs-5 mt-3">
+                <span class="nav-link text-light">{{userName}}</span>
+            </li>
+            <li class="nav-item fs-5 mt-3 auth-item">
               <a class="nav-link text-light" href="#" @click.prevent="logout">Выйти</a>
             </li>
           </template>
