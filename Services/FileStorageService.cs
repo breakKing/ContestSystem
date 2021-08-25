@@ -1,5 +1,6 @@
 ﻿using ContestSystem.Extensions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -17,11 +18,12 @@ namespace ContestSystem.Services
         private readonly string _chatsDirectory = @"Chats";
         private readonly ILogger<FileStorageService> _logger;
 
-        private string StorageDirectory => Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, _storageDirectory));
-        private string ImagesDirectory => Path.GetFullPath(Path.Combine(StorageDirectory, _imagesDirectory));
-        private string ContestsImagesDirectory => Path.GetFullPath(Path.Combine(ImagesDirectory, _contestsDirectory));
-        private string PostsImagesDirectory => Path.GetFullPath(Path.Combine(ImagesDirectory, _postsDirectory));
-        private string ChatsImagesDirectory => Path.GetFullPath(Path.Combine(ImagesDirectory, _chatsDirectory));
+        private string ContentRootPath { get; set; }
+        private string StorageDirectory { get; set; }
+        private string ImagesDirectory { get; set; }
+        private string ContestsImagesDirectory { get; set; }
+        private string PostsImagesDirectory { get; set; }
+        private string ChatsImagesDirectory { get; set; }
 
         private List<string> AllowedImageTypes => new List<string>
         {
@@ -32,13 +34,37 @@ namespace ContestSystem.Services
             "tiff"
         };
 
-        public FileStorageService(ILogger<FileStorageService> logger)
+        public FileStorageService(ILogger<FileStorageService> logger, IHostEnvironment environment)
         {
+            _logger = logger;
+
+            ContentRootPath = environment.ContentRootPath;
+            StorageDirectory = GeneratePath(ContentRootPath, _storageDirectory);
+            ImagesDirectory = GeneratePath(StorageDirectory, _imagesDirectory);
+            ContestsImagesDirectory = GeneratePath(ImagesDirectory, _contestsDirectory);
+            PostsImagesDirectory = GeneratePath(ImagesDirectory, _postsDirectory);
+            ChatsImagesDirectory = GeneratePath(ImagesDirectory, _chatsDirectory);
+
             EnsureDirectoryCreated(StorageDirectory);
             EnsureDirectoryCreated(ImagesDirectory);
             EnsureDirectoryCreated(ContestsImagesDirectory);
             EnsureDirectoryCreated(PostsImagesDirectory);
-            _logger = logger;
+            EnsureDirectoryCreated(ChatsImagesDirectory);
+        }
+
+        private string GeneratePath(params string[] pathPieces)
+        {
+            return Path.Combine(pathPieces);
+        }
+
+        private string GetAbsolutePath(string path)
+        {
+            return Path.Combine(ContentRootPath, path);
+        }
+
+        private string GetRelativePath(string path)
+        {
+            return Path.GetRelativePath(ContentRootPath, path);
         }
 
         private void EnsureDirectoryCreated(string directory)
@@ -73,7 +99,7 @@ namespace ContestSystem.Services
                     }
                 }
             }
-            return result;
+            return string.IsNullOrWhiteSpace(result) ? result : GetRelativePath(result);
         }
 
         public async Task<string> SavePostImageAsync(long postId, IFormFile formFileForImage)
@@ -100,7 +126,7 @@ namespace ContestSystem.Services
                     }
                 }
             }
-            return result;
+            return string.IsNullOrWhiteSpace(result) ? result : GetRelativePath(result);
         }
 
         public async Task<string> SaveChatImageAsync(long chatId, IFormFile formFileForImage)
@@ -127,12 +153,13 @@ namespace ContestSystem.Services
                     }
                 }
             }
-            return result;
+            return string.IsNullOrWhiteSpace(result) ? result : GetRelativePath(result);
         }
 
         public bool DeleteFileAsync(string filePath)
         {
             bool deleted = false;
+            filePath = GetAbsolutePath(filePath);
             if (File.Exists(filePath))
             {
                 try
@@ -156,6 +183,7 @@ namespace ContestSystem.Services
         public string GetImageInBase64(string imagePath)
         {
             string result = "";
+            imagePath = GetAbsolutePath(imagePath);
             if (File.Exists(imagePath))
             {
                 try

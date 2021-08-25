@@ -77,7 +77,7 @@ export default {
             try {
                 if (post_id) {
                     return await $.ajax({
-                        url: `/workspace/posts/${post_id}`,
+                        url: `/api/workspace/posts/${post_id}`,
                         data: request_data,
                         processData: false,
                         contentType: false,
@@ -85,7 +85,7 @@ export default {
                     })
                 } else {
                     return await $.ajax({
-                        url: `/workspace/posts`,
+                        url: `/api/workspace/posts`,
                         data: request_data,
                         processData: false,
                         contentType: false,
