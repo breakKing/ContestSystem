@@ -47,4 +47,8 @@
       <_ContentIncludedByDefault Remove="wwwroot\bundle\Home\index.js.map" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="ClientScripts\styles\fonts" />
+    </ItemGroup>
+
 </Project>

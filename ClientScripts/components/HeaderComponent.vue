@@ -1,5 +1,5 @@
 ﻿<template>
-  <nav class="navbar navbar-expand-lg navbar-light bg-primary ">
+  <nav class="navbar navbar-expand-lg navbar-light header-block">
     <div class="container-xl">
       <router-link class="navbar-brand me-5 text-light" :to="{name: 'Home'}">
         <img src="~../../Images/logo.png" alt="logo" class="me-2">
@@ -12,36 +12,36 @@
 
       <div class="collapse navbar-collapse" id="navbarsExample07XL">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item me-2 fs-5">
+          <li class="nav-item me-2 fs-5 rounded-item">
             <router-link class="nav-link text-light" :to="{name: 'Home'}">Главная</router-link>
           </li>
-          <li class="nav-item me-2 fs-5" v-if="isAuthenticated && currentRole === 'user'">
+          <li class="nav-item me-2 fs-5 rounded-item" v-if="isAuthenticated && currentRole === 'user'">
             <router-link class="nav-link text-light" :to="{name: 'AvailableContestsPage'}">Контесты</router-link>
           </li>
-          <li class="nav-item me-2 fs-5">
+          <li class="nav-item me-2 fs-5 rounded-item">
             <router-link class="nav-link text-light" :to="{name: 'PostsPage'}">Блог</router-link>
           </li>
           <template v-if="isAuthenticated && currentRole === 'user'">
-            <!--          <li class="nav-item me-2 fs-5" >-->
+            <!--          <li class="nav-item me-2 fs-5 rounded-item" >-->
             <!--            <router-link class="nav-link text-light" :to="{name: 'CoursePage'}">Учебные курсы</router-link>-->
             <!--          </li>-->
-            <li class="nav-item fs-5">
+            <li class="nav-item fs-5 rounded-item">
               <router-link class="nav-link text-light" :to="{name: 'WorkSpaceWelcomeComponent'}">Личный кабинет
               </router-link>
             </li>
           </template>
         </ul>
         <ul>
-          <template v-if="isAuthenticated ">
-            <li class="nav-item me-2 fs-5 mt-3">
-              <a class="nav-link text-light " href="#" @click.prevent="logout">Выйти</a>
+          <template v-if="isAuthenticated">
+            <li class="nav-item me-2 fs-5 mt-3 auth-item">
+              <a class="nav-link text-light" href="#" @click.prevent="logout">Выйти</a>
             </li>
           </template>
           <template v-else>
-            <li class="nav-item me-2 fs-5 mt-3">
+            <li class="nav-item me-3 fs-5 mt-3 auth-item">
               <router-link class="nav-link text-light" :to="{name: 'Login'}">Войти</router-link>
             </li>
-            <li class="nav-item fs-5 mt-3">
+            <li class="nav-item fs-5 mt-3 auth-item">
               <router-link class="nav-link text-light" :to="{name: 'Register'}">Зарегистрироваться</router-link>
             </li>
           </template>
@@ -52,7 +52,7 @@
 </template>
 
 <script>
-import {mapState, mapActions, mapGetters, mapMutations} from 'vuex'
+import {mapState, mapActions, mapGetters} from 'vuex'
 
 export default {
   name: "HeaderComponent",
@@ -72,11 +72,25 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.navbar-brand {
-  font-family: cursive;
-  padding: 15px;
-  border-radius: 16px 0 16px 0;
-  background-color: rgb(0, 13, 189, 0.2);
+.header-block {
+  background-color: #2D3A4F;
+
+  .navbar-brand {
+    span {
+      font-weight: 700;
+      letter-spacing: 1pt;
+      font-size: 120%;
+    }
+  }
+
+  .auth-item {
+    background-color: #59B7CE;
+
+    &:hover,
+    &:focus {
+      background-color: #3a7787;
+    }
+  }
 }
 
 ul {
@@ -85,14 +99,14 @@ ul {
 
   li:hover,
   li:focus {
-    border-radius: 16px;
-    color: rgba(0, 0, 0, .85);
-    background-color: rgba(210, 244, 234, 0.188);
+    &.rounded-item {
+      border-radius: 16px;
+    }
   }
 }
 
 .router-link-active {
   border-radius: 16px;
-  background-color: #0A5BF0;
 }
+
 </style>
