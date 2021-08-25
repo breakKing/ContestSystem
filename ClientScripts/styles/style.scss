@@ -1,64 +1,65 @@
 @import '~bootstrap-icons/font/bootstrap-icons.css';
+
 #app {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between
 }
 
 * {
-    font-family: Playfair;
+  font-family: Raleway sans-serif;
 }
 
 .workspace-btn {
-    padding: 5px 5px;
-    background-color: #fff;
-    border-radius: 16px;
-    border: 1px solid blue;
-    text-decoration: none;
-    color: blue;
-    width: 48%;
+  padding: 5px 5px;
+  background-color: #fff;
+  border-radius: 16px;
+  border: 1px solid blue;
+  text-decoration: none;
+  color: blue;
+  width: 48%;
 
-    &:hover {
-        background-color: #0b76ef;
-        color: white;
-    }
+  &:hover {
+    background-color: #0b76ef;
+    color: white;
+  }
 }
 
 .workspace-btn-del {
-    border: 1px solid red;
-    color: red;
+  border: 1px solid red;
+  color: red;
 
-    &:hover {
-        background-color: red;
-    }
+  &:hover {
+    background-color: red;
+  }
 }
 
 .workspace-btn-enter {
-    border: 1px solid green;
-    color: green;
+  border: 1px solid green;
+  color: green;
 
-    &:hover {
-        background-color: green;
-    }
+  &:hover {
+    background-color: green;
+  }
 }
 
 .code-editor {
-    background: #ffffff;
-    color: #333333;
+  background: #ffffff;
+  color: #333333;
 
-    /* you must provide font-family font-size line-height. Example: */
-    font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
-    font-size: 16px;
-    line-height: 1.5;
-    padding: 5px;
+  /* you must provide font-family font-size line-height. Example: */
+  font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
+  font-size: 16px;
+  line-height: 1.5;
+  padding: 5px;
 
-    min-height: 300px;
+  min-height: 300px;
 
-    border: 2px solid #dddddd;
-    border-radius: 8px;
+  border: 2px solid #dddddd;
+  border-radius: 8px;
 }
 
 .prism-editor__textarea:focus {
-    outline: none;
-  }
+  outline: none;
+}
