@@ -22,8 +22,8 @@
                     class="code-editor"/>
     </div>
   </div>
-  <div v-if="can_change_status && currentUserIsOrganizerOfCurrentContest">
-    <v-form @submit="saveForm" :validation-schema="schema">
+  <div v-if="currentUserIsOrganizerOfCurrentContest">
+    <v-form v-if="can_change_status" @submit="saveForm" :validation-schema="schema">
       <div>
         <label class="font-weight-bold">Вердикт</label>
         <v-field as="select" v-model="verdict" class="form-control" name="verdict">
@@ -38,31 +38,33 @@
       </div>
       <button type="submit" class="btn btn-primary">Сохранить</button>
     </v-form>
-    <!-- Button trigger modal -->
-    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete_solution_modal">
-      Удалить
-    </button>
+    <template v-if="can_delete">
+      <!-- Button trigger modal -->
+      <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete_solution_modal">
+        Удалить
+      </button>
 
-    <!-- Modal -->
-    <div class="modal fade" id="delete_solution_modal" tabindex="-1" aria-labelledby="delete_solution_modal_label"
-         aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="delete_solution_modal_label">Подтвердите</h5>
-            <button type="button" id="delete_solution_modal_close" class="btn-close" data-bs-dismiss="modal"
-                    aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            Вы уверены что хотите удалить это решение?
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-            <button type="button" @click.prevent="removeSolution" class="btn btn-primary">Подтвердить</button>
+      <!-- Modal -->
+      <div class="modal fade" id="delete_solution_modal" tabindex="-1" aria-labelledby="delete_solution_modal_label"
+           aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="delete_solution_modal_label">Подтвердите</h5>
+              <button type="button" id="delete_solution_modal_close" class="btn-close" data-bs-dismiss="modal"
+                      aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              Вы уверены что хотите удалить это решение?
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+              <button type="button" @click.prevent="removeSolution" class="btn btn-primary">Подтвердить</button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </template>
   </div>
 </template>
 
@@ -117,9 +119,9 @@ export default {
   },
   methods: {
     ...mapActions([
-        'getSolution',
+      'getSolution',
       'changeCurrentContest',
-      'changeSolution', 
+      'changeSolution',
       'deleteSolution',
     ]),
     async saveForm() {
