@@ -1,6 +1,5 @@
 <template>
   <bread-crumbs-component :routes="bread_crumb_routes"></bread-crumbs-component>
-  <!-- eslint-disable-next-line -->
   <posts-list-component></posts-list-component>
 </template>
 

@@ -10,7 +10,6 @@
       <router-link class="nav-link" :to="{name: 'CurrentlyRunningContestsComponentPage'}">Идут сейчас</router-link>
     </li>
   </ul>
-  <!-- eslint-disable-next-line -->
   <div class="tab-content">
     <div class="tab-pane fade show active" role="tabpanel">
       <router-view></router-view>

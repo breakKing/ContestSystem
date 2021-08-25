@@ -1,5 +1,4 @@
 ﻿<template>
-  <!--eslint-disable -->
   <div class="row">
     <div class="col">
       <div v-if="!!error_msg" class="alert alert-danger" role="alert">

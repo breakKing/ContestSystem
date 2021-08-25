@@ -57,7 +57,6 @@
     </v-form>
     <router-link :to="{name: 'Login'}">Уже зарегистрировны?</router-link>
   </div>
-  <!-- eslint-disable-next-line -->
   <footer-component></footer-component>
 </template>
 
@@ -82,7 +81,7 @@ export default {
       date_of_birth: null,
       registrationSchema: Yup.object({
         login: Yup.string().required('Логин это обязательное поле').label('Логин'),
-        password: Yup.string().required('Пароль это обязательное поле').label('Пароль').min(5,'Минимум 5 символов'),
+        password: Yup.string().required('Пароль это обязательное поле').label('Пароль').min(5, 'Минимум 5 символов'),
         first_name: Yup.string().required('Имя это обязательное поле'),
         surname: Yup.string().required('Фамилия это обязательное поле'),
         patronymic: Yup.string().nullable(),

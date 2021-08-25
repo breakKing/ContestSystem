@@ -1,6 +1,5 @@
 <template>
   <bread-crumbs-component :routes="bread_crumb_routes"></bread-crumbs-component>
-  <!--eslint-disable -->
   <contest-preview-component v-for="contest of availableContests" :contest="contest"></contest-preview-component>
 </template>
 
@@ -12,7 +11,7 @@ import AvailableContestsBreads from "../../../dictionaries/bread_crumbs/Availabl
 
 export default {
   name: "AvailableContestsComponent",
-  components: {ContestPreviewComponent,BreadCrumbsComponent},
+  components: {ContestPreviewComponent, BreadCrumbsComponent},
   computed: {
     ...mapGetters(['availableContests']),
     bread_crumb_routes() {

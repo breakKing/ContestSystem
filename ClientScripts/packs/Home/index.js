@@ -7,7 +7,8 @@ import axios from 'axios'
 import VueAxios from 'vue-axios'
 import $ from "jquery";
 import 'bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/scss/bootstrap.scss';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 import 'vue-prism-editor/dist/prismeditor.min.css';
 import 'prismjs/themes/prism-tomorrow.css'; 
 import '../../styles/style.scss';

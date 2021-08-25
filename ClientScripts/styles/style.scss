@@ -1,14 +1,11 @@
-@import '~bootstrap-icons/font/bootstrap-icons.css';
+* {
+  font-family: Raleway sans-serif;
+}
 
 #app {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: space-between
-}
-
-* {
-  font-family: Raleway sans-serif;
 }
 
 .workspace-btn {

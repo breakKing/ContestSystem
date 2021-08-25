@@ -1,5 +1,4 @@
 ﻿<template>
-  <!--eslint-disable -->
   <div v-if="!!errors" class="alert alert-danger" role="alert">
     {{ errors }}
   </div>
@@ -12,7 +11,8 @@
     <div>
       <label class="fs-4">Описание</label>
       <v-field v-model="description" name="description" type="hidden"/>
-      <quill-editor ref="quill_editor_description" theme="snow" v-model:content="description" contentType="html" toolbar="full" class="form-control"></quill-editor>
+      <quill-editor ref="quill_editor_description" theme="snow" v-model:content="description" contentType="html"
+                    toolbar="full" class="form-control"></quill-editor>
       <error-message name="description"></error-message>
     </div>
     <div>
@@ -24,11 +24,11 @@
     <div>
       <label class="fs-4">Код</label>
       <v-field name="code" type="hidden" v-model="code"/>
-      <prism-editor v-model="code" 
-                      :highlight="highlighter" 
-                      :tabSize="4" 
-                      line-numbers
-                      class="code-editor"/>
+      <prism-editor v-model="code"
+                    :highlight="highlighter"
+                    :tabSize="4"
+                    line-numbers
+                    class="code-editor"/>
       <error-message name="code"></error-message>
     </div>
     <button type="submit">Сохранить</button>
@@ -124,15 +124,15 @@ export default {
     next(async vm => {
       await vm.updateFields()
     })
-        },
-    mounted() {
-        $(".code-editor").click(function () {
-            $(".prism-editor__textarea").focus();
-        });
-    }
+  },
+  mounted() {
+    $(".code-editor").click(function () {
+      $(".prism-editor__textarea").focus();
+    });
+  }
 }
 
-    
+
 </script>
 
 <style lang="scss" scoped>

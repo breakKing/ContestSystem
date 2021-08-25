@@ -1,7 +1,7 @@
 ﻿<template>
   <header-component></header-component>
-  <div class="container" style="min-height: inherit;">
-    <div class="row" style="min-height: inherit;">
+  <div class="container">
+    <div class="row">
       <div class="col-4">
         <admin-side-bar-component></admin-side-bar-component>
       </div>
@@ -10,7 +10,6 @@
       </div>
     </div>
   </div>
-  <!-- eslint-disable-next-line -->
   <footer-component></footer-component>
 </template>
 

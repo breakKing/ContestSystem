@@ -1,5 +1,4 @@
 ﻿<template>
-    <!--eslint-disable -->
     <div class="row mt-3">
         <checker-preview-component v-for="checker of currentUserApprovedCheckers" :checker="checker"></checker-preview-component>
     </div>

@@ -1,5 +1,4 @@
 <template>
-  <!--eslint-disable -->
   <post-edit-component></post-edit-component>
   <h2 class="mt-5 text-center" v-if="!currentUserPostsList || currentUserPostsList.length === 0">Пока нет постов</h2>
   <template v-else>

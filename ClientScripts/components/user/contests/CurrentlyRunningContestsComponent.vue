@@ -1,5 +1,4 @@
 <template>
-  <!--eslint-disable -->
   <bread-crumbs-component :routes="bread_crumb_routes"></bread-crumbs-component>
   <contest-preview-component v-for="contest of runningContests" :contest="contest"></contest-preview-component>
 </template>

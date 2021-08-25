@@ -1,8 +1,7 @@
 ﻿<template>
-    <!--eslint-disable -->
-    <div class="row mt-3">
-        <task-preview-component v-for="task of currentUserPendingTasks" :task="task"></task-preview-component>
-    </div>
+  <div class="row mt-3">
+    <task-preview-component v-for="task of currentUserPendingTasks" :task="task"></task-preview-component>
+  </div>
 </template>
 
 <script>

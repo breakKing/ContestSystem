@@ -1,5 +1,4 @@
 ﻿<template>
-  <!--eslint-disable -->
   <table class="table">
     <thead>
     <tr class="d-flex justify-content-between w-100">
@@ -16,7 +15,7 @@
           {{ example.number }}
         </span>
       </td>
-       <td class="col">
+      <td class="col">
         <div class="d-flex align-items-center">
           <label class="w-50 fs-5">Входные данные</label>
           <textarea :value="example.inputText" @change="$emit('update:examples',{
@@ -26,9 +25,9 @@
               inputText: $event.target.value
             }
             })"
-            class="w-50 mb-2"></textarea>
+                    class="w-50 mb-2"></textarea>
         </div>
-        <div  class="d-flex align-items-center">
+        <div class="d-flex align-items-center">
           <label class="w-50 fs-5">Выходные данные</label>
           <textarea :value="example.outputText" @change="$emit('update:examples', {
             type: 'change',
@@ -37,31 +36,31 @@
               outputText: $event.target.value
             }
             })"
-            class="w-50 mb-2">></textarea>
+                    class="w-50 mb-2">></textarea>
         </div>
       </td>
       <td class="col d-flex flex-column align-items-center justify-content-around">
         <div>
-          
-            <button class="btn btn-info me-2" style="width: 100px" @click.prevent="$emit('update:examples', {
+
+          <button class="btn btn-info me-2" style="width: 100px" @click.prevent="$emit('update:examples', {
           type: 'up-order',
           index: example_idx
           })">
-                🠉
-            </button>
-            <button class="btn btn-info" style="width: 100px" @click.prevent="$emit('update:examples', {
+            🠉
+          </button>
+          <button class="btn btn-info" style="width: 100px" @click.prevent="$emit('update:examples', {
             type: 'down-order',
             index: example_idx
           })">
-                🠋
-            </button>
+            🠋
+          </button>
         </div>
         <button class="btn btn-danger w-25" @click.prevent="$emit('update:examples', {
           type: 'delete',
           index: example_idx
         })">Удалить
         </button>
-        
+
       </td>
     </tr>
     </tbody>
@@ -70,6 +69,7 @@
 
 <script>
 import 'bootstrap-icons/font/bootstrap-icons.css';
+
 export default {
   name: "ExamplesTableComponent",
   props: ['examples'],
@@ -78,14 +78,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  tbody{
-   tr{
-     background-color: rgba(255, 255, 255, 0.2);
-     margin-bottom: 10px;
-   }
-   textarea{
+tbody {
+  tr {
+    background-color: rgba(255, 255, 255, 0.2);
+    margin-bottom: 10px;
+  }
+
+  textarea {
     color: black;
     border-radius: 16px;
-   }
- }
+  }
+}
 </style>

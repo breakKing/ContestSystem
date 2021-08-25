@@ -1,9 +1,8 @@
 ﻿<template>
   <header-component></header-component>
-  <div class="container" style="min-height: inherit;">
+  <div class="container">
     <router-view></router-view>
   </div>
-  <!-- eslint-disable-next-line -->
   <footer-component></footer-component>
 </template>
 

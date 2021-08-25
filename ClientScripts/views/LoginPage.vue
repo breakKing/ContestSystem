@@ -22,7 +22,6 @@
     </v-form>
     <router-link style="margin-top: 10px" :to="{name: 'Register'}">Ещё не зарегистрированы?</router-link>
   </div>
-  <!-- eslint-disable-next-line -->
   <footer-component></footer-component>
 </template>
 

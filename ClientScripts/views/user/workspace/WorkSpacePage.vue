@@ -1,5 +1,5 @@
 ﻿<template>
-  <div class="row" style="min-height: inherit;">
+  <div class="row">
     <div class="col-lg-3 col-12">
       <work-space-side-bar-component></work-space-side-bar-component>
     </div>

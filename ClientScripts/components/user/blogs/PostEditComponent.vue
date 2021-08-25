@@ -1,5 +1,4 @@
 <template>
-  <!--eslint-disable -->
   <button type="button" class="workspace-btn mt-2 mb-1" data-bs-toggle="modal"
           :data-bs-target="'#'+modalId">
     {{ btnMessage }}
