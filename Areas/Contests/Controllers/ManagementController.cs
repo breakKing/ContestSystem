@@ -69,7 +69,7 @@ namespace ContestSystem.Areas.Contests.Controllers
             var imageInBase64 = _storage.GetImageInBase64(contest.ImagePath);
             var contestLocalizer = _localizerHelper.GetAppropriateLocalizer(contest.ContestLocalizers, currentUser.Culture);
             var externalSolutions = solutions.ConvertAll(s => SolutionExternalModel.GetFromModel(s, imageInBase64, contestLocalizer,
-                                                                                                _localizerHelper.GetAppropriateLocalizer(s.Problem.ProblemLocalizers, currentUser.Culture), false));
+                                                                                                _localizerHelper.GetAppropriateLocalizer(s.Problem.ProblemLocalizers, currentUser.Culture), false, true));
 
             return Json(externalSolutions);
         }

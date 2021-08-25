@@ -21,7 +21,7 @@ namespace ContestSystem.Models.ExternalModels
 
         public static SolutionExternalModel GetFromModel(Solution solution, string contestImageInBase64,
             ContestLocalizer contestLocalizer, ProblemLocalizer problemLocalizer,
-            bool testsResultsRestricted = true)
+            bool testsResultsRestricted = true, bool includeCheckerData = false)
         {
             if (solution == null)
             {
@@ -33,12 +33,12 @@ namespace ContestSystem.Models.ExternalModels
             {
                 if (!testsResultsRestricted || (solution.Contest?.RulesSet?.ShowFullTestsResults ?? false))
                 {
-                    neededTestResults = solution.TestResults.ConvertAll(tr => TestResultExternalModel.GetFromModel(tr));
+                    neededTestResults = solution.TestResults.ConvertAll(tr => TestResultExternalModel.GetFromModel(tr, includeCheckerData));
                 }
                 else
                 {
                     var maxNumber = solution.TestResults.Max(tr => tr.Number);
-                    var testResult = TestResultExternalModel.GetFromModel(solution.TestResults.FirstOrDefault(t => t.Number == maxNumber));
+                    var testResult = TestResultExternalModel.GetFromModel(solution.TestResults.FirstOrDefault(t => t.Number == maxNumber), includeCheckerData);
                     neededTestResults.Add(testResult);
                 }
             }
