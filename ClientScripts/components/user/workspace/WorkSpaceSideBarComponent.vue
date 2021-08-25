@@ -1,6 +1,6 @@
 ﻿<template>
-  <div class="flex-shrink-0 side-bar-menu d-flex flex-column justify-content-start me-3"
-       style="height: 100%; padding: 10px">
+  <div class="side-bar-menu main-block-height d-flex flex-column justify-content-start me-3"
+       style="padding: 10px">
 
     <h4 class="fw-bold m-2 mb-5 ">ContestSystem Workspace</h4>
     <hr>
@@ -72,7 +72,8 @@
              id="contests-collapse">
           <ul class="btn-toggle-nav underlined_li list-unstyled fw-normal pb-1 small">
             <li>
-              <router-link class="no_style_link rounded" :to="{name: 'WorkSpaceMyPendingContestsPage'}">Ожидающие модерации
+              <router-link class="no_style_link rounded" :to="{name: 'WorkSpaceMyPendingContestsPage'}">Ожидающие
+                модерации
               </router-link>
             </li>
             <li>
@@ -130,7 +131,8 @@
              id="checkers-collapse">
           <ul class="btn-toggle-nav underlined_li list-unstyled fw-normal pb-1 small">
             <li>
-              <router-link class="no_style_link rounded" :to="{name: 'WorkSpaceMyPendingCheckersPage'}">Ожидающие модерации
+              <router-link class="no_style_link rounded" :to="{name: 'WorkSpaceMyPendingCheckersPage'}">Ожидающие
+                модерации
               </router-link>
             </li>
             <li>
@@ -148,8 +150,8 @@
           </ul>
         </div>
       </li>
-      <li style="margin-bottom: 135px">
-        <button class="btn btn-custom btn-toggle align-items-center rounded collapsed "
+      <li class="mb-1">
+        <button class="btn btn-custom btn-toggle align-items-center rounded collapsed"
                 data-bs-toggle="collapse"
                 data-bs-target="#rule-sets-collapse" aria-expanded="false">
           Наборы правил

@@ -1,6 +1,6 @@
 ﻿<template>
     <router-link :to="{name: 'WorkSpaceEditContestPage'}" class="workspace-btn">Создать контест</router-link>
-    <div class="row mt-3">
+    <div class="row mt-3 gx-0">
         <contest-preview-component v-for="contest of currentUserContests" :contest="contest"></contest-preview-component>
     </div>
 </template>
