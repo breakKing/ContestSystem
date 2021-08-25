@@ -38,6 +38,7 @@ module.exports = {
     },
     plugins: [
         new VueLoaderPlugin(),
+        new webpack.HotModuleReplacementPlugin(),
         // new MiniCssExtractPlugin(),
         new BrowserSyncPlugin({
                 // browse to http://localhost:3000/ during development,
@@ -51,6 +52,7 @@ module.exports = {
             // plugin options
             {
                 injectCss: true,
+                reload: false
             }
         )
     ],
@@ -91,6 +93,9 @@ module.exports = {
         ]
     },
     devtool: 'source-map', //'#eval-source-map'
+    devServer: {
+        hot: true,
+    }
 }
 module.exports.watch = process.env.WATCH === "true";
 if (process.env.NODE_ENV === 'production') {
