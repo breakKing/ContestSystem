@@ -3,15 +3,18 @@
   <div class="row">
     <div class="col">
       <div class="row">
-        <div class="col"><h2>{{ currentContest && currentContest.localizedName }}</h2></div>
+        <div class="col-5">
+          <h2>{{ currentContest && currentContest.localizedName }}</h2>
+          <hr>
+        </div>
         <div class="col">{{ currentContest && currentContest.creator && currentContest.creator.fullName }}</div>
       </div>
       <p v-html="currentContest && currentContest.localizedDescription"></p>
-
-      <div class="row"
+      <div class="row my-3"
            v-if="currentUserIsOrganizerOfCurrentContest || currentUserIsParticipantOfCurrentContest || (currentContest && currentContest.rules && currentContest.rules.publicMonitor)">
         <div class="col">
-          <router-link class="btn btn-info" :to="{name: 'ContestMonitorPage', params: {contest_id: currentContest.id}}">
+          <router-link class="btn btn-info"
+                       :to="{name: 'ContestMonitorPage', params: {contest_id: currentContest.id}}">
             Монитор
           </router-link>
         </div>

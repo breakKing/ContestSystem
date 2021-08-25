@@ -1,14 +1,14 @@
 <template>
   <div class="row">
     <div class="col-12">
-      <div class="messages-block p-2">
+      <div class="messages-block p-2" v-if="filtered_chat_rows && filtered_chat_rows.length">
         <div class="d-flex justify-content-center mb-3">
           <button class="btn btn-primary" v-if="chat_rows && chat_rows.length >= 50" @click.prevent="loadMoreMessages">
             Загрузить ещё
           </button>
         </div>
         <chat-row-component :row_instance="row" :show_events="show_events"
-                            v-for="row of chat_rows"></chat-row-component>
+                            v-for="row of filtered_chat_rows"></chat-row-component>
       </div>
     </div>
     <div class="col-12">
@@ -24,6 +24,7 @@
 import ChatRowComponent from "./ChatRowComponent";
 import {mapActions} from "vuex";
 import ChatTypes from "../../dictionaries/ChatTypes";
+import ChatEventTypes from "../../dictionaries/ChatEventTypes";
 
 export default {
   name: "ChatWindowComponent",
@@ -42,10 +43,21 @@ export default {
     },
     show_events() {
       return +this.chat?.type === ChatTypes.Custom
+    },
+    filtered_chat_rows() {
+      return _.filter(this.chat_rows, (r) => {
+        if (this.show_events) {
+          return true
+        }
+        return !this.isEvent(r)
+      })
     }
   },
   methods: {
     ...mapActions(['sendMessageToChat', 'fetchChatInfo']),
+    isEvent(row) {
+      return +row?.type !== ChatEventTypes.Undefined && !row?.text
+    },
     async loadMoreMessages() {
       if (this.chat) {
         let link = this.chat.link;
@@ -72,7 +84,10 @@ export default {
 
 <style lang="scss" scoped>
 .messages-block {
-  height: 80vh;
+  max-height: 80vh;
   overflow-y: auto;
+  border-radius: 5px;
+  border: 1px solid black;
+  margin-bottom: 1.5rem;
 }
 </style>

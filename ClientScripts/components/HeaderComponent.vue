@@ -103,7 +103,7 @@ export default {
   .router-link-active, .router-link-exact-active, .router-link {
     background-color: #2D3A4F;
     &:hover, &:focus {
-      border-radius: 0px;
+      border-radius: 0;
     }
   }
   
