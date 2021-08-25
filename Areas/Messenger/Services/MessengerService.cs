@@ -62,18 +62,22 @@ namespace ContestSystem.Areas.Messenger.Services
                 var chat = await dbContext.Chats.Include(ch => ch.ChatUsers)
                     .FirstOrDefaultAsync(ch => ch.Link == link);
 
-                var extenalChatUsers = chat.ChatUsers.ConvertAll(cu => GetChatUserAsync(dbContext, cu).GetAwaiter().GetResult());
+                var extenalChatUsers =
+                    chat.ChatUsers.ConvertAll(cu => GetChatUserAsync(dbContext, cu).GetAwaiter().GetResult());
 
                 var messagesExpression = dbContext.ChatsMessages.Where(cm => cm.ChatId == chat.Id)
                     .OrderByDescending(cm => cm.SentDateTimeUTC)
                     .AsEnumerable()
-                    .Select(cm => ChatHistoryEntry.GetFromModel(cm, extenalChatUsers.FirstOrDefault(ecu => ecu.Id == cm.SenderId)));
+                    .Select(cm =>
+                        ChatHistoryEntry.GetFromModel(cm,
+                            extenalChatUsers.FirstOrDefault(ecu => ecu.Id == cm.SenderId)));
 
                 var eventsExpression = dbContext.ChatsEvents.Where(ce => ce.ChatId == chat.Id)
                     .OrderByDescending(ce => ce.DateTimeUTC)
                     .AsEnumerable()
-                    .Select(ce => ChatHistoryEntry.GetFromModel(ce, extenalChatUsers.FirstOrDefault(ecu => ecu.Id == ce.AffectedUserId),
-                                                                    extenalChatUsers.FirstOrDefault(ecu => ecu.Id == ce.InitiatorId)));
+                    .Select(ce => ChatHistoryEntry.GetFromModel(ce,
+                        extenalChatUsers.FirstOrDefault(ecu => ecu.Id == ce.AffectedUserId),
+                        extenalChatUsers.FirstOrDefault(ecu => ecu.Id == ce.InitiatorId)));
 
                 var finalExpression = messagesExpression.Concat(eventsExpression)
                     .Skip(offset.Value)
@@ -84,7 +88,9 @@ namespace ContestSystem.Areas.Messenger.Services
 
                 var image = _storage.GetImageInBase64(chat.ImagePath);
 
-                result = ChatExternalModel.GetFromModel(chat, chat.ChatUsers.ConvertAll(cu => GetChatUserAsync(dbContext, cu).GetAwaiter().GetResult()), entries, image);
+                result = ChatExternalModel.GetFromModel(chat,
+                    chat.ChatUsers.ConvertAll(cu => GetChatUserAsync(dbContext, cu).GetAwaiter().GetResult()), entries,
+                    image);
             }
 
             return result;
@@ -99,7 +105,7 @@ namespace ContestSystem.Areas.Messenger.Services
         public async Task<bool> IsChatJoinableAsync(MainDbContext dbContext, string link)
         {
             var chat = await dbContext.Chats.FirstOrDefaultAsync(ch => ch.Link == link);
-            
+
             if (chat == null)
             {
                 return false;
@@ -268,7 +274,7 @@ namespace ContestSystem.Areas.Messenger.Services
             return status;
         }
 
-        public async Task<CreationStatusData<string>> CreateChatAsync(MainDbContext dbContext, ChatForm form, 
+        public async Task<CreationStatusData<string>> CreateChatAsync(MainDbContext dbContext, ChatForm form,
             ChatType type = ChatType.Custom, long? contestId = null, long? participantId = null)
         {
             var statusData = new CreationStatusData<string>
@@ -293,8 +299,8 @@ namespace ContestSystem.Areas.Messenger.Services
                 IsCreatedBySystem = (type != ChatType.Custom)
             };
 
-            if (type == ChatType.ContestAnnouncements || 
-                type == ChatType.ContestParticipant || 
+            if (type == ChatType.ContestAnnouncements ||
+                type == ChatType.ContestParticipant ||
                 type == ChatType.ContestModerator)
             {
                 chat.ContestId = contestId;
@@ -317,14 +323,15 @@ namespace ContestSystem.Areas.Messenger.Services
                 }
                 else if (type == ChatType.ContestParticipant)
                 {
-                    var participant = chat.Contest.ContestParticipants.FirstOrDefault(cp => cp.ParticipantId == participantId.GetValueOrDefault(-1));
+                    var participant = chat.Contest.ContestParticipants.FirstOrDefault(cp =>
+                        cp.ParticipantId == participantId.GetValueOrDefault(-1));
                     chat.Link = GenerateContestChatLink(chat, chat.Contest, participant);
                 }
                 else
                 {
                     chat.Link = GenerateCustomChatLink(chat);
                 }
-                
+
                 form.InitialUsers.ForEach(u => chat.ChatUsers.Add(new ChatUser
                 {
                     ChatId = chat.Id,
@@ -351,6 +358,7 @@ namespace ContestSystem.Areas.Messenger.Services
 
             return statusData;
         }
+
         public async Task<FormCheckStatus> CheckChatMessageFormAsync(MainDbContext dbContext, ChatMessageForm form)
         {
             var status = FormCheckStatus.Correct;
@@ -414,9 +422,10 @@ namespace ContestSystem.Areas.Messenger.Services
                     statusData.Id = chatMessage.Id;
 
                     var chatUsers = await dbContext.ChatsUsers.Where(cu => cu.ChatId == chat.Id)
-                                                                .ToListAsync();
+                        .ToListAsync();
 
-                    var sender = await GetChatUserAsync(dbContext, chatUsers.FirstOrDefault(cu => cu.UserId == chatMessage.SenderId));
+                    var sender = await GetChatUserAsync(dbContext,
+                        chatUsers.FirstOrDefault(cu => cu.UserId == chatMessage.SenderId));
                     await _notifier.UpdateOnChatMessagesAsync(chatMessage, chatUsers, sender);
                 }
             }
@@ -457,6 +466,7 @@ namespace ContestSystem.Areas.Messenger.Services
                     }
                 }
             }
+
             return status;
         }
 
@@ -481,6 +491,7 @@ namespace ContestSystem.Areas.Messenger.Services
                     status = DeletionStatus.Success;
                 }
             }
+
             return status;
         }
 
@@ -540,17 +551,21 @@ namespace ContestSystem.Areas.Messenger.Services
                 {
                     var contestId = chatUser.Chat.ContestId.GetValueOrDefault(-1);
 
-                    if (await dbContext.ContestsLocalModerators.AnyAsync(clm => clm.ContestId == contestId && clm.LocalModeratorId == chatUser.UserId))
+                    if (await dbContext.ContestsLocalModerators.AnyAsync(clm =>
+                        clm.ContestId == contestId && clm.LocalModeratorId == chatUser.UserId))
                     {
-                        name = (await dbContext.ContestsLocalModerators.FirstOrDefaultAsync(clm => clm.ContestId == contestId
-                                                                                                && clm.LocalModeratorId == chatUser.UserId))
-                                                                        .Alias;
+                        name = (await dbContext.ContestsLocalModerators.FirstOrDefaultAsync(clm =>
+                                clm.ContestId == contestId
+                                && clm.LocalModeratorId == chatUser.UserId))
+                            .Alias;
                     }
-                    else if (await dbContext.ContestsParticipants.AnyAsync(cp => cp.ContestId == contestId && cp.ParticipantId == chatUser.UserId && cp.ConfirmedByParticipant && cp.ConfirmedByLocalModerator))
+                    else if (await dbContext.ContestsParticipants.AnyAsync(cp =>
+                        cp.ContestId == contestId && cp.ParticipantId == chatUser.UserId && cp.ConfirmedByParticipant &&
+                        cp.ConfirmedByLocalModerator))
                     {
                         name = (await dbContext.ContestsParticipants.FirstOrDefaultAsync(cp => cp.ContestId == contestId
-                                                                                                && cp.ParticipantId == chatUser.UserId))
-                                                                        .Alias;
+                                && cp.ParticipantId == chatUser.UserId))
+                            .Alias;
                     }
                     else
                     {
@@ -600,8 +615,14 @@ namespace ContestSystem.Areas.Messenger.Services
                 var chatUsers = await dbContext.ChatsUsers.Where(cu => cu.ChatId == chatId)
                     .ToListAsync();
 
-                var initiator = chatEvent.InitiatorId == null ? await GetChatUserAsync(dbContext, chatUsers.FirstOrDefault(cu => cu.UserId == chatEvent.InitiatorId)) : null;
-                var affectedUser = chatEvent.AffectedUserId == null ? await GetChatUserAsync(dbContext, chatUsers.FirstOrDefault(cu => cu.UserId == chatEvent.AffectedUserId)) : null;
+                var initiator = chatEvent.InitiatorId == null
+                    ? await GetChatUserAsync(dbContext,
+                        chatUsers.FirstOrDefault(cu => cu.UserId == chatEvent.InitiatorId))
+                    : null;
+                var affectedUser = chatEvent.AffectedUserId == null
+                    ? await GetChatUserAsync(dbContext,
+                        chatUsers.FirstOrDefault(cu => cu.UserId == chatEvent.AffectedUserId))
+                    : null;
                 await _notifier.UpdateOnChatEventsAsync(chatEvent, chatUsers, initiator, affectedUser);
             }
 
@@ -633,6 +654,7 @@ namespace ContestSystem.Areas.Messenger.Services
                         {
                             link = $"contest-participant-{contest.Id}-{participant.ParticipantId}";
                         }
+
                         break;
                     case ChatType.ContestAnnouncements:
                         link = $"contest-announcements-{contest.Id}";
