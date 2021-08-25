@@ -38,7 +38,7 @@ module.exports = {
     },
     plugins: [
         new VueLoaderPlugin(),
-        new MiniCssExtractPlugin(),
+        // new MiniCssExtractPlugin(),
         new BrowserSyncPlugin({
                 // browse to http://localhost:3000/ during development,
                 // ./public directory is being served
@@ -73,6 +73,7 @@ module.exports = {
             {
                 test: /\.s[ac]ss$/,
                 use: ['style-loader', 'css-loader', 'sass-loader']
+                // use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader']
             },
             {
                 test: /\.css$/,
