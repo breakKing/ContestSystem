@@ -268,7 +268,7 @@ export default {
                 return []
             }
             try {
-                let {data} = await rootGetters.api.get(`/contests/management/solutions/${contest_id}`)
+                let {data} = await rootGetters.api.get(`/contests/management/${contest_id}/solutions`)
                 return data
             } catch (e) {
                 console.error(e)

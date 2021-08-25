@@ -45,7 +45,7 @@ namespace ContestSystem.Areas.Contests.Controllers
             _errorCodes = Constants.ErrorCodes[_entityName];
         }
 
-        [HttpGet("solutions/{contestId}")]
+        [HttpGet("{contestId}/solutions")]
         [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
         public async Task<IActionResult> GetAllSolutions(long contestId)
         {
