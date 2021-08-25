@@ -1,5 +1,5 @@
 ﻿<template>
-  <table class="table">
+  <table class="table-main">
     <thead>
     <tr>
       <th>Участник</th>

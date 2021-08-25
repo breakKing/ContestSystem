@@ -1,6 +1,6 @@
 <template>
   <bread-crumbs-component :routes="bread_crumb_routes"></bread-crumbs-component>
-  <table class="table">
+  <table class="table-main">
     <thead>
     <tr>
       <th>№</th>
@@ -17,10 +17,22 @@
       <td>{{ entry.problemsSolvedCount }}</td>
       <td>{{ entry.result }}</td>
       <td v-for="problem_try of sortedTries(entry.problemTries)">
-        <div class="d-flex align-content-between justify-content-center">
-          <div :class="{green: problem_try.solved}">{{ getFirstRow(problem_try) }}</div>
-          <div>{{ getSecondRow(problem_try) }}</div>
-          <div v-if="!!getThirdRow(problem_try)">{{ getThirdRow(problem_try) }}</div>
+        <div class="container-fluid justify-content-center" style="border: 0px;">
+          <div class="row">
+            <div class="col" :class="{green: problem_try.solved}">
+              {{ getFirstRow(problem_try) }}
+            </div>
+          </div>
+          <div class="row">
+            <div class="col">
+              {{ getSecondRow(problem_try) }}
+            </div>
+          </div>
+          <div class="row" v-if="!!getThirdRow(problem_try)">
+            <div>
+              {{ getThirdRow(problem_try) }}
+            </div>
+          </div>
         </div>
       </td>
     </tr>
