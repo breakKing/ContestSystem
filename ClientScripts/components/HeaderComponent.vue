@@ -86,11 +86,24 @@ export default {
   .auth-item {
     background-color: #59B7CE;
 
-    &:hover,
-    &:focus {
-      background-color: #3a7787;
+    .router-link-active, .router-link-exact-active, .router-link {
+      background-color: #59B7CE;
+      &:hover, &:focus {
+        background-color: #3a7787;
+      }
+    }
+      &:hover, &:focus {
+        background-color: #3a7787;
+      }
+  }
+
+  .router-link-active, .router-link-exact-active, .router-link {
+    background-color: #2D3A4F;
+    &:hover, &:focus {
+      border-radius: 0px;
     }
   }
+  
 }
 
 ul {
@@ -103,10 +116,6 @@ ul {
       border-radius: 16px;
     }
   }
-}
-
-.router-link-active {
-  border-radius: 16px;
 }
 
 </style>
