@@ -118,5 +118,39 @@ export default {
                 return false
             }
         },
+
+        /**
+         *
+         * @param update_callback получит массив {index, props, solution_user_id}
+         * @param current_solutions_collection
+         * @param solution_data объект похожий по структуре на решение(есть actualResult)
+         * @param is_solution_data_full передан ли нормальный объект решения в solution_data
+         * @returns {Promise<void>}
+         */
+        async updateOrAddSolutionToState({commit, state, dispatch, getters, rootGetters}, {
+            current_solutions_collection,
+            solution_data,
+            is_solution_data_full,
+            update_callback,
+        }) {
+            let solutionFromDB, solution_user_id;
+            let props = solution_data
+            let index = _.findIndex(current_solutions_collection, (s) => +s.id === +solution_data.actualResult.solutionId)
+            if (+index > -1) {
+                solution_user_id = current_solutions_collection[index].participant.id
+            } else {
+                if (is_solution_data_full) {
+                    solutionFromDB = solution_data
+                } else {
+                    solutionFromDB = await dispatch('getSolution', +solution_data.actualResult.solutionId)
+                }
+                if (solutionFromDB) {
+                    index = current_solutions_collection.length;
+                    props = solutionFromDB;
+                    solution_user_id = solutionFromDB.participant.id
+                }
+            }
+            return update_callback({index, props, solution_user_id})
+        }
     }
 }
