@@ -46,7 +46,8 @@ export default {
 .tab-pane {
   border: 1px solid #505050;
   padding: 1.5rem;
-  min-height: 67vh;
+  min-height: 66vh;
+  margin-bottom: 15px;
 }
 
 .router-link-active {

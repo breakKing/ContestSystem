@@ -1,5 +1,5 @@
 <template>
-  <ul class="nav nav-pills">
+  <ul class="nav nav-pills mb-2">
     <li class="nav-item">
       <a class="nav-link" @click.prevent="active_page='solutions'" :class="{active: active_page === 'solutions'}"
          aria-current="page" href="#">Решения</a>
@@ -13,34 +13,37 @@
          aria-current="page" href="#">Чаты</a>
     </li>
   </ul>
-  <div v-if="active_page === 'solutions'">
-    <contest-solutions-list-component
-        :solutions="currentContestAllSolutions"
-        :contest="currentContest"
-        :organizer_mode="true"
-    ></contest-solutions-list-component>
-  </div>
-  <div v-else-if="active_page === 'users'">
-    <contest-users-list-component
-        :users="currentContestParticipants"
-        :contest="currentContest"
-    ></contest-users-list-component>
-  </div>
-  <div v-else-if="active_page === 'chats'">
-    <div class="row">
-      <div class="col-12 col-md-3">
-        <chat-list-component
-            @chat_selected="active_chat_id = $event"
-            :chats="currentChats"
-            :enable_event_mode="true"
-        ></chat-list-component>
-      </div>
-      <div class="col">
-        <chat-window-component
-            v-if="active_chat_id"
-            :chat="currentChat"
-        >
-        </chat-window-component>
+  <hr>
+  <div class="mt-3 mb-2">
+    <div v-if="active_page === 'solutions'">
+      <contest-solutions-list-component
+          :solutions="currentContestAllSolutions"
+          :contest="currentContest"
+          :organizer_mode="true"
+      ></contest-solutions-list-component>
+    </div>
+    <div v-else-if="active_page === 'users'">
+      <contest-users-list-component
+          :users="currentContestParticipants"
+          :contest="currentContest"
+      ></contest-users-list-component>
+    </div>
+    <div v-else-if="active_page === 'chats'">
+      <div class="row">
+        <div class="col-12 col-md-3">
+          <chat-list-component
+              @chat_selected="active_chat_id = $event"
+              :chats="currentChats"
+              :enable_event_mode="true"
+          ></chat-list-component>
+        </div>
+        <div class="col">
+          <chat-window-component
+              v-if="active_chat_id"
+              :chat="currentChat"
+          >
+          </chat-window-component>
+        </div>
       </div>
     </div>
   </div>
