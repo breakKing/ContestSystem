@@ -149,7 +149,7 @@ export default {
 
                     return true
                 } else {
-                    commit('setAuthError', data.message)
+                    commit('setAuthError', data.errors[0])
                     await dispatch('logout')
                     return false
                 }
