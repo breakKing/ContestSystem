@@ -27,7 +27,8 @@ module.exports = {
     output: {
         path: path.resolve(__dirname, bundleExportPath),
         publicPath: publicPath,
-        filename: '[name].js'
+        filename: '[name].js',
+        assetModuleFilename: 'assets/[name][ext]'
     },
     resolve: {
         extensions: ['.js', '.vue'],
@@ -84,11 +85,11 @@ module.exports = {
             },
             {
                 test: /\.(eot|svg|ttf|woff|woff2)(\?\S*)?$/,
-                type: 'asset/resource'
+                type: 'asset/inline',
             },
             {
                 test: /\.(png|jpe?g|gif|svg)(\?\S*)?$/,
-                loader: 'file-loader',
+                loader: 'url-loader',
             }
         ]
     },

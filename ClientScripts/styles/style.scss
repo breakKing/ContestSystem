@@ -54,11 +54,13 @@
   width: 100%;
   margin-bottom: 1rem;
   border-collapse: collapse;
+
   thead {
     tr {
       border-width: 0 0 3px 3px;
       border-color: #59B7CE;
       border-style: solid;
+
       th {
         padding: 0.5rem;
         align-items: center;
@@ -71,19 +73,23 @@
         border-right-style: solid;
       }
     }
-    
+
   }
+
   tbody {
     tr {
       border-width: 0 0 3px 3px;
       border-color: #59B7CE;
       border-style: solid;
+
       &:nth-child(even) {
         background: #D9F2F8;
       }
+
       &:nth-child(odd) {
         background: #F5FCFE;
       }
+
       td {
         padding: 0.5rem;
         align-items: center;
