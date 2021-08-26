@@ -5,6 +5,33 @@
           currentModeratingRuleSet && currentModeratingRuleSet.author && currentModeratingRuleSet.author.fullName
         }}</h2>
       <p>{{ currentModeratingRuleSet && currentModeratingRuleSet.description }}</p>
+      <p>Режим подсчёта: {{ readable_count_mode }}</p>
+      <template v-if="currentModeratingRuleSet && +currentModeratingRuleSet.countMode === countModes.CountPenalty">
+        <p v-if="currentModeratingRuleSet.currentModeratingRuleSet">Наказывать за ошибку компиляции</p>
+        <p v-else>Не наказывать за ошибку компиляции</p>
+
+        <p>Размер наказания за одну попытку: {{ currentModeratingRuleSet.penaltyForOneTry }}</p>
+      </template>
+      <template v-if="currentModeratingRuleSet && +currentModeratingRuleSet.countMode !== countModes.CountPoints">
+        <p>Размер наказания за одну минуту: {{ currentModeratingRuleSet.penaltyForOneMinute }}</p>
+      </template>
+      <template v-if="currentModeratingRuleSet && +currentModeratingRuleSet.countMode === countModes.CountPoints">
+        <p>Прибавка к очкам за лучшее решение: {{ currentModeratingRuleSet.pointsForBestSolution }}</p>
+      </template>
+      <p>Максимальное количество попыток на задачу: {{ currentModeratingRuleSet.maxTriesForOneProblem }}</p>
+      <template v-if="currentModeratingRuleSet">
+        <p v-if="currentModeratingRuleSet.publicMonitor">Публичный монитор</p>
+        <p v-else>Не публичный монитор</p>
+      </template>
+      <p>Замораживать монитор за {{ currentModeratingRuleSet.monitorFreezeTimeBeforeFinishInMinutes }} минут до конца</p>
+
+      <template v-if="currentModeratingRuleSet">
+        <p v-if="currentModeratingRuleSet.showFullTestsResults">Показывать полный отчёт о попытке</p>
+        <p v-else>Не показывать полный отчёт о попытке</p>
+
+        <p v-if="currentModeratingRuleSet.isPublic">Публичный набор правил</p>
+        <p v-else>Не публичный набор правил</p>
+      </template>
       <div class="row">
         <div class="col">
           <v-form @submit="submitEntity" :validation-schema="schema" class="mb-3">
@@ -38,6 +65,7 @@ import {ErrorMessage, Field, Form} from "vee-validate";
 import * as Yup from "yup";
 import {mapActions, mapGetters} from "vuex";
 import code_editor_mixin from '../../../components/mixins/code_editor_mixin';
+import CountModes from "../../../dictionaries/CountModes";
 
 export default {
   name: "ModeratorRuleSetModerationPage",
@@ -59,6 +87,20 @@ export default {
     ...mapGetters('moder_rule_sets', [
       'currentModeratingRuleSet',
     ]),
+    countModes() {
+      return CountModes
+    },
+    readable_count_mode() {
+      switch (+this.currentModeratingRuleSet.countMode) {
+        case CountModes.CountPenalty:
+          return 'штраф'
+        case CountModes.CountPoints:
+          return 'очки за тесты'
+        case CountModes.CountPointsMinusPenalty:
+          return 'разность между очками и штрафом'
+      }
+      return ''
+    },
   },
   methods: {
     ...mapActions('moder_rule_sets', [
