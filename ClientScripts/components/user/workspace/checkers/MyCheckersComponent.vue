@@ -1,7 +1,9 @@
 ﻿<template>
-  <router-link :to="{name: 'WorkSpaceEditCheckersPage'}" class="workspace-btn">Создать</router-link>
-  <div class="row mt-3">
-    <checker-preview-component v-for="checker of availableCheckers" :checker="checker"></checker-preview-component>
+  <div class="p-3">
+    <router-link :to="{name: 'WorkSpaceEditCheckersPage'}" class="workspace-btn">Создать</router-link>
+    <div class="row gx-0 mt-3">
+      <checker-preview-component v-for="checker of availableCheckers" :checker="checker"></checker-preview-component>
+    </div>
   </div>
 </template>
 

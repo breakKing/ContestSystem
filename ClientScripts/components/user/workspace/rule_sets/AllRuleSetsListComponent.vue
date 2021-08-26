@@ -1,6 +1,6 @@
 <template>
     <router-link class="workspace-btn" :to="{name: 'WorkSpaceEditRuleSetPage'}">Создать</router-link>
-    <div class="row mt-3">
+    <div class="row gx-0 mt-3">
         <rule-set-preview-component v-for="ruleSet of availableRuleSets" :rule-set="ruleSet"></rule-set-preview-component>
     </div>
 </template>

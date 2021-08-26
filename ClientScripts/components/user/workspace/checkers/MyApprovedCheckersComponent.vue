@@ -1,5 +1,5 @@
 ﻿<template>
-    <div class="row mt-3">
+    <div class="row gx-0 mt-3">
         <checker-preview-component v-for="checker of currentUserApprovedCheckers" :checker="checker"></checker-preview-component>
     </div>
 </template>
