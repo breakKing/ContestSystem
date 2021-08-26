@@ -1,5 +1,5 @@
 ﻿<template>
-  <div class="col-md-4 mb-3">
+  <div class="col-md-3 col-6 mx-3 mb-3">
     <div class="card">
       <div class="card-body d-flex flex-column justify-content-between">
         <h5 class="card-title">{{ checker.name }}</h5>
