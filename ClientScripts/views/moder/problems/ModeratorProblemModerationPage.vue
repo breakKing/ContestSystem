@@ -1,5 +1,5 @@
 <template>
-  <div class="row">
+  <div class="row p-3">
     <div class="col">
 
       <div v-if="!!error_msg" class="alert alert-danger" role="alert">
@@ -107,7 +107,7 @@
               <error-message name="current_status"></error-message>
             </div>
             <button @click.prevent="deleteEntity" type="button" class="btn btn-danger">Удалить</button>
-            <button type="submit" class="btn btn-primary">Сохранить</button>
+            <button type="submit" class="btn btn-primary ms-2">Сохранить</button>
           </v-form>
         </div>
       </div>

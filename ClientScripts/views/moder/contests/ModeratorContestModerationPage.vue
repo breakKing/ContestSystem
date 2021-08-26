@@ -1,63 +1,66 @@
 <template>
-  <div v-if="!!error_msg" class="alert alert-danger" role="alert">
-    {{ error_msg }}
-  </div>
-  <div class="row">
-    <div class="col">
-      <div class="row">
-        <div class="col">
-          <div>
-            <h2>{{ currentModeratingContestLocalizer && currentModeratingContestLocalizer.name }}</h2>
+  <div class="p-3">
+    <div v-if="!!error_msg" class="alert alert-danger" role="alert">
+      {{ error_msg }}
+    </div>
+    <div class="row">
+      <div class="col">
+        <div class="row">
+          <div class="col">
+            <div>
+              <h2>{{ currentModeratingContestLocalizer && currentModeratingContestLocalizer.name }}</h2>
+            </div>
+          </div>
+          <div class="col-4" v-if="!!dataUrl">
+            <img class="img-fluid" alt="картинка" :src="dataUrl"/>
           </div>
         </div>
-        <div class="col-4" v-if="!!dataUrl">
-          <img class="img-fluid" alt="картинка" :src="dataUrl"/>
+        <div>
+          <p>{{ currentModeratingContestLocalizer && currentModeratingContestLocalizer.description }}</p>
         </div>
-      </div>
-      <div>
-        <p>{{ currentModeratingContestLocalizer && currentModeratingContestLocalizer.description }}</p>
-      </div>
-      <div>
-        <span>Дата начала </span>
-        <span>{{ formatted_start_date }}</span>
-      </div>
-      <div>
-        <span>Продолжительность в минутах </span>
-        <span>{{ currentModeratingContest && currentModeratingContest.durationInMinutes }}</span>
-      </div>
-      <div>
-        <span>Набор правил </span>
-        <span>{{ currentModeratingContest && currentModeratingContest.rules && currentModeratingContest.rules.name }}</span>
-      </div>
-      <div class="row" v-for="problem of sortedTasks">
-        <div class="col">
-          <span>{{ problem.letter }} {{ problem.problem.localizedName }}</span>
+        <div>
+          <span>Дата начала </span>
+          <span>{{ formatted_start_date }}</span>
         </div>
-      </div>
+        <div>
+          <span>Продолжительность в минутах </span>
+          <span>{{ currentModeratingContest && currentModeratingContest.durationInMinutes }}</span>
+        </div>
+        <div>
+          <span>Набор правил </span>
+          <span>{{
+              currentModeratingContest && currentModeratingContest.rules && currentModeratingContest.rules.name
+            }}</span>
+        </div>
+        <div class="row" v-for="problem of sortedTasks">
+          <div class="col">
+            <span>{{ problem.letter }} {{ problem.problem.localizedName }}</span>
+          </div>
+        </div>
 
-      <div class="row">
-        <div class="col">
-          <v-form @submit="submitEntity" :validation-schema="schema" class="mb-3">
-            <div>
-              <span>Комментарий</span>
-              <v-field v-model="message" as="textarea" class="form-control" name="message"/>
-              <error-message name="message"></error-message>
-            </div>
-            <div>
-              <span>Статус</span>
-              <v-field v-model="current_status" as="select" class="form-control" name="current_status">
-                <option :value="approvalStatuses.NotModeratedYet">Не проверено</option>
-                <option :value="approvalStatuses.Rejected">Отклонено</option>
-                <option :value="approvalStatuses.Accepted">Утверждено</option>
-              </v-field>
-              <error-message name="current_status"></error-message>
-            </div>
-            <button @click.prevent="deleteEntity" type="button" class="btn btn-danger">Удалить</button>
-            <button type="submit" class="btn btn-primary">Сохранить</button>
-          </v-form>
+        <div class="row">
+          <div class="col">
+            <v-form @submit="submitEntity" :validation-schema="schema" class="mb-3">
+              <div>
+                <span>Комментарий</span>
+                <v-field v-model="message" as="textarea" class="form-control" name="message"/>
+                <error-message name="message"></error-message>
+              </div>
+              <div>
+                <span>Статус</span>
+                <v-field v-model="current_status" as="select" class="form-control" name="current_status">
+                  <option :value="approvalStatuses.NotModeratedYet">Не проверено</option>
+                  <option :value="approvalStatuses.Rejected">Отклонено</option>
+                  <option :value="approvalStatuses.Accepted">Утверждено</option>
+                </v-field>
+                <error-message name="current_status"></error-message>
+              </div>
+              <button @click.prevent="deleteEntity" type="button" class="btn btn-danger">Удалить</button>
+              <button type="submit" class="btn btn-primary ms-2">Сохранить</button>
+            </v-form>
+          </div>
         </div>
       </div>
-
     </div>
   </div>
 </template>
