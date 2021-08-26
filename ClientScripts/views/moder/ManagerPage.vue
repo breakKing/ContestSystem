@@ -1,10 +1,10 @@
 ﻿<template>
   <header-component></header-component>
-  <div class="row">
+  <div class="row gx-0">
     <div class="col-lg-3 col-12" v-if="!$route.meta || !$route.meta.hide_sidebar">
       <moder-side-bar-component></moder-side-bar-component>
     </div>
-    <div class="col">
+    <div class="col p-3">
       <router-view></router-view>
     </div>
   </div>

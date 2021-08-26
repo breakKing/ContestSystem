@@ -1,12 +1,12 @@
 ﻿<template>
-  <div class="side-bar-menu main-block-height d-flex flex-column justify-content-start me-3"
+  <div class="side-bar-menu-light main-block-height d-flex flex-column justify-content-start me-3"
        style="padding: 10px">
 
-    <h4 class="fw-bold m-2 mb-5 ">ContestSystem Workspace</h4>
+    <h4 class="fw-bold fs-4 m-2 mb-5 ">ContestSystem Workspace</h4>
     <hr>
     <ul class="list-unstyled underlined_li ps-0 ">
       <li class="mb-1">
-        <button class="btn btn-custom align-items-center ">
+        <button class="btn btn-custom rounded align-items-center ">
           Мой профиль
         </button>
       </li>
@@ -182,5 +182,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.side-bar-menu-light {
+  .btn-custom.rounded {
+    font-size: 1.2rem;
+  }
 
+  .no_style_link.rounded {
+    font-size: 1.1rem;
+  }
+  
+}
 </style>

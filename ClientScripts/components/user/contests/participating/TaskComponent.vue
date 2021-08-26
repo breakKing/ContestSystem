@@ -10,16 +10,17 @@
       ></contest-side-bar-component>
     </div>
     <div class="col">
-      <router-link class="btn btn-info" :to="{name: 'ContestMySolutionsPage', params:{contest_id: contest_id}}">Мои
-        попытки
-      </router-link>
-
       <div v-if="!!error_msg" class="alert alert-danger" role="alert">
         {{ error_msg }}
       </div>
       <h2>{{ problem_name }}</h2>
       <p><i>({{ getFormattedTime(problem?.timeLimitInMilliseconds || 0) }},
         {{ getFormattedMemory(problem?.memoryLimitInBytes || 0) }})</i></p>
+      <div class="my-2">
+        <router-link class="btn btn-info" :to="{name: 'ContestMySolutionsPage', params:{contest_id: contest_id}}">Мои
+          попытки
+        </router-link>
+      </div>
       <p v-html="problem_description" v-if="problem_description"></p>
       <p v-html="problem_input" v-if="problem_input"></p>
       <p v-html="problem_output" v-if="problem_output"></p>

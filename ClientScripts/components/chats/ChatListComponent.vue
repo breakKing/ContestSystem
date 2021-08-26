@@ -2,13 +2,13 @@
   <div class="d-flex flex-column">
     <h4>Чаты</h4>
     <template v-for="chat of chats">
-      <div class="card mb-2 chat-card">
-        <div class="card-body">
-          <a v-if="enable_event_mode" class="chat-item no_style_link" :class="{active: +active_chat_id === +chat.id}"
+      <div class="card mb-2 custom-card">
+        <div class="card-body custom-card-body">
+          <a v-if="enable_event_mode" class="custom-card-item no_style_link" :class="{'active-item': +active_chat_id === +chat.id}"
              @click.prevent="$emit('chat_selected', +chat.id)">{{
               getChatName(chat)
             }}</a>
-          <router-link v-else class="chat-item no_style_link" :class="{active: +active_chat_id === +chat.id}"
+          <router-link v-else class="custom-card-item no_style_link" active-class="chat-link-active" :class="{'active-item': +active_chat_id === +chat.id}"
                        :to="{name: route_name, params: {chat_id: chat.id}}">
             {{
               getChatName(chat)
@@ -57,20 +57,5 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.card-body {
-  padding: 0;
-}
 
-.chat-card {
-  cursor: pointer;
-
-  &:hover {
-    background-color: #e0e0e0;
-  }
-
-  .chat-item {
-    display: block;
-    padding: 1rem;
-  }
-}
 </style>

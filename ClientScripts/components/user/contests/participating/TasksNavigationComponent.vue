@@ -1,14 +1,16 @@
 <template>
-<div class="d-flex flex-column">
-  <h4>Задачи</h4>
-  <ul>
-    <li v-for="task of tasks" :class="calcClass(+task.id)">
-      <router-link :to="{name: 'ContestParticipatingPage', params: {contest_id: currentContest?.id, task_id: task.problemId}}">
-        {{ task.letter }} {{ task?.problem?.localizedName }}
-      </router-link>
-    </li>
-  </ul>
-</div>
+  <div class="d-flex flex-column">
+    <h4>Задачи</h4>
+    <div class="card mb-2 custom-card" v-for="task of tasks" :class="calcClass(+task.id)">
+      <div class="card-body custom-card-body">
+        <router-link class="custom-card-item no_style_link"
+                     active-class="active-item"
+                     :to="{name: 'ContestParticipatingPage', params: {contest_id: currentContest?.id, task_id: task.problemId}}">
+          {{ task.letter }} {{ task?.problem?.localizedName }}
+        </router-link>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>

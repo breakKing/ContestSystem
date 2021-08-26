@@ -184,7 +184,22 @@
 }
 
 .side-bar-menu {
-  background-color: #59b7ceab;
+  background-color: #59b7ce;
+
+  .btn, a {
+    font-size: 1.2rem;
+  }
+}
+
+.side-bar-menu-light {
+  background-color: #59b7ce6b;;
+}
+
+.side-bar-menu-light, .side-bar-menu {
+  .router-link-active {
+    background-color: unset;
+    font-weight: bolder;
+  }
 }
 
 .side-vertical-line {
@@ -237,4 +252,25 @@ ul.underlined_li {
 }
 
 @media all and (min-width: 1400px) {
+}
+
+.custom-card-body {
+  padding: 0;
+}
+
+.custom-card {
+  cursor: pointer;
+
+  &:hover {
+    background-color: #e0e0e0;
+  }
+
+  .custom-card-item {
+    display: block;
+    padding: 1rem;
+
+    &.active-item {
+      background-color: #b8bfcc;
+    }
+  }
 }

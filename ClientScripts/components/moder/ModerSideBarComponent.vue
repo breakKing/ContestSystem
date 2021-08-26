@@ -2,7 +2,7 @@
   <div class="flex-shrink-0 side-bar-menu main-block-height d-flex flex-column justify-content-start"
        style="height: 100%; padding: 10px">
 
-    <h4 class="fw-bold m-2 mb-5 text-light">Панель модератора</h4>
+    <h4 class="fw-bold fs-3 m-2 mb-5 text-light">Панель модератора</h4>
 
     <ul class="list-unstyled ps-0 ">
 <!--      <li class="mb-1">-->

@@ -44,18 +44,23 @@
         </template>
       </template>
       <template v-else>
-        <router-link class="btn btn-info" v-if="currentContestIsRunning"
-                     :to="{name: 'ContestParticipatingPage', params: {contest_id: currentContest?.id}}">Задачи
-        </router-link>
-        <span v-else-if="currentContestIsInTheFuture">Соревнование начнётся {{
-            formatted_start_date
-          }}</span>
-        <span v-else>Соревнование окончено</span>
-
-        <router-link v-if="!currentContestIsInTheFuture" class="btn btn-success"
-                     :to="{name: 'ContestMySolutionsPage', params: {contest_id: currentContest?.id }}">Мои отправки
-        </router-link>
-        <button class="btn btn-danger" v-else @click.prevent="removeFromParticipants">Не учавствовать</button>
+        <div class="d-flex">
+          <div>
+            <router-link v-if="!currentContestIsInTheFuture" class="btn btn-success"
+                         :to="{name: 'ContestMySolutionsPage', params: {contest_id: currentContest?.id }}">Мои отправки
+            </router-link>
+            <button class="btn btn-danger" v-else @click.prevent="removeFromParticipants">Не учавствовать</button>
+          </div>
+          <div class="ms-3">
+            <router-link class="btn btn-info" v-if="currentContestIsRunning"
+                         :to="{name: 'ContestParticipatingPage', params: {contest_id: currentContest?.id}}">Задачи
+            </router-link>
+            <span v-else-if="currentContestIsInTheFuture">Соревнование начнётся {{
+                formatted_start_date
+              }}</span>
+            <span v-else>Соревнование окончено</span>
+          </div>
+        </div>
       </template>
     </div>
   </div>
