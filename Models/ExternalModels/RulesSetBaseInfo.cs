@@ -11,7 +11,8 @@ namespace ContestSystem.Models.ExternalModels
         public object Author { get; set; }
         public bool IsPublic { get; set; }
         public bool IsArchieved { get; set; }
-        public RulesCountMode CountMode {get; set;}
+        public RulesCountMode CountMode { get; set; }
+        public ApproveType ApprovalStatus { get; set; }
 
         public static RulesSetBaseInfo GetFromModel(RulesSet rules)
         {
@@ -28,7 +29,8 @@ namespace ContestSystem.Models.ExternalModels
                 Author = rules.Author?.ResponseStructure,
                 IsPublic = rules.IsPublic,
                 IsArchieved = rules.IsArchieved,
-                CountMode = rules.CountMode
+                CountMode = rules.CountMode,
+                ApprovalStatus = rules.ApprovalStatus
             };
         }
     }

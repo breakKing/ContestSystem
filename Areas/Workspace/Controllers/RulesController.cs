@@ -63,7 +63,7 @@ namespace ContestSystem.Areas.Workspace.Controllers
         }
 
         [HttpGet("{id}")]
-        [AuthorizeByJwt(Roles = RolesContainer.User)]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
         public async Task<IActionResult> GetConstructedRules(long id)
         {
             var rules = await _dbContext.RulesSets.FirstOrDefaultAsync(r => r.Id == id && !r.IsArchieved);
@@ -150,7 +150,7 @@ namespace ContestSystem.Areas.Workspace.Controllers
             return Json(response);
         }
 
-        [AuthorizeByJwt(Roles = RolesContainer.User)]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator + ", " + RolesContainer.User)]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRules(long id)
         {

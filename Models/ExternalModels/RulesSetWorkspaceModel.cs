@@ -20,6 +20,9 @@ namespace ContestSystem.Models.ExternalModels
         public bool ShowFullTestsResults { get; set; }
         public bool IsPublic { get; set; }
         public bool IsArchieved { get; set; }
+        public ApproveType ApprovalStatus { get; set; }
+        public object ApprovingModerator { get; set; }
+        public string ModerationMessage { get; set; }
 
         public static RulesSetWorkspaceModel GetFromModel(RulesSet rules)
         {
@@ -44,7 +47,10 @@ namespace ContestSystem.Models.ExternalModels
                 PublicMonitor = rules.PublicMonitor,
                 Author = rules.Author?.ResponseStructure,
                 IsPublic = rules.IsPublic,
-                IsArchieved = rules.IsArchieved
+                IsArchieved = rules.IsArchieved,
+                ApprovalStatus = rules.ApprovalStatus,
+                ApprovingModerator = rules.ApprovingModerator?.ResponseStructure,
+                ModerationMessage = rules.ModerationMessage
             };
         }
     }
