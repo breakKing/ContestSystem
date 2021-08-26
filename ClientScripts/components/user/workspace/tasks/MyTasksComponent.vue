@@ -1,7 +1,9 @@
 ﻿<template>
-  <router-link :to="{name: 'WorkSpaceEditTaskPage'}" class="workspace-btn">Создать задачу</router-link>
-  <div class="row mt-4">
-    <task-preview-component v-for="task of availableTasks" :task="task"></task-preview-component>
+  <div class="p-3">
+    <router-link :to="{name: 'WorkSpaceEditTaskPage'}" class="workspace-btn">Создать задачу</router-link>
+    <div class="row mt-4">
+      <task-preview-component v-for="task of availableTasks" :task="task"></task-preview-component>
+    </div>
   </div>
 </template>
 
