@@ -1,6 +1,6 @@
 import WorkSpacePage from "../../../views/user/workspace/WorkSpacePage";
 import WorkSpaceWelcomeComponent from "../../../components/user/workspace/WorkSpaceWelcomeComponent";
-import AboutComponent from "../../../components/user/workspace/AboutComponent";
+import WorkSpaceProfileComponent from "../../../components/user/workspace/WorkSpaceProfileComponent";
 import PostsMainComponent from "../../../components/user/workspace/posts/PostsMainComponent";
 import MyPendingPostsComponent from "../../../components/user/workspace/posts/MyPendingPostsComponent";
 import MyRejectedPostsComponent from "../../../components/user/workspace/posts/MyRejectedPostsComponent";
@@ -47,9 +47,9 @@ export default {
             },
         },
         {
-            path: 'about',
-            name: 'WorkSpaceAboutPage',
-            component: AboutComponent,
+            path: 'profile',
+            name: 'WorkSpaceProfilePage',
+            component: WorkSpaceProfileComponent,
             meta: {
                 authorize: ['user']
             },

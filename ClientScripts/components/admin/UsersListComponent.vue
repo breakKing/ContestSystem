@@ -50,6 +50,7 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(['formatDate']),
     ...mapState({
       users: state => state.admin.all_users
     }),
@@ -77,9 +78,6 @@ export default {
     getRolesListString(roles) {
       return _.join(_.map(roles, (role) => role.description), '\n')
     },
-    formatDate(date) {
-      return moment(date).format('MMMM DD YYYY')
-    }
   },
   async created() {
     moment.locale('ru')

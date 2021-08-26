@@ -55,6 +55,10 @@ export default createStore({
             moment.locale('ru');
             return moment.utc(date).local().format('LLLL');
         },
+        formatDate: (state, getters) => (date) => {
+            moment.locale('ru');
+            return moment(date).format('MMMM DD YYYY');
+        },
         getFormattedMemory: (state, getters) => (bytes) => {
             let result = ''
             if (bytes) {

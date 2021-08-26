@@ -6,9 +6,8 @@
     <hr>
     <ul class="list-unstyled underlined_li ps-0 ">
       <li class="mb-1">
-        <button class="btn btn-custom rounded align-items-center ">
-          Мой профиль
-        </button>
+        <router-link class="no_style_link rounded" :to="{name: 'WorkSpaceProfilePage'}">Мой профиль
+        </router-link>
       </li>
       <!--      <li class="mb-1">-->
       <!--        <button class="btn btn-custom btn-toggle align-items-center rounded collapsed " data-bs-toggle="collapse"-->
@@ -190,6 +189,6 @@ export default {
   .no_style_link.rounded {
     font-size: 1.1rem;
   }
-  
+
 }
 </style>
