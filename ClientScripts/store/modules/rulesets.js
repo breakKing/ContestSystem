@@ -21,6 +21,15 @@ export default {
         currentUserRuleSets(state, getters) {
             return state.current_user_rulesets
         },
+        currentUserPendingRuleSets(state, getters) {
+            return _.filter(getters.currentUserRuleSets, (el) => Number(el.approvalStatus) === 0)
+        },
+        currentUserRejectedRuleSets(state, getters) {
+            return _.filter(getters.currentUserRuleSets, (el) => Number(el.approvalStatus) === 1)
+        },
+        currentUserApprovedRuleSets(state, getters) {
+            return _.filter(getters.currentUserRuleSets, (el) => Number(el.approvalStatus) === 2)
+        },
     },
     actions: {
         async fetchAvailableRuleSets({commit, state, dispatch, getters, rootGetters}, force = false) {

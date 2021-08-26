@@ -198,7 +198,11 @@ export default {
           this.error_msg = ''
           await this.fetchAvailableRuleSets(true)
           await this.fetchCurrentUserRuleSets(true)
-          await this.$router.push({name: 'WorkSpaceMyRuleSetsPage'})
+          if (this.currentUser?.limits?.rules) {
+            await this.$router.push({name: 'WorkSpaceMyPendingRuleSetsPage'})
+          } else {
+            await this.$router.push({name: 'WorkSpaceMyApprovedRuleSetsPage'})
+          }
         } else {
           this.error_msg = (data.errors || []).join(', ')
         }

@@ -25,7 +25,9 @@ import MyApprovedCheckersComponent from "../../../components/user/workspace/chec
 import MyCheckersComponent from "../../../components/user/workspace/checkers/MyCheckersComponent";
 import CheckerEditComponent from "../../../components/user/workspace/checkers/CheckerEditComponent";
 import MainRuleSetsComponent from "../../../components/user/workspace/rule_sets/MainRuleSetsComponent";
-import RuleSetsListComponent from "../../../components/user/workspace/rule_sets/RuleSetsListComponent";
+import MyApprovedRuleSetsListComponent from "../../../components/user/workspace/rule_sets/MyApprovedRuleSetsListComponent";
+import MyPendingRuleSetsListComponent from "../../../components/user/workspace/rule_sets/MyPendingRuleSetsListComponent";
+import MyRejectedRuleSetsListComponent from "../../../components/user/workspace/rule_sets/MyRejectedRuleSetsListComponent";
 import AllRuleSetsListComponent from "../../../components/user/workspace/rule_sets/AllRuleSetsListComponent";
 import RuleSetEditComponent from "../../../components/user/workspace/rule_sets/RuleSetEditComponent";
 
@@ -258,9 +260,25 @@ export default {
             },
             children: [
                 {
-                    path: 'my-rule-sets',
-                    name: 'WorkSpaceMyRuleSetsPage',
-                    component: RuleSetsListComponent,
+                    path: 'my-pending-rule-sets',
+                    name: 'WorkSpaceMyPendingRuleSetsPage',
+                    component: MyPendingRuleSetsListComponent,
+                    meta: {
+                        authorize: ['user']
+                    },
+                },
+                {
+                    path: 'my-rejected-rule-sets',
+                    name: 'WorkSpaceMyRejectedRuleSetsPage',
+                    component: MyRejectedRuleSetsListComponent,
+                    meta: {
+                        authorize: ['user']
+                    },
+                },
+                {
+                    path: 'my-approved-rule-sets',
+                    name: 'WorkSpaceMyApprovedRuleSetsPage',
+                    component: MyApprovedRuleSetsListComponent,
                     meta: {
                         authorize: ['user']
                     },

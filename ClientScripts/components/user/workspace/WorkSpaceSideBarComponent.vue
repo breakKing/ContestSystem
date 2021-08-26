@@ -156,11 +156,20 @@
           Наборы правил
         </button>
         <div class="collapse"
-             :class="{show: ['WorkSpaceMyRuleSetsPage','WorkSpaceAllRuleSetsPage'].includes($route.name)}"
+             :class="{show: ['WorkSpaceMyPendingRuleSetsPage', 'WorkSpaceMyRejectedRuleSetsPage', 'WorkSpaceMyApprovedRuleSetsPage' ,'WorkSpaceAllRuleSetsPage'].includes($route.name)}"
              id="rule-sets-collapse">
           <ul class="btn-toggle-nav underlined_li list-unstyled fw-normal pb-1 small">
             <li>
-              <router-link class="no_style_link rounded" :to="{name: 'WorkSpaceMyRuleSetsPage'}">Мои
+              <router-link class="no_style_link rounded" :to="{name: 'WorkSpaceMyPendingRuleSetsPage'}">Ожидающие
+                модерации
+              </router-link>
+            </li>
+            <li>
+              <router-link class="no_style_link rounded" :to="{name: 'WorkSpaceMyApprovedRuleSetsPage'}">Одобренные
+              </router-link>
+            </li>
+            <li>
+              <router-link class="no_style_link rounded" :to="{name: 'WorkSpaceMyRejectedRuleSetsPage'}">Отклонённые
               </router-link>
             </li>
             <li>
