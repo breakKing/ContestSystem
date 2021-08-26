@@ -1,7 +1,9 @@
 ﻿<template>
-  <div class="col-md-6 mb-3">
-    <div class="card">
-      <img v-if="!!dataUrl" :src="dataUrl" class="card-img-top" alt="...">
+  <div class="col-6 col-md-3 mb-3 mx-3">
+    <div class="card h-100">
+      <div class="p-2">
+          <img v-if="!!dataUrl" :src="dataUrl" class="card-img-top" alt="..." style="max-height: 15rem; object-fit: contain;">
+      </div>
       <div class="card-body d-flex flex-column justify-content-between">
         <h5 class="card-title">{{ contest && contest.localizedName }}</h5>
         <template v-if="contest && contest.localizedDescription">
