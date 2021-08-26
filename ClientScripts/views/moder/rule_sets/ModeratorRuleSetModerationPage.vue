@@ -1,16 +1,10 @@
 <template>
   <div class="row">
     <div class="col">
-      <h2>{{ currentModeratingChecker && currentModeratingChecker.name }} {{
-          currentModeratingChecker && currentModeratingChecker.author && currentModeratingChecker.author.fullName
+      <h2>{{ currentModeratingRuleSet && currentModeratingRuleSet.name }} {{
+          currentModeratingRuleSet && currentModeratingRuleSet.author && currentModeratingRuleSet.author.fullName
         }}</h2>
-      <p>{{currentModeratingChecker && currentModeratingChecker.description}}</p>
-      <prism-editor v-model="checkerCode" 
-                      :highlight="highlighter" 
-                      :tabSize="4" 
-                      line-numbers
-                      readonly
-                      class="code-editor"/>
+      <p>{{currentModeratingRuleSet && currentModeratingRuleSet.description}}</p>
       <div class="row">
         <div class="col">
           <v-form @submit="submitEntity" :validation-schema="schema" class="mb-3">
@@ -44,12 +38,11 @@ import {mapActions, mapGetters} from "vuex";
 import code_editor_mixin from '../../../components/mixins/code_editor_mixin';
 
 export default {
-  name: "ModeratorCheckerModerationPage",
-  props: ['checker_id'],
+  name: "ModeratorRuleSetModerationPage",
+  props: ['rule_set_id'],
   mixins: [code_editor_mixin],
   data() {
     return {
-      checkerCode: '',
       error_msg: '',
       message: '',
       current_status: null,
@@ -61,22 +54,19 @@ export default {
   },
   computed: {
     ...mapGetters(['currentUser', 'approvalStatuses']),
-    ...mapGetters('moder_checkers', [
-      'currentModeratingChecker',
+    ...mapGetters('moder_rule_sets', [
+      'currentModeratingRuleSet',
     ]),
   },
   methods: {
-    ...mapActions('moder_checkers', [
-      'changeCurrentChecker',
-      'fetchCheckersToModerate',
-      'fetchRejectedCheckers',
-      'fetchApprovedCheckers',
-      'moderateChecker',
+    ...mapActions('moder_rule_sets', [
+      'changeCurrentRuleSet',
+      'moderateRuleSet',
     ]),
-    ...mapActions(['deleteChecker']),
+    ...mapActions(['deleteRuleSet']),
     async deleteEntity() {
       this.error_msg = ''
-      let {status, errors} = await this.deleteChecker(this.checker_id)
+      let {status, errors} = await this.deleteRuleSet(this.rule_set_id)
       if (status) {
         await this.fetchDataAndGoToList()
       } else {
@@ -85,10 +75,10 @@ export default {
     },
     async submitEntity() {
       this.error_msg = ''
-      let {status, errors} = await this.moderateChecker({
-        checker_id: this.checker_id,
+      let {status, errors} = await this.moderateRuleSet({
+        rule_set_id: this.rule_set_id,
         request_body: {
-          checkerId: +this.checker_id,
+          rulesSetId: +this.rule_set_id,
           approvalStatus: +this.current_status,
           approvingModeratorId: this.currentUser.id,
           moderationMessage: this.message,
@@ -101,19 +91,18 @@ export default {
       }
     },
     async fetchDataAndGoToList() {
-      await this.changeCurrentChecker({force: true, checker_id: null})
+      await this.changeCurrentRuleSet({force: true, rule_set_id: null})
       await this.$router.push({
-        name: 'ModeratorNotModeratedCheckersPage'
+        name: 'ModeratorNotModeratedRuleSetsPage'
       })
     },
   },
   beforeRouteEnter(to, from, next) {
     next(async vm => {
-      await vm.changeCurrentChecker({force: false, checker_id: vm.checker_id})
-      vm.message = vm.currentModeratingChecker?.moderationMessage
-      vm.current_status = +vm.currentModeratingChecker?.approvalStatus
+      await vm.changeCurrentRuleSet({force: false, rule_set_id: vm.rule_set_id})
+      vm.message = vm.currentModeratingRuleSet?.moderationMessage
+      vm.current_status = +vm.currentModeratingRuleSet?.approvalStatus
       vm.error_msg = ''
-      vm.checkerCode = vm.currentModeratingChecker?.code
     })
   },
   components: {

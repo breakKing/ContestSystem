@@ -1,5 +1,4 @@
-﻿import api from '../../services/api-configurator'
-import moment from 'moment'
+﻿import moment from 'moment'
 import 'moment-timezone';
 import * as _ from 'lodash'
 

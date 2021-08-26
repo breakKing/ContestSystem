@@ -11,7 +11,7 @@
 <!--          Курсы-->
 <!--        </button>-->
 <!--        <div class="collapse"-->
-<!--             :class="{show: ['ModeratorNotModeratedCoursesPage','ModeratorApprovedCoursesPage','ModeratorRejectedCoursesPage'].includes($route.name)}"-->
+<!--             :class="{show: ['ModeratorNotModeratedCoursesPage', 'ModeratorApprovedCoursesPage', 'ModeratorRejectedCoursesPage'].includes($route.name)}"-->
 <!--             id="courses-collapse">-->
 <!--          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">-->
 <!--            <li>-->
@@ -36,7 +36,7 @@
           Посты
         </button>
         <div class="collapse"
-             :class="{show: ['ModeratorNotModeratedPostsPage', 'ModeratorApprovedPostsPage','ModeratorRejectedPostsPage'].includes($route.name)}"
+             :class="{show: ['ModeratorNotModeratedPostsPage', 'ModeratorApprovedPostsPage', 'ModeratorRejectedPostsPage'].includes($route.name)}"
              id="posts-collapse">
           <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
             <li>
@@ -60,7 +60,7 @@
           Соревнования
         </button>
         <div class="collapse"
-             :class="{show: ['ModeratorNotModeratedContestsPage','ModeratorApprovedContestsPage','ModeratorRejectedContestsPage'].includes($route.name)}"
+             :class="{show: ['ModeratorNotModeratedContestsPage', 'ModeratorApprovedContestsPage', 'ModeratorRejectedContestsPage'].includes($route.name)}"
              id="contests-collapse">
           <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
             <li>
@@ -85,7 +85,7 @@
           Задачи
         </button>
         <div class="collapse"
-             :class="{show: ['ModeratorNotModeratedProblemsPage','ModeratorApprovedProblemsPage','ModeratorRejectedProblemsPage'].includes($route.name)}"
+             :class="{show: ['ModeratorNotModeratedProblemsPage', 'ModeratorApprovedProblemsPage', 'ModeratorRejectedProblemsPage'].includes($route.name)}"
              id="tasks-collapse">
           <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
             <li>
@@ -110,7 +110,7 @@
           Чекеры
         </button>
         <div class="collapse"
-             :class="{show: ['ModeratorNotModeratedCheckersPage','ModeratorApprovedCheckersPage','ModeratorRejectedCheckersPage'].includes($route.name)}"
+             :class="{show: ['ModeratorNotModeratedCheckersPage', 'ModeratorApprovedCheckersPage', 'ModeratorRejectedCheckersPage'].includes($route.name)}"
              id="checkers-collapse">
           <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
             <li>
@@ -124,6 +124,31 @@
             </li>
             <li>
               <router-link class="link-light rounded" :to="{name: 'ModeratorRejectedCheckersPage'}">Отклонённые
+              </router-link>
+            </li>
+          </ul>
+        </div>
+      </li>
+      <li class="mb-1">
+        <button class="btn btn-custom btn-toggle align-items-center rounded collapsed text-light" data-bs-toggle="collapse"
+                data-bs-target="#rule-sets-collapse" aria-expanded="false">
+          Наборы правил
+        </button>
+        <div class="collapse"
+             :class="{show: ['ModeratorNotModeratedRuleSetsPage', 'ModeratorApprovedRuleSetsPage', 'ModeratorRejectedRuleSetsPage'].includes($route.name)}"
+             id="rule-sets-collapse">
+          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+            <li>
+              <router-link class="link-light rounded" :to="{name: 'ModeratorNotModeratedRuleSetsPage'}">Ожидающие
+                модерации
+              </router-link>
+            </li>
+            <li>
+              <router-link class="link-light rounded" :to="{name: 'ModeratorApprovedRuleSetsPage'}">Одобренные
+              </router-link>
+            </li>
+            <li>
+              <router-link class="link-light rounded" :to="{name: 'ModeratorRejectedRuleSetsPage'}">Отклонённые
               </router-link>
             </li>
           </ul>

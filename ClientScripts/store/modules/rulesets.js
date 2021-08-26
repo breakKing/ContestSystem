@@ -1,4 +1,3 @@
-import api from '../../services/api-configurator'
 import * as _ from 'lodash'
 
 export default {
@@ -61,7 +60,7 @@ export default {
             }
         },
         async getWorkspaceRulesSet({getters, dispatch, rootGetters}, ruleset_id) {
-            if (!set_id) {
+            if (!ruleset_id) {
                 return null
             }
             try {

@@ -4,6 +4,7 @@ import CheckersRoutes from "./manager_routes/checkers_routes";
 import ContestsRoutes from "./manager_routes/contests_routes";
 import CoursesRoutes from "./manager_routes/courses_routes";
 import ProblemsRoutes from "./manager_routes/problems_routes";
+import RuleSetsRoutes from "./manager_routes/rule_sets_routes";
 import ManagerStartPage from "../../views/moder/ManagerStartPage";
 
 export default {
@@ -28,5 +29,6 @@ export default {
         ...ContestsRoutes,
         ...CoursesRoutes,
         ...ProblemsRoutes,
+        ...RuleSetsRoutes,
     ]
 }

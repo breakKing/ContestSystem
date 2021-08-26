@@ -9,6 +9,7 @@ import rulesets from './modules/rulesets'
 import solutions from './modules/solutions'
 import hub from "./modules/hub"
 import moder_posts from './modules/moder/posts'
+import moder_rule_sets from './modules/moder/rule_sets'
 import moder_checkers from './modules/moder/checkers'
 import moder_contests from './modules/moder/contests'
 import moder_courses from './modules/moder/courses'
@@ -35,6 +36,7 @@ export default createStore({
         moder_contests,
         moder_courses,
         moder_problems,
+        moder_rule_sets,
     },
     state: {
         api: null

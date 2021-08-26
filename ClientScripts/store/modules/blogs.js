@@ -1,5 +1,4 @@
-﻿import api from '../../services/api-configurator'
-import * as _ from 'lodash'
+﻿import * as _ from 'lodash'
 import $ from "jquery";
 import ApproveTypes from "../../dictionaries/ApproveTypes";
 import moment from "moment";

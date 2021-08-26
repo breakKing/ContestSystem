@@ -13,6 +13,10 @@
                   @click.prevent="$router.push({name: 'WorkSpaceEditRuleSetPage', params: { set_id: ruleSet.id }})">
             Редактировать
           </button>
+          <button v-else-if="currentRole === 'moderator'" class="workspace-btn"
+                  @click.prevent="moderateRuleSet">
+            Подробнее
+          </button>
           <button v-if="currentUser && +currentUser.id === +ruleSet.author.id" class="workspace-btn workspace-btn-del"
                   @click.prevent="deleteEntity">
             Удалить
@@ -43,6 +47,14 @@ export default {
     ...mapActions(['deleteRuleSet',
       'fetchAvailableRuleSets',
       'fetchCurrentUserRuleSets']),
+    async moderateRuleSet() {
+      await this.$router.push({
+        name: 'ModeratorRuleSetModerationPage',
+        params: {
+          rule_set_id: +this.ruleSet.id
+        }
+      })
+    },
     async deleteEntity() {
       this.error_msg = ''
       let {status, errors} = await this.deleteRuleSet(this.ruleSet?.id)
