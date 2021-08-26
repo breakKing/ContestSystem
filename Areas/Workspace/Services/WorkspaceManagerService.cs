@@ -272,7 +272,7 @@ namespace ContestSystem.Areas.Workspace.Services
             return statusData;
         }
 
-        public async Task<CreationStatusData<long?>> CreateRulesSetAsync(MainDbContext dbContext, RulesSetForm form)
+        public async Task<CreationStatusData<long?>> CreateRulesSetAsync(MainDbContext dbContext, RulesSetForm form, bool checkForLimit = false)
         {
             var statusData = new CreationStatusData<long?>
             {
@@ -297,6 +297,22 @@ namespace ContestSystem.Areas.Workspace.Services
                 IsPublic = form.IsPublic,
                 IsArchieved = false
             };
+
+            if (checkForLimit)
+            {
+                if (await dbContext.RulesSets.CountAsync(rs => rs.AuthorId == form.AuthorId && rs.ApprovalStatus == ApproveType.NotModeratedYet) >= Constants.RulesSetsLimitForLimitedUsers)
+                {
+                    statusData.Status = CreationStatus.LimitExceeded;
+                }
+                else
+                {
+                    rulesSet.ApprovalStatus = ApproveType.NotModeratedYet;
+                }
+            }
+            else
+            {
+                rulesSet.ApprovalStatus = ApproveType.Accepted;
+            }
 
             await dbContext.RulesSets.AddAsync(rulesSet);
 
@@ -1194,6 +1210,34 @@ namespace ContestSystem.Areas.Workspace.Services
                 }
             }
 
+            return status;
+        }
+
+        public async Task<ModerationStatus> ModerateRulesSetAsync(MainDbContext dbContext, RulesSetRequestForm form, RulesSet rulesSet = null)
+        {
+            var status = ModerationStatus.Undefined;
+            rulesSet ??= await dbContext.RulesSets.FirstOrDefaultAsync(rs => rs.Id == form.RulesSetId);
+            if (rulesSet == null)
+            {
+                status = ModerationStatus.NotExistentEntity;
+            }
+            else
+            {
+                rulesSet.ApprovalStatus = form.ApprovalStatus;
+                rulesSet.ApprovingModeratorId = form.ApprovingModeratorId;
+                rulesSet.ModerationMessage = form.ModerationMessage;
+                dbContext.RulesSets.Update(rulesSet);
+
+                bool saveSuccess = await dbContext.SecureSaveAsync();
+                if (!saveSuccess)
+                {
+                    status = ModerationStatus.DbSaveError;
+                }
+                else
+                {
+                    status = (rulesSet.ApprovalStatus == ApproveType.Accepted) ? ModerationStatus.Accepted : ModerationStatus.Rejected;
+                }
+            }
             return status;
         }
 

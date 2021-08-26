@@ -6,6 +6,7 @@ using ContestSystem.Models.Dictionaries;
 using ContestSystem.Models.ExternalModels;
 using ContestSystem.Models.FormModels;
 using ContestSystem.Models.Misc;
+using ContestSystemDbStructure.Enums;
 using ContestSystemDbStructure.Models.Auth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -92,7 +93,7 @@ namespace ContestSystem.Areas.Workspace.Controllers
                 }
                 else
                 {
-                    var statusData = await _workspace.CreateRulesSetAsync(_dbContext, rulesSetForm);
+                    var statusData = await _workspace.CreateRulesSetAsync(_dbContext, rulesSetForm, currentUser.IsLimitedInRulesSets);
                     _logger.LogCreationStatus(statusData.Status, _entityName, statusData.Id.GetValueOrDefault(-1).ToString(), currentUser.Id);
                     response = ResponseObject<long>.FormResponseObjectForCreation(statusData.Status, _entityName, statusData.Id.GetValueOrDefault(-1));
                 }
@@ -173,6 +174,89 @@ namespace ContestSystem.Areas.Workspace.Controllers
                     DeletionStatus status = await _workspace.DeleteRulesSetAsync(_dbContext, loadedRules);
                     _logger.LogDeletionStatus(status, _entityName, id, currentUser.Id);
                     response = ResponseObject<long>.FormResponseObjectForDeletion(status, _entityName, id);
+                }
+            }
+            return Json(response);
+        }
+
+        [HttpGet("requests")]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
+        public async Task<IActionResult> GetRulesRequests()
+        {
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
+            var rulesSets = await _dbContext.RulesSets
+                .Where(rs => rs.ApprovalStatus == ApproveType.NotModeratedYet && !rs.IsArchieved).ToListAsync();
+            var requests = rulesSets.ConvertAll(RulesSetBaseInfo.GetFromModel);
+            return Json(requests);
+        }
+
+        [HttpGet("accepted")]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
+        public async Task<IActionResult> GetAcceptedRules()
+        {
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
+            var rulesSets = await _dbContext.RulesSets
+                .Where(rs => rs.ApprovalStatus == ApproveType.Accepted && !rs.IsArchieved
+                            && rs.ApprovingModeratorId.GetValueOrDefault(-1) == currentUser.Id)
+                .ToListAsync();
+            var requests = rulesSets.ConvertAll(RulesSetBaseInfo.GetFromModel);
+            return Json(requests);
+        }
+
+        [HttpGet("rejected")]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
+        public async Task<IActionResult> GetRejectedRules()
+        {
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
+            var rulesSets = await _dbContext.RulesSets
+                .Where(rs => rs.ApprovalStatus == ApproveType.Rejected && !rs.IsArchieved
+                            && rs.ApprovingModeratorId.GetValueOrDefault(-1) == currentUser.Id)
+                .ToListAsync();
+            var requests = rulesSets.ConvertAll(RulesSetBaseInfo.GetFromModel);
+            return Json(requests);
+        }
+
+        [HttpPut("{id}/moderate")]
+        [AuthorizeByJwt(Roles = RolesContainer.Moderator)]
+        public async Task<IActionResult> ModerateRules([FromBody] RulesSetRequestForm rulesSetRequestForm,
+            long id)
+        {
+            var response = new ResponseObject<long>();
+            var currentUser = await HttpContext.GetCurrentUser(_userManager);
+            if (rulesSetRequestForm.RulesSetId != id)
+            {
+                _logger.LogModeratingWithNonEqualFormAndRequestId(_entityName, rulesSetRequestForm.RulesSetId, id,
+                    currentUser.Id);
+                response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityIdMismatchErrorName]);
+            }
+            else
+            {
+                if (ModelState.IsValid)
+                {
+                    var rulesSet = await _dbContext.RulesSets.FirstOrDefaultAsync(p => p.Id == id && !p.IsArchieved);
+                    if (rulesSet == null)
+                    {
+                        _logger.LogModeratingOfNonExistentEntity(_entityName, id, currentUser.Id);
+                        response = ResponseObject<long>.Fail(_errorCodes[Constants.EntityDoesntExistErrorName]);
+                    }
+                    else
+                    {
+                        if (rulesSet.ApprovingModeratorId.GetValueOrDefault(-1) != currentUser.Id && rulesSet.ApprovalStatus != ApproveType.NotModeratedYet)
+                        {
+                            _logger.LogModeratingByWrongUser(_entityName, id, currentUser.Id, rulesSet.ApprovingModeratorId.GetValueOrDefault(-1), rulesSet.ApprovalStatus);
+                            response = ResponseObject<long>.Fail(_errorCodes[Constants.ModerationByWrongModeratorErrorName]);
+                        }
+                        else
+                        {
+                            ModerationStatus status = await _workspace.ModerateRulesSetAsync(_dbContext, rulesSetRequestForm, rulesSet);
+                            _logger.LogModerationStatus(status, _entityName, id, currentUser.Id);
+                            response = ResponseObject<long>.FormResponseObjectForModeration(status, _entityName, id);
+                        }
+                    }
+                }
+                else
+                {
+                    response = ResponseObject<long>.Success(id);
                 }
             }
             return Json(response);

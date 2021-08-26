@@ -9,6 +9,7 @@ namespace ContestSystem.Models.Dictionaries
         public static readonly int ProblemsLimitForLimitedUsers = 1;
         public static readonly int ContestsLimitForLimitedUsers = 1;
         public static readonly int CoursesLimitForLimitedUsers = 1;
+        public static readonly int RulesSetsLimitForLimitedUsers = 1;
         public static readonly int ContestLockBeforeStartInMinutes = 60;
         public static readonly int MaxPointsSumForAllTests = 100;
 
@@ -123,6 +124,7 @@ namespace ContestSystem.Models.Dictionaries
                 { UserIdMismatchErrorName, "ERR_RULES_USER_ID_MISMATCH" },
                 { EntityIdMismatchErrorName, "ERR_RULES_ID_MISMATCH" },
                 { EntityDoesntExistErrorName, "ERR_RULES_DOESNT_EXIST" },
+                { ModerationByWrongModeratorErrorName, "ERR_RULES_MODERATION_BY_WRONG_MODERATOR" }
             },
             [UserEntityName] = new Dictionary<string, string>
             {
