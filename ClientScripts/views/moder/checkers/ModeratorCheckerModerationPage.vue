@@ -4,13 +4,13 @@
       <h2>{{ currentModeratingChecker && currentModeratingChecker.name }} {{
           currentModeratingChecker && currentModeratingChecker.author && currentModeratingChecker.author.fullName
         }}</h2>
-      <p>{{currentModeratingChecker && currentModeratingChecker.description}}</p>
-      <prism-editor v-model="checkerCode" 
-                      :highlight="highlighter" 
-                      :tabSize="4" 
-                      line-numbers
-                      readonly
-                      class="code-editor"/>
+      <p>{{ currentModeratingChecker && currentModeratingChecker.description }}</p>
+      <prism-editor v-model="checkerCode"
+                    :highlight="highlighter"
+                    :tabSize="4"
+                    line-numbers
+                    readonly
+                    class="code-editor"/>
       <div class="row">
         <div class="col">
           <v-form @submit="submitEntity" :validation-schema="schema" class="mb-3">
@@ -28,8 +28,10 @@
               </v-field>
               <error-message name="current_status"></error-message>
             </div>
-            <button @click.prevent="deleteEntity" type="button" class="btn btn-danger">Удалить</button>
-            <button type="submit" class="btn btn-primary ms-2">Сохранить</button>
+            <div class="mt-2">
+              <button @click.prevent="deleteEntity" type="button" class="btn btn-danger">Удалить</button>
+              <button type="submit" class="btn btn-primary ms-2">Сохранить</button>
+            </div>
           </v-form>
         </div>
       </div>

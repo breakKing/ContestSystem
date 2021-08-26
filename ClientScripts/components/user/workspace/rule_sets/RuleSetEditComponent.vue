@@ -33,7 +33,7 @@
                    id="penaltyForCompilationError"
                    :disabled="+countMode !== countModes.CountPenalty"
                    name="penaltyForCompilationError"/>
-          <label class="fs-4" for="penaltyForCompilationError">Наказывать за ошибку компиляции</label>
+          <label class="fs-4">Наказывать за ошибку компиляции</label>
 
           <error-message name="penaltyForCompilationError"></error-message>
         </div>
@@ -70,7 +70,7 @@
           <v-field v-model="publicMonitor" id="publicMonitor" class="custom-checkbox" type="checkbox"
                    :value="true" :uncheckedValue="false"
                    name="publicMonitor"/>
-          <label class="fs-4" for="publicMonitor">Сделать монитор публичным</label>
+          <label class="fs-4">Сделать монитор публичным</label>
           <error-message name="publicMonitor"></error-message>
         </div>
         <div>
@@ -83,14 +83,14 @@
           <v-field v-model="showFullTestsResults" id="showFullTestsResults" class="custom-checkbox" type="checkbox"
                    :value="true" :uncheckedValue="false"
                    name="showFullTestsResults"/>
-          <label class="fs-4" for="showFullTestsResults">Показывать полный отчёт о попытке</label>
+          <label class="fs-4">Показывать полный отчёт о попытке</label>
           <error-message name="showFullTestsResults"></error-message>
         </div>
         <div>
           <v-field v-model="isPublic" id="isPublic" class="custom-checkbox" type="checkbox"
                    :value="true" :uncheckedValue="false"
                    name="isPublic"/>
-          <label class="fs-4" for="isPublic">Сделать набор правил публичным</label>
+          <label class="fs-4">Сделать набор правил публичным</label>
           <error-message name="isPublic"></error-message>
         </div>
         <button type="submit" class="btn btn-primary">Сохранить</button>

@@ -4,7 +4,7 @@
       <h2>{{ currentModeratingRuleSet && currentModeratingRuleSet.name }} {{
           currentModeratingRuleSet && currentModeratingRuleSet.author && currentModeratingRuleSet.author.fullName
         }}</h2>
-      <p>{{currentModeratingRuleSet && currentModeratingRuleSet.description}}</p>
+      <p>{{ currentModeratingRuleSet && currentModeratingRuleSet.description }}</p>
       <div class="row">
         <div class="col">
           <v-form @submit="submitEntity" :validation-schema="schema" class="mb-3">
@@ -22,8 +22,10 @@
               </v-field>
               <error-message name="current_status"></error-message>
             </div>
-            <button @click.prevent="deleteEntity" type="button" class="btn btn-danger">Удалить</button>
-            <button type="submit" class="btn btn-primary ms-2">Сохранить</button>
+            <div class="mt-2">
+              <button @click.prevent="deleteEntity" type="button" class="btn btn-danger">Удалить</button>
+              <button type="submit" class="btn btn-primary ms-2">Сохранить</button>
+            </div>
           </v-form>
         </div>
       </div>
