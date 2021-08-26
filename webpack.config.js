@@ -84,7 +84,7 @@ module.exports = {
             },
             {
                 test: /\.(eot|svg|ttf|woff|woff2)(\?\S*)?$/,
-                loader: 'file-loader'
+                type: 'asset/resource'
             },
             {
                 test: /\.(png|jpe?g|gif|svg)(\?\S*)?$/,
