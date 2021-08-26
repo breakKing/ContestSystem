@@ -58,7 +58,7 @@ export default {
         return ''
       }
       if (!this.task.localizedName) {
-        return _.filter((this.task.localizers || []), (el) => el.culture === 'ru')[0].name
+        return _.find((this.task.localizers || []), (el) => el.culture === 'ru')?.name
       }
       return this.task.localizedName
     }

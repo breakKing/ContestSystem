@@ -151,10 +151,10 @@ export default {
       this.isPublic = data?.isPublic || false
       this.checker = data?.checker?.id || null
       this.startedChecker = data?.checker || null
-      this.name = (data?.localizers || [])[0]?.name || null
-      this.description = (data?.localizers || [])[0]?.description || null
-      this.inputBlock = (data?.localizers || [])[0]?.inputBlock || null
-      this.outputBlock = (data?.localizers || [])[0]?.outputBlock || null
+      this.name = _.first((data?.localizers || []))?.name || null
+      this.description = _.first((data?.localizers || []))?.description || null
+      this.inputBlock = _.first((data?.localizers || []))?.inputBlock || null
+      this.outputBlock = _.first((data?.localizers || []))?.outputBlock || null
       this.$refs.quill_editor_description.setHTML(this.description)
       this.$refs.quill_editor_inputBlock.setHTML(this.inputBlock)
       this.$refs.quill_editor_outputBlock.setHTML(this.outputBlock)

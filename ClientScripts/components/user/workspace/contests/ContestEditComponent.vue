@@ -110,8 +110,8 @@ export default {
       await this.fetchAvailableRuleSets()
       await this.fetchAvailableTasks()
       let contest = await this.getWorkspaceContest(this.contest_id)
-      this.name = (contest?.localizers || [])[0]?.name || null
-      this.description = (contest?.localizers || [])[0]?.description || null
+      this.name = _.first((contest?.localizers || []))?.name || null
+      this.description = _.first((contest?.localizers || []))?.description || null
       // у компонента баг. Начальное значение не отрисовывается
       this.$refs.quill_editor_description.setHTML(this.description)
       this.startDateTimeUTC = (contest?.startDateTimeUTC && this.to_local_string(contest.startDateTimeUTC)) || null
@@ -171,7 +171,7 @@ export default {
         tmp_form.append($('<input type="hidden"/>').attr('name', `problems[${idx}][letter]`).val(problem.letter))
       })
       tmp_form.append($('[name="image"]').clone())
-      let data = new FormData(tmp_form[0]);
+      let data = new FormData(tmp_form.get(0));
 
       let url;
       let type;

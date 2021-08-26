@@ -63,7 +63,7 @@ export default {
             if (!state.selected_role) {
                 let currentUserRoles = getters.currentUserRoles
                 if (currentUserRoles && currentUserRoles.length === 1) {
-                    return currentUserRoles[0]
+                    return _.first(currentUserRoles)
                 }
             }
             return state.selected_role
@@ -148,7 +148,7 @@ export default {
 
                     return true
                 } else {
-                    commit('setAuthError', data.errors[0])
+                    commit('setAuthError', _.first(data.errors))
                     await dispatch('logout')
                     return false
                 }

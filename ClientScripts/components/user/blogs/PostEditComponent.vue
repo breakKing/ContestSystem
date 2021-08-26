@@ -136,7 +136,7 @@ export default {
       tmp_form.append($('[name="previewImage"]').clone())
 
       let result = await this.savePostInfo({
-        request_data: new FormData(tmp_form[0]),
+        request_data: new FormData(tmp_form.get(0)),
         post_id: this.post_id
       })
       if (result.status) {
