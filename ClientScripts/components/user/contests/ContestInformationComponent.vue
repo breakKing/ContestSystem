@@ -1,76 +1,80 @@
 <template>
-  <bread-crumbs-component :routes="bread_crumb_routes"></bread-crumbs-component>
-  <div class="row">
-    <div class="col">
-      <div class="row">
-        <div class="col-5">
-          <h2>{{ currentContest && currentContest.localizedName }}</h2>
-          <hr>
-        </div>
-        <div class="col">{{ currentContest && currentContest.creator && currentContest.creator.fullName }}</div>
-      </div>
-      <p v-html="currentContest && currentContest.localizedDescription"></p>
-      <div class="row my-3"
-           v-if="currentUserIsOrganizerOfCurrentContest || currentUserIsParticipantOfCurrentContest || (currentContest && currentContest.rules && currentContest.rules.publicMonitor)">
-        <div class="col">
-          <router-link class="btn btn-info"
-                       :to="{name: 'ContestMonitorPage', params: {contest_id: currentContest.id}}">
-            Монитор
-          </router-link>
-        </div>
-      </div>
+    <div class="p-3">
+        <bread-crumbs-component :routes="bread_crumb_routes"></bread-crumbs-component>
+        <div class="row">
+            <div class="col">
+                <div class="row">
+                    <div class="col-5">
+                        <h2>{{ currentContest && currentContest.localizedName }}</h2>
+                        <hr>
+                    </div>
+                    <div class="col">{{ currentContest && currentContest.creator && currentContest.creator.fullName }}</div>
+                </div>
+                <p v-html="currentContest && currentContest.localizedDescription"></p>
+                <div class="row my-3"
+                     v-if="currentUserIsOrganizerOfCurrentContest || currentUserIsParticipantOfCurrentContest || (currentContest && currentContest.rules && currentContest.rules.publicMonitor)">
+                    <div class="col">
+                        <router-link class="btn btn-info"
+                                     :to="{name: 'ContestMonitorPage', params: {contest_id: currentContest.id}}">
+                            Монитор
+                        </router-link>
+                    </div>
+                </div>
 
-    </div>
-    <div class="col-4" v-if="!!dataUrl">
-      <img alt="картинка" class="img-fluid" :src="dataUrl"/>
-    </div>
-  </div>
-
-  <div class="row" v-if="!currentUserIsOrganizerOfCurrentContest">
-    <div class="col">
-      <template v-if="!currentUserIsParticipantOfCurrentContest">
-        <button class="btn btn-success" v-if="!wants_participate" @click.prevent="wants_participate=true">
-          Хочу участвовать
-        </button>
-        <template v-else>
-          <v-form @submit="joinContest" :validation-schema="schema">
-            <div>
-              <label>Псевдоним</label>
-              <v-field v-model="nickname" class="form-control" name="nickname"/>
-              <error-message name="nickname"></error-message>
             </div>
-            <button type="submit" class="btn btn-primary">Участвовать</button>
-          </v-form>
-        </template>
-      </template>
-      <template v-else>
-        <div class="d-flex">
-          <div>
-            <router-link v-if="!currentContestIsInTheFuture" class="btn btn-success"
-                         :to="{name: 'ContestMySolutionsPage', params: {contest_id: currentContest?.id }}">Мои отправки
-            </router-link>
-            <button class="btn btn-danger" v-else @click.prevent="removeFromParticipants">Не учавствовать</button>
-          </div>
-          <div class="ms-3">
-            <router-link class="btn btn-info" v-if="currentContestIsRunning"
-                         :to="{name: 'ContestParticipatingPage', params: {contest_id: currentContest?.id}}">Задачи
-            </router-link>
-            <span v-else-if="currentContestIsInTheFuture">Соревнование начнётся {{
-                formatted_start_date
-              }}</span>
-            <span v-else>Соревнование окончено</span>
-          </div>
+            <div class="col-4" v-if="!!dataUrl">
+                <img alt="картинка" class="img-fluid" :src="dataUrl" />
+            </div>
         </div>
-      </template>
+
+        <div class="row" v-if="!currentUserIsOrganizerOfCurrentContest">
+            <div class="col">
+                <template v-if="!currentUserIsParticipantOfCurrentContest">
+                    <button class="btn btn-success" v-if="!wants_participate" @click.prevent="wants_participate=true">
+                        Хочу участвовать
+                    </button>
+                    <template v-else>
+                        <v-form @submit="joinContest" :validation-schema="schema">
+                            <div>
+                                <label>Псевдоним</label>
+                                <v-field v-model="nickname" class="form-control" name="nickname" />
+                                <error-message name="nickname"></error-message>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Участвовать</button>
+                        </v-form>
+                    </template>
+                </template>
+                <template v-else>
+                    <div class="d-flex">
+                        <div>
+                            <router-link v-if="!currentContestIsInTheFuture" class="btn btn-success"
+                                         :to="{name: 'ContestMySolutionsPage', params: {contest_id: currentContest?.id }}">
+                                Мои отправки
+                            </router-link>
+                            <button class="btn btn-danger" v-else @click.prevent="removeFromParticipants">Не учавствовать</button>
+                        </div>
+                        <div class="ms-3">
+                            <router-link class="btn btn-info" v-if="currentContestIsRunning"
+                                         :to="{name: 'ContestParticipatingPage', params: {contest_id: currentContest?.id}}">
+                                Задачи
+                            </router-link>
+                            <span v-else-if="currentContestIsInTheFuture">
+                                Соревнование начнётся {{
+                formatted_start_date
+                                }}
+                            </span>
+                            <span v-else>Соревнование окончено</span>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+        <div v-else class="row">
+            <div class="col">
+                <contest-organizer-interface-main-component :contest="currentContest"></contest-organizer-interface-main-component>
+            </div>
+        </div>
     </div>
-  </div>
-  <div v-else class="row">
-    <div class="col">
-      <contest-organizer-interface-main-component
-          :contest="currentContest"
-      ></contest-organizer-interface-main-component>
-    </div>
-  </div>
 </template>
 
 <script>
