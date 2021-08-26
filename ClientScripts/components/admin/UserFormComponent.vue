@@ -58,6 +58,12 @@
       <error-message name="isLimitedInProblems"></error-message>
     </div>
     <div>
+      <label class="font-weight-bold">Ограничен в создании наборов правил</label>
+      <v-field v-model="isLimitedInRulesSets" type="checkbox" class="form-control" name="isLimitedInRulesSets"
+               :value="true" :uncheckedValue="false"/>
+      <error-message name="isLimitedInRulesSets"></error-message>
+    </div>
+    <div>
       <div>
         <label class="font-weight-bold">Роли</label>
       </div>
@@ -129,6 +135,7 @@ export default {
         isLimitedInPosts,
         isLimitedInCourses,
         isLimitedInProblems,
+        isLimitedInRulesSets,
         roles
       } = this.$store.getters.getUserById(this.user_id)
       return {
@@ -141,6 +148,7 @@ export default {
         isLimitedInPosts,
         isLimitedInCourses,
         isLimitedInProblems,
+        isLimitedInRulesSets,
         dateOfBirth: (dateOfBirth && this.to_local_string(dateOfBirth).substr(0, 10)) || null,
         roles: _.map(roles, (r) => r.name),
       }
@@ -158,6 +166,7 @@ export default {
         isLimitedInPosts: this.isLimitedInPosts,
         isLimitedInCourses: this.isLimitedInCourses,
         isLimitedInProblems: this.isLimitedInProblems,
+        isLimitedInRulesSets: this.isLimitedInRulesSets,
         roles: this.roles,
       }).then(async () => {
         await this.fetchAllUsers(true)
