@@ -173,6 +173,9 @@ export default {
     ]),
     ...mapMutations(['updateCurrentContestSolutionForCurrentUser']),
     async onSubmitSolution() {
+      if (this.currentContest && this.currentContestIsInPast) {
+        return await this.$router.replace({name: 'ContestPage', params: {contest_id: this.currentContest.id}})
+      }
       this.loading = true
       let {data, status, errors} = await this.sendSolution({
         code: this.code,
