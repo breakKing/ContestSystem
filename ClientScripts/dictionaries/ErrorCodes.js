@@ -48,6 +48,7 @@
         UserIdMismatch: "ERR_RULES_USER_ID_MISMATCH",
         EntityIdMismatch: "ERR_RULES_ID_MISMATCH",
         EntityDoesntExist: "ERR_RULES_DOESNT_EXIST",
+        ModerationByWrongModerator: "ERR_RULES_MODERATION_BY_WRONG_MODERATOR"
     },
     User: {
         ValidationFailed: "ERR_USER_VALIDATION_FAILED",

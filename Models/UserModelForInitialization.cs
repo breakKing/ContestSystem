@@ -10,5 +10,6 @@
         public bool IsLimitedInCourses { get; set; } = true;
         public bool IsLimitedInPosts { get; set; } = true;
         public bool IsLimitedInProblems { get; set; } = true;
+        public bool IsLimitedInRulesSets { get; set; } = true;
     }
 }

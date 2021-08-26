@@ -49,7 +49,8 @@ namespace ContestSystem.Models.DbContexts
                 IsLimitedInContests = false,
                 IsLimitedInCourses = false,
                 IsLimitedInPosts = false,
-                IsLimitedInProblems = false
+                IsLimitedInProblems = false,
+                IsLimitedInRulesSets = false
             },
             new UserModelForInitialization()
             {
@@ -60,7 +61,8 @@ namespace ContestSystem.Models.DbContexts
                 IsLimitedInContests = true,
                 IsLimitedInCourses = true,
                 IsLimitedInPosts = true,
-                IsLimitedInProblems = true
+                IsLimitedInProblems = true,
+                IsLimitedInRulesSets = true
             }
         };
 
@@ -94,6 +96,7 @@ namespace ContestSystem.Models.DbContexts
                     IsLimitedInCourses = userModel.IsLimitedInCourses,
                     IsLimitedInPosts = userModel.IsLimitedInPosts,
                     IsLimitedInProblems = userModel.IsLimitedInProblems,
+                    IsLimitedInRulesSets = userModel.IsLimitedInRulesSets,
                     Culture = "ru"
                 };
                 var result = await userManager.CreateAsync(user, userModel.Password);
