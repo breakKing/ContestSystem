@@ -25,7 +25,7 @@
 
       </div>
       <div class="col-md-5 col-12">
-        <img class="img-fluid" :src="dataUrl" :alt="post.Name">
+        <img class="img-fluid p-3" style="max-height: 25rem;" :src="dataUrl" :alt="post.Name">
       </div>
     </div>
   </div>
