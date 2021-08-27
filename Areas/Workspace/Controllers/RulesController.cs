@@ -57,7 +57,8 @@ namespace ContestSystem.Areas.Workspace.Controllers
         public async Task<IActionResult> GetAvailableRules(long userId)
         {
             var rules = await _dbContext.RulesSets.Where(rs => (rs.AuthorId == userId || rs.IsPublic)
-                                                               && !rs.IsArchieved).ToListAsync();
+                                                               && !rs.IsArchieved
+                                                               && rs.ApprovalStatus == ApproveType.Accepted).ToListAsync();
             var rulesInfo = rules.ConvertAll(RulesSetBaseInfo.GetFromModel);
             return Json(rulesInfo);
         }

@@ -1,37 +1,37 @@
 <template>
   <div class="row p-3">
     <div class="col">
-      <h2>{{ currentModeratingRuleSet && currentModeratingRuleSet.name }} {{
-          currentModeratingRuleSet && currentModeratingRuleSet.author && currentModeratingRuleSet.author.fullName
-        }}</h2>
-      <p>{{ currentModeratingRuleSet && currentModeratingRuleSet.description }}</p>
-      <p>Режим подсчёта: {{ readable_count_mode }}</p>
+      <h2 style="font-weight: bold;">{{ currentModeratingRuleSet && currentModeratingRuleSet.name }}</h2>
+      <h4 style="color: #4998AB;">Автор: {{ currentModeratingRuleSet && currentModeratingRuleSet.author && currentModeratingRuleSet.author.fullName }}</h4>
+      <br><p>Описание:</p>
+      <p>{{ currentModeratingRuleSet && currentModeratingRuleSet.description }}</p><br>
+      <p>Режим подсчёта: <span class="semi-bold-text">{{ readable_count_mode }}</span></p>
       <template v-if="currentModeratingRuleSet && +currentModeratingRuleSet.countMode === countModes.CountPenalty">
-        <p v-if="currentModeratingRuleSet.currentModeratingRuleSet">Наказывать за ошибку компиляции</p>
-        <p v-else>Не наказывать за ошибку компиляции</p>
+        <p v-if="currentModeratingRuleSet.penaltyForCompilationError"><span class="semi-bold-text">Наказывать</span> за ошибку компиляции</p>
+        <p v-else><span class="semi-bold-text">Не наказывать</span> за ошибку компиляции</p>
 
-        <p>Размер наказания за одну попытку: {{ currentModeratingRuleSet.penaltyForOneTry }}</p>
+        <p>Размер наказания за одну попытку: <span class="semi-bold-text">{{ currentModeratingRuleSet.penaltyForOneTry }}</span></p>
       </template>
       <template v-if="currentModeratingRuleSet && +currentModeratingRuleSet.countMode !== countModes.CountPoints">
-        <p>Размер наказания за одну минуту: {{ currentModeratingRuleSet.penaltyForOneMinute }}</p>
+        <p>Размер наказания за одну минуту: <span class="semi-bold-text">{{ currentModeratingRuleSet.penaltyForOneMinute }}</span></p>
       </template>
       <template v-if="currentModeratingRuleSet && +currentModeratingRuleSet.countMode === countModes.CountPoints">
-        <p>Прибавка к очкам за лучшее решение: {{ currentModeratingRuleSet.pointsForBestSolution }}</p>
+        <p>Прибавка к очкам за лучшее решение: <span class="semi-bold-text">{{ currentModeratingRuleSet.pointsForBestSolution }}</span></p>
       </template>
-      <p>Максимальное количество попыток на задачу: {{ currentModeratingRuleSet.maxTriesForOneProblem }}</p>
+      <p>Максимальное количество попыток на задачу: <span class="semi-bold-text">{{ currentModeratingRuleSet && currentModeratingRuleSet.maxTriesForOneProblem }}</span></p>
       <template v-if="currentModeratingRuleSet">
-        <p v-if="currentModeratingRuleSet.publicMonitor">Публичный монитор</p>
-        <p v-else>Не публичный монитор</p>
+        <p v-if="currentModeratingRuleSet.publicMonitor"><span class="semi-bold-text">Публичный монитор</span></p>
+        <p v-else><span class="semi-bold-text">Не публичный монитор</span></p>
       </template>
-      <p>Замораживать монитор за {{ currentModeratingRuleSet.monitorFreezeTimeBeforeFinishInMinutes }} минут до конца</p>
+      <p>Замораживать монитор за <span class="semi-bold-text">{{ currentModeratingRuleSet && currentModeratingRuleSet.monitorFreezeTimeBeforeFinishInMinutes }}</span> минут до конца</p>
 
       <template v-if="currentModeratingRuleSet">
-        <p v-if="currentModeratingRuleSet.showFullTestsResults">Показывать полный отчёт о попытке</p>
-        <p v-else>Не показывать полный отчёт о попытке</p>
+        <p v-if="currentModeratingRuleSet.showFullTestsResults"><span class="semi-bold-text">Показывать</span> полный отчёт о попытке</p>
+        <p v-else><span class="semi-bold-text">Не показывать</span> полный отчёт о попытке</p>
 
-        <p v-if="currentModeratingRuleSet.isPublic">Публичный набор правил</p>
-        <p v-else>Не публичный набор правил</p>
-      </template>
+        <p v-if="currentModeratingRuleSet.isPublic"><span class="semi-bold-text">Публичный</span> набор правил</p>
+        <p v-else><span class="semi-bold-text">Не публичный</span> набор правил</p>
+      </template><br>
       <div class="row">
         <div class="col">
           <v-form @submit="submitEntity" :validation-schema="schema" class="mb-3">
@@ -40,7 +40,7 @@
               <v-field v-model="message" as="textarea" class="form-control" name="message"/>
               <error-message name="message"></error-message>
             </div>
-            <div>
+            <div class="mt-3">
               <label>Статус</label>
               <v-field v-model="current_status" as="select" class="form-control" name="current_status">
                 <option :value="approvalStatuses.NotModeratedYet">Не проверено</option>
@@ -49,7 +49,7 @@
               </v-field>
               <error-message name="current_status"></error-message>
             </div>
-            <div class="mt-2">
+            <div class="mt-4">
               <button @click.prevent="deleteEntity" type="button" class="btn btn-danger">Удалить</button>
               <button type="submit" class="btn btn-primary ms-2">Сохранить</button>
             </div>
@@ -91,7 +91,7 @@ export default {
       return CountModes
     },
     readable_count_mode() {
-      switch (+this.currentModeratingRuleSet.countMode) {
+      switch (+this.currentModeratingRuleSet?.countMode) {
         case CountModes.CountPenalty:
           return 'штраф'
         case CountModes.CountPoints:
@@ -158,5 +158,10 @@ export default {
 </script>
 
 <style scoped>
-
+  p {
+    font-size: 1.2rem;
+  }
+  .semi-bold-text {
+    font-weight: 600;
+  }
 </style>

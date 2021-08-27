@@ -20,9 +20,9 @@
         <div>
           <label class="fs-4">Режим подсчёта</label>
           <v-field v-model="countMode" class="form-control" as="select" name="countMode">
-            <option value="1">Считать очки за тесты</option>
-            <option value="2">Считать штраф</option>
-            <option value="3">Считать разность между очками и штрафом</option>
+            <option :value="+countModes?.CountPoints">Считать очки за тесты</option>
+            <option :value="+countModes?.CountPenalty">Считать штраф</option>
+            <option :value="+countModes?.CountPointsMinusPenalty">Считать разность между очками и штрафом</option>
           </v-field>
           <error-message name="countMode"></error-message>
         </div>
