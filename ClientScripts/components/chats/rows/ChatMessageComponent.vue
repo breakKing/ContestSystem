@@ -42,7 +42,7 @@ export default {
 
 .message {
   position: relative;
-  background-color: #86BB71;
+  background-color: #BFE8AF;
   border-radius: 10px;
   padding: 10px;
 
@@ -55,7 +55,7 @@ export default {
     position: absolute;
     pointer-events: none;
     border: 10px solid transparent;
-    border-bottom-color: #86BB71;
+    border-bottom-color: #BFE8AF;
     margin-left: -10px;
   }
 }
