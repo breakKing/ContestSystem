@@ -1,39 +1,41 @@
 <template>
-  <div class="row p-3">
-    <div class="col">
-      <h2>{{ currentModeratingChecker && currentModeratingChecker.name }} {{
-          currentModeratingChecker && currentModeratingChecker.author && currentModeratingChecker.author.fullName
-        }}</h2>
-      <p>{{ currentModeratingChecker && currentModeratingChecker.description }}</p>
-      <prism-editor v-model="checkerCode"
-                    :highlight="highlighter"
-                    :tabSize="4"
-                    line-numbers
-                    readonly
-                    class="code-editor"/>
-      <div class="row">
-        <div class="col">
-          <v-form @submit="submitEntity" :validation-schema="schema" class="mb-3">
-            <div>
-              <label>Комментарий</label>
-              <v-field v-model="message" as="textarea" class="form-control" name="message"/>
-              <error-message name="message"></error-message>
-            </div>
-            <div>
-              <label>Статус</label>
-              <v-field v-model="current_status" as="select" class="form-control" name="current_status">
-                <option :value="approvalStatuses.NotModeratedYet">Не проверено</option>
-                <option :value="approvalStatuses.Rejected">Отклонено</option>
-                <option :value="approvalStatuses.Accepted">Утверждено</option>
-              </v-field>
-              <error-message name="current_status"></error-message>
-            </div>
-            <div class="mt-2">
-              <button @click.prevent="deleteEntity" type="button" class="btn btn-danger">Удалить</button>
-              <button type="submit" class="btn btn-primary ms-2">Сохранить</button>
-            </div>
-          </v-form>
-        </div>
+  <div class="container">
+    <div class="row p-3">
+      <div class="col">
+        <h2 style="font-weight: bold;">{{ currentModeratingChecker && currentModeratingChecker.name }}</h2>
+        <h4 style="color: #4998AB;">Автор: {{ currentModeratingChecker && currentModeratingChecker.author && currentModeratingChecker.author.fullName }}</h4>
+        <br><p>Описание:</p>
+        <p>{{ currentModeratingChecker && currentModeratingChecker.description }}</p><br>
+        <prism-editor v-model="checkerCode"
+                      :highlight="highlighter"
+                      :tabSize="4"
+                      line-numbers
+                      readonly
+                      class="code-editor"/>
+      </div>
+    </div>
+    <div class="row p-3">
+      <div class="col">
+        <v-form @submit="submitEntity" :validation-schema="schema" class="mb-3">
+          <div>
+            <label>Комментарий</label>
+            <v-field v-model="message" as="textarea" class="form-control" name="message"/>
+            <error-message name="message"></error-message>
+          </div>
+          <div class="mt-3">
+            <label>Статус</label>
+            <v-field v-model="current_status" as="select" class="form-control" name="current_status">
+              <option :value="approvalStatuses.NotModeratedYet">Не проверено</option>
+              <option :value="approvalStatuses.Rejected">Отклонено</option>
+              <option :value="approvalStatuses.Accepted">Утверждено</option>
+            </v-field>
+            <error-message name="current_status"></error-message>
+          </div>
+          <div class="mt-4">
+            <button @click.prevent="deleteEntity" type="button" class="btn btn-danger">Удалить</button>
+            <button type="submit" class="btn btn-primary ms-2">Сохранить</button>
+          </div>
+        </v-form>
       </div>
     </div>
   </div>
@@ -127,5 +129,7 @@ export default {
 </script>
 
 <style scoped>
-
+  p {
+    font-size: 1.2rem;
+  }
 </style>

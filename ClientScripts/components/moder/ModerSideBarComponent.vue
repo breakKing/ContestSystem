@@ -107,7 +107,7 @@
       <li class="mb-1">
         <button class="btn btn-custom btn-toggle align-items-center rounded collapsed text-light" data-bs-toggle="collapse"
                 data-bs-target="#checkers-collapse" aria-expanded="false">
-          Чекеры
+          Механизмы проверки
         </button>
         <div class="collapse"
              :class="{show: ['ModeratorNotModeratedCheckersPage', 'ModeratorApprovedCheckersPage', 'ModeratorRejectedCheckersPage'].includes($route.name)}"
