@@ -4,19 +4,19 @@
   </div>
   <v-form @submit="saveContest" :validation-schema="schema" class="mb-3">
     <div>
-      <label class=" fs-4">Название</label>
+      <label class="fs-4">Название</label>
       <v-field v-model="name" class="form-control" name="name"/>
       <error-message name="name"></error-message>
     </div>
     <div>
-      <label class=" fs-4">Описание</label>
+      <label class="fs-4">Описание</label>
       <v-field v-model="description" name="description" type="hidden"/>
       <quill-editor ref="quill_editor_description" theme="snow" v-model:content="description" contentType="html"
                     toolbar="full" class="form-control"></quill-editor>
       <error-message name="description"></error-message>
     </div>
     <div>
-      <label class=" fs-4">Дата начала</label>
+      <label class="fs-4">Дата начала</label>
       <v-field v-model="startDateTimeUTC" class="form-control" type="datetime-local" name="startDateTimeUTC"/>
       <error-message name="startDateTimeUTC"></error-message>
     </div>
@@ -26,13 +26,14 @@
       <error-message name="durationInMinutes"></error-message>
     </div>
     <div>
-      <v-field v-model="areVirtualContestsAvailable" class="custom-checkbox" id="areVirtualContestsAvailable"
+      <v-field v-model="areVirtualContestsAvailable" class="custom-checkbox"
+               id="areVirtualContestsAvailable"
                type="checkbox" :value="true" :uncheckedValue="false" name="areVirtualContestsAvailable"/>
-      <label class=" fs-4" for="areVirtualContestsAvailable">Разрешены виртуальные соревнования</label>
+      <label for="areVirtualContestsAvailable" class="fs-4">Разрешены виртуальные соревнования</label>
       <error-message name="areVirtualContestsAvailable"></error-message>
     </div>
     <div>
-      <label class=" fs-4">Набор правил</label>
+      <label class="fs-4">Набор правил</label>
       <v-field class="form-control" v-model="rulesSetId" as="select" name="rulesSetId">
         <option :value="set.id" v-for="set of availableRuleSetsForContest">{{ set.name }}
           {{ shouldRulesSetBeRemarked(set) ? '*' : '' }}
@@ -45,7 +46,7 @@
     <div class="row">
       <div class="col">
         <div>
-          <label class=" fs-4">Изображение</label>
+          <label class="fs-4">Изображение</label>
           <v-field v-model="image" class="form-control" name="image" type="file"/>
           <error-message name="image"></error-message>
         </div>
@@ -229,8 +230,7 @@ export default {
         let startedTasks = _.map(this.startedProblems || [], (sp, i) => sp.problem) || []
         if (this.availableTasks && this.availableTasks.length > 0) {
           return _.unionBy(this.availableTasks || [], startedTasks || [], (t) => t.id)
-        }
-        else {
+        } else {
           return startedTasks || []
         }
       }

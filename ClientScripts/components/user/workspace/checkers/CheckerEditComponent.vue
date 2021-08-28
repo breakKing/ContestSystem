@@ -18,7 +18,7 @@
     <div>
       <v-field v-model="isPublic" class="custom-checkbox" id="isPublic" name="isPublic" type="checkbox" :value="true"
                :uncheckedValue="false"/>
-      <label class=" fs-4" for="isPublic">Виден всем</label>
+      <label class="fs-4" for="isPublic">Виден всем</label>
       <error-message name="isPublic"></error-message>
     </div>
     <div>

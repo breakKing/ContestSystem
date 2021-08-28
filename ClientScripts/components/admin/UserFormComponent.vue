@@ -34,32 +34,37 @@
       <error-message name="dateOfBirth"></error-message>
     </div>
     <div>
-      <label class="font-weight-bold">Ограничен в создании соревнований</label>
+      <label for="isLimitedInContests" class="font-weight-bold">Ограничен в создании соревнований</label>
       <v-field v-model="isLimitedInContests" type="checkbox" class="form-control" name="isLimitedInContests"
+               id="isLimitedInContests"
                :value="true" :uncheckedValue="false"/>
       <error-message name="isLimitedInContests"></error-message>
     </div>
     <div>
-      <label class="font-weight-bold">Ограничен в создании постов</label>
-      <v-field v-model="isLimitedInPosts" type="checkbox" class="form-control" name="isLimitedInPosts" :value="true"
+      <label for="isLimitedInPosts" class="font-weight-bold">Ограничен в создании постов</label>
+      <v-field v-model="isLimitedInPosts" type="checkbox" class="form-control" name="isLimitedInPosts"
+               id="isLimitedInPosts" :value="true"
                :uncheckedValue="false"/>
       <error-message name="isLimitedInPosts"></error-message>
     </div>
     <div>
-      <label class="font-weight-bold">Ограничен в создании курсов</label>
-      <v-field v-model="isLimitedInCourses" type="checkbox" class="form-control" name="isLimitedInCourses" :value="true"
+      <label for="isLimitedInCourses" class="font-weight-bold">Ограничен в создании курсов</label>
+      <v-field v-model="isLimitedInCourses" type="checkbox" class="form-control" name="isLimitedInCourses"
+               id="isLimitedInCourses" :value="true"
                :uncheckedValue="false"/>
       <error-message name="isLimitedInCourses"></error-message>
     </div>
     <div>
-      <label class="font-weight-bold">Ограничен в создании задач</label>
+      <label for="isLimitedInProblems" class="font-weight-bold">Ограничен в создании задач</label>
       <v-field v-model="isLimitedInProblems" type="checkbox" class="form-control" name="isLimitedInProblems"
+               id="isLimitedInProblems"
                :value="true" :uncheckedValue="false"/>
       <error-message name="isLimitedInProblems"></error-message>
     </div>
     <div>
-      <label class="font-weight-bold">Ограничен в создании наборов правил</label>
+      <label for="isLimitedInRulesSets" class="font-weight-bold">Ограничен в создании наборов правил</label>
       <v-field v-model="isLimitedInRulesSets" type="checkbox" class="form-control" name="isLimitedInRulesSets"
+               id="isLimitedInRulesSets"
                :value="true" :uncheckedValue="false"/>
       <error-message name="isLimitedInRulesSets"></error-message>
     </div>
@@ -68,8 +73,8 @@
         <label class="font-weight-bold">Роли</label>
       </div>
       <div class="form-check d-flex align-items-center" v-for="role in all_roles">
-        <label class="me-4">{{ role.description }}</label>
-        <v-field v-model="roles" type="checkbox" :value="role.name" class="form-check-label" name="roles"/>
+        <label class="me-4" for="roles">{{ role.description }}</label>
+        <v-field v-model="roles" type="checkbox" :value="role.name" class="form-check-label" name="roles" id="roles"/>
       </div>
       <error-message name="roles"></error-message>
     </div>

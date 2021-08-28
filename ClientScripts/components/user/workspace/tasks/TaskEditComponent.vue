@@ -53,9 +53,9 @@
             использовать его для этой задачи до тех пор, пока не замените его.</p>
         </div>
         <div>
-          <v-field v-model="isPublic" class="custom-checkbox" id="isPublic" name="isPublic" type="checkbox"
+          <v-field v-model="isPublic" class="custom-checkbox" name="isPublic" id="isPublic" type="checkbox"
                    :value="true" :uncheckedValue="false"/>
-          <label class="fs-4" for="isPublic">Виден всем</label>
+          <label for="isPublic" class="fs-4">Виден всем</label>
           <error-message name="isPublic"></error-message>
         </div>
         <div>

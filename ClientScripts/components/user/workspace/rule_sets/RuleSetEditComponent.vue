@@ -14,7 +14,7 @@
           <label class="fs-4">Описание</label>
           <v-field v-model="description" name="description" type="hidden"/>
           <quill-editor ref="quill_editor_description" theme="snow" v-model:content="description" contentType="html"
-                    toolbar="full" class="form-control"></quill-editor>
+                        toolbar="full" class="form-control"></quill-editor>
           <error-message name="description"></error-message>
         </div>
         <div>
@@ -30,10 +30,10 @@
           <v-field v-model="penaltyForCompilationError"
                    type="checkbox" class="custom-checkbox"
                    :value="true" :uncheckedValue="false"
-                   id="penaltyForCompilationError"
                    :disabled="+countMode !== countModes.CountPenalty"
+                   id="penaltyForCompilationError"
                    name="penaltyForCompilationError"/>
-          <label class="fs-4">Наказывать за ошибку компиляции</label>
+          <label for="penaltyForCompilationError" class="fs-4">Наказывать за ошибку компиляции</label>
 
           <error-message name="penaltyForCompilationError"></error-message>
         </div>
@@ -52,11 +52,12 @@
           <error-message name="penaltyForOneMinute"></error-message>
         </div>
         <div v-show="+countMode === countModes.CountPoints">
-          <v-field v-model="pointsForBestSolution" id="pointsForBestSolution" class="custom-checkbox" type="checkbox"
+          <v-field v-model="pointsForBestSolution" class="custom-checkbox" type="checkbox"
                    :disabled="+countMode !== countModes.CountPoints"
                    :value="true" :uncheckedValue="false"
+                   id="pointsForBestSolution"
                    name="pointsForBestSolution"/>
-          <label class="fs-4">Прибавка к очкам за лучшее решение</label>
+          <label for="pointsForBestSolution" class="fs-4">Прибавка к очкам за лучшее решение</label>
           <error-message name="pointsForBestSolution"></error-message>
         </div>
         <div>
@@ -67,10 +68,11 @@
         </div>
         <div>
 
-          <v-field v-model="publicMonitor" id="publicMonitor" class="custom-checkbox" type="checkbox"
+          <v-field v-model="publicMonitor" class="custom-checkbox" type="checkbox"
                    :value="true" :uncheckedValue="false"
+                   id="publicMonitor"
                    name="publicMonitor"/>
-          <label class="fs-4">Сделать монитор публичным</label>
+          <label for="publicMonitor" class="fs-4">Сделать монитор публичным</label>
           <error-message name="publicMonitor"></error-message>
         </div>
         <div>
@@ -80,17 +82,19 @@
           <error-message name="monitorFreezeTimeBeforeFinishInMinutes"></error-message>
         </div>
         <div>
-          <v-field v-model="showFullTestsResults" id="showFullTestsResults" class="custom-checkbox" type="checkbox"
+          <v-field v-model="showFullTestsResults" class="custom-checkbox" type="checkbox"
                    :value="true" :uncheckedValue="false"
+                   id="showFullTestsResults"
                    name="showFullTestsResults"/>
-          <label class="fs-4">Показывать полный отчёт о попытке</label>
+          <label for="showFullTestsResults" class="fs-4">Показывать полный отчёт о попытке</label>
           <error-message name="showFullTestsResults"></error-message>
         </div>
         <div>
-          <v-field v-model="isPublic" id="isPublic" class="custom-checkbox" type="checkbox"
+          <v-field v-model="isPublic" class="custom-checkbox" type="checkbox"
                    :value="true" :uncheckedValue="false"
+                   id="isPublic"
                    name="isPublic"/>
-          <label class="fs-4">Сделать набор правил публичным</label>
+          <label for="isPublic" class="fs-4">Сделать набор правил публичным</label>
           <error-message name="isPublic"></error-message>
         </div>
         <button type="submit" class="btn btn-primary">Сохранить</button>
