@@ -1,67 +1,65 @@
 <template>
-  <div class="p-3">
+  <div class="container">
     <div v-if="!!error_msg" class="alert alert-danger" role="alert">
       {{ error_msg }}
     </div>
-    <div class="row">
+    <div class="row p-3">
       <div class="col">
-        <div class="row">
-          <div class="col">
-            <div>
-              <h2>{{ currentModeratingContestLocalizer && currentModeratingContestLocalizer.name }}</h2>
-            </div>
-          </div>
-          <div class="col-4" v-if="!!dataUrl">
-            <img class="img-fluid" alt="картинка" :src="dataUrl"/>
-          </div>
-        </div>
         <div>
-          <p>{{ currentModeratingContestLocalizer && currentModeratingContestLocalizer.description }}</p>
+          <h2 style="font-weight: bold;">{{ currentModeratingContestLocalizer && currentModeratingContestLocalizer.name }}</h2>
+          <h4 style="color: #4998AB;">Автор: {{ currentModeratingContest && currentModeratingContest.creator && currentModeratingContest.creator.userName }}</h4>
         </div>
-        <div>
-          <span>Дата начала </span>
-          <span>{{ formatted_start_date }}</span>
-        </div>
-        <div>
-          <span>Продолжительность в минутах </span>
-          <span>{{ currentModeratingContest && currentModeratingContest.durationInMinutes }}</span>
-        </div>
-        <div>
-          <span>Набор правил </span>
-          <span>{{
-              currentModeratingContest && currentModeratingContest.rules && currentModeratingContest.rules.name
-            }}</span>
-        </div>
-        <div class="row" v-for="problem of sortedTasks">
-          <div class="col">
-            <span>{{ problem.letter }} {{ problem.problem.localizedName }}</span>
+      </div>
+    </div>
+    <div class="row p-3">
+      <div class="col-4" v-if="!!dataUrl">
+        <img class="img-fluid" alt="картинка" :src="dataUrl"/>
+      </div>
+    </div>
+    <div class="row p-3">
+      <div class="col">
+        <p class="semi-bold-text">Описание:</p>
+        <p>{{ currentModeratingContestLocalizer && currentModeratingContestLocalizer.description }}</p>
+        <span>Дата начала: </span>
+        <span class="semi-bold-text">{{ formatted_start_date }}</span><br>
+        <span>Дата окончания: </span>
+        <span class="semi-bold-text">{{ formatted_end_date }}</span><br>
+        <span>Продолжительность в минутах: </span>
+        <span class="semi-bold-text">{{ currentModeratingContest && currentModeratingContest.durationInMinutes }}</span><br>
+        <span>Набор правил: </span>
+        <span class="semi-bold-text">{{ currentModeratingContest && currentModeratingContest.rules && currentModeratingContest.rules.name }}</span>
+      </div>
+    </div>
+    <div class="row p-3">
+      <div class="col">
+        <p class="semi-bold-text">Перечень задач:</p>
+        <template v-for="problem of sortedTasks">
+          <p><span class="semi-bold-text">{{ problem.letter }}</span>. {{ problem.problem.localizedName }}</p>
+        </template>
+      </div>
+    </div>
+    <div class="row p-3">
+      <div class="col">
+        <v-form @submit="submitEntity" :validation-schema="schema" class="mb-3">
+          <div>
+            <span>Комментарий</span>
+            <v-field v-model="message" as="textarea" class="form-control" name="message"/>
+            <error-message name="message"></error-message>
           </div>
-        </div>
-
-        <div class="row">
-          <div class="col">
-            <v-form @submit="submitEntity" :validation-schema="schema" class="mb-3">
-              <div>
-                <span>Комментарий</span>
-                <v-field v-model="message" as="textarea" class="form-control" name="message"/>
-                <error-message name="message"></error-message>
-              </div>
-              <div>
-                <span>Статус</span>
-                <v-field v-model="current_status" as="select" class="form-control" name="current_status">
-                  <option :value="approvalStatuses.NotModeratedYet">Не проверено</option>
-                  <option :value="approvalStatuses.Rejected">Отклонено</option>
-                  <option :value="approvalStatuses.Accepted">Утверждено</option>
-                </v-field>
-                <error-message name="current_status"></error-message>
-              </div>
-              <div class="mt-2">
-                <button @click.prevent="deleteEntity" type="button" class="btn btn-danger">Удалить</button>
-                <button type="submit" class="btn btn-primary ms-2">Сохранить</button>
-              </div>
-            </v-form>
+          <div class="mt-3">
+            <span>Статус</span>
+            <v-field v-model="current_status" as="select" class="form-control" name="current_status">
+              <option :value="approvalStatuses.NotModeratedYet">Не проверено</option>
+              <option :value="approvalStatuses.Rejected">Отклонено</option>
+              <option :value="approvalStatuses.Accepted">Утверждено</option>
+            </v-field>
+            <error-message name="current_status"></error-message>
           </div>
-        </div>
+          <div class="mt-4">
+            <button @click.prevent="deleteEntity" type="button" class="btn btn-danger">Удалить</button>
+            <button type="submit" class="btn btn-primary ms-2">Сохранить</button>
+          </div>
+        </v-form>
       </div>
     </div>
   </div>
@@ -87,11 +85,14 @@ export default {
     formatted_start_date() {
       return this.getFormattedFullDateTime(this.currentModeratingContest?.startDateTimeUTC)
     },
+    formatted_end_date() {
+      return this.getFormattedFullDateTime(this.currentModeratingContest?.endDateTimeUTC)
+    },
     sortedTasks() {
       return _.sortBy((this.currentModeratingContest?.problems || []), ['letter'])
     },
     dataUrl() {
-      if (!this.currentModeratingContest || this.currentModeratingContest.image) {
+      if (!this.currentModeratingContest || !this.currentModeratingContest.image) {
         return '';
       }
       // загружено новое фото
@@ -174,5 +175,10 @@ export default {
 </script>
 
 <style scoped>
-
+  p, span {
+    font-size: 1.2rem;
+  }
+  .semi-bold-text {
+    font-weight: 600;
+  }
 </style>
