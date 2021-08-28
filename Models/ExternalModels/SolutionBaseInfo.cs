@@ -8,7 +8,8 @@ namespace ContestSystem.Models.ExternalModels
         public long Id { get; set; }
         public ProblemBaseInfo Problem { get; set; }
         public object Participant { get; set; }
-        public long ContestId { get; set; }
+        public long? ContestId { get; set; }
+        public long? CourseId { get; set; }
         public string CompilerGUID { get; set; }
         public string CompilerName { get; set; }
         public DateTime SubmitTimeUTC { get; set; }
@@ -28,6 +29,7 @@ namespace ContestSystem.Models.ExternalModels
                 Problem = ProblemBaseInfo.GetFromModel(solution.Problem, problemLocalizer),
                 Participant = solution.Participant?.ResponseStructure,
                 ContestId = solution.ContestId,
+                CourseId = solution.CourseId,
                 CompilerGUID = solution.CompilerGUID,
                 CompilerName = solution.CompilerName,
                 SubmitTimeUTC = solution.SubmitTimeUTC,

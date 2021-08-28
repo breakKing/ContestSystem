@@ -55,6 +55,9 @@ namespace ContestSystem.Models.DbContexts
             base.OnModelCreating(builder);
 
             // Конфигурация обычных сущностей через Fluent API
+            builder.ApplyConfiguration(new ChatConfiguration());
+            builder.ApplyConfiguration(new ContestConfiguration());
+            builder.ApplyConfiguration(new CourseConfiguration());
             builder.ApplyConfiguration(new ExampleConfiguration());
             builder.ApplyConfiguration(new SessionConfiguration());
             builder.ApplyConfiguration(new TestConfiguration());

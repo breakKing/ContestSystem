@@ -8,7 +8,8 @@ namespace ContestSystem.Models.ExternalModels
     public class SolutionActualResultExternalModel
     {
         public long SolutionId { get; set; }
-        public long ContestId { get; set; }
+        public long? ContestId { get; set; }
+        public long? CourseId { get; set; }
         public short LastRunTestNumber { get; set; }
         public bool TestsAreDone { get; set; }
         public int UsedTimeInMillis { get; set; } // с последнего выполненного теста
@@ -47,6 +48,7 @@ namespace ContestSystem.Models.ExternalModels
             {
                 SolutionId = solution.Id,
                 ContestId = solution.ContestId,
+                CourseId = solution.CourseId,
                 LastRunTestNumber = lastRunTestResultNumber,
                 TestsAreDone = _verdictsWhenTestsAreDone.Contains(solution.Verdict),
                 UsedTimeInMillis = lastRunTestResult?.UsedTimeInMillis ?? 0,
