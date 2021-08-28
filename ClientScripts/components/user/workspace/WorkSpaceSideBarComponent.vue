@@ -1,6 +1,6 @@
 ﻿<template>
   <div class="side-bar-menu-light main-block-height d-flex flex-column justify-content-start me-3"
-       style="padding: 10px">
+       style="padding: 0.625rem">
 
     <h4 class="fw-bold fs-4 m-2 mb-5 ">ContestSystem Workspace</h4>
     <hr>

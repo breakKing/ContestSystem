@@ -28,6 +28,6 @@ export default {
 
 ul {
   list-style-type: none;
-  padding-top: 10px;
+  padding-top: 0.625rem;
 }
 </style>

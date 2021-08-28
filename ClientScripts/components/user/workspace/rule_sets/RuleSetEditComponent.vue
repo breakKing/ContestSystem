@@ -221,7 +221,7 @@ export default {
 
 <style lang="scss" scoped>
 div * {
-  margin: 5px;
+  margin: 0.3125rem;
   color: #04295E;
 }
 
@@ -230,7 +230,7 @@ span[role=alert] {
 }
 
 form {
-  padding: 10px;
+  padding: 0.625rem;
 }
 
 .custom-checkbox {
@@ -266,13 +266,13 @@ form {
 }
 
 .form-control {
-  border-radius: 16px;
+  border-radius: 1rem;
 }
 
 button {
-  padding: 5px 10px;
+  padding: 0.3125rem 0.625rem;
   background-color: #fff;
-  border-radius: 16px;
+  border-radius: 1rem;
   border: 1px solid blue;
 
   &:hover {

@@ -116,7 +116,7 @@ ul {
   li:hover,
   li:focus {
     &.rounded-item {
-      border-radius: 16px;
+      border-radius: 1rem;
     }
   }
 }

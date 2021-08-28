@@ -20,7 +20,7 @@
         <button class="btn btn-primary" type="submit">Войти</button>
       </div>
     </v-form>
-    <router-link style="margin-top: 10px" :to="{name: 'Register'}">Ещё не зарегистрированы?</router-link>
+    <router-link style="margin-top: 0.625rem" :to="{name: 'Register'}">Ещё не зарегистрированы?</router-link>
   </div>
   <footer-component></footer-component>
 </template>

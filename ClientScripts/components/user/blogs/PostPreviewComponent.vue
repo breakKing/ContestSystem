@@ -124,11 +124,11 @@ export default {
 <style lang="scss" scoped>
 .card {
   border: 1px solid blue;
-  padding-top: 10px;
-  padding-bottom: 10px;
+  padding-top: 0.625rem;
+  padding-bottom: 0.625rem;
 }
 
 .post-wrap {
-  margin-bottom: 15px;
+  margin-bottom: 10.3125rem;
 }
 </style>

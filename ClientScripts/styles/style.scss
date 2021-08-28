@@ -18,9 +18,9 @@
 }
 
 .workspace-btn {
-  padding: 5px 5px;
+  padding: 0.3125rem 0.3125rem;
   background-color: #fff;
-  border-radius: 16px;
+  border-radius: 1rem;
   border: 1px solid blue;
   text-decoration: none;
   color: blue;
@@ -110,14 +110,14 @@
 
   /* you must provide font-family font-size line-height. Example: */
   font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
-  font-size: 16px;
+  font-size: 1rem;
   line-height: 1.5;
-  padding: 5px;
+  padding: 0.3125rem;
 
-  height: 500px;
+  height: 31.25rem;
 
   border: 2px solid #dddddd;
-  border-radius: 8px;
+  border-radius: .5rem;
 }
 
 .prism-editor__textarea:focus {
@@ -125,8 +125,8 @@
 }
 
 .navbar-brand {
-  padding: 15px;
-  border-radius: 16px 0 16px 0;
+  padding: 0.9375rem;
+  border-radius: 1rem 0 1rem 0;
 }
 
 
@@ -135,7 +135,7 @@
 }
 
 .link-light {
-  font-size: 18px;
+  font-size: 1.125rem;
 }
 
 .btn-toggle-nav {

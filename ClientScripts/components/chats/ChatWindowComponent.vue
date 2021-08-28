@@ -86,7 +86,7 @@ export default {
 .messages-block {
   max-height: 80vh;
   overflow-y: auto;
-  border-radius: 5px;
+  border-radius: 0.3125rem;
   border: 1px solid black;
   margin-bottom: 1.5rem;
 }

@@ -1,6 +1,6 @@
 <template>
   <div class="flex-shrink-0 side-bar-menu main-block-height d-flex flex-column justify-content-start"
-       style="height: 100%; padding: 10px">
+       style="height: 100%; padding: 0.625rem">
 
     <h4 class="fw-bold fs-3 m-2 mb-5 text-light">Панель модератора</h4>
 

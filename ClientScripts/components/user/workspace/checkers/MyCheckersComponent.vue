@@ -30,9 +30,9 @@ export default {
 
 <style lang="scss" scoped>
 .workspace-btn {
-  padding: 5px 10px;
+  padding: 0.3125rem 0.625rem;
   background-color: #fff;
-  border-radius: 16px;
+  border-radius: 1rem;
   border: 1px solid blue;
   text-decoration: none;
 

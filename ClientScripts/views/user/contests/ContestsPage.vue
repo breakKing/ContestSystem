@@ -47,7 +47,7 @@ export default {
   border: 1px solid #505050;
   padding: 1.5rem;
   min-height: 66vh;
-  margin-bottom: 15px;
+  margin-bottom: 10.3125rem;
 }
 
 .router-link-active {

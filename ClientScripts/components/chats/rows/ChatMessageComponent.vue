@@ -37,14 +37,14 @@ export default {
 }
 
 .message-up-block {
-  margin-bottom: 10px;
+  margin-bottom: 0.625rem;
 }
 
 .message {
   position: relative;
   background-color: #BFE8AF;
-  border-radius: 10px;
-  padding: 10px;
+  border-radius: 0.625rem;
+  padding: 0.625rem;
 
   &:after {
     bottom: 100%;
@@ -54,9 +54,9 @@ export default {
     width: 0;
     position: absolute;
     pointer-events: none;
-    border: 10px solid transparent;
+    border: 0.625rem solid transparent;
     border-bottom-color: #BFE8AF;
-    margin-left: -10px;
+    margin-left: -0.625rem;
   }
 }
 

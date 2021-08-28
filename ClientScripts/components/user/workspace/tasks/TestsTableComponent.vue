@@ -89,12 +89,12 @@ export default {
 tbody {
   tr {
     background-color: rgba(255, 255, 255, 0.2);
-    margin-bottom: 10px;
+    margin-bottom: 0.625rem;
   }
 
   textarea, input {
     color: black;
-    border-radius: 16px;
+    border-radius: 1rem;
   }
 }
 </style>
