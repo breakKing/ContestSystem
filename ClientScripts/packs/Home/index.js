@@ -14,6 +14,9 @@ import 'prismjs/themes/prism-tomorrow.css';
 import '../../styles/style.scss';
 import generateFingerprint from '../../services/fingerprint-loader';
 import { configureApi, createApi } from '../../services/api-configurator';
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
+import ruLang from 'element-plus/es/locale/lang/ru'
 
 generateFingerprint(store)
 
@@ -30,4 +33,5 @@ app.use(VueAxios, apiAxios)
 app.use(store)
 app.use(router)
 app.use(Breadcrumb)
+app.use(ElementPlus, {locale: ruLang})
 app.mount('#app')
