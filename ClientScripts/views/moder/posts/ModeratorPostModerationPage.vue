@@ -1,27 +1,26 @@
 <template>
-  <div class="container p-3">
+  <div class="container">
     <div v-if="!!error_msg" class="alert alert-danger" role="alert">
       {{ error_msg }}
     </div>
-    <div class="row">
+    <div class="row p-3">
       <div class="col-12 col-md-9">
-        <h2>{{ currentModeratingPostLocalizer && currentModeratingPostLocalizer.name }}</h2>
-        <span>{{ currentModeratingPostApprovalStatusName }}</span>
-      </div>
-      <div class="col">
-        <p>{{ currentModeratingPost && currentModeratingPost.author && currentModeratingPost.author.fullName }}
-          {{ currentModeratingPost && currentModeratingPost.approvalStatus === 2 ? getFormattedFullDateTime(currentModeratingPost.publicationDateTimeUTC) : '' }}</p>
+        <h2 style="font-weight: bold;">{{ currentModeratingPostLocalizer && currentModeratingPostLocalizer.name }}</h2>
+        <h4 style="color: #4998AB;">Автор: {{ currentModeratingPost && currentModeratingPost.author && currentModeratingPost.author.fullName }}</h4><br>
       </div>
     </div>
-    <div class="row">
+    <div class="row p-3">
       <div class="col">
         <img class="img-fluid" :src="dataUrl" :alt="currentModeratingPostLocalizer && currentModeratingPostLocalizer.name">
       </div>
     </div>
-    <div class="row">
-      <div class="col" v-html="currentModeratingPostLocalizer && currentModeratingPostLocalizer.htmlText"></div>
+    <div class="row p-3">
+      <div class="col">
+        <br><p>Текст:</p>
+        <span>{{ currentModeratingPostLocalizer && currentModeratingPostLocalizer.htmlText }}</span><br>
+      </div>
     </div>
-    <div class="row">
+    <div class="row p-3">
       <div class="col">
         <v-form @submit="submitEntity" :validation-schema="schema" class="mb-3">
           <div>
@@ -29,7 +28,7 @@
             <v-field v-model="message" as="textarea" class="form-control" name="message"/>
             <error-message name="message"></error-message>
           </div>
-          <div>
+          <div class="mt-3">
             <label>Статус</label>
             <v-field v-model="current_status" as="select" class="form-control" name="current_status">
               <option :value="approvalStatuses.NotModeratedYet">Не проверено</option>
@@ -38,10 +37,10 @@
             </v-field>
             <error-message name="current_status"></error-message>
           </div>
-      <div class="mt-2">
-        <button @click.prevent="deleteEntity" type="button" class="btn btn-danger">Удалить</button>
-        <button type="submit" class="btn btn-primary ms-2">Сохранить</button>
-      </div>
+          <div class="mt-4">
+            <button @click.prevent="deleteEntity" type="button" class="btn btn-danger">Удалить</button>
+            <button type="submit" class="btn btn-primary ms-2">Сохранить</button>
+          </div>
         </v-form>
       </div>
     </div>
@@ -151,5 +150,7 @@ export default {
 </script>
 
 <style scoped>
-
+  p {
+    font-size: 1.2rem;
+  }
 </style>
