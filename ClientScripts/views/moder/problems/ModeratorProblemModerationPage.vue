@@ -1,117 +1,107 @@
 <template>
-  <div class="row p-3">
-    <div class="col">
-
-      <div v-if="!!error_msg" class="alert alert-danger" role="alert">
-        {{ error_msg }}
+  <div class="container">
+    <div v-if="!!error_msg" class="alert alert-danger" role="alert">
+          {{ error_msg }}
+    </div>
+    <div class="row p-3">
+      <div class="col">
+        <h2 style="font-weight: bold;">{{ currentModeratingProblemLocalizer && currentModeratingProblemLocalizer.name }}</h2>
+        <h4 style="color: #4998AB;">Автор: {{ currentModeratingProblem && currentModeratingProblem.creator && currentModeratingProblem.creator.userName }}</h4>
       </div>
-      <div class="row">
-        <div class="col">
-          <div>
-            <h2>{{ currentModeratingProblemLocalizer && currentModeratingProblemLocalizer.name }}</h2>
-          </div>
-          <div>
-            <p>{{ currentModeratingProblemLocalizer && currentModeratingProblemLocalizer.description }}</p>
-          </div>
-          <div class="row">
-            <div class="col">
-              <span class="text-light fs-3">Входные данные</span>
-              <p>{{ currentModeratingProblemLocalizer && currentModeratingProblemLocalizer.inputBlock }}</p>
-            </div>
-            <div class="col">
-              <span class="text-light fs-3">Выходные данные</span>
-              <p>{{ currentModeratingProblemLocalizer && currentModeratingProblemLocalizer.outputBlock }}</p>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col">
-              <span class="text-light fs-3">Лимит занимаемого RAM (bytes)</span>
-              <span>{{ currentModeratingProblem && currentModeratingProblem.memoryLimitInBytes }}</span>
-            </div>
-            <div class="col">
-              <span class="text-light fs-3">Лимит времени выполнения (мсек)</span>
-              <span>{{ currentModeratingProblem && currentModeratingProblem.timeLimitInMilliseconds }}</span>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col">
-              <span class="text-light fs-3">Механизм проверки:</span>
-              <span
-                  class="text-light fs-3">{{
-                  currentModeratingProblem && currentModeratingProblem.checker && currentModeratingProblem.checker.name
-                }} ({{
-                  currentModeratingProblem && currentModeratingProblem.checker && currentModeratingProblem.checker.author && currentModeratingProblem.checker.author.fullName
-                }})</span>
-            </div>
-            <div class="col">
-              <span class="text-light fs-5">Виден всем: {{
-                  currentModeratingProblem && currentModeratingProblem.isPublic ? 'Да' : 'Нет'
-                }}</span>
-            </div>
-          </div>
-          <div>
-            <h4>Тесты</h4>
-            <table>
-              <thead>
+    </div>
+    <div class="row p-3">
+      <div class="col">
+        <p class="semi-bold-text">Условие:</p>
+        <p>{{ currentModeratingProblemLocalizer && currentModeratingProblemLocalizer.description }}</p>
+      </div>
+    </div>
+    <div class="row p-3">
+      <div class="col">
+        <span>Блок описания входных данных:</span>
+        <p>{{ currentModeratingProblemLocalizer && currentModeratingProblemLocalizer.inputBlock }}</p><br>
+        <span>Блок описания выходных данных:</span>
+        <p>{{ currentModeratingProblemLocalizer && currentModeratingProblemLocalizer.outputBlock }}</p>
+      </div>
+    </div>
+    <div class="row p-3">
+      <div class="col">
+        <span>Ограничение по времени: </span>
+        <span class="semi-bold-text">{{ formatted_time_limit }}</span><br>
+        <span>Ограничение по памяти: </span>
+        <span class="semi-bold-text">{{ formatted_memory_limit }}</span><br>
+        <span>Механизм проверки: </span>
+        <span class="semi-bold-text">{{ currentModeratingProblem && currentModeratingProblem.checker 
+          && currentModeratingProblem.checker.name }}</span><br>
+        <span v-if="currentModeratingProblem && currentModeratingProblem.isPublic">Публичная</span>
+        <span v-else><span class="semi-bold-text">Не</span> публичная</span>
+      </div>
+    </div>
+    <div class="row p-3">
+      <div class="col">
+        <p>Тесты:</p>
+        <template v-if="sortedTests && +sortedTests.length !== 0">
+          <table class="table-main">
+            <thead>
               <tr>
                 <th>Входные данные</th>
                 <th>Ожидаемый ответ</th>
                 <th>Очки</th>
               </tr>
-              </thead>
-              <tbody>
+            </thead>
+            <tbody>
               <tr v-for="test of sortedTests">
                 <td>{{ test.input }}</td>
                 <td>{{ test.answer }}</td>
                 <td>{{ test.availablePoints }}</td>
               </tr>
-              </tbody>
-            </table>
-          </div>
-          <div>
-            <h4>Примеры</h4>
-            <table>
-              <thead>
+            </tbody>
+          </table>
+        </template>
+      </div>
+    </div>
+    <div class="row p-3">
+      <div class="col">
+        <p>Примеры:</p>
+        <template v-if="sortedExamples && +sortedExamples.length !== 0">
+          <table class="table-main">
+            <thead>
               <tr>
                 <th>Входные данные</th>
                 <th>Выходные данные</th>
               </tr>
-              </thead>
-              <tbody>
+            </thead>
+            <tbody>
               <tr v-for="example of sortedExamples">
                 <td>{{ example.inputText }}</td>
                 <td>{{ example.outputText }}</td>
               </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+            </tbody>
+          </table>
+        </template>
       </div>
-
-
-      <div class="row">
-        <div class="col">
-          <v-form @submit="submitEntity" :validation-schema="schema" class="mb-3">
-            <div>
-              <span>Комментарий</span>
-              <v-field v-model="message" as="textarea" class="form-control" name="message"/>
-              <error-message name="message"></error-message>
-            </div>
-            <div>
-              <span>Статус</span>
-              <v-field v-model="current_status" as="select" class="form-control" name="current_status">
-                <option :value="approvalStatuses.NotModeratedYet">Не проверено</option>
-                <option :value="approvalStatuses.Rejected">Отклонено</option>
-                <option :value="approvalStatuses.Accepted">Утверждено</option>
-              </v-field>
-              <error-message name="current_status"></error-message>
-            </div>
-            <div class="mt-2">
-              <button @click.prevent="deleteEntity" type="button" class="btn btn-danger">Удалить</button>
-              <button type="submit" class="btn btn-primary ms-2">Сохранить</button>
-            </div>
-          </v-form>
-        </div>
+    </div>
+    <div class="row p-3">
+      <div class="col">
+        <v-form @submit="submitEntity" :validation-schema="schema" class="mb-3">
+          <div>
+            <span>Комментарий</span>
+            <v-field v-model="message" as="textarea" class="form-control" name="message"/>
+            <error-message name="message"></error-message>
+          </div>
+          <div class="mt-3">
+            <span>Статус</span>
+            <v-field v-model="current_status" as="select" class="form-control" name="current_status">
+              <option :value="approvalStatuses.NotModeratedYet">Не проверено</option>
+              <option :value="approvalStatuses.Rejected">Отклонено</option>
+              <option :value="approvalStatuses.Accepted">Утверждено</option>
+            </v-field>
+            <error-message name="current_status"></error-message>
+          </div>
+          <div class="mt-4">
+            <button @click.prevent="deleteEntity" type="button" class="btn btn-danger">Удалить</button>
+            <button type="submit" class="btn btn-primary ms-2">Сохранить</button>
+          </div>
+        </v-form>
       </div>
     </div>
   </div>
@@ -127,7 +117,7 @@ export default {
   name: "ModeratorProblemModerationPage",
   props: ['problem_id'],
   computed: {
-    ...mapGetters(['currentUser', 'approvalStatuses']),
+    ...mapGetters(['currentUser', 'approvalStatuses', 'getFormattedMemory', 'getFormattedTime']),
     ...mapGetters('moder_problems', [
       'currentModeratingProblem',
       'currentModeratingProblemLocalizer',
@@ -137,6 +127,12 @@ export default {
     },
     sortedExamples() {
       return _.orderBy((this.currentModeratingProblem?.examples || []), ['number'], ['asc'])
+    },
+    formatted_memory_limit() {
+      return this.getFormattedMemory(this.currentModeratingProblem?.memoryLimitInBytes)
+    },
+    formatted_time_limit() {
+      return this.getFormattedTime(this.currentModeratingProblem?.timeLimitInMilliseconds)
     }
   },
   methods: {
@@ -212,5 +208,10 @@ export default {
 </script>
 
 <style scoped>
-
+  p, span {
+    font-size: 1.2rem;
+  }
+  .semi-bold-text {
+    font-weight: 600;
+  }
 </style>
