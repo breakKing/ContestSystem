@@ -253,17 +253,17 @@ namespace ContestSystem.Areas.Contests.Services
             return status;
         }
 
-        public async Task<bool> IsUserContestLocalModeratorAsync(MainDbContext dbContext, long contestId, long userId)
+        public async Task<bool> IsUserContestOrganizerAsync(MainDbContext dbContext, long contestId, long userId)
         {
-            return await dbContext.ContestsLocalModerators.AnyAsync(clm => clm.ContestId == contestId
-                                                                            && clm.LocalModeratorId == userId);
+            return await dbContext.ContestsOrganizers.AnyAsync(co => co.ContestId == contestId
+                                                                            && co.OrganizerId == userId);
         }
 
         public async Task<bool> IsUserContestParticipantAsync(MainDbContext dbContext, long contestId, long userId)
         {
             return await dbContext.ContestsParticipants.AnyAsync(cp => cp.ContestId == contestId
                                                                         && cp.ParticipantId == userId
-                                                                        && cp.ConfirmedByLocalModerator
+                                                                        && cp.ConfirmedByOrganizer
                                                                         && cp.ConfirmedByParticipant);
         }
 
@@ -277,7 +277,7 @@ namespace ContestSystem.Areas.Contests.Services
                     AnyoneCanJoin = false,
                     Image = null,
                     Name = "ContestAnnouncmentsChat",
-                    InitialUsers = contest.ContestLocalModerators.Select(clm => clm.LocalModeratorId).ToList()
+                    InitialUsers = contest.ContestOrganizers.Select(co => co.OrganizerId).ToList()
                 };
 
                 var statusData = await _messenger.CreateChatAsync(dbContext, form, ChatType.ContestAnnouncements, contest.Id);
@@ -309,25 +309,25 @@ namespace ContestSystem.Areas.Contests.Services
                     AnyoneCanJoin = false,
                     Image = null,
                     Name = $"ContestParticipant{participant.ParticipantId}Chat",
-                    InitialUsers = contest.ContestLocalModerators.Select(clm => clm.LocalModeratorId).Concat(new List<long> { participant.ParticipantId }).ToList()
+                    InitialUsers = contest.ContestOrganizers.Select(co => co.OrganizerId).Concat(new List<long> { participant.ParticipantId }).ToList()
                 };
 
                 await _messenger.CreateChatAsync(dbContext, form, ChatType.ContestParticipant, contest.Id, participant.ParticipantId);
             }
         }
 
-        public async Task AddLocalModeratorToChatsAsync(MainDbContext dbContext, ContestLocalModerator localModerator)
+        public async Task AddOrganizerToChatsAsync(MainDbContext dbContext, ContestOrganizer organizer)
         {
-            if (localModerator != null)
+            if (organizer != null)
             {
-                var contest = localModerator.Contest;
+                var contest = organizer.Contest;
 
                 var announcmentsChatLink = (await dbContext.Chats.FirstOrDefaultAsync(c => c.Type == ChatType.ContestAnnouncements
-                                                                                            && c.ContestId == localModerator.ContestId
+                                                                                            && c.ContestId == organizer.ContestId
                                                                                             && c.IsCreatedBySystem))
                                                                   .Link;
 
-                await _messenger.AddUserToChatAsync(dbContext, localModerator.LocalModeratorId, announcmentsChatLink);
+                await _messenger.AddUserToChatAsync(dbContext, organizer.OrganizerId, announcmentsChatLink);
 
                 var chats = await dbContext.Chats.Where(c => c.Type == ChatType.ContestParticipant
                                                                 && c.ContestId == contest.Id)
@@ -335,7 +335,7 @@ namespace ContestSystem.Areas.Contests.Services
 
                 foreach (var chat in chats)
                 {
-                    await _messenger.AddUserToChatAsync(dbContext, localModerator.LocalModeratorId, chat.Link);
+                    await _messenger.AddUserToChatAsync(dbContext, organizer.OrganizerId, chat.Link);
                 }
             }
         }
@@ -365,20 +365,20 @@ namespace ContestSystem.Areas.Contests.Services
             }
         }
 
-        public async Task RemoveLocalModeratorFromChatsAsync(MainDbContext dbContext, ContestLocalModerator localModerator)
+        public async Task RemoveOrganizerFromChatsAsync(MainDbContext dbContext, ContestOrganizer organizer)
         {
-            if (localModerator != null)
+            if (organizer != null)
             {
-                var contest = localModerator.Contest;
+                var contest = organizer.Contest;
 
                 var chats = await dbContext.Chats.Where(c => c.ContestId == contest.Id
                                                                 && c.IsCreatedBySystem
-                                                                && c.ChatUsers.Any(cu => cu.UserId == localModerator.LocalModeratorId))
+                                                                && c.ChatUsers.Any(cu => cu.UserId == organizer.OrganizerId))
                                                     .ToListAsync();
 
                 foreach (var chat in chats)
                 {
-                    await _messenger.RemoveUserFromChatAsync(dbContext, chat, localModerator.LocalModeratorId);
+                    await _messenger.RemoveUserFromChatAsync(dbContext, chat, organizer.OrganizerId);
                 }
             }
         }

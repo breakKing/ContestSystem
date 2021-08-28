@@ -44,7 +44,7 @@ namespace ContestSystem.Areas.Solutions.Services
             {
                 bool isUserParticipant = await dbContext.ContestsParticipants.AnyAsync(cp => cp.ContestId == form.ContestId
                                                                                             && cp.ParticipantId == form.UserId
-                                                                                            && cp.ConfirmedByLocalModerator
+                                                                                            && cp.ConfirmedByOrganizer
                                                                                             && cp.ConfirmedByParticipant);
 
                 if (isUserParticipant)

@@ -551,17 +551,17 @@ namespace ContestSystem.Areas.Messenger.Services
                 {
                     var contestId = chatUser.Chat.ContestId.GetValueOrDefault(-1);
 
-                    if (await dbContext.ContestsLocalModerators.AnyAsync(clm =>
-                        clm.ContestId == contestId && clm.LocalModeratorId == chatUser.UserId))
+                    if (await dbContext.ContestsOrganizers.AnyAsync(co =>
+                        co.ContestId == contestId && co.OrganizerId == chatUser.UserId))
                     {
-                        name = (await dbContext.ContestsLocalModerators.FirstOrDefaultAsync(clm =>
-                                clm.ContestId == contestId
-                                && clm.LocalModeratorId == chatUser.UserId))
+                        name = (await dbContext.ContestsOrganizers.FirstOrDefaultAsync(co =>
+                                co.ContestId == contestId
+                                && co.OrganizerId == chatUser.UserId))
                             .Alias;
                     }
                     else if (await dbContext.ContestsParticipants.AnyAsync(cp =>
                         cp.ContestId == contestId && cp.ParticipantId == chatUser.UserId && cp.ConfirmedByParticipant &&
-                        cp.ConfirmedByLocalModerator))
+                        cp.ConfirmedByOrganizer))
                     {
                         name = (await dbContext.ContestsParticipants.FirstOrDefaultAsync(cp => cp.ContestId == contestId
                                 && cp.ParticipantId == chatUser.UserId))

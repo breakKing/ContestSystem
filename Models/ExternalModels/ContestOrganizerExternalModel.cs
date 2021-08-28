@@ -8,18 +8,18 @@ namespace ContestSystem.Models.ExternalModels
         public long Id { get; set; }
         public string Alias { get; set; }
 
-        public static ContestOrganizerExternalModel GetFromModel(ContestLocalModerator localModerator)
+        public static ContestOrganizerExternalModel GetFromModel(ContestOrganizer organizer)
         {
-            if (localModerator == null)
+            if (organizer == null)
             {
                 return null;
             }
 
             return new ContestOrganizerExternalModel
             {
-                ContestId = localModerator.ContestId,
-                Id = localModerator.LocalModeratorId,
-                Alias = localModerator.Alias
+                ContestId = organizer.ContestId,
+                Id = organizer.OrganizerId,
+                Alias = organizer.Alias
             };
         }
     }

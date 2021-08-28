@@ -83,13 +83,13 @@ namespace ContestSystem.Areas.Workspace.Services
                     contest.ImagePath = await _storage.SaveContestImageAsync(contest.Id, form.Image);
                     dbContext.Contests.Update(contest);
 
-                    var localModerator = new ContestLocalModerator
+                    var organizer = new ContestOrganizer
                     {
                         ContestId = contest.Id,
                         Alias = contest.Creator.FullName, // TODO: надо получать алиас из формы
-                        LocalModeratorId = contest.CreatorId.GetValueOrDefault(-1)
+                        OrganizerId = contest.CreatorId.GetValueOrDefault(-1)
                     };
-                    await dbContext.ContestsLocalModerators.AddAsync(localModerator);
+                    await dbContext.ContestsOrganizers.AddAsync(organizer);
 
                     await CreateLinkedEntitiesAsync(dbContext, dbContext.ContestsLocalizers, contest.Id,
                                                     form.Localizers,

@@ -72,7 +72,7 @@ namespace ContestSystem.Areas.Contests.Controllers
             var currentUser = await HttpContext.GetCurrentUser(_userManager);
 
             if (currentUser.Id != userId
-                && !await _contestsManager.IsUserContestLocalModeratorAsync(_dbContext, contestId, currentUser.Id)
+                && !await _contestsManager.IsUserContestOrganizerAsync(_dbContext, contestId, currentUser.Id)
                 && !await _userManager.IsInRoleAsync(currentUser, RolesContainer.Moderator))
             {
                 _logger.LogWarning($"Попытка от пользователя с идентификатором {currentUser.Id} получить статистику " +
@@ -152,8 +152,8 @@ namespace ContestSystem.Areas.Contests.Controllers
                                     ContestId = participantForm.ContestId,
                                     Alias = participantForm.Alias,
                                     ConfirmedByParticipant = true, // TODO: сделать нормальные проверки на инвайты и прочую чепухню
-                                    ConfirmedByLocalModerator = true,
-                                    ConfirmingLocalModeratorId = contest.CreatorId
+                                    ConfirmedByOrganizer = true,
+                                    ConfirmingOrganizerId = contest.CreatorId
                                 };
                                 await _dbContext.ContestsParticipants.AddAsync(contestParticipant);
                                 await _dbContext.SaveChangesAsync();
@@ -200,7 +200,7 @@ namespace ContestSystem.Areas.Contests.Controllers
                 }
                 else
                 {
-                    if (currentUser.Id != userId && !contest.ContestLocalModerators.Any(clm => clm.ContestId == contestId && clm.LocalModeratorId == currentUser.Id))
+                    if (currentUser.Id != userId && !contest.ContestOrganizers.Any(co => co.ContestId == contestId && co.OrganizerId == currentUser.Id))
                     {
                         _logger.LogWarning(
                             $"Попытка от пользователя с идентификатором {currentUser.Id} удалить из списка участников соревнования с идентификатором {contestId} участника с идентификатором {userId}, не имея на это прав");

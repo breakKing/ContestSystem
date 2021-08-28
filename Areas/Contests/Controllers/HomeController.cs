@@ -58,8 +58,8 @@ namespace ContestSystem.Areas.Contests.Controllers
                                                                 && c.IsPublic
                                                                 && c.ContestParticipants.All(cp =>
                                                                     cp.ParticipantId != currentUser.Id)
-                                                                && c.ContestLocalModerators.All(cp =>
-                                                                    cp.LocalModeratorId != currentUser.Id))
+                                                                && c.ContestOrganizers.All(cp =>
+                                                                    cp.OrganizerId != currentUser.Id))
                 .ToListAsync();
             var localizers = contests.ConvertAll(c => _localizerHelper.GetAppropriateLocalizer(c.ContestLocalizers, culture));
             var contestsInfo = new List<ContestBaseInfo>();
@@ -181,8 +181,8 @@ namespace ContestSystem.Areas.Contests.Controllers
                 return BadRequest(_errorCodes[Constants.EntityDoesntExistErrorName]);
             }
 
-            if (currentUser.Id != userId && !await _dbContext.ContestsLocalModerators.AnyAsync(clm =>
-                clm.ContestId == contestId && clm.LocalModeratorId == currentUser.Id))
+            if (currentUser.Id != userId && !await _dbContext.ContestsOrganizers.AnyAsync(co =>
+                co.ContestId == contestId && co.OrganizerId == currentUser.Id))
             {
                 _logger.LogWarning(
                     $"Попытка от пользователя с идентификатором {currentUser.Id} получить отправки пользователя с идентификатором {userId} в рамках соревнования с идентификатором {contestId} при отсутствии прав на их получение");
@@ -217,7 +217,7 @@ namespace ContestSystem.Areas.Contests.Controllers
             }
 
             if (!await _dbContext.ContestsParticipants.AnyAsync(cp => cp.ContestId == contestId && cp.ParticipantId == currentUser.Id) 
-                && !await _dbContext.ContestsLocalModerators.AnyAsync(clm => clm.ContestId == contestId && clm.LocalModeratorId == currentUser.Id))
+                && !await _dbContext.ContestsOrganizers.AnyAsync(co => co.ContestId == contestId && co.OrganizerId == currentUser.Id))
             {
                 _logger.LogWarning(
                     $"Попытка от пользователя с идентификатором {currentUser.Id} получить задачу {letter} в рамках соревнования с идентификатором {contestId} при отсутствии прав на её получение");
@@ -264,7 +264,7 @@ namespace ContestSystem.Areas.Contests.Controllers
             }
 
             if (!await _dbContext.ContestsParticipants.AnyAsync(cp => cp.ContestId == contestId && cp.ParticipantId == currentUser.Id)
-                && !await _dbContext.ContestsLocalModerators.AnyAsync(clm => clm.ContestId == contestId && clm.LocalModeratorId == currentUser.Id))
+                && !await _dbContext.ContestsOrganizers.AnyAsync(co => co.ContestId == contestId && co.OrganizerId == currentUser.Id))
             {
                 _logger.LogWarning(
                     $"Попытка от пользователя с идентификатором {currentUser.Id} получить чаты соревнования с идентификатором {contestId} при отсутствии прав на их получение");
@@ -289,7 +289,7 @@ namespace ContestSystem.Areas.Contests.Controllers
                 return BadRequest(_errorCodes[Constants.EntityDoesntExistErrorName]);
             }
 
-            var organizers = contest.ContestLocalModerators.ConvertAll(ContestOrganizerExternalModel.GetFromModel);
+            var organizers = contest.ContestOrganizers.ConvertAll(ContestOrganizerExternalModel.GetFromModel);
 
             return Json(organizers);
         }

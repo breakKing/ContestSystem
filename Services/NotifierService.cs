@@ -34,10 +34,10 @@ namespace ContestSystem.Services
             var participantId = contest.ContestParticipants.FirstOrDefault(cp => cp.ParticipantId == solution.ParticipantId)?.ParticipantId.ToString();
             usersIds.Add(participantId);
 
-            if (contest.ContestLocalModerators != null && contest.ContestLocalModerators.Count > 0)
+            if (contest.ContestOrganizers != null && contest.ContestOrganizers.Count > 0)
             {
-                var localModeratorsIds = contest.ContestLocalModerators.Select(clm => clm.LocalModeratorId.ToString()).ToList();
-                usersIds.AddRange(localModeratorsIds);
+                var organizersIds = contest.ContestOrganizers.Select(co => co.OrganizerId.ToString()).ToList();
+                usersIds.AddRange(organizersIds);
             }
 
             var actualResult = SolutionActualResultExternalModel.GetFromModel(solution);

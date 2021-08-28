@@ -51,7 +51,7 @@ namespace ContestSystem.Models.ExternalModels
                             localizerPredicate(cp.Problem))
                     };
                 }),
-                Organizers = contest.ContestLocalModerators.ConvertAll(ContestOrganizerExternalModel.GetFromModel)
+                Organizers = contest.ContestOrganizers.ConvertAll(ContestOrganizerExternalModel.GetFromModel)
             };
         }
     }

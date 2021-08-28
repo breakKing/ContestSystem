@@ -58,7 +58,7 @@ namespace ContestSystem.Areas.Contests.Controllers
                 return BadRequest(_errorCodes[Constants.EntityDoesntExistErrorName]);
             }
 
-            if (!await _userManager.IsInRoleAsync(currentUser, RolesContainer.Moderator) && !await _contestsManager.IsUserContestLocalModeratorAsync(_dbContext, contestId, currentUser.Id))
+            if (!await _userManager.IsInRoleAsync(currentUser, RolesContainer.Moderator) && !await _contestsManager.IsUserContestOrganizerAsync(_dbContext, contestId, currentUser.Id))
             {
                 _logger.LogWarning(
                     $"Попытка от пользователя с идентификатором {currentUser.Id} получить все решения в рамках соревнования с идентификатором {contestId} при отсутствии прав на это");
@@ -85,7 +85,7 @@ namespace ContestSystem.Areas.Contests.Controllers
                 var currentUser = await HttpContext.GetCurrentUser(_userManager);
                 var contest = await _dbContext.Contests.FirstOrDefaultAsync(c => c.Id == contestId);
 
-                if (!await _userManager.IsInRoleAsync(currentUser, RolesContainer.Moderator) && !await _contestsManager.IsUserContestLocalModeratorAsync(_dbContext, contestId, currentUser.Id))
+                if (!await _userManager.IsInRoleAsync(currentUser, RolesContainer.Moderator) && !await _contestsManager.IsUserContestOrganizerAsync(_dbContext, contestId, currentUser.Id))
                 {
                     _logger.LogWarning(
                         $"Попытка от пользователя с идентификатором {currentUser.Id} вручную вынести вердикт для решения с идентификатором {solutionId} " +
@@ -145,7 +145,7 @@ namespace ContestSystem.Areas.Contests.Controllers
             }
             else
             {
-                if (!await _userManager.IsInRoleAsync(currentUser, RolesContainer.Moderator) && !await _contestsManager.IsUserContestLocalModeratorAsync(_dbContext, contestId, currentUser.Id))
+                if (!await _userManager.IsInRoleAsync(currentUser, RolesContainer.Moderator) && !await _contestsManager.IsUserContestOrganizerAsync(_dbContext, contestId, currentUser.Id))
                 {
                     _logger.LogWarning(
                         $"Попытка от пользователя с идентификатором {currentUser.Id} удалить решение с идентификатором {solutionId} " +

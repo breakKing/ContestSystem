@@ -27,8 +27,8 @@ namespace ContestSystem.Models.DbContexts
         public DbSet<Post> Posts { get; set; }
         public DbSet<ContestProblem> ContestsProblems { get; set; }
         public DbSet<ContestParticipant> ContestsParticipants { get; set; }
-        public DbSet<ContestLocalModerator> ContestsLocalModerators { get; set; }
-        public DbSet<CourseLocalModerator> CoursesLocalModerators { get; set; }
+        public DbSet<ContestOrganizer> ContestsOrganizers { get; set; }
+        public DbSet<CourseOrganizer> CoursesOrganizers { get; set; }
         public DbSet<CourseParticipant> CoursesParticipants { get; set; }
         public DbSet<CourseProblem> CoursesProblems { get; set; }
         public DbSet<ContestLocalizer> ContestsLocalizers { get; set; }
@@ -66,10 +66,10 @@ namespace ContestSystem.Models.DbContexts
 
             // Конфигурация сущностей Many-to-Many через Fluent API
             builder.ApplyConfiguration(new ChatUserConfiguration());
-            builder.ApplyConfiguration(new ContestLocalModeratorConfiguration());
+            builder.ApplyConfiguration(new ContestOrganizerConfiguration());
             builder.ApplyConfiguration(new ContestParticipantConfiguration());
             builder.ApplyConfiguration(new ContestProblemConfiguration());
-            builder.ApplyConfiguration(new CourseLocalModeratorConfiguration());
+            builder.ApplyConfiguration(new CourseOrganizerConfiguration());
             builder.ApplyConfiguration(new CourseParticipantConfiguration());
             builder.ApplyConfiguration(new CourseProblemConfiguration());
         }

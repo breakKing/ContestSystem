@@ -150,10 +150,10 @@ namespace ContestSystem.Areas.Solutions.Controllers
             }
             else
             {
-                bool isUserLocalModerator = await _dbContext.ContestsLocalModerators.AnyAsync(clm => clm.ContestId == solution.ContestId
-                                                                                                        && clm.LocalModeratorId == currentUser.Id);
+                bool isUserOrganizer = await _dbContext.ContestsOrganizers.AnyAsync(co => co.ContestId == solution.ContestId
+                                                                                                        && co.OrganizerId == currentUser.Id);
 
-                if (currentUser.Id != solution.ParticipantId && !isUserLocalModerator)
+                if (currentUser.Id != solution.ParticipantId && !isUserOrganizer)
                 {
                     _logger.LogWarning(
                         $"Попытка от пользователя с идентификатором {currentUser.Id} скомпилировать решение с идентификатором {solutionId}, не имея на это прав");
@@ -210,10 +210,10 @@ namespace ContestSystem.Areas.Solutions.Controllers
             }
             else
             {
-                bool isUserLocalModerator = await _dbContext.ContestsLocalModerators.AnyAsync(clm => clm.ContestId == solution.ContestId
-                                                                                                        && clm.LocalModeratorId == currentUser.Id);
+                bool isUserOrganizer = await _dbContext.ContestsOrganizers.AnyAsync(co => co.ContestId == solution.ContestId
+                                                                                                        && co.OrganizerId == currentUser.Id);
 
-                if (currentUser.Id != solution.ParticipantId && !isUserLocalModerator)
+                if (currentUser.Id != solution.ParticipantId && !isUserOrganizer)
                 {
                     _logger.LogWarning(
                         $"Попытка от пользователя с идентификатором {currentUser.Id} запустить тесты решения с идентификатором {solutionId}, не имея на это прав");

@@ -40,7 +40,7 @@ namespace ContestSystem.Models.ExternalModels
                 AreVirtualContestsAvailable = contest.AreVirtualContestsAvailable,
                 DurationInMinutes = contest.DurationInMinutes,
                 ApprovalStatus = contest.ApprovalStatus,
-                Organizers = contest.ContestLocalModerators.ConvertAll(ContestOrganizerExternalModel.GetFromModel)
+                Organizers = contest.ContestOrganizers.ConvertAll(ContestOrganizerExternalModel.GetFromModel)
             };
         }
     }

@@ -4,14 +4,16 @@ using ContestSystem.Models.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ContestSystem.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    partial class MainDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210828215658_Renaming local moderators to organizers")]
+    partial class Renaminglocalmoderatorstoorganizers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -518,13 +520,13 @@ namespace ContestSystem.Migrations
                     b.Property<string>("Alias")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("ConfirmedByOrganizer")
+                    b.Property<bool>("ConfirmedByLocalModerator")
                         .HasColumnType("bit");
 
                     b.Property<bool>("ConfirmedByParticipant")
                         .HasColumnType("bit");
 
-                    b.Property<long?>("ConfirmingOrganizerId")
+                    b.Property<long?>("ConfirmingLocalModeratorId")
                         .HasColumnType("bigint");
 
                     b.Property<byte[]>("Timestamp")
@@ -536,7 +538,7 @@ namespace ContestSystem.Migrations
                         .HasName("PK_ContestsParticipants")
                         .IsClustered();
 
-                    b.HasIndex("ConfirmingOrganizerId");
+                    b.HasIndex("ConfirmingLocalModeratorId");
 
                     b.HasIndex("ContestId");
 
@@ -776,13 +778,13 @@ namespace ContestSystem.Migrations
                     b.Property<string>("Alias")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("ConfirmedByOrganizer")
+                    b.Property<bool>("ConfirmedByLocalModerator")
                         .HasColumnType("bit");
 
                     b.Property<bool>("ConfirmedByParticipant")
                         .HasColumnType("bit");
 
-                    b.Property<long?>("ConfirmingOrganizerId")
+                    b.Property<long?>("ConfirmingLocalModeratorId")
                         .HasColumnType("bigint");
 
                     b.Property<byte[]>("Timestamp")
@@ -794,7 +796,7 @@ namespace ContestSystem.Migrations
                         .HasName("PK_CoursesParticipants")
                         .IsClustered();
 
-                    b.HasIndex("ConfirmingOrganizerId");
+                    b.HasIndex("ConfirmingLocalModeratorId");
 
                     b.HasIndex("CourseId");
 
@@ -1699,9 +1701,9 @@ namespace ContestSystem.Migrations
 
             modelBuilder.Entity("ContestSystemDbStructure.Models.ContestParticipant", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.Auth.User", "ConfirmingOrganizer")
+                    b.HasOne("ContestSystemDbStructure.Models.Auth.User", "ConfirmingLocalModerator")
                         .WithMany()
-                        .HasForeignKey("ConfirmingOrganizerId");
+                        .HasForeignKey("ConfirmingLocalModeratorId");
 
                     b.HasOne("ContestSystemDbStructure.Models.Contest", "Contest")
                         .WithMany("ContestParticipants")
@@ -1715,7 +1717,7 @@ namespace ContestSystem.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("ConfirmingOrganizer");
+                    b.Navigation("ConfirmingLocalModerator");
 
                     b.Navigation("Contest");
 
@@ -1829,9 +1831,9 @@ namespace ContestSystem.Migrations
 
             modelBuilder.Entity("ContestSystemDbStructure.Models.CourseParticipant", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.Auth.User", "ConfirmingOrganizer")
+                    b.HasOne("ContestSystemDbStructure.Models.Auth.User", "ConfirmingLocalModerator")
                         .WithMany()
-                        .HasForeignKey("ConfirmingOrganizerId");
+                        .HasForeignKey("ConfirmingLocalModeratorId");
 
                     b.HasOne("ContestSystemDbStructure.Models.Course", "Course")
                         .WithMany("CourseParticipants")
@@ -1845,7 +1847,7 @@ namespace ContestSystem.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("ConfirmingOrganizer");
+                    b.Navigation("ConfirmingLocalModerator");
 
                     b.Navigation("Course");
 

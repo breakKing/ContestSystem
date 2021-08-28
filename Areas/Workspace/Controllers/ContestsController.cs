@@ -154,7 +154,7 @@ namespace ContestSystem.Areas.Workspace.Controllers
                     }
                     else
                     {
-                        if (!contest.ContestLocalModerators.Any(clm => clm.LocalModeratorId == currentUser.Id))
+                        if (!contest.ContestOrganizers.Any(co => co.OrganizerId == currentUser.Id))
                         {
                             _logger.LogEditingByNotAppropriateUser(_entityName, id, currentUser.Id);
                             response = ResponseObject<long>.Fail(Constants.ErrorCodes[Constants.UserEntityName][Constants.UserInsufficientRightsErrorName]);
