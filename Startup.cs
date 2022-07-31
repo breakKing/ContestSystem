@@ -13,7 +13,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using ContestSystem.Hubs;
 using System.Threading.Tasks;
-using ContestSystemDbStructure.Models.Auth;
+using ContestSystem.DbStructure.Models.Auth;
 using Microsoft.AspNetCore.HttpOverrides;
 
 namespace ContestSystem

@@ -7,7 +7,7 @@ using ContestSystem.Models.ExternalModels;
 using ContestSystem.Models.FormModels;
 using ContestSystem.Models.Misc;
 using ContestSystem.Services;
-using ContestSystemDbStructure.Models.Auth;
+using ContestSystem.DbStructure.Models.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

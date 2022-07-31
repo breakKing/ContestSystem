@@ -2,7 +2,7 @@
 using ContestSystem.Models.Dictionaries;
 using ContestSystem.Models.ExternalModels;
 using ContestSystem.Services;
-using ContestSystemDbStructure.Enums;
+using ContestSystem.DbStructure.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

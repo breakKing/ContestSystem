@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using ContestSystemDbStructure.Models.Auth;
+using ContestSystem.DbStructure.Models.Auth;
 using Microsoft.AspNetCore.Identity;
 
 namespace ContestSystem.Models.DbContexts
