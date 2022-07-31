@@ -34,10 +34,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\ContestSystemDbStructure\ContestSystemDbStructure.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
       <_ContentIncludedByDefault Remove="wwwroot\bundle\8dc80155b21ec118aa72.woff2" />
       <_ContentIncludedByDefault Remove="wwwroot\bundle\93b2cec7533131f14f76.woff" />
       <_ContentIncludedByDefault Remove="wwwroot\bundle\94eeade15e6b7fbed95b18ff32f0c112.woff" />

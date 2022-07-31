@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ContestSystem.Models.DbContexts;
 using ContestSystem.Models.Dictionaries;
-using ContestSystemDbStructure.Models.Auth;
+using ContestSystem.DbStructure.Models.Auth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

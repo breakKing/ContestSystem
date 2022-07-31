@@ -1,4 +1,4 @@
-﻿using ContestSystemDbStructure.Enums;
+﻿using ContestSystem.DbStructure.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace ContestSystem.Models.FormModels

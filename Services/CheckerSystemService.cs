@@ -4,13 +4,13 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
-using ContestSystemDbStructure.Models;
+using ContestSystem.DbStructure.Models;
 using ContestSystem.Models.Misc;
 using System;
 using Microsoft.Extensions.Logging;
 using ContestSystem.Models.DbContexts;
 using Microsoft.EntityFrameworkCore;
-using ContestSystemDbStructure.Enums;
+using ContestSystem.DbStructure.Enums;
 
 namespace ContestSystem.Services
 {

@@ -1,5 +1,5 @@
 ﻿using ContestSystem.Models.Dictionaries;
-using ContestSystemDbStructure.Enums;
+using ContestSystem.DbStructure.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace ContestSystem.Extensions

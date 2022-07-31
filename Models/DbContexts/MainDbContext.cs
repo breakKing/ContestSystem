@@ -1,7 +1,7 @@
-﻿using ContestSystemDbStructure.Configurations;
-using ContestSystemDbStructure.Models;
-using ContestSystemDbStructure.Models.Auth;
-using ContestSystemDbStructure.Models.Messenger;
+﻿using ContestSystem.DbStructure.Configurations;
+using ContestSystem.DbStructure.Models;
+using ContestSystem.DbStructure.Models.Auth;
+using ContestSystem.DbStructure.Models.Messenger;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;

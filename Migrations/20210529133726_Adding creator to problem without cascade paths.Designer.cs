@@ -21,7 +21,7 @@ namespace ContestSystem.Migrations
                 .HasAnnotation("ProductVersion", "5.0.6")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Checker", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.Checker", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -61,7 +61,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("Checkers");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Comment", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.Comment", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -99,7 +99,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("Comments");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Contest", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.Contest", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -152,7 +152,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("Contests");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.ContestFile", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.ContestFile", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -180,7 +180,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("ContestsFiles");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.ContestHistory", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.ContestHistory", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -221,7 +221,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("ContestsHistories");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.ContestLocalModerator", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.ContestLocalModerator", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -251,7 +251,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("ContestsLocalModerators");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.ContestLocalizer", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.ContestLocalizer", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -282,7 +282,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("ContestsLocalizers");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.ContestParticipant", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.ContestParticipant", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -326,7 +326,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("ContestsParticipants");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.ContestProblem", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.ContestProblem", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -357,7 +357,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("ContestsProblems");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Course", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.Course", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -402,7 +402,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("Courses");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.CourseLocalModerator", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.CourseLocalModerator", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -432,7 +432,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("CoursesLocalModerators");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.CourseLocalizer", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.CourseLocalizer", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -463,7 +463,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("CoursesLocalizers");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.CoursePage", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.CoursePage", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -493,7 +493,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("CoursesPages");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.CoursePageFile", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.CoursePageFile", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -521,7 +521,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("CoursesPagesFiles");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.CoursePageLocalizer", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.CoursePageLocalizer", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -552,7 +552,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("CoursesPagesLocalizers");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.CourseParticipant", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.CourseParticipant", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -593,7 +593,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("CoursesParticipants");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.CourseProblem", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.CourseProblem", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -620,7 +620,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("CoursesProblems");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Example", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.Example", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -651,7 +651,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("Examples");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Log", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.Log", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -680,7 +680,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("Logs");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Message", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.Message", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -726,7 +726,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("Messages");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Notification", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.Notification", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -760,7 +760,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("Notifications");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Post", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.Post", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -802,7 +802,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("Posts");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.PostLocalizer", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.PostLocalizer", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -836,7 +836,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("PostsLocalizers");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Problem", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.Problem", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -883,7 +883,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("Problems");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.ProblemLocalizer", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.ProblemLocalizer", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -920,7 +920,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("ProblemsLocalizers");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Role", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.Role", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -952,7 +952,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("AspNetRoles");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.RulesSet", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.RulesSet", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1007,7 +1007,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("RulesSets");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Solution", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.Solution", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1055,7 +1055,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("Solutions");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Test", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.Test", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1089,7 +1089,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("Tests");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.TestResult", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.TestResult", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1132,7 +1132,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("TestsResults");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.User", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.User", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1225,7 +1225,7 @@ namespace ContestSystem.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.VirtualContest", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.VirtualContest", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -1356,28 +1356,28 @@ namespace ContestSystem.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Checker", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.Checker", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.User", "Author")
+                    b.HasOne("ContestSystem.DbStructure.Models.User", "Author")
                         .WithMany()
                         .HasForeignKey("AuthorId");
 
                     b.Navigation("Author");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Comment", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.Comment", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.Comment", "CommentToReply")
+                    b.HasOne("ContestSystem.DbStructure.Models.Comment", "CommentToReply")
                         .WithMany()
                         .HasForeignKey("CommentToReplyId");
 
-                    b.HasOne("ContestSystemDbStructure.Models.Post", "Post")
+                    b.HasOne("ContestSystem.DbStructure.Models.Post", "Post")
                         .WithMany()
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ContestSystemDbStructure.Models.User", "Sender")
+                    b.HasOne("ContestSystem.DbStructure.Models.User", "Sender")
                         .WithMany()
                         .HasForeignKey("SenderId");
 
@@ -1388,17 +1388,17 @@ namespace ContestSystem.Migrations
                     b.Navigation("Sender");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Contest", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.Contest", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.User", "ApprovingGlobalModerator")
+                    b.HasOne("ContestSystem.DbStructure.Models.User", "ApprovingGlobalModerator")
                         .WithMany()
                         .HasForeignKey("ApprovingGlobalModeratorId");
 
-                    b.HasOne("ContestSystemDbStructure.Models.User", "Creator")
+                    b.HasOne("ContestSystem.DbStructure.Models.User", "Creator")
                         .WithMany()
                         .HasForeignKey("CreatorId");
 
-                    b.HasOne("ContestSystemDbStructure.Models.RulesSet", "RulesSet")
+                    b.HasOne("ContestSystem.DbStructure.Models.RulesSet", "RulesSet")
                         .WithMany()
                         .HasForeignKey("RulesSetId");
 
@@ -1409,9 +1409,9 @@ namespace ContestSystem.Migrations
                     b.Navigation("RulesSet");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.ContestFile", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.ContestFile", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.Contest", "Contest")
+                    b.HasOne("ContestSystem.DbStructure.Models.Contest", "Contest")
                         .WithMany()
                         .HasForeignKey("ContestId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1420,21 +1420,21 @@ namespace ContestSystem.Migrations
                     b.Navigation("Contest");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.ContestHistory", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.ContestHistory", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.Contest", "Contest")
+                    b.HasOne("ContestSystem.DbStructure.Models.Contest", "Contest")
                         .WithMany()
                         .HasForeignKey("ContestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ContestSystemDbStructure.Models.User", "Participant")
+                    b.HasOne("ContestSystem.DbStructure.Models.User", "Participant")
                         .WithMany()
                         .HasForeignKey("ParticipantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ContestSystemDbStructure.Models.Problem", "Problem")
+                    b.HasOne("ContestSystem.DbStructure.Models.Problem", "Problem")
                         .WithMany()
                         .HasForeignKey("ProblemId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1447,15 +1447,15 @@ namespace ContestSystem.Migrations
                     b.Navigation("Problem");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.ContestLocalModerator", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.ContestLocalModerator", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.Contest", "Contest")
+                    b.HasOne("ContestSystem.DbStructure.Models.Contest", "Contest")
                         .WithMany()
                         .HasForeignKey("ContestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ContestSystemDbStructure.Models.User", "LocalModerator")
+                    b.HasOne("ContestSystem.DbStructure.Models.User", "LocalModerator")
                         .WithMany()
                         .HasForeignKey("LocalModeratorId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1466,9 +1466,9 @@ namespace ContestSystem.Migrations
                     b.Navigation("LocalModerator");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.ContestLocalizer", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.ContestLocalizer", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.Contest", "Contest")
+                    b.HasOne("ContestSystem.DbStructure.Models.Contest", "Contest")
                         .WithMany("ContestLocalizers")
                         .HasForeignKey("ContestId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1477,19 +1477,19 @@ namespace ContestSystem.Migrations
                     b.Navigation("Contest");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.ContestParticipant", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.ContestParticipant", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.User", "ConfirmingLocalModerator")
+                    b.HasOne("ContestSystem.DbStructure.Models.User", "ConfirmingLocalModerator")
                         .WithMany()
                         .HasForeignKey("ConfirmingLocalModeratorId");
 
-                    b.HasOne("ContestSystemDbStructure.Models.Contest", "Contest")
+                    b.HasOne("ContestSystem.DbStructure.Models.Contest", "Contest")
                         .WithMany()
                         .HasForeignKey("ContestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ContestSystemDbStructure.Models.User", "Participant")
+                    b.HasOne("ContestSystem.DbStructure.Models.User", "Participant")
                         .WithMany()
                         .HasForeignKey("ParticipantId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1502,15 +1502,15 @@ namespace ContestSystem.Migrations
                     b.Navigation("Participant");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.ContestProblem", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.ContestProblem", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.Contest", "Contest")
+                    b.HasOne("ContestSystem.DbStructure.Models.Contest", "Contest")
                         .WithMany()
                         .HasForeignKey("ContestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ContestSystemDbStructure.Models.Problem", "Problem")
+                    b.HasOne("ContestSystem.DbStructure.Models.Problem", "Problem")
                         .WithMany()
                         .HasForeignKey("ProblemId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1521,13 +1521,13 @@ namespace ContestSystem.Migrations
                     b.Navigation("Problem");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Course", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.Course", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.User", "ApprovingGlobalModerator")
+                    b.HasOne("ContestSystem.DbStructure.Models.User", "ApprovingGlobalModerator")
                         .WithMany()
                         .HasForeignKey("ApprovingGlobalModeratorId");
 
-                    b.HasOne("ContestSystemDbStructure.Models.User", "Creator")
+                    b.HasOne("ContestSystem.DbStructure.Models.User", "Creator")
                         .WithMany()
                         .HasForeignKey("CreatorId");
 
@@ -1536,15 +1536,15 @@ namespace ContestSystem.Migrations
                     b.Navigation("Creator");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.CourseLocalModerator", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.CourseLocalModerator", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.Course", "Course")
+                    b.HasOne("ContestSystem.DbStructure.Models.Course", "Course")
                         .WithMany()
                         .HasForeignKey("CourseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ContestSystemDbStructure.Models.User", "LocalModerator")
+                    b.HasOne("ContestSystem.DbStructure.Models.User", "LocalModerator")
                         .WithMany()
                         .HasForeignKey("LocalModeratorId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1555,9 +1555,9 @@ namespace ContestSystem.Migrations
                     b.Navigation("LocalModerator");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.CourseLocalizer", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.CourseLocalizer", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.Course", "Course")
+                    b.HasOne("ContestSystem.DbStructure.Models.Course", "Course")
                         .WithMany()
                         .HasForeignKey("CourseId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1566,15 +1566,15 @@ namespace ContestSystem.Migrations
                     b.Navigation("Course");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.CoursePage", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.CoursePage", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.Course", "Course")
+                    b.HasOne("ContestSystem.DbStructure.Models.Course", "Course")
                         .WithMany()
                         .HasForeignKey("CourseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ContestSystemDbStructure.Models.CoursePage", "CoursePageParent")
+                    b.HasOne("ContestSystem.DbStructure.Models.CoursePage", "CoursePageParent")
                         .WithMany()
                         .HasForeignKey("CoursePageParentId");
 
@@ -1583,9 +1583,9 @@ namespace ContestSystem.Migrations
                     b.Navigation("CoursePageParent");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.CoursePageFile", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.CoursePageFile", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.CoursePage", "CoursePage")
+                    b.HasOne("ContestSystem.DbStructure.Models.CoursePage", "CoursePage")
                         .WithMany()
                         .HasForeignKey("CoursePageId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1594,9 +1594,9 @@ namespace ContestSystem.Migrations
                     b.Navigation("CoursePage");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.CoursePageLocalizer", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.CoursePageLocalizer", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.CoursePage", "CoursePage")
+                    b.HasOne("ContestSystem.DbStructure.Models.CoursePage", "CoursePage")
                         .WithMany()
                         .HasForeignKey("CoursePageId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1605,19 +1605,19 @@ namespace ContestSystem.Migrations
                     b.Navigation("CoursePage");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.CourseParticipant", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.CourseParticipant", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.User", "ConfirmingLocalModerator")
+                    b.HasOne("ContestSystem.DbStructure.Models.User", "ConfirmingLocalModerator")
                         .WithMany()
                         .HasForeignKey("ConfirmingLocalModeratorId");
 
-                    b.HasOne("ContestSystemDbStructure.Models.Course", "Course")
+                    b.HasOne("ContestSystem.DbStructure.Models.Course", "Course")
                         .WithMany()
                         .HasForeignKey("CourseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ContestSystemDbStructure.Models.User", "Participant")
+                    b.HasOne("ContestSystem.DbStructure.Models.User", "Participant")
                         .WithMany()
                         .HasForeignKey("ParticipantId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1630,15 +1630,15 @@ namespace ContestSystem.Migrations
                     b.Navigation("Participant");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.CourseProblem", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.CourseProblem", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.Course", "Course")
+                    b.HasOne("ContestSystem.DbStructure.Models.Course", "Course")
                         .WithMany()
                         .HasForeignKey("CourseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ContestSystemDbStructure.Models.Problem", "Problem")
+                    b.HasOne("ContestSystem.DbStructure.Models.Problem", "Problem")
                         .WithMany()
                         .HasForeignKey("ProblemId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1649,9 +1649,9 @@ namespace ContestSystem.Migrations
                     b.Navigation("Problem");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Example", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.Example", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.Problem", "Problem")
+                    b.HasOne("ContestSystem.DbStructure.Models.Problem", "Problem")
                         .WithMany()
                         .HasForeignKey("ProblemId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1660,23 +1660,23 @@ namespace ContestSystem.Migrations
                     b.Navigation("Problem");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Message", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.Message", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.Contest", "Contest")
+                    b.HasOne("ContestSystem.DbStructure.Models.Contest", "Contest")
                         .WithMany()
                         .HasForeignKey("ContestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ContestSystemDbStructure.Models.Message", "MessageToReply")
+                    b.HasOne("ContestSystem.DbStructure.Models.Message", "MessageToReply")
                         .WithMany()
                         .HasForeignKey("MessageToReplyId");
 
-                    b.HasOne("ContestSystemDbStructure.Models.User", "Receiver")
+                    b.HasOne("ContestSystem.DbStructure.Models.User", "Receiver")
                         .WithMany()
                         .HasForeignKey("ReceiverId");
 
-                    b.HasOne("ContestSystemDbStructure.Models.User", "Sender")
+                    b.HasOne("ContestSystem.DbStructure.Models.User", "Sender")
                         .WithMany()
                         .HasForeignKey("SenderId");
 
@@ -1689,9 +1689,9 @@ namespace ContestSystem.Migrations
                     b.Navigation("Sender");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Notification", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.Notification", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.User", "User")
+                    b.HasOne("ContestSystem.DbStructure.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1700,13 +1700,13 @@ namespace ContestSystem.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Post", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.Post", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.User", "ApprovingBlogModerator")
+                    b.HasOne("ContestSystem.DbStructure.Models.User", "ApprovingBlogModerator")
                         .WithMany()
                         .HasForeignKey("ApprovingBlogModeratorId");
 
-                    b.HasOne("ContestSystemDbStructure.Models.User", "Author")
+                    b.HasOne("ContestSystem.DbStructure.Models.User", "Author")
                         .WithMany()
                         .HasForeignKey("AuthorId");
 
@@ -1715,9 +1715,9 @@ namespace ContestSystem.Migrations
                     b.Navigation("Author");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.PostLocalizer", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.PostLocalizer", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.Post", "Post")
+                    b.HasOne("ContestSystem.DbStructure.Models.Post", "Post")
                         .WithMany("PostLocalizers")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1726,17 +1726,17 @@ namespace ContestSystem.Migrations
                     b.Navigation("Post");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Problem", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.Problem", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.User", "ApprovingGlobalModerator")
+                    b.HasOne("ContestSystem.DbStructure.Models.User", "ApprovingGlobalModerator")
                         .WithMany()
                         .HasForeignKey("ApprovingGlobalModeratorId");
 
-                    b.HasOne("ContestSystemDbStructure.Models.Checker", "Checker")
+                    b.HasOne("ContestSystem.DbStructure.Models.Checker", "Checker")
                         .WithMany()
                         .HasForeignKey("CheckerId");
 
-                    b.HasOne("ContestSystemDbStructure.Models.User", "Creator")
+                    b.HasOne("ContestSystem.DbStructure.Models.User", "Creator")
                         .WithMany()
                         .HasForeignKey("CreatorId");
 
@@ -1747,9 +1747,9 @@ namespace ContestSystem.Migrations
                     b.Navigation("Creator");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.ProblemLocalizer", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.ProblemLocalizer", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.Problem", "Problem")
+                    b.HasOne("ContestSystem.DbStructure.Models.Problem", "Problem")
                         .WithMany()
                         .HasForeignKey("ProblemId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1758,22 +1758,22 @@ namespace ContestSystem.Migrations
                     b.Navigation("Problem");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.RulesSet", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.RulesSet", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.User", "Author")
+                    b.HasOne("ContestSystem.DbStructure.Models.User", "Author")
                         .WithMany()
                         .HasForeignKey("AuthorId");
 
                     b.Navigation("Author");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Solution", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.Solution", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.User", "Participant")
+                    b.HasOne("ContestSystem.DbStructure.Models.User", "Participant")
                         .WithMany()
                         .HasForeignKey("ParticipantId");
 
-                    b.HasOne("ContestSystemDbStructure.Models.Problem", "Problem")
+                    b.HasOne("ContestSystem.DbStructure.Models.Problem", "Problem")
                         .WithMany()
                         .HasForeignKey("ProblemId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1784,9 +1784,9 @@ namespace ContestSystem.Migrations
                     b.Navigation("Problem");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Test", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.Test", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.Problem", "Problem")
+                    b.HasOne("ContestSystem.DbStructure.Models.Problem", "Problem")
                         .WithMany("Tests")
                         .HasForeignKey("ProblemId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1795,9 +1795,9 @@ namespace ContestSystem.Migrations
                     b.Navigation("Problem");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.TestResult", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.TestResult", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.Solution", "Solution")
+                    b.HasOne("ContestSystem.DbStructure.Models.Solution", "Solution")
                         .WithMany()
                         .HasForeignKey("SolutionId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1806,15 +1806,15 @@ namespace ContestSystem.Migrations
                     b.Navigation("Solution");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.VirtualContest", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.VirtualContest", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.Contest", "Contest")
+                    b.HasOne("ContestSystem.DbStructure.Models.Contest", "Contest")
                         .WithMany()
                         .HasForeignKey("ContestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ContestSystemDbStructure.Models.User", "Participant")
+                    b.HasOne("ContestSystem.DbStructure.Models.User", "Participant")
                         .WithMany()
                         .HasForeignKey("ParticipantId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1827,7 +1827,7 @@ namespace ContestSystem.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<long>", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.Role", null)
+                    b.HasOne("ContestSystem.DbStructure.Models.Role", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1836,7 +1836,7 @@ namespace ContestSystem.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<long>", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.User", null)
+                    b.HasOne("ContestSystem.DbStructure.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1845,7 +1845,7 @@ namespace ContestSystem.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<long>", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.User", null)
+                    b.HasOne("ContestSystem.DbStructure.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1854,13 +1854,13 @@ namespace ContestSystem.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<long>", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.Role", null)
+                    b.HasOne("ContestSystem.DbStructure.Models.Role", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ContestSystemDbStructure.Models.User", null)
+                    b.HasOne("ContestSystem.DbStructure.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1869,24 +1869,24 @@ namespace ContestSystem.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<long>", b =>
                 {
-                    b.HasOne("ContestSystemDbStructure.Models.User", null)
+                    b.HasOne("ContestSystem.DbStructure.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Contest", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.Contest", b =>
                 {
                     b.Navigation("ContestLocalizers");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Post", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.Post", b =>
                 {
                     b.Navigation("PostLocalizers");
                 });
 
-            modelBuilder.Entity("ContestSystemDbStructure.Models.Problem", b =>
+            modelBuilder.Entity("ContestSystem.DbStructure.Models.Problem", b =>
                 {
                     b.Navigation("Tests");
                 });

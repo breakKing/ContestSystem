@@ -1,4 +1,4 @@
-﻿using ContestSystemDbStructure.Models;
+﻿using ContestSystem.DbStructure.Models;
 using System.Collections.Generic;
 using System.Linq;
 

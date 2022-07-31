@@ -2,8 +2,8 @@
 using ContestSystem.Models.Dictionaries;
 using ContestSystem.Models.ExternalModels;
 using ContestSystem.Services;
-using ContestSystemDbStructure.Models.Messenger;
-using ContestSystemDbStructure.Enums;
+using ContestSystem.DbStructure.Models.Messenger;
+using ContestSystem.DbStructure.Enums;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using ContestSystem.Models.FormModels;
 using ContestSystem.Models.Misc;
 using System.Collections.Generic;
-using ContestSystemDbStructure.Models;
+using ContestSystem.DbStructure.Models;
 
 namespace ContestSystem.Areas.Messenger.Services
 {

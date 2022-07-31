@@ -1,8 +1,8 @@
 ﻿using ContestSystem.Hubs;
 using ContestSystem.Models.ExternalModels;
-using ContestSystemDbStructure.Enums;
-using ContestSystemDbStructure.Models;
-using ContestSystemDbStructure.Models.Messenger;
+using ContestSystem.DbStructure.Enums;
+using ContestSystem.DbStructure.Models;
+using ContestSystem.DbStructure.Models.Messenger;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using System;

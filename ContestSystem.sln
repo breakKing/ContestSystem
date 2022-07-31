@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.31005.135
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ContestSystem", "ContestSystem.csproj", "{1BB121D9-987B-4A40-BC6B-1FF4512D5121}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContestSystemDbStructure", "..\ContestSystemDbStructure\ContestSystemDbStructure.csproj", "{BF8F7286-320F-4AF9-803F-7527EF69C725}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

@@ -1,4 +1,4 @@
-﻿using ContestSystemDbStructure.Models.Messenger;
+﻿using ContestSystem.DbStructure.Models.Messenger;
 
 namespace ContestSystem.Models.ExternalModels
 {
