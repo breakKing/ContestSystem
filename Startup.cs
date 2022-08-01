@@ -18,33 +18,25 @@ using Microsoft.AspNetCore.HttpOverrides;
 
 namespace ContestSystem
 {
-    public class Startup
+    public static class Startup
     {
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
-
-        public IConfiguration Configuration { get; }
-
         // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
+        public static WebApplicationBuilder ConfigureServices(this WebApplicationBuilder builder)
         {
             //services.AddLocalization(options => options.ResourcesPath = "Resources");
 
             var jwtService = new JwtSettingsService();
-            Configuration.Bind("JwtConfiguration", jwtService);
-            services.AddSingleton(jwtService);
+            builder.Configuration.Bind("JwtConfiguration", jwtService);
+            builder.Services.AddSingleton(jwtService);
 
-            services.AddDbContext<MainDbContext>(
+            builder.Services.AddDbContext<MainDbContext>(
                 x => x
                     .UseLazyLoadingProxies()
-                    //.UseNpgsql(Configuration.GetConnectionString("PgsqlConnection"))
-                    .UseSqlServer(Configuration.GetConnectionString("MssqlConnection"))
+                    .UseSqlServer(builder.Configuration.GetConnectionString("MssqlConnection"))
             );
 
 
-            services.AddIdentity<User, Role>(options =>
+            builder.Services.AddIdentity<User, Role>(options =>
             {
                 options.Password.RequireDigit = false;
                 options.Password.RequireLowercase = false;
@@ -56,7 +48,7 @@ namespace ContestSystem
                 options.SignIn.RequireConfirmedPhoneNumber = false;
             }).AddEntityFrameworkStores<MainDbContext>();
 
-            services.AddAuthentication(x =>
+            builder.Services.AddAuthentication(x =>
                 {
                     x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
                     x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -94,29 +86,29 @@ namespace ContestSystem
                         }
                     };
                 });
-            services.AddControllersWithViews();
+            builder.Services.AddControllersWithViews();
 
-            services.AddCheckerSystemConnector();
+            builder.Services.AddCheckerSystemConnector();
 
-            services.AddContestsManager();
+            builder.Services.AddContestsManager();
 
-            services.AddSolutionsManager();
+            builder.Services.AddSolutionsManager();
 
-            services.AddFileStorage();
+            builder.Services.AddFileStorage();
 
-            services.AddWorkspace();
+            builder.Services.AddWorkspace();
 
-            services.AddLocalizers();
+            builder.Services.AddLocalizers();
 
-            services.AddSignalR();
+            builder.Services.AddSignalR();
 
-            services.AddUserIdProvider();
+            builder.Services.AddUserIdProvider();
 
-            services.AddNotifier();
+            builder.Services.AddNotifier();
 
-            services.AddMessenger();
+            builder.Services.AddMessenger();
 
-            services.AddSwaggerGen(c =>
+            builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v0.1", new OpenApiInfo { Title = "ContestSystem API v0.1 beta", Version = "v0.1" });
                 var securityScheme = new OpenApiSecurityScheme
@@ -137,14 +129,17 @@ namespace ContestSystem
                     { securityScheme, new[] { "JWT-Auth" } }
                 });
             });
+
+            return builder;
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
+        public static WebApplication Configure(this WebApplication app)
         {
+            var loggerFactory = app.Services.GetService<ILoggerFactory>();
             loggerFactory.AddFile("Logs/log_{Date}.txt");
 
-            if (env.IsDevelopment())
+            if (app.Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
@@ -182,6 +177,8 @@ namespace ContestSystem
                     defaults: new { controller = "Home", action = "Index" }
                 );
             });
+
+            return app;
         }
     }
 }
