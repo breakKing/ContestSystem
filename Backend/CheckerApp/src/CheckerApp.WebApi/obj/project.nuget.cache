@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "dgSpecHash": "GBDMeE8nQuQ3P6VmLdQktgR6GBQLVts6DW6mCdoBg/BIbtHv0ZaAcwvRr9G1OBZVg2C6U86kXK3zfwwukW14tw==",
+  "success": true,
+  "projectFilePath": "E:\\Projects\\ContestSystem\\Backend\\CheckerApp\\src\\CheckerApp.WebApi\\CheckerApp.WebApi.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Daniil-Laptop\\.nuget\\packages\\microsoft.extensions.apidescription.server\\3.0.0\\microsoft.extensions.apidescription.server.3.0.0.nupkg.sha512",
+    "C:\\Users\\Daniil-Laptop\\.nuget\\packages\\microsoft.openapi\\1.2.3\\microsoft.openapi.1.2.3.nupkg.sha512",
+    "C:\\Users\\Daniil-Laptop\\.nuget\\packages\\swashbuckle.aspnetcore\\6.2.3\\swashbuckle.aspnetcore.6.2.3.nupkg.sha512",
+    "C:\\Users\\Daniil-Laptop\\.nuget\\packages\\swashbuckle.aspnetcore.swagger\\6.2.3\\swashbuckle.aspnetcore.swagger.6.2.3.nupkg.sha512",
+    "C:\\Users\\Daniil-Laptop\\.nuget\\packages\\swashbuckle.aspnetcore.swaggergen\\6.2.3\\swashbuckle.aspnetcore.swaggergen.6.2.3.nupkg.sha512",
+    "C:\\Users\\Daniil-Laptop\\.nuget\\packages\\swashbuckle.aspnetcore.swaggerui\\6.2.3\\swashbuckle.aspnetcore.swaggerui.6.2.3.nupkg.sha512"
+  ],
+  "logs": []
+}
