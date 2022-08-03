@@ -9,3 +9,5 @@ appsettings.Development.json
 Logs/*
 Storage/*
 .vscode/*
+!.vscode/launch.json
+!.vscode/tasks.json
