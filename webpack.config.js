@@ -93,7 +93,7 @@ module.exports = {
             }
         ]
     },
-    devtool: 'source-map', //'#eval-source-map'
+    devtool: 'source-map',
     devServer: {
         hot: true,
     }
