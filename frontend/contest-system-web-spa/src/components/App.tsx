@@ -1,5 +1,5 @@
 import { FunctionComponent} from "react";
-import RouterComponent from "./components/Router";
+import RouterComponent from "./Router";
 
 const App: FunctionComponent = () => {
 
