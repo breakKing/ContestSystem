@@ -1,0 +1,20 @@
+@use './shared/colors';
+
+@import '~antd/dist/antd.css';
+
+.layout {
+    min-height: 100vh;
+    .header {
+        background-color: colors.$color-dark;
+    }
+    .content {
+        background-color: colors.$color-light;
+        color: colors.$color-dark;
+        padding: 30px;
+    }
+    .footer {
+        background-color: colors.$color-dark;
+        color: colors.$color-light;
+        text-align: center;
+    }
+}
