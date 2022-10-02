@@ -1,4 +1,4 @@
-@use './shared/colors';
+@use './shared/colors.scss';
 
 @import '~antd/dist/antd.css';
 
@@ -9,12 +9,12 @@
     }
     .content {
         background-color: colors.$color-light;
-        color: colors.$color-dark;
+        color: colors.$color-dark-text;
         padding: 30px;
     }
     .footer {
         background-color: colors.$color-dark;
-        color: colors.$color-light;
+        color: colors.$color-light-text;
         text-align: center;
     }
 }

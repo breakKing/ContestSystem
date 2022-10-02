@@ -1,15 +1,12 @@
 import { FunctionComponent } from "react";
 import { Image } from 'antd';
 import { Link } from "react-router-dom";
+import { RoutePaths } from "../../../router";
 
-interface LogoProps {
-    
-}
- 
-const Logo: FunctionComponent<LogoProps> = (props: LogoProps) => {
+const Logo: FunctionComponent = () => {
 
     return (
-        <Link to="/">
+        <Link to={RoutePaths.HOME}>
             <Image className="logo"
                 src="logo.svg"
                 preview={ false }

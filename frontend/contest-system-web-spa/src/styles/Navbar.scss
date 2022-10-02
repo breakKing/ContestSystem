@@ -1,8 +1,33 @@
+@use "./shared/colors.scss";
+
 .navbar {
-    .left {
-        justify-items: left;
-    }
     .right {
         justify-content: flex-end;
     }
+    .burger__wrapper {
+        display: flex;
+        justify-content: flex-end;
+        align-content: center;
+        align-items: center;
+        height: 100%;
+    }
+}
+
+.ant-drawer-header {
+    background-color: colors.$color-dark;
+    color: colors.$color-light;
+    border-radius: 0;
+
+    .ant-drawer-title {
+        color: colors.$color-light;
+    }
+    
+    .ant-drawer-close {
+        color: colors.$color-light;
+    }
+}
+
+.ant-drawer-body {
+    background-color: colors.$color-dark;
+    color: colors.$color-light-text;
 }
