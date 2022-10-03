@@ -36,7 +36,7 @@ public class AuthService : IAuthService
         SignUpData data,
         CancellationToken ct = default)
     {
-       var client = _factory.CreateClient(AuthHttpClientParameters.ClientName);
+        var client = _factory.CreateClient(AuthHttpClientParameters.ClientName);
         return new SignUpResult();
     }
 }
