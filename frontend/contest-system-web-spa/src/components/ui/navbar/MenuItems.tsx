@@ -33,7 +33,7 @@ export const rightMenuItems = (user: ICurrentUser | null) => {
     }
 
     return [
-        getItem("profile", <span>sfsfsdfs</span>, <UserOutlined size={1}/>, [
+        getItem("profile", <span>{user.username}</span>, <UserOutlined size={1}/>, [
             getItem("profile-open", <span>Профиль</span>),
             getItem("profile-settings", <span>Настройки</span>),
             getItem("profile-logout", <span>Выйти</span>)

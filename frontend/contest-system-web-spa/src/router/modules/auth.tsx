@@ -1,10 +1,10 @@
 import { RouteObject } from "react-router-dom";
-import AboutPage from "../../pages/AboutPage";
 import LoginPage from "../../pages/auth/LoginPage";
+import SignUpPage from "../../pages/auth/SignUpPage";
 
 export enum AuthRoutePaths {
     LOGIN = "/login",
-    ABOUT = "/about"
+    SIGN_UP = "/sign-up"
 };
 
 export const authRoutes: RouteObject[] = [
@@ -13,7 +13,7 @@ export const authRoutes: RouteObject[] = [
         element: <LoginPage/>
     },
     {
-        path: AuthRoutePaths.ABOUT,
-        element: <AboutPage/>
-    }
+        path: AuthRoutePaths.SIGN_UP,
+        element: <SignUpPage/>
+    },
 ];
