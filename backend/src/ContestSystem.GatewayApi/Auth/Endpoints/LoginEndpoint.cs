@@ -2,6 +2,7 @@ using ContestSystem.GatewayApi.Auth.Constants;
 using ContestSystem.GatewayApi.Auth.Contracts;
 using ContestSystem.GatewayApi.Auth.Models;
 using ContestSystem.GatewayApi.Auth.Services;
+using ContestSystem.GatewayApi.Auth.Validators;
 using ContestSystem.GatewayApi.Common.Interfaces;
 
 namespace ContestSystem.GatewayApi.Auth.Endpoints;
@@ -30,6 +31,9 @@ public class LoginEndpoint: Endpoint<LoginRequest, LoginResponse>
 
     public override async Task HandleAsync(LoginRequest req, CancellationToken ct)
     {
-        
+        var credentials = _requestMapper.Convert(req);
+        var result = await _authService.LoginAsync(credentials, ct);
+        var response = _responseMapper.Convert(result);
+        await SendOkAsync(response, ct);
     }
 }

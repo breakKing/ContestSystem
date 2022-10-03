@@ -10,8 +10,8 @@ public class LoginRequestMapper : IMapper<LoginRequest, LoginCredentials>
     {
         return new LoginCredentials
         {
-            Login = src.Login,
-            Password = src.Password
+            Login = src.Login ?? string.Empty,
+            Password = src.Password ?? string.Empty
         };
     }
 }

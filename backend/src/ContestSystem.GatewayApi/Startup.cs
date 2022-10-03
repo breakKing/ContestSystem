@@ -10,7 +10,10 @@ public static class Startup
 {
     public static WebApplicationBuilder ConfigureServices(this WebApplicationBuilder builder)
     {
-        builder.Services.AddFastEndpoints();
+        builder.Services.AddFastEndpoints(options => 
+        {
+            options.IncludeAbstractValidators = true;
+        });
         builder.Services.AddMappersFromAssembly(Assembly.GetExecutingAssembly());
         builder.Services.AddSingleton<IIdsHasher, IdsHasher>();
 
