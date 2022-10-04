@@ -75,4 +75,46 @@ public class LoginEndpointTests
         response.Errors.Should().ContainSingle();
         response.Errors[0].Should().BeEquivalentTo("SomeError");
     }
+
+    [Fact]
+    public async Task HandleAsync_ShouldReturnSuccessfulResponse_WhenLoginPasses()
+    {
+        // Assign
+        var now = DateTimeOffset.UtcNow;
+        var authService = Substitute.For<IAuthService>();
+        authService.LoginAsync(new LoginCredentials(), default)
+            .ReturnsForAnyArgs(Task.FromResult(new LoginResult
+                {
+                    Success = true,
+                    AccessToken = "access-token",
+                    RefreshToken = "refresh-token",
+                    ExpiresAt = now
+                }));
+
+        var requestMapper = new LoginRequestMapper();
+        var responseMapper = new LoginResponseMapper();
+        
+        var endpoint = Factory.Create<LoginEndpoint>(
+            authService,
+            requestMapper,
+            responseMapper);
+        
+        var request = new LoginRequest
+        {
+            Login = "login",
+            Password = "password"
+        };
+
+        var tokenSource = new CancellationTokenSource();
+        
+        // Act
+        await endpoint.HandleAsync(request, tokenSource.Token);
+        
+        // Assert
+        var response = endpoint.Response;
+        response.Success.Should().BeTrue();
+        response.Errors.Should().BeEmpty();
+        response.AccessToken.Should().BeEquivalentTo("access-token");
+        response.ExpiresAt.Should().BeExactly(now);
+    }
 }

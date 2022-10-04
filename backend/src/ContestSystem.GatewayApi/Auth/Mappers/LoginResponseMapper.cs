@@ -12,7 +12,8 @@ public class LoginResponseMapper : IMapper<LoginResult, LoginResponse>
         {
             Success = src.Success,
             Errors = src.Errors,
-            AccessToken = src.AccessToken
+            AccessToken = src.AccessToken,
+            ExpiresAt = src.ExpiresAt
         };
     }
 }
