@@ -6,9 +6,6 @@ using ContestSystem.GatewayApi.Auth.Services;
 using ContestSystem.GatewayApi.Auth.Validators;
 using ContestSystem.GatewayApi.Common.Interfaces;
 using ContestSystem.GatewayApi.Common.Services;
-using FastEndpoints;
-using FluentAssertions;
-using NSubstitute;
 
 namespace ContestSystem.GatewayApi.Tests.Unit.Auth;
 
