@@ -10,9 +10,9 @@ public class SignUpRequestMapper : IMapper<SignUpRequest, SignUpData>
     {
         return new SignUpData
         {
-            Username = src.Username,
-            Password = src.Password,
-            PasswordRepeat = src.PasswordRepeat
+            Username = src.Username ?? string.Empty,
+            Password = src.Password ?? string.Empty,
+            PasswordRepeat = src.PasswordRepeat ?? string.Empty
         };
     }
 }
