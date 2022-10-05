@@ -1,17 +1,23 @@
 import { FunctionComponent } from "react";
-import { Image } from 'antd';
+import { Col, Image, Layout, Row } from 'antd';
 import { Link } from "react-router-dom";
 import { RoutePaths } from "../../../router";
 
 const Logo: FunctionComponent = () => {
 
     return (
-        <Link to={RoutePaths.HOME}>
-            <Image className="logo"
-                src="logo.svg"
-                preview={ false }
-            />
-        </Link> 
+        <Layout>
+            <Row align="middle" justify="start">
+                <Col span={24}>
+                    <Link to={RoutePaths.HOME}>
+                        <Image
+                            src="logo.svg"
+                            preview={ false }
+                        />
+                    </Link> 
+                </Col>
+            </Row>
+        </Layout>
     );
 }
  

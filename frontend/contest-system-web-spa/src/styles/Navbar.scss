@@ -1,15 +1,11 @@
 @use "./shared/colors.scss";
 
 .navbar {
-    .right {
-        justify-content: flex-end;
+    .ant-row {
+        background-color: colors.$color-dark;
     }
-    .burger__wrapper {
-        display: flex;
+    .right-menu {
         justify-content: flex-end;
-        align-content: center;
-        align-items: center;
-        height: 100%;
     }
 }
 
